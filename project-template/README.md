@@ -8,19 +8,20 @@
 2. 填写 `.codex/project.md`，明确项目基本信息。
 3. 填写 `.codex/scope.md`，明确当前版本范围。
 4. 填写 `.codex/commands.md`，记录本项目常用命令。
-5. 新项目填写 `docs/项目开发方案.md` 和 `docs/版本路线图.md`。
-6. 接手项目填写 `docs/既有项目接手审计.md` 和 `docs/缺陷修复计划.md`。
-7. 重要方案讨论写入 `docs/rfc/`，重要架构决策写入 `docs/adr/`。
-8. 需求、RFC、ADR、任务、测试、缺陷关系写入 `docs/追踪矩阵.md`。
-9. 高风险写入 `docs/风险登记册.md`。
-10. 高影响变更写入 `docs/变更影响评估.md`。
-11. 严重事故或重复缺陷写入 `docs/事故复盘.md` 或 `docs/缺陷复盘.md`。
-12. 安全敏感变更写入 `docs/安全威胁建模.md`，依赖变更写入 `docs/依赖安全审查.md`。
-13. 环境和发布链路写入 `docs/环境矩阵.md` 和 `docs/发布流水线.md`。
-14. 模块负责人和评审责任写入 `docs/代码所有权.md`。
-15. Epic、Feature、Task、Bug 写入 `docs/项目任务看板.md`。
-16. 技术债写入 `docs/技术债记录.md`，版本质量写入 `docs/质量指标记录.md`。
-17. 开始编码前，确认 Definition of Ready；完成时确认 Definition of Done。
+5. 如果已有问答内容，优先使用 `project-bootstrap-fill` 根据 `.codex/questionnaires/项目初始化问答.md` 补齐第一版文档。
+6. 新项目填写 `docs/项目开发方案.md` 和 `docs/版本路线图.md`。
+7. 接手项目填写 `docs/既有项目接手审计.md` 和 `docs/缺陷修复计划.md`。
+8. 重要方案讨论写入 `docs/rfc/`，重要架构决策写入 `docs/adr/`。
+9. 需求、RFC、ADR、任务、测试、缺陷关系写入 `docs/追踪矩阵.md`。
+10. 高风险写入 `docs/风险登记册.md`。
+11. 高影响变更写入 `docs/变更影响评估.md`。
+12. 严重事故或重复缺陷写入 `docs/事故复盘.md` 或 `docs/缺陷复盘.md`。
+13. 安全敏感变更写入 `docs/安全威胁建模.md`，依赖变更写入 `docs/依赖安全审查.md`。
+14. 环境和发布链路写入 `docs/环境矩阵.md` 和 `docs/发布流水线.md`。
+15. 模块负责人和评审责任写入 `docs/代码所有权.md`。
+16. Epic、Feature、Task、Bug 写入 `docs/项目任务看板.md`。
+17. 技术债写入 `docs/技术债记录.md`，版本质量写入 `docs/质量指标记录.md`。
+18. 开始编码前，确认 Definition of Ready；完成时确认 Definition of Done。
 
 ## 可选增强
 
@@ -58,6 +59,7 @@
 - `governance/cicd-environment-governance.md`：环境矩阵、发布流水线和回滚治理。
 - `governance/code-ownership-review-governance.md`：代码所有权、必要评审人和 Critical 区域规则。
 - `governance/project-management-task-model.md`：Epic、Feature、Task、Bug 状态流和版本映射。
+- `governance/project-bootstrap-fill.md`：初始化问答到第一版项目文档的填充映射。
 - `governance/version-governance.md`：版本路线图和推进闸门。
 - `governance/quality-metrics.md`：DORA 风格轻量质量指标。
 - `governance/technical-debt-management.md`：技术债管理流程。

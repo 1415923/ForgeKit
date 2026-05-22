@@ -110,6 +110,18 @@ function Test-StackTemplates {
     }
 }
 
+function Test-PromptTemplates {
+    $promptDir = Join-Path $repoRoot "prompts"
+    if (-not (Test-Path -LiteralPath $promptDir)) {
+        Add-Error "Missing prompt directory: prompts"
+        return
+    }
+    $promptCount = (Get-ChildItem -LiteralPath $promptDir -Filter "*.prompt.md" -File).Count
+    if ($promptCount -lt 7) {
+        Add-Error "Expected at least 7 prompt templates, found $promptCount"
+    }
+}
+
 function Test-StaleText {
     Test-NoPattern "project-template\.agents\skills\project-init\SKILL.md" "docs/project development plan" "Stale document path"
     Test-NoPattern "project-template\.agents\skills\project-init\SKILL.md" "docs/version roadmap" "Stale document path"
@@ -117,17 +129,22 @@ function Test-StaleText {
 }
 
 Test-RequiredPath "README.md"
+Test-RequiredPath "AGENTS.md"
 Test-RequiredPath "scripts\init-project-template.ps1"
 Test-RequiredPath "project-template\README.md"
+Test-RequiredPath "project-template\AGENTS.md"
 Test-RequiredPath "project-template\.codex\rules.md"
 Test-RequiredPath "project-template\.agents\skills\project-init\SKILL.md"
+Test-RequiredPath "project-template\.agents\skills\project-bootstrap-fill\SKILL.md"
 Test-RequiredPath "project-template\.agents\skills\handover-review\SKILL.md"
 Test-RequiredPath "project-template\.agents\skills\code-review\SKILL.md"
 Test-RequiredPath "project-template\.agents\skills\release-check\SKILL.md"
 Test-RequiredPath "project-template\.agents\skills\security-review\SKILL.md"
+Test-RequiredPath "project-template\governance\project-bootstrap-fill.md"
 
 Test-GovernanceFiles
 Test-StackTemplates
+Test-PromptTemplates
 Test-SkillAscii
 Test-SkillFrontmatter
 Test-StaleText

@@ -7,6 +7,7 @@
 | Skill | 使用场景 | 备注 |
 | --- | --- | --- |
 | project-init | 项目初始化、补齐 `.codex/` 和 `docs/` | 已内置于 `.agents/skills/project-init/` |
+| project-bootstrap-fill | 根据初始化问答生成第一版项目规则和文档 | 已内置于 `.agents/skills/project-bootstrap-fill/` |
 | handover-review | 接手既有项目、现状审计、兼容边界、缺陷修复计划 | 已内置于 `.agents/skills/handover-review/` |
 | code-review | 审查 diff、查找 bug、回归、安全风险、测试缺口 | 已内置于 `.agents/skills/code-review/` |
 | release-check | 发布前检查、版本记录、测试构建、部署风险 | 已内置于 `.agents/skills/release-check/` |

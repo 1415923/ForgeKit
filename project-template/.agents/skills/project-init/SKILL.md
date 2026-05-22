@@ -1,16 +1,17 @@
 ---
 name: project-init
-description: Initialize or repair a project's Codex workflow files and documentation, with emphasis on project development plan, technical choices, version roadmap, hardware/software landing conditions, and gating before coding. Use when Codex is asked to set up a new project, discuss architecture before implementation, fill `.codex/` rules, process a questionnaire, choose stack templates, create initial docs, or bring an existing project into this workflow.
+description: Initialize or repair a project's Codex workflow, interview the user about project plan and architecture, and fill first-version `.codex/` and `docs/` files from questionnaire answers. Use when Codex is asked to set up a new project, process initialization answers, discuss architecture before implementation, choose stack templates, or decide whether coding may start.
 ---
 
 # Project Init
 
 ## Workflow
 
-1. Read `governance/sdlc.md`, `governance/architecture-governance.md`, `governance/rfc-process.md`, `governance/adr-process.md`, `governance/traceability.md`, `governance/definition-of-ready.md`, `governance/risk-management.md`, `governance/cicd-environment-governance.md`, `governance/project-management-task-model.md`, and project root files first: `README.md`, build configs, existing `docs/`, `.codex/`, and any questionnaire.
+1. Read `AGENTS.md` first if present, then read the governance overview, `.codex/init.generated.md`, `.codex/questionnaires/`, existing `.codex/`, existing `docs/`, and project root files.
 2. Identify the project type, active stack templates, current phase, delivery target, and hardware/software landing conditions.
 3. If `.codex/stacks/` exists, read only relevant stack folders. Do not load unrelated stacks.
-4. Discuss and fill the project development plan before large-scale coding:
+4. If questionnaire answers exist, use `governance/project-bootstrap-fill.md` to convert them into first-version `.codex/` rules and `docs/`.
+5. Interview the user before large-scale coding when key facts are unclear:
    - problem definition
    - technical stack options and decision
    - hardware/software landing conditions
@@ -18,7 +19,7 @@ description: Initialize or repair a project's Codex workflow files and documenta
    - risks and blockers
    - Epic / Feature / Task / Bug model
    - version roadmap
-5. Fill or update:
+6. Fill or update:
    - `.codex/project.md`
    - `.codex/scope.md`
    - `.codex/commands.md`
@@ -35,12 +36,12 @@ description: Initialize or repair a project's Codex workflow files and documenta
    - `docs/environment matrix`
    - `docs/release pipeline`
    - `docs/project task board`
-6. Preserve existing project-specific facts. Do not overwrite real information with template text.
-7. Do not modify business code unless the user explicitly asks.
+7. Preserve existing project-specific facts. Do not overwrite real information with template text.
+8. Do not modify business code unless the user explicitly asks.
 
 ## Gate Before Coding
 
-If the development plan, version roadmap, or landing conditions are unclear, ask follow-up questions instead of starting implementation.
+If the development plan, version roadmap, landing conditions, or first implementation slice are unclear, ask follow-up questions instead of starting implementation.
 
 Do not recommend large-scale coding until there is at least a first version of:
 
@@ -68,7 +69,8 @@ End with:
 - Project classification.
 - Selected stack templates.
 - Files created or updated.
-- Whether coding is allowed yet.
-- Open questions.
-- Suggested next tasks.
+- Plan status: confirmed, partial, or blocked.
+- Key decisions that still need user confirmation.
+- The next 3-5 questions to continue the project planning discussion.
+- Suggested first implementation slice only if coding is allowed.
 - Validation commands that are safe to run.

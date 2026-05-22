@@ -3,10 +3,10 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Codex CLI 开发流程模板使用说明</title>
+  <title>Codex 项目初始化工作台</title>
   <style>
     :root {
-      --bg: #f6f7f9;
+      --bg: #f7f8fa;
       --panel: #fff;
       --text: #1f2937;
       --muted: #667085;
@@ -34,14 +34,14 @@
     }
 
     .wrap {
-      max-width: 1180px;
+      max-width: 1240px;
       margin: 0 auto;
-      padding: 26px 24px;
+      padding: 24px;
     }
 
     h1 { margin: 0 0 8px; font-size: 30px; line-height: 1.25; }
     h2 { margin: 0 0 14px; font-size: 22px; }
-    h3 { margin: 18px 0 8px; font-size: 16px; }
+    h3 { margin: 16px 0 8px; font-size: 16px; }
     p { margin: 8px 0; }
     .muted { color: var(--muted); }
     .ok { color: var(--ok); font-weight: 700; }
@@ -54,53 +54,42 @@
       margin: 18px 0;
     }
 
-    .flow {
+    .split {
       display: grid;
-      grid-template-columns: repeat(4, minmax(0, 1fr));
+      grid-template-columns: minmax(360px, 0.95fr) minmax(0, 1.05fr);
+      gap: 18px;
+      align-items: start;
+    }
+
+    .grid-2 {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
       gap: 12px;
-      margin-top: 16px;
     }
 
     .mode-grid {
       display: grid;
       grid-template-columns: repeat(3, minmax(0, 1fr));
       gap: 12px;
-      margin-top: 14px;
     }
 
-    .flow-card {
+    .mode {
       border: 1px solid var(--border);
       border-radius: 8px;
       background: #fbfcfe;
-      padding: 14px;
-      min-height: 150px;
+      padding: 12px;
+      cursor: pointer;
+      min-height: 138px;
     }
 
-    .flow-card strong { display: block; margin: 8px 0 6px; }
-
-    .num {
-      display: inline-grid;
-      place-items: center;
-      width: 30px;
-      height: 30px;
-      border-radius: 50%;
-      background: var(--accent);
-      color: #fff;
-      font-weight: 700;
+    .mode.active {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 2px rgba(31, 111, 235, 0.12);
+      background: #eef5ff;
     }
 
-    .split {
-      display: grid;
-      grid-template-columns: minmax(320px, 0.9fr) minmax(0, 1.1fr);
-      gap: 18px;
-      align-items: start;
-    }
-
-    .form-grid {
-      display: grid;
-      grid-template-columns: repeat(2, minmax(0, 1fr));
-      gap: 12px;
-    }
+    .mode input { margin-right: 6px; }
+    .mode strong { display: inline-block; margin-bottom: 4px; }
 
     label {
       display: block;
@@ -121,7 +110,7 @@
     }
 
     textarea {
-      min-height: 82px;
+      min-height: 92px;
       resize: vertical;
     }
 
@@ -145,20 +134,6 @@
     .stack input { width: 16px; height: 16px; margin-top: 3px; }
     .stack-title { display: block; font-weight: 700; line-height: 1.3; }
     .stack-desc { display: block; color: var(--muted); font-size: 13px; line-height: 1.35; margin-top: 3px; }
-
-    .combo-list {
-      display: grid;
-      gap: 8px;
-      margin-top: 10px;
-    }
-
-    .combo {
-      border: 1px solid var(--border);
-      border-radius: 6px;
-      background: #fbfcfe;
-      padding: 9px 10px;
-      font-size: 14px;
-    }
 
     button,
     .link-button {
@@ -208,7 +183,7 @@
       border-radius: 8px;
       padding: 14px;
       overflow: auto;
-      min-height: 128px;
+      min-height: 132px;
     }
 
     code {
@@ -255,27 +230,10 @@
       margin-top: 10px;
     }
 
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      margin-top: 10px;
-      font-size: 14px;
-    }
-
-    th, td {
-      border: 1px solid var(--border);
-      padding: 8px 9px;
-      text-align: left;
-      vertical-align: top;
-    }
-
-    th { background: var(--soft); }
-
     @media (max-width: 920px) {
-      .flow,
-      .mode-grid,
       .split,
-      .form-grid,
+      .grid-2,
+      .mode-grid,
       .stack-list {
         grid-template-columns: 1fr;
       }
@@ -287,61 +245,39 @@
 <body>
   <header>
     <div class="wrap">
-      <h1>Codex CLI 开发流程模板使用说明</h1>
-      <p class="muted">按成熟 SDLC、架构治理、版本治理和接手项目治理裁剪成 Codex 可执行流程。</p>
+      <h1>Codex 项目初始化工作台</h1>
+      <p class="muted">选择项目模式，生成初始化命令和一条可直接开启方案访谈的 Codex 提示词。</p>
     </div>
   </header>
 
   <main class="wrap">
     <section class="section">
-      <h2>你应该怎么走</h2>
-      <div class="note">
-        先选入口：新项目走“SDLC + RFC/ADR + 方案设计 + 架构治理 + 版本路线图”；接手既有项目走“现状审计 + 缺陷修复 + 兼容边界”，然后再规划后续开发。Ready/Done、风险登记、追踪矩阵、变更影响评估、事故/缺陷复盘、安全治理、技术债、质量指标和版本闸门始终适用。
-      </div>
-      <div class="flow">
-        <div class="flow-card">
-          <span class="num">1</span>
-          <strong>先做方案设计</strong>
-          <p class="muted">明确项目目标、技术栈、软硬件落地条件和版本路线图，不清楚的先让 Codex 追问。</p>
-        </div>
-        <div class="flow-card">
-          <span class="num">2</span>
-          <strong>生成项目骨架</strong>
-          <p class="muted">复制 PowerShell 命令执行，创建 `.codex/`、`docs/`、skills、技术栈模板和版本闸门。</p>
-        </div>
-        <div class="flow-card">
-          <span class="num">3</span>
-          <strong>生成方案问答</strong>
-          <p class="muted">把你知道的信息填进去，不知道的留空，让 Codex 继续和你商讨并补齐方案。</p>
-        </div>
-        <div class="flow-card">
-          <span class="num">4</span>
-          <strong>按版本闸门推进</strong>
-          <p class="muted">大版本结束后先做 review/refactor 中版本，不通过就不推进下一个大版本。</p>
-        </div>
-      </div>
-      <div class="mode-grid">
-        <div class="flow-card">
+      <h2>1. 选择工作模式</h2>
+      <div class="mode-grid" id="modeGrid">
+        <label class="mode">
+          <input type="radio" name="mode" value="Lite">
           <strong>Lite</strong>
-          <p class="muted">小脚本、小工具、个人验证项目。维护 `.codex/`、项目开发方案、版本更新记录和必要命令。</p>
-        </div>
-        <div class="flow-card">
+          <p class="muted">小脚本、小工具、个人验证项目。只维护最小规则、项目方案、命令和版本记录。</p>
+        </label>
+        <label class="mode active">
+          <input type="radio" name="mode" value="Standard" checked>
           <strong>Standard</strong>
-          <p class="muted">普通前后端、API、数据处理、内部业务项目。增加需求、架构、技术选型、版本路线图、任务看板、测试和发布检查。</p>
-        </div>
-        <div class="flow-card">
+          <p class="muted">普通业务项目。维护方案、技术选型、版本路线图、任务看板、测试和发布检查。</p>
+        </label>
+        <label class="mode">
+          <input type="radio" name="mode" value="Enterprise">
           <strong>Enterprise</strong>
-          <p class="muted">多人协作、接手项目、交付项目、高风险项目。增加 ADR/RFC、风险、变更影响、代码所有权、CI/CD、安全治理和复盘。</p>
-        </div>
+          <p class="muted">多人协作、接手项目、交付或高风险项目。增加 ADR/RFC、风险、CI/CD、安全和代码所有权。</p>
+        </label>
       </div>
-      <div class="note">浏览器不能直接执行 PowerShell，也不能稳定获取 Windows 完整路径。本页负责生成命令、问答和提示词，执行动作仍在 PowerShell 或 Codex 中完成。</div>
+      <div class="note" id="modeNote"></div>
     </section>
 
     <section class="section">
-      <h2>1. 项目模板初始化</h2>
+      <h2>2. 生成项目骨架</h2>
       <div class="split">
         <div>
-          <div class="form-grid">
+          <div class="grid-2">
             <div>
               <label for="parentPath">常用父目录</label>
               <input id="parentPath" type="text" value="D:\JAVA-code" autocomplete="off">
@@ -391,32 +327,27 @@
             <button type="button" class="secondary" id="chooseFolder">选择文件夹名</button>
             <button type="button" class="secondary" id="resetExample">恢复示例</button>
           </div>
-          <p class="muted" id="folderStatus">选择文件夹后，页面会把“常用父目录 + 文件夹名”拼成完整目标路径；如果实际路径不同，请手动修改。</p>
+          <p class="muted" id="folderStatus">浏览器不能稳定提供 Windows 完整路径；如果实际路径不同，请手动修改完整目标项目目录。</p>
           <p id="copyStatus" class="muted"></p>
         </div>
 
         <div>
           <h3>复制到 PowerShell 执行</h3>
           <pre><code id="commandOutput"></code></pre>
-          <p class="muted">执行成功后，到新项目目录打开 Codex，再继续下面的问答和初始化提示词。</p>
+          <p class="muted">执行后进入目标项目目录，再把第 4 步提示词发给 Codex。</p>
 
           <h3>常见组合</h3>
-          <div class="combo-list">
-            <div class="combo"><strong>普通 Java 前后端项目：</strong>选 <code>java-springboot</code> + <code>vue</code>。</div>
-            <div class="combo"><strong>只有 Java 后端：</strong>只选 <code>java-springboot</code>。</div>
-            <div class="combo"><strong>只有前端：</strong>Vue 项目选 <code>vue</code>，React 项目选 <code>react</code>。</div>
-            <div class="combo"><strong>FPGA / HLS 项目：</strong>只选 <code>fpga-vivado-vitis</code>，除非项目确实还有软件端。</div>
-          </div>
+          <p class="muted">普通 Java 前后端项目选 <code>java-springboot</code> + <code>vue</code>。只有后端只选 Java；只有前端只选 Vue 或 React；FPGA 项目只选 FPGA 模板，除非确实还有软件端。</p>
         </div>
       </div>
     </section>
 
     <section class="section">
-      <h2>2. 方案设计与项目初始化问答</h2>
-      <p class="muted">这部分是最重要的。你可以先填你知道的内容，空着的让 Codex 继续追问和讨论；没有形成方案前，不建议直接编码。</p>
+      <h2>3. 给 Codex 的项目简报</h2>
+      <p class="muted">这里只填你已经确定的内容。不要为了填表强行编答案；不确定的内容会由 Codex 在下一步继续追问。</p>
       <div class="split">
         <div>
-          <div class="form-grid">
+          <div class="grid-2">
             <div>
               <label for="entryMode">项目入口</label>
               <select id="entryMode">
@@ -437,67 +368,38 @@
                 <option>其他</option>
               </select>
             </div>
-            <div>
-              <label for="stage">当前阶段</label>
-              <select id="stage">
-                <option>MVP / 初始开发</option>
-                <option>原型验证</option>
-                <option>复现项目</option>
-                <option>维护迭代</option>
-                <option>发布准备</option>
-              </select>
-            </div>
           </div>
 
-          <label for="goal">项目一句话目标</label>
-          <input id="goal" type="text" value="实现一个可维护的前后端业务系统" autocomplete="off">
+          <label for="goal">项目目标</label>
+          <textarea id="goal">实现一个可维护的前后端业务系统。</textarea>
 
-          <label for="landingConditions">最终落地的软硬件条件</label>
-          <textarea id="landingConditions" placeholder="例如：Windows 本机开发，服务器部署，MySQL/Redis，本地 Ollama DeepSeek，或 FPGA 板卡型号"></textarea>
+          <label for="knownFacts">已经确定的事实</label>
+          <textarea id="knownFacts" placeholder="例如：使用 Spring Boot + Vue；数据库 MySQL；本地有 Redis；最终部署到公司服务器。"></textarea>
 
-          <label for="architectureConcern">必须提前想清楚的设计点</label>
-          <textarea id="architectureConcern" placeholder="例如：权限模型、数据模型、模块边界、部署方式、硬件接口、模型服务方案"></textarea>
+          <label for="uncertainties">不确定、需要 Codex 和我讨论的点</label>
+          <textarea id="uncertainties" placeholder="例如：权限模型怎么设计、是否需要消息队列、部署是否用 Docker、v0.1.0 范围怎么切。"></textarea>
 
-          <label for="versionRoadmap">版本长规划</label>
-          <textarea id="versionRoadmap">v0.1.0：完成最小功能闭环
-v0.1.1：review/refactor/documentation gate
-v0.2.0：扩展第二阶段核心能力
-v0.2.1：review/refactor/documentation gate</textarea>
-
-          <label for="mustHave">当前版本必须完成</label>
-          <textarea id="mustHave" placeholder="例如：登录注册、用户管理、核心业务 CRUD、前端页面联调"></textarea>
-
-          <label for="notDo">当前阶段明确不做</label>
-          <textarea id="notDo" placeholder="例如：支付、复杂权限、生产部署、多租户"></textarea>
-
-          <label for="dependencies">数据库 / 中间件 / 外部 API</label>
-          <textarea id="dependencies">MySQL、Redis、MinIO、Kafka、Elasticsearch、Ollama / DeepSeek 本地版（deepseek-r1:7b，http://localhost:11434/v1）</textarea>
-
-          <label for="permissions">Codex 权限偏好</label>
-          <textarea id="permissions">允许读取和修改当前项目文件；安装依赖、启动长期服务、git commit、git push、部署前必须确认。</textarea>
-
-          <label for="validation">测试和验证要求</label>
-          <textarea id="validation" placeholder="例如：后端运行 mvn test，前端运行 npm run build；如果不能运行要说明原因"></textarea>
+          <label for="constraints">限制条件和偏好</label>
+          <textarea id="constraints">安装依赖、启动长期服务、git commit、git push、部署前必须确认。</textarea>
 
           <div class="actions">
-            <button type="button" id="copyQuestionnaire">复制问答内容</button>
+            <button type="button" id="copyBrief">复制项目简报</button>
           </div>
-          <p id="questionnaireStatus" class="muted"></p>
+          <p id="briefStatus" class="muted"></p>
         </div>
 
         <div>
-          <h3>生成的问答内容</h3>
-          <pre><code id="questionnaireOutput"></code></pre>
-          <p class="muted">你可以把这段发给 Codex，让它写入 <code>.codex/questionnaires/项目初始化问答.md</code> 并继续补齐项目规则。</p>
+          <h3>生成的项目简报</h3>
+          <pre><code id="briefOutput"></code></pre>
         </div>
       </div>
     </section>
 
     <section class="section">
-      <h2>3. 给 Codex 的下一步提示词</h2>
-      <p class="muted">先执行初始化命令，再复制下面提示词到新项目目录的 Codex 会话中。</p>
+      <h2>4. 给 Codex 的下一步提示词</h2>
+      <p class="muted">“初始化并访谈”已经合并项目初始化和问答填充。它应该先和你确认方案，再决定是否允许编码。</p>
       <div class="tabs">
-        <button type="button" class="tab active" data-prompt="init">项目初始化</button>
+        <button type="button" class="tab active" data-prompt="init">初始化并访谈</button>
         <button type="button" class="tab" data-prompt="dev">开始开发</button>
         <button type="button" class="tab" data-prompt="review">代码审查</button>
         <button type="button" class="tab" data-prompt="release">发布检查</button>
@@ -520,20 +422,6 @@ v0.2.1：review/refactor/documentation gate</textarea>
         <a class="link-button secondary" href="./project-template/.agents/skills/">skills</a>
       </div>
     </section>
-
-    <section class="section">
-      <h2>生成后目录说明</h2>
-      <table>
-        <thead><tr><th>目录或文件</th><th>用途</th></tr></thead>
-        <tbody>
-          <tr><td><code>.codex/</code></td><td>项目目标、范围、命令、风格、测试、安全、Git、skills 规则。</td></tr>
-          <tr><td><code>.codex/stacks/&lt;stack&gt;/</code></td><td>按需复制的技术栈模板，避免加载无关规则。</td></tr>
-          <tr><td><code>.codex/questionnaires/</code></td><td>项目初始化问答表，作为补齐文档和规则的事实来源。</td></tr>
-          <tr><td><code>.agents/skills/</code></td><td>项目级 Codex skills：project-init、code-review、release-check、security-review。</td></tr>
-          <tr><td><code>docs/</code></td><td>需求、架构、技术选型、接口、数据库、部署、测试、版本记录。</td></tr>
-        </tbody>
-      </table>
-    </section>
   </main>
 
   <script>
@@ -546,11 +434,16 @@ v0.2.1：review/refactor/documentation gate</textarea>
     const projectName = document.getElementById('projectName');
     const stackList = document.getElementById('stackList');
     const commandOutput = document.getElementById('commandOutput');
-    const copyStatus = document.getElementById('copyStatus');
-    const folderStatus = document.getElementById('folderStatus');
-    const questionnaireOutput = document.getElementById('questionnaireOutput');
+    const briefOutput = document.getElementById('briefOutput');
     const promptOutput = document.getElementById('promptOutput');
+    const folderStatus = document.getElementById('folderStatus');
+    const modeNote = document.getElementById('modeNote');
     let activePrompt = 'init';
+
+    function selectedMode() {
+      const checked = document.querySelector('input[name="mode"]:checked');
+      return checked ? checked.value : 'Standard';
+    }
 
     function selectedStacks() {
       return Array.from(stackList.querySelectorAll('input[type="checkbox"]:checked')).map(input => input.value);
@@ -568,6 +461,12 @@ v0.2.1：review/refactor/documentation gate</textarea>
       return cleanParent + '\\' + cleanChild;
     }
 
+    function getValue(id, fallback) {
+      const el = document.getElementById(id);
+      const value = el ? el.value.trim() : '';
+      return value || fallback;
+    }
+
     function syncTargetPathFromParts() {
       const nextPath = joinWindowsPath(parentPath.value, folderName.value);
       if (nextPath) targetPath.value = nextPath;
@@ -579,8 +478,7 @@ v0.2.1：review/refactor/documentation gate</textarea>
     }
 
     function buildCommand() {
-      const stacks = selectedStacks();
-      const stackText = stacks.length > 0 ? stacks.join(',') : '';
+      const stackText = selectedStacks().join(',');
       const lines = [
         'powershell -ExecutionPolicy Bypass -File ' + psQuote(scriptPath) + ' `',
         '  -TargetPath ' + psQuote(targetPath.value.trim() || 'D:\\JAVA-code\\demo') + ' `',
@@ -593,95 +491,80 @@ v0.2.1：review/refactor/documentation gate</textarea>
       return lines.join('\n');
     }
 
-    function getValue(id, fallback) {
-      const el = document.getElementById(id);
-      const value = el ? el.value.trim() : '';
-      return value || fallback;
+    function modeDocs() {
+      const mode = selectedMode();
+      if (mode === 'Lite') {
+        return '.codex/project.md、.codex/scope.md、.codex/commands.md、docs/项目开发方案.md、docs/版本更新记录.md';
+      }
+      if (mode === 'Enterprise') {
+        return 'Standard 文档，加 ADR/RFC、风险登记、变更影响评估、环境矩阵、发布流水线、代码所有权、安全治理、质量指标';
+      }
+      return 'docs/项目开发方案.md、docs/技术选型.md、docs/版本路线图.md、docs/需求文档.md、docs/项目任务看板.md、docs/测试文档.md';
     }
 
-    function buildQuestionnaire() {
+    function updateModeUI() {
+      document.querySelectorAll('.mode').forEach(label => {
+        const input = label.querySelector('input');
+        label.classList.toggle('active', input.checked);
+      });
+      modeNote.textContent = '当前模式：' + selectedMode() + '。建议维护：' + modeDocs() + '。';
+    }
+
+    function buildBrief() {
       return [
-        '# 项目初始化问答',
+        '# 项目初始化简报',
         '',
-        '## 1. 必答信息',
+        '- 使用模式：' + selectedMode(),
+        '- 项目名称：' + getValue('projectName', '待补充'),
+        '- 项目入口：' + getValue('entryMode', '待补充'),
+        '- 项目类型：' + getValue('projectType', '待补充'),
+        '- 技术栈模板：' + (selectedStacks().join(', ') || '待补充'),
         '',
-        '| 问题 | 回答 |',
-        '| --- | --- |',
-        '| 项目名称是什么？ | ' + getValue('projectName', '待补充') + ' |',
-        '| 项目一句话目标是什么？ | ' + getValue('goal', '待补充') + ' |',
-        '| 项目入口 | ' + getValue('entryMode', '待补充') + ' |',
-        '| 项目类型是什么？ | ' + getValue('projectType', '待补充') + ' |',
-        '| 当前阶段是什么？ | ' + getValue('stage', '待补充') + ' |',
-        '| 技术栈模板 | ' + (selectedStacks().join(', ') || '待补充') + ' |',
+        '## 项目目标',
         '',
-        '## 2. 项目开发方案',
+        getValue('goal', '待补充'),
         '',
-        '| 问题 | 回答 |',
-        '| --- | --- |',
-        '| 最终落地的软硬件条件 | ' + getValue('landingConditions', '待补充').replace(/\n/g, '<br>') + ' |',
-        '| 必须提前想清楚的设计点 | ' + getValue('architectureConcern', '待补充').replace(/\n/g, '<br>') + ' |',
-        '| 是否允许直接进入编码 | 否，先完成项目开发方案和版本路线图第一版 |',
+        '## 已经确定的事实',
         '',
-        '## 3. 版本路线图',
+        getValue('knownFacts', '待补充'),
         '',
-        '| 问题 | 回答 |',
-        '| --- | --- |',
-        '| 大版本规划 | ' + getValue('versionRoadmap', '待补充').replace(/\n/g, '<br>') + ' |',
-        '| 是否同意未完成 review/refactor 中版本前不推进下个大版本 | 是 |',
+        '## 需要讨论确认的点',
         '',
-        '## 4. 当前范围',
+        getValue('uncertainties', '待补充'),
         '',
-        '| 问题 | 回答 |',
-        '| --- | --- |',
-        '| 当前版本必须完成哪些功能？ | ' + getValue('mustHave', '待补充').replace(/\n/g, '<br>') + ' |',
-        '| 哪些事情明确不做？ | ' + getValue('notDo', '待补充').replace(/\n/g, '<br>') + ' |',
+        '## 限制条件和偏好',
         '',
-        '## 5. 运行环境',
-        '',
-        '| 问题 | 回答 |',
-        '| --- | --- |',
-        '| 数据库 / 中间件 / 外部 API | ' + getValue('dependencies', '待补充').replace(/\n/g, '<br>') + ' |',
-        '',
-        '## 6. 权限',
-        '',
-        '| 问题 | 回答 |',
-        '| --- | --- |',
-        '| Codex 权限偏好 | ' + getValue('permissions', '待补充').replace(/\n/g, '<br>') + ' |',
-        '',
-        '## 7. 测试与验证',
-        '',
-        '| 问题 | 回答 |',
-        '| --- | --- |',
-        '| 测试和验证要求 | ' + getValue('validation', '待补充').replace(/\n/g, '<br>') + ' |'
+        getValue('constraints', '待补充')
       ].join('\n');
     }
 
-    function buildPrompt(type) {
+    function buildInitPrompt() {
+      const mode = selectedMode();
       const stacks = selectedStacks().join(', ') || '未选择';
       const name = projectName.value.trim() || '当前项目';
+      const entry = getValue('entryMode', '新项目');
+      if (entry === '接手既有项目') {
+        return '使用 .agents/skills/handover-review 接手这个既有项目，并根据下面的项目简报开始访谈。\n\n' + buildBrief() + '\n\n请先读取 AGENTS.md、governance/流程总览.md、.codex/handover.md、README、启动文档、构建配置、.codex/、docs/、.codex/stacks/ 中相关技术栈模板。不要默认改变大架构、对外 API、数据库语义或部署方式。先输出当前项目状态、兼容边界、P0/P1 风险、需要我确认的 3-5 个关键问题；确认前不要开始编码。';
+      }
+      return '使用 .agents/skills/project-init 初始化这个项目，并根据下面的项目简报开始方案访谈。\n\n' + buildBrief() + '\n\n要求：\n1. 先读取 AGENTS.md、governance/流程总览.md、governance/project-bootstrap-fill.md、.codex/init.generated.md、.codex/questionnaires/、.codex/stacks/ 中相关技术栈模板。\n2. 按 ' + mode + ' 模式裁剪文档，不要把所有治理文件都读进上下文。\n3. 将稳定事实合并到第一版 .codex/ 和 docs/；未知项保留为待确认，不要编造。\n4. 输出方案状态、已写入文件、关键风险、初始 EPIC/FEAT/TASK、是否允许进入编码。\n5. 重点是继续和我确认项目方案：最后请提出 3-5 个最关键问题，而不是只列“已确认事实”。\n6. 没有项目开发方案、技术选型、落地条件、v0.1.0 范围和 v0.1.1 review/refactor gate 的第一版结论前，不要开始编码。';
+    }
+
+    function buildPrompt(type) {
       const prompts = {
-        init: buildInitPrompt(name, stacks),
-        dev: '请开始实现我接下来描述的功能。\n先读取 .codex/rules.md、.codex/scope.md、.codex/commands.md、docs/项目任务看板.md，以及 .codex/stacks/ 中相关技术栈规则。\n先确认本次工作对应的 EPIC / FEAT / TASK / BUG 编号；没有编号时先帮我拆分并补到任务看板。\n实现时不要做无关重构；完成后运行必要验证，并更新相关文档、docs/项目任务看板.md 和 docs/版本更新记录.md。',
-        review: '使用 .agents/skills/code-review 审查当前改动。\n请先查看 git status 和 git diff，并读取 docs/代码所有权.md、docs/项目任务看板.md。\n重点检查 bug、行为回归、安全风险、兼容性问题、代码所有权缺口、必要评审人缺口、任务状态不一致和测试缺口。\n按 Findings、Open Questions、Test Gaps、Summary 输出。',
-        release: '使用 .agents/skills/release-check 做发布前检查。\n读取 docs/版本路线图.md、docs/版本更新记录.md、docs/项目任务看板.md、docs/变更影响评估.md、docs/事故复盘.md、docs/缺陷复盘.md、docs/安全威胁建模.md、docs/依赖安全审查.md、docs/环境矩阵.md、docs/发布流水线.md、docs/部署文档.md、docs/代码所有权.md、docs/技术债记录.md、docs/质量指标记录.md、.codex/version-gates.md、.codex/git.md、.codex/commands.md、.codex/testing.md 和 .codex/security.md。\n检查当前是否需要先完成 review/refactor 中版本。\n不要 commit、tag、push 或部署，只给检查结果、阻塞项、风险、变更影响、事故/缺陷复盘、安全闸门、CI/CD 与环境闸门、代码所有权和评审责任、项目任务状态、技术债、质量指标变化和建议命令。\n如果上一个大版本后的 review/refactor 中版本未完成，或存在未关闭 SEV-1 / SEV-2 行动项、S2/S3 安全风险，或生产发布缺少环境矩阵、发布流水线、回滚方案，或 Critical/Unknown 代码区域缺少评审结论，或当前版本任务状态未闭合，请拒绝直接推进并提醒我人工确认。',
-        security: '使用 .agents/skills/security-review 审查当前改动。\n重点看密钥、鉴权、权限、外部输入、数据库查询、文件上传、第三方 API、MCP 和外部动作风险。\n不要输出完整密钥值。'
+        init: buildInitPrompt(),
+        dev: '请开始实现我接下来描述的功能。\n先读取 AGENTS.md、.codex/rules.md、.codex/scope.md、.codex/commands.md、docs/项目任务看板.md，以及 .codex/stacks/ 中相关技术栈规则。\n先确认本次工作对应的 EPIC / FEAT / TASK / BUG 编号；没有编号时先帮我拆分并补到任务看板。\n实现时不要做无关重构；完成后运行必要验证，并更新相关文档、docs/项目任务看板.md 和 docs/版本更新记录.md。',
+        review: '使用 .agents/skills/code-review 审查当前改动。\n请先查看 git status 和 git diff，并读取 AGENTS.md、docs/代码所有权.md、docs/项目任务看板.md。\n重点检查 bug、行为回归、安全风险、兼容性问题、代码所有权缺口、必要评审人缺口、任务状态不一致和测试缺口。\n按 Findings、Open Questions、Test Gaps、Summary 输出。',
+        release: '使用 .agents/skills/release-check 做发布前检查。\n先读取 AGENTS.md、docs/版本路线图.md、docs/版本更新记录.md、docs/项目任务看板.md、.codex/version-gates.md、.codex/git.md、.codex/commands.md。\n按需要读取环境矩阵、发布流水线、代码所有权、安全、质量指标和事故复盘文档。\n不要 commit、tag、push 或部署。若 review/refactor gate、任务状态、S2/S3 安全风险、CI/CD 回滚、Critical/Unknown 评审结论不完整，请拒绝推进并列出需要人工确认的问题。',
+        security: '使用 .agents/skills/security-review 审查当前改动。\n先读取 AGENTS.md 和 .codex/security.md。重点看密钥、鉴权、权限、外部输入、数据库查询、文件上传、第三方 API、MCP 和外部动作风险。不要输出完整密钥值。'
       };
       return prompts[type] || prompts.init;
     }
 
-    function buildInitPrompt(name, stacks) {
-      const mode = getValue('entryMode', '新项目');
-      if (mode === '接手既有项目') {
-        return '使用 .agents/skills/handover-review 接手这个既有项目。\n\n项目名称：' + name + '\n技术栈模板：' + stacks + '\n\n请先读取 governance/流程总览.md、.codex/handover.md、README、启动文档、构建配置、.codex/、docs/、.codex/stacks/ 中相关技术栈模板。\n目标是先做现状审计、大规模代码审查、兼容边界识别、运行环境和 CI/CD 链路梳理、代码所有权梳理、任务/缺陷模型梳理、P0/P1 缺陷修复计划，不要默认改变大架构、对外 API、数据库语义或部署方式。\n请补齐 docs/既有项目接手审计.md、docs/缺陷修复计划.md、docs/版本路线图.md、docs/环境矩阵.md、docs/发布流水线.md、docs/代码所有权.md、docs/项目任务看板.md，并告诉我：当前项目状态、兼容边界、环境和 CI/CD 基线、代码所有权基线、任务/缺陷基线、P0/P1 问题、P2/P3 后续规划、是否允许进入后续功能开发。';
-      }
-      return '使用 .agents/skills/project-init 进行项目初始化。\n\n项目名称：' + name + '\n技术栈模板：' + stacks + '\n\n请先读取 governance/流程总览.md、governance/sdlc.md、governance/architecture-governance.md、governance/rfc-process.md、governance/adr-process.md、governance/traceability.md、governance/definition-of-ready.md、governance/version-governance.md、governance/risk-management.md、governance/cicd-environment-governance.md、governance/code-ownership-review-governance.md、governance/project-management-task-model.md。\n然后和我确认项目开发方案、技术栈选择、版本路线图、软硬件落地条件、环境矩阵、发布流水线假设、代码所有权假设和 EPIC / FEAT / TASK / BUG 模型。\n读取 .codex/init.generated.md、.codex/questionnaires/项目初始化问答.md、.codex/stacks/ 中相关技术栈模板，以及 docs/项目开发方案.md、docs/版本路线图.md、docs/环境矩阵.md、docs/发布流水线.md、docs/代码所有权.md、docs/项目任务看板.md。\n如果我已经粘贴了问答内容，请先把它整理进 .codex/questionnaires/项目初始化问答.md。\n然后补齐 .codex/ 和 docs/，不要修改业务代码。\n如果方案、版本路线图、落地环境、发布链路、代码所有权或项目任务模型不清楚，请先追问，不要直接进入编码。\n最后告诉我：方案结论、版本规划、环境和发布结论、代码所有权结论、项目任务模型、需要的 RFC/ADR、追踪编号、风险项、已补齐文件、阻塞问题和下一步建议。';
-    }
-
     function updateAll() {
+      updateModeUI();
       commandOutput.textContent = buildCommand();
-      questionnaireOutput.textContent = buildQuestionnaire();
+      briefOutput.textContent = buildBrief();
       promptOutput.textContent = buildPrompt(activePrompt);
-      copyStatus.textContent = '';
     }
 
     async function copyText(text, statusId, okText) {
@@ -717,23 +600,20 @@ v0.2.1：review/refactor/documentation gate</textarea>
       targetPath.value = 'D:\\JAVA-code\\demo-fullstack';
       projectName.value = 'demo-fullstack';
       projectName.dataset.autoFromFolder = 'true';
-      document.getElementById('projectType').value = 'Java + Vue 前后端项目';
+      document.querySelector('input[name="mode"][value="Standard"]').checked = true;
       document.getElementById('entryMode').value = '新项目';
-      document.getElementById('stage').value = 'MVP / 初始开发';
-      document.getElementById('goal').value = '实现一个可维护的前后端业务系统';
-      document.getElementById('landingConditions').value = '';
-      document.getElementById('architectureConcern').value = '';
-      document.getElementById('versionRoadmap').value = 'v0.1.0：完成最小功能闭环\nv0.1.1：review/refactor/documentation gate\nv0.2.0：扩展第二阶段核心能力\nv0.2.1：review/refactor/documentation gate';
-      document.getElementById('mustHave').value = '';
-      document.getElementById('notDo').value = '';
-      document.getElementById('dependencies').value = 'MySQL、Redis、MinIO、Kafka、Elasticsearch、Ollama / DeepSeek 本地版（deepseek-r1:7b，http://localhost:11434/v1）';
-      document.getElementById('validation').value = '';
+      document.getElementById('projectType').value = 'Java + Vue 前后端项目';
+      document.getElementById('goal').value = '实现一个可维护的前后端业务系统。';
+      document.getElementById('knownFacts').value = '';
+      document.getElementById('uncertainties').value = '';
+      document.getElementById('constraints').value = '安装依赖、启动长期服务、git commit、git push、部署前必须确认。';
       stackList.querySelectorAll('input[type="checkbox"]').forEach(input => {
         input.checked = input.value === 'java-springboot' || input.value === 'vue';
       });
       updateAll();
     }
 
+    document.querySelectorAll('input[name="mode"]').forEach(input => input.addEventListener('change', updateAll));
     parentPath.addEventListener('input', syncTargetPathFromParts);
     folderName.addEventListener('input', syncTargetPathFromParts);
     targetPath.addEventListener('input', updateAll);
@@ -742,13 +622,13 @@ v0.2.1：review/refactor/documentation gate</textarea>
       updateAll();
     });
     stackList.addEventListener('change', updateAll);
-    ['entryMode', 'projectType', 'stage', 'goal', 'landingConditions', 'architectureConcern', 'versionRoadmap', 'mustHave', 'notDo', 'dependencies', 'permissions', 'validation'].forEach(id => {
+    ['entryMode', 'projectType', 'goal', 'knownFacts', 'uncertainties', 'constraints'].forEach(id => {
       document.getElementById(id).addEventListener('input', updateAll);
       document.getElementById(id).addEventListener('change', updateAll);
     });
 
     document.getElementById('copyCommand').addEventListener('click', () => copyText(buildCommand(), 'copyStatus', '初始化命令已复制。'));
-    document.getElementById('copyQuestionnaire').addEventListener('click', () => copyText(buildQuestionnaire(), 'questionnaireStatus', '问答内容已复制。'));
+    document.getElementById('copyBrief').addEventListener('click', () => copyText(buildBrief(), 'briefStatus', '项目简报已复制。'));
     document.getElementById('copyPrompt').addEventListener('click', () => copyText(buildPrompt(activePrompt), 'promptStatus', '提示词已复制。'));
     document.getElementById('chooseFolder').addEventListener('click', chooseFolder);
     document.getElementById('resetExample').addEventListener('click', resetExample);

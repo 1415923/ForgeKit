@@ -18,6 +18,7 @@ skill-name/
 | Skill | 用途 |
 | --- | --- |
 | `project-init` | 初始化或修复项目 `.codex/` 和 `docs/` |
+| `project-bootstrap-fill` | 根据项目初始化问答补齐第一版 `.codex/` 和 `docs/` |
 | `handover-review` | 接手既有项目时做现状审计、兼容边界和缺陷修复计划 |
 | `code-review` | 审查改动中的 bug、回归、安全风险和测试缺口 |
 | `release-check` | 发布前检查版本、文档、测试、构建、部署风险 |

@@ -7,7 +7,7 @@
 1. 新项目先复制 `project-template/`。
 2. 根据项目技术栈选择 `templates/<stack>/`。
 3. 填写 [项目初始化问答.md](./项目初始化问答.md)。
-4. 让 Codex 根据问答表补齐 `.codex/` 和 `docs/`。
+4. 让 Codex 使用 `project-bootstrap-fill` 根据问答表补齐 `.codex/` 和 `docs/`。
 
 ## 设计原则
 

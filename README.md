@@ -29,9 +29,10 @@
 2. 用 `scripts/init-project-template.ps1` 或手动方式把 `project-template/` 复制到项目根目录。
 3. 根据技术栈只选择需要的 `templates/<stack>/`，不要全量复制。
 4. 先读取 `governance/流程总览.md`。
-5. 新项目使用 `project-init`，既有项目使用 `handover-review`。
-6. 每次开发功能时，按 `checklists/功能开发检查清单.md` 执行。
-7. 每次发布前，按 `checklists/发布前检查清单.md`、`checklists/版本推进闸门检查清单.md`、`docs/环境矩阵.md`、`docs/发布流水线.md`、`docs/代码所有权.md` 和 `docs/项目任务看板.md` 核对。
+5. 新项目使用 `project-init`，它会合并初始化、问答填充和方案访谈。
+6. 既有项目使用 `handover-review`，先审计和修 P0/P1，再规划后续开发。
+7. 每次开发功能时，按 `checklists/功能开发检查清单.md` 执行。
+8. 每次发布前，按 `checklists/发布前检查清单.md`、`checklists/版本推进闸门检查清单.md`、`docs/环境矩阵.md`、`docs/发布流水线.md`、`docs/代码所有权.md` 和 `docs/项目任务看板.md` 核对。
 
 ## 使用模式
 
@@ -42,6 +43,17 @@
 | Enterprise | 多人协作、接手项目、交付项目、高风险项目 | Standard + ADR/RFC、风险、变更影响、代码所有权、CI/CD、安全治理、事故复盘、质量指标 |
 
 默认推荐 `Standard`。小项目可以从 `Lite` 开始；涉及公司交付、生产环境、安全、硬件或多人协作时，用 `Enterprise`。
+
+## Codex 上下文入口
+
+生成到具体项目后，Codex 应先读取 `AGENTS.md`。它是轻量入口，只负责路由任务和控制上下文，不要求一次性读取所有治理文档。
+
+原则：
+
+- 按任务读取相关治理文件。
+- 按技术栈只读取 `.codex/stacks/<stack>/` 中相关模板。
+- 初始化阶段先访谈和确认方案，不直接编码。
+- Lite 项目不强行加载 Enterprise 级治理。
 
 ## 技术栈按需加载
 
