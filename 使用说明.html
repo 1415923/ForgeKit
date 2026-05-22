@@ -1,0 +1,768 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Codex CLI 开发流程模板使用说明</title>
+  <style>
+    :root {
+      --bg: #f6f7f9;
+      --panel: #fff;
+      --text: #1f2937;
+      --muted: #667085;
+      --border: #d7dce2;
+      --soft: #f2f5f9;
+      --accent: #1f6feb;
+      --accent-dark: #1557b0;
+      --code: #111827;
+      --ok: #087443;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--text);
+      font-family: "Segoe UI", "Microsoft YaHei", Arial, sans-serif;
+      line-height: 1.55;
+    }
+
+    header {
+      background: var(--panel);
+      border-bottom: 1px solid var(--border);
+    }
+
+    .wrap {
+      max-width: 1180px;
+      margin: 0 auto;
+      padding: 26px 24px;
+    }
+
+    h1 { margin: 0 0 8px; font-size: 30px; line-height: 1.25; }
+    h2 { margin: 0 0 14px; font-size: 22px; }
+    h3 { margin: 18px 0 8px; font-size: 16px; }
+    p { margin: 8px 0; }
+    .muted { color: var(--muted); }
+    .ok { color: var(--ok); font-weight: 700; }
+
+    .section {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 20px;
+      margin: 18px 0;
+    }
+
+    .flow {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 12px;
+      margin-top: 16px;
+    }
+
+    .mode-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 12px;
+      margin-top: 14px;
+    }
+
+    .flow-card {
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      background: #fbfcfe;
+      padding: 14px;
+      min-height: 150px;
+    }
+
+    .flow-card strong { display: block; margin: 8px 0 6px; }
+
+    .num {
+      display: inline-grid;
+      place-items: center;
+      width: 30px;
+      height: 30px;
+      border-radius: 50%;
+      background: var(--accent);
+      color: #fff;
+      font-weight: 700;
+    }
+
+    .split {
+      display: grid;
+      grid-template-columns: minmax(320px, 0.9fr) minmax(0, 1.1fr);
+      gap: 18px;
+      align-items: start;
+    }
+
+    .form-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 12px;
+    }
+
+    label {
+      display: block;
+      margin: 10px 0 5px;
+      font-weight: 700;
+    }
+
+    input[type="text"],
+    textarea,
+    select {
+      width: 100%;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 10px 11px;
+      font: inherit;
+      color: var(--text);
+      background: #fff;
+    }
+
+    textarea {
+      min-height: 82px;
+      resize: vertical;
+    }
+
+    .stack-list {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 9px;
+      margin-top: 8px;
+    }
+
+    .stack {
+      display: grid;
+      grid-template-columns: 18px 1fr;
+      gap: 8px;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 10px;
+      background: #fbfcfe;
+    }
+
+    .stack input { width: 16px; height: 16px; margin-top: 3px; }
+    .stack-title { display: block; font-weight: 700; line-height: 1.3; }
+    .stack-desc { display: block; color: var(--muted); font-size: 13px; line-height: 1.35; margin-top: 3px; }
+
+    .combo-list {
+      display: grid;
+      gap: 8px;
+      margin-top: 10px;
+    }
+
+    .combo {
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      background: #fbfcfe;
+      padding: 9px 10px;
+      font-size: 14px;
+    }
+
+    button,
+    .link-button {
+      border: 1px solid var(--accent);
+      border-radius: 6px;
+      background: var(--accent);
+      color: #fff;
+      padding: 9px 12px;
+      font-size: 14px;
+      cursor: pointer;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      line-height: 1.3;
+    }
+
+    button:hover,
+    .link-button:hover {
+      background: var(--accent-dark);
+      border-color: var(--accent-dark);
+    }
+
+    button.secondary,
+    .link-button.secondary {
+      background: #fff;
+      color: var(--accent);
+    }
+
+    button.secondary:hover,
+    .link-button.secondary:hover {
+      background: #eef5ff;
+      color: var(--accent-dark);
+    }
+
+    .actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 14px;
+    }
+
+    pre {
+      white-space: pre-wrap;
+      word-break: break-word;
+      background: var(--code);
+      color: #e5e7eb;
+      border-radius: 8px;
+      padding: 14px;
+      overflow: auto;
+      min-height: 128px;
+    }
+
+    code {
+      background: #eef2f7;
+      color: #111827;
+      border-radius: 4px;
+      padding: 2px 5px;
+      font-family: Consolas, "Cascadia Mono", monospace;
+      font-size: 0.95em;
+    }
+
+    pre code { background: transparent; color: inherit; padding: 0; }
+
+    .note {
+      border-left: 4px solid var(--accent);
+      background: #eef5ff;
+      padding: 10px 12px;
+      border-radius: 6px;
+      color: #16406f;
+      margin-top: 12px;
+    }
+
+    .tabs {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin: 8px 0 12px;
+    }
+
+    .tab {
+      background: #fff;
+      color: var(--accent);
+    }
+
+    .tab.active {
+      background: var(--accent);
+      color: #fff;
+    }
+
+    .file-links {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 10px;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 10px;
+      font-size: 14px;
+    }
+
+    th, td {
+      border: 1px solid var(--border);
+      padding: 8px 9px;
+      text-align: left;
+      vertical-align: top;
+    }
+
+    th { background: var(--soft); }
+
+    @media (max-width: 920px) {
+      .flow,
+      .mode-grid,
+      .split,
+      .form-grid,
+      .stack-list {
+        grid-template-columns: 1fr;
+      }
+
+      .wrap { padding: 20px 14px; }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="wrap">
+      <h1>Codex CLI 开发流程模板使用说明</h1>
+      <p class="muted">按成熟 SDLC、架构治理、版本治理和接手项目治理裁剪成 Codex 可执行流程。</p>
+    </div>
+  </header>
+
+  <main class="wrap">
+    <section class="section">
+      <h2>你应该怎么走</h2>
+      <div class="note">
+        先选入口：新项目走“SDLC + RFC/ADR + 方案设计 + 架构治理 + 版本路线图”；接手既有项目走“现状审计 + 缺陷修复 + 兼容边界”，然后再规划后续开发。Ready/Done、风险登记、追踪矩阵、变更影响评估、事故/缺陷复盘、安全治理、技术债、质量指标和版本闸门始终适用。
+      </div>
+      <div class="flow">
+        <div class="flow-card">
+          <span class="num">1</span>
+          <strong>先做方案设计</strong>
+          <p class="muted">明确项目目标、技术栈、软硬件落地条件和版本路线图，不清楚的先让 Codex 追问。</p>
+        </div>
+        <div class="flow-card">
+          <span class="num">2</span>
+          <strong>生成项目骨架</strong>
+          <p class="muted">复制 PowerShell 命令执行，创建 `.codex/`、`docs/`、skills、技术栈模板和版本闸门。</p>
+        </div>
+        <div class="flow-card">
+          <span class="num">3</span>
+          <strong>生成方案问答</strong>
+          <p class="muted">把你知道的信息填进去，不知道的留空，让 Codex 继续和你商讨并补齐方案。</p>
+        </div>
+        <div class="flow-card">
+          <span class="num">4</span>
+          <strong>按版本闸门推进</strong>
+          <p class="muted">大版本结束后先做 review/refactor 中版本，不通过就不推进下一个大版本。</p>
+        </div>
+      </div>
+      <div class="mode-grid">
+        <div class="flow-card">
+          <strong>Lite</strong>
+          <p class="muted">小脚本、小工具、个人验证项目。维护 `.codex/`、项目开发方案、版本更新记录和必要命令。</p>
+        </div>
+        <div class="flow-card">
+          <strong>Standard</strong>
+          <p class="muted">普通前后端、API、数据处理、内部业务项目。增加需求、架构、技术选型、版本路线图、任务看板、测试和发布检查。</p>
+        </div>
+        <div class="flow-card">
+          <strong>Enterprise</strong>
+          <p class="muted">多人协作、接手项目、交付项目、高风险项目。增加 ADR/RFC、风险、变更影响、代码所有权、CI/CD、安全治理和复盘。</p>
+        </div>
+      </div>
+      <div class="note">浏览器不能直接执行 PowerShell，也不能稳定获取 Windows 完整路径。本页负责生成命令、问答和提示词，执行动作仍在 PowerShell 或 Codex 中完成。</div>
+    </section>
+
+    <section class="section">
+      <h2>1. 项目模板初始化</h2>
+      <div class="split">
+        <div>
+          <div class="form-grid">
+            <div>
+              <label for="parentPath">常用父目录</label>
+              <input id="parentPath" type="text" value="D:\JAVA-code" autocomplete="off">
+            </div>
+            <div>
+              <label for="folderName">项目文件夹名</label>
+              <input id="folderName" type="text" value="demo-fullstack" autocomplete="off">
+            </div>
+          </div>
+
+          <label for="targetPath">完整目标项目目录</label>
+          <input id="targetPath" type="text" value="D:\JAVA-code\demo-fullstack" autocomplete="off">
+
+          <label for="projectName">项目名称</label>
+          <input id="projectName" type="text" value="demo-fullstack" autocomplete="off">
+
+          <label>技术栈模板</label>
+          <div class="stack-list" id="stackList">
+            <label class="stack">
+              <input type="checkbox" value="java-springboot" checked>
+              <span><span class="stack-title">Java Spring Boot</span><span class="stack-desc">Java 后端、接口、数据库、中间件、Maven/Gradle。</span></span>
+            </label>
+            <label class="stack">
+              <input type="checkbox" value="vue" checked>
+              <span><span class="stack-title">Vue</span><span class="stack-desc">Vue/Vite 前端、管理端、页面、组件、路由、接口代理。</span></span>
+            </label>
+            <label class="stack">
+              <input type="checkbox" value="react">
+              <span><span class="stack-title">React</span><span class="stack-desc">React 前端、组件、hooks、路由、状态管理。</span></span>
+            </label>
+            <label class="stack">
+              <input type="checkbox" value="python-fastapi">
+              <span><span class="stack-title">Python FastAPI</span><span class="stack-desc">Python API 服务、脚本服务、pytest、虚拟环境。</span></span>
+            </label>
+            <label class="stack">
+              <input type="checkbox" value="node-express">
+              <span><span class="stack-title">Node Express</span><span class="stack-desc">Node.js 后端、Express API、路由、中间件。</span></span>
+            </label>
+            <label class="stack">
+              <input type="checkbox" value="fpga-vivado-vitis">
+              <span><span class="stack-title">FPGA Vivado/Vitis</span><span class="stack-desc">FPGA、Vivado、Vitis、Vitis HLS、板卡验证。</span></span>
+            </label>
+          </div>
+
+          <div class="actions">
+            <button type="button" id="copyCommand">复制初始化命令</button>
+            <button type="button" class="secondary" id="chooseFolder">选择文件夹名</button>
+            <button type="button" class="secondary" id="resetExample">恢复示例</button>
+          </div>
+          <p class="muted" id="folderStatus">选择文件夹后，页面会把“常用父目录 + 文件夹名”拼成完整目标路径；如果实际路径不同，请手动修改。</p>
+          <p id="copyStatus" class="muted"></p>
+        </div>
+
+        <div>
+          <h3>复制到 PowerShell 执行</h3>
+          <pre><code id="commandOutput"></code></pre>
+          <p class="muted">执行成功后，到新项目目录打开 Codex，再继续下面的问答和初始化提示词。</p>
+
+          <h3>常见组合</h3>
+          <div class="combo-list">
+            <div class="combo"><strong>普通 Java 前后端项目：</strong>选 <code>java-springboot</code> + <code>vue</code>。</div>
+            <div class="combo"><strong>只有 Java 后端：</strong>只选 <code>java-springboot</code>。</div>
+            <div class="combo"><strong>只有前端：</strong>Vue 项目选 <code>vue</code>，React 项目选 <code>react</code>。</div>
+            <div class="combo"><strong>FPGA / HLS 项目：</strong>只选 <code>fpga-vivado-vitis</code>，除非项目确实还有软件端。</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section">
+      <h2>2. 方案设计与项目初始化问答</h2>
+      <p class="muted">这部分是最重要的。你可以先填你知道的内容，空着的让 Codex 继续追问和讨论；没有形成方案前，不建议直接编码。</p>
+      <div class="split">
+        <div>
+          <div class="form-grid">
+            <div>
+              <label for="entryMode">项目入口</label>
+              <select id="entryMode">
+                <option>新项目</option>
+                <option>接手既有项目</option>
+              </select>
+            </div>
+            <div>
+              <label for="projectType">项目类型</label>
+              <select id="projectType">
+                <option>Java + Vue 前后端项目</option>
+                <option>Java 后端项目</option>
+                <option>Vue 前端项目</option>
+                <option>React 前端项目</option>
+                <option>Python API 项目</option>
+                <option>Node 后端项目</option>
+                <option>FPGA / HLS 项目</option>
+                <option>其他</option>
+              </select>
+            </div>
+            <div>
+              <label for="stage">当前阶段</label>
+              <select id="stage">
+                <option>MVP / 初始开发</option>
+                <option>原型验证</option>
+                <option>复现项目</option>
+                <option>维护迭代</option>
+                <option>发布准备</option>
+              </select>
+            </div>
+          </div>
+
+          <label for="goal">项目一句话目标</label>
+          <input id="goal" type="text" value="实现一个可维护的前后端业务系统" autocomplete="off">
+
+          <label for="landingConditions">最终落地的软硬件条件</label>
+          <textarea id="landingConditions" placeholder="例如：Windows 本机开发，服务器部署，MySQL/Redis，本地 Ollama DeepSeek，或 FPGA 板卡型号"></textarea>
+
+          <label for="architectureConcern">必须提前想清楚的设计点</label>
+          <textarea id="architectureConcern" placeholder="例如：权限模型、数据模型、模块边界、部署方式、硬件接口、模型服务方案"></textarea>
+
+          <label for="versionRoadmap">版本长规划</label>
+          <textarea id="versionRoadmap">v0.1.0：完成最小功能闭环
+v0.1.1：review/refactor/documentation gate
+v0.2.0：扩展第二阶段核心能力
+v0.2.1：review/refactor/documentation gate</textarea>
+
+          <label for="mustHave">当前版本必须完成</label>
+          <textarea id="mustHave" placeholder="例如：登录注册、用户管理、核心业务 CRUD、前端页面联调"></textarea>
+
+          <label for="notDo">当前阶段明确不做</label>
+          <textarea id="notDo" placeholder="例如：支付、复杂权限、生产部署、多租户"></textarea>
+
+          <label for="dependencies">数据库 / 中间件 / 外部 API</label>
+          <textarea id="dependencies">MySQL、Redis、MinIO、Kafka、Elasticsearch、Ollama / DeepSeek 本地版（deepseek-r1:7b，http://localhost:11434/v1）</textarea>
+
+          <label for="permissions">Codex 权限偏好</label>
+          <textarea id="permissions">允许读取和修改当前项目文件；安装依赖、启动长期服务、git commit、git push、部署前必须确认。</textarea>
+
+          <label for="validation">测试和验证要求</label>
+          <textarea id="validation" placeholder="例如：后端运行 mvn test，前端运行 npm run build；如果不能运行要说明原因"></textarea>
+
+          <div class="actions">
+            <button type="button" id="copyQuestionnaire">复制问答内容</button>
+          </div>
+          <p id="questionnaireStatus" class="muted"></p>
+        </div>
+
+        <div>
+          <h3>生成的问答内容</h3>
+          <pre><code id="questionnaireOutput"></code></pre>
+          <p class="muted">你可以把这段发给 Codex，让它写入 <code>.codex/questionnaires/项目初始化问答.md</code> 并继续补齐项目规则。</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="section">
+      <h2>3. 给 Codex 的下一步提示词</h2>
+      <p class="muted">先执行初始化命令，再复制下面提示词到新项目目录的 Codex 会话中。</p>
+      <div class="tabs">
+        <button type="button" class="tab active" data-prompt="init">项目初始化</button>
+        <button type="button" class="tab" data-prompt="dev">开始开发</button>
+        <button type="button" class="tab" data-prompt="review">代码审查</button>
+        <button type="button" class="tab" data-prompt="release">发布检查</button>
+        <button type="button" class="tab" data-prompt="security">安全审查</button>
+      </div>
+      <pre><code id="promptOutput"></code></pre>
+      <div class="actions">
+        <button type="button" id="copyPrompt">复制当前提示词</button>
+      </div>
+      <p id="promptStatus" class="muted"></p>
+    </section>
+
+    <section class="section">
+      <h2>本地模板入口</h2>
+      <div class="file-links">
+        <a class="link-button secondary" href="./project-template/">project-template</a>
+        <a class="link-button secondary" href="./templates/">templates</a>
+        <a class="link-button secondary" href="./scripts/">scripts</a>
+        <a class="link-button secondary" href="./questionnaires/">questionnaires</a>
+        <a class="link-button secondary" href="./project-template/.agents/skills/">skills</a>
+      </div>
+    </section>
+
+    <section class="section">
+      <h2>生成后目录说明</h2>
+      <table>
+        <thead><tr><th>目录或文件</th><th>用途</th></tr></thead>
+        <tbody>
+          <tr><td><code>.codex/</code></td><td>项目目标、范围、命令、风格、测试、安全、Git、skills 规则。</td></tr>
+          <tr><td><code>.codex/stacks/&lt;stack&gt;/</code></td><td>按需复制的技术栈模板，避免加载无关规则。</td></tr>
+          <tr><td><code>.codex/questionnaires/</code></td><td>项目初始化问答表，作为补齐文档和规则的事实来源。</td></tr>
+          <tr><td><code>.agents/skills/</code></td><td>项目级 Codex skills：project-init、code-review、release-check、security-review。</td></tr>
+          <tr><td><code>docs/</code></td><td>需求、架构、技术选型、接口、数据库、部署、测试、版本记录。</td></tr>
+        </tbody>
+      </table>
+    </section>
+  </main>
+
+  <script>
+    const templateRoot = 'D:\\JAVA-code\\项目开发流程';
+    const scriptPath = templateRoot + '\\scripts\\init-project-template.ps1';
+
+    const parentPath = document.getElementById('parentPath');
+    const folderName = document.getElementById('folderName');
+    const targetPath = document.getElementById('targetPath');
+    const projectName = document.getElementById('projectName');
+    const stackList = document.getElementById('stackList');
+    const commandOutput = document.getElementById('commandOutput');
+    const copyStatus = document.getElementById('copyStatus');
+    const folderStatus = document.getElementById('folderStatus');
+    const questionnaireOutput = document.getElementById('questionnaireOutput');
+    const promptOutput = document.getElementById('promptOutput');
+    let activePrompt = 'init';
+
+    function selectedStacks() {
+      return Array.from(stackList.querySelectorAll('input[type="checkbox"]:checked')).map(input => input.value);
+    }
+
+    function psQuote(value) {
+      return '"' + String(value).replace(/"/g, '`"') + '"';
+    }
+
+    function joinWindowsPath(parent, child) {
+      const cleanParent = String(parent || '').trim().replace(/[\\\/]+$/, '');
+      const cleanChild = String(child || '').trim().replace(/^[\\\/]+/, '');
+      if (!cleanParent) return cleanChild;
+      if (!cleanChild) return cleanParent;
+      return cleanParent + '\\' + cleanChild;
+    }
+
+    function syncTargetPathFromParts() {
+      const nextPath = joinWindowsPath(parentPath.value, folderName.value);
+      if (nextPath) targetPath.value = nextPath;
+      if (!projectName.value.trim() || projectName.dataset.autoFromFolder === 'true') {
+        projectName.value = folderName.value.trim();
+        projectName.dataset.autoFromFolder = 'true';
+      }
+      updateAll();
+    }
+
+    function buildCommand() {
+      const stacks = selectedStacks();
+      const stackText = stacks.length > 0 ? stacks.join(',') : '';
+      const lines = [
+        'powershell -ExecutionPolicy Bypass -File ' + psQuote(scriptPath) + ' `',
+        '  -TargetPath ' + psQuote(targetPath.value.trim() || 'D:\\JAVA-code\\demo') + ' `',
+        '  -ProjectName ' + psQuote(projectName.value.trim() || 'demo')
+      ];
+      if (stackText) {
+        lines[lines.length - 1] += ' `';
+        lines.push('  -Stacks ' + stackText);
+      }
+      return lines.join('\n');
+    }
+
+    function getValue(id, fallback) {
+      const el = document.getElementById(id);
+      const value = el ? el.value.trim() : '';
+      return value || fallback;
+    }
+
+    function buildQuestionnaire() {
+      return [
+        '# 项目初始化问答',
+        '',
+        '## 1. 必答信息',
+        '',
+        '| 问题 | 回答 |',
+        '| --- | --- |',
+        '| 项目名称是什么？ | ' + getValue('projectName', '待补充') + ' |',
+        '| 项目一句话目标是什么？ | ' + getValue('goal', '待补充') + ' |',
+        '| 项目入口 | ' + getValue('entryMode', '待补充') + ' |',
+        '| 项目类型是什么？ | ' + getValue('projectType', '待补充') + ' |',
+        '| 当前阶段是什么？ | ' + getValue('stage', '待补充') + ' |',
+        '| 技术栈模板 | ' + (selectedStacks().join(', ') || '待补充') + ' |',
+        '',
+        '## 2. 项目开发方案',
+        '',
+        '| 问题 | 回答 |',
+        '| --- | --- |',
+        '| 最终落地的软硬件条件 | ' + getValue('landingConditions', '待补充').replace(/\n/g, '<br>') + ' |',
+        '| 必须提前想清楚的设计点 | ' + getValue('architectureConcern', '待补充').replace(/\n/g, '<br>') + ' |',
+        '| 是否允许直接进入编码 | 否，先完成项目开发方案和版本路线图第一版 |',
+        '',
+        '## 3. 版本路线图',
+        '',
+        '| 问题 | 回答 |',
+        '| --- | --- |',
+        '| 大版本规划 | ' + getValue('versionRoadmap', '待补充').replace(/\n/g, '<br>') + ' |',
+        '| 是否同意未完成 review/refactor 中版本前不推进下个大版本 | 是 |',
+        '',
+        '## 4. 当前范围',
+        '',
+        '| 问题 | 回答 |',
+        '| --- | --- |',
+        '| 当前版本必须完成哪些功能？ | ' + getValue('mustHave', '待补充').replace(/\n/g, '<br>') + ' |',
+        '| 哪些事情明确不做？ | ' + getValue('notDo', '待补充').replace(/\n/g, '<br>') + ' |',
+        '',
+        '## 5. 运行环境',
+        '',
+        '| 问题 | 回答 |',
+        '| --- | --- |',
+        '| 数据库 / 中间件 / 外部 API | ' + getValue('dependencies', '待补充').replace(/\n/g, '<br>') + ' |',
+        '',
+        '## 6. 权限',
+        '',
+        '| 问题 | 回答 |',
+        '| --- | --- |',
+        '| Codex 权限偏好 | ' + getValue('permissions', '待补充').replace(/\n/g, '<br>') + ' |',
+        '',
+        '## 7. 测试与验证',
+        '',
+        '| 问题 | 回答 |',
+        '| --- | --- |',
+        '| 测试和验证要求 | ' + getValue('validation', '待补充').replace(/\n/g, '<br>') + ' |'
+      ].join('\n');
+    }
+
+    function buildPrompt(type) {
+      const stacks = selectedStacks().join(', ') || '未选择';
+      const name = projectName.value.trim() || '当前项目';
+      const prompts = {
+        init: buildInitPrompt(name, stacks),
+        dev: '请开始实现我接下来描述的功能。\n先读取 .codex/rules.md、.codex/scope.md、.codex/commands.md、docs/项目任务看板.md，以及 .codex/stacks/ 中相关技术栈规则。\n先确认本次工作对应的 EPIC / FEAT / TASK / BUG 编号；没有编号时先帮我拆分并补到任务看板。\n实现时不要做无关重构；完成后运行必要验证，并更新相关文档、docs/项目任务看板.md 和 docs/版本更新记录.md。',
+        review: '使用 .agents/skills/code-review 审查当前改动。\n请先查看 git status 和 git diff，并读取 docs/代码所有权.md、docs/项目任务看板.md。\n重点检查 bug、行为回归、安全风险、兼容性问题、代码所有权缺口、必要评审人缺口、任务状态不一致和测试缺口。\n按 Findings、Open Questions、Test Gaps、Summary 输出。',
+        release: '使用 .agents/skills/release-check 做发布前检查。\n读取 docs/版本路线图.md、docs/版本更新记录.md、docs/项目任务看板.md、docs/变更影响评估.md、docs/事故复盘.md、docs/缺陷复盘.md、docs/安全威胁建模.md、docs/依赖安全审查.md、docs/环境矩阵.md、docs/发布流水线.md、docs/部署文档.md、docs/代码所有权.md、docs/技术债记录.md、docs/质量指标记录.md、.codex/version-gates.md、.codex/git.md、.codex/commands.md、.codex/testing.md 和 .codex/security.md。\n检查当前是否需要先完成 review/refactor 中版本。\n不要 commit、tag、push 或部署，只给检查结果、阻塞项、风险、变更影响、事故/缺陷复盘、安全闸门、CI/CD 与环境闸门、代码所有权和评审责任、项目任务状态、技术债、质量指标变化和建议命令。\n如果上一个大版本后的 review/refactor 中版本未完成，或存在未关闭 SEV-1 / SEV-2 行动项、S2/S3 安全风险，或生产发布缺少环境矩阵、发布流水线、回滚方案，或 Critical/Unknown 代码区域缺少评审结论，或当前版本任务状态未闭合，请拒绝直接推进并提醒我人工确认。',
+        security: '使用 .agents/skills/security-review 审查当前改动。\n重点看密钥、鉴权、权限、外部输入、数据库查询、文件上传、第三方 API、MCP 和外部动作风险。\n不要输出完整密钥值。'
+      };
+      return prompts[type] || prompts.init;
+    }
+
+    function buildInitPrompt(name, stacks) {
+      const mode = getValue('entryMode', '新项目');
+      if (mode === '接手既有项目') {
+        return '使用 .agents/skills/handover-review 接手这个既有项目。\n\n项目名称：' + name + '\n技术栈模板：' + stacks + '\n\n请先读取 governance/流程总览.md、.codex/handover.md、README、启动文档、构建配置、.codex/、docs/、.codex/stacks/ 中相关技术栈模板。\n目标是先做现状审计、大规模代码审查、兼容边界识别、运行环境和 CI/CD 链路梳理、代码所有权梳理、任务/缺陷模型梳理、P0/P1 缺陷修复计划，不要默认改变大架构、对外 API、数据库语义或部署方式。\n请补齐 docs/既有项目接手审计.md、docs/缺陷修复计划.md、docs/版本路线图.md、docs/环境矩阵.md、docs/发布流水线.md、docs/代码所有权.md、docs/项目任务看板.md，并告诉我：当前项目状态、兼容边界、环境和 CI/CD 基线、代码所有权基线、任务/缺陷基线、P0/P1 问题、P2/P3 后续规划、是否允许进入后续功能开发。';
+      }
+      return '使用 .agents/skills/project-init 进行项目初始化。\n\n项目名称：' + name + '\n技术栈模板：' + stacks + '\n\n请先读取 governance/流程总览.md、governance/sdlc.md、governance/architecture-governance.md、governance/rfc-process.md、governance/adr-process.md、governance/traceability.md、governance/definition-of-ready.md、governance/version-governance.md、governance/risk-management.md、governance/cicd-environment-governance.md、governance/code-ownership-review-governance.md、governance/project-management-task-model.md。\n然后和我确认项目开发方案、技术栈选择、版本路线图、软硬件落地条件、环境矩阵、发布流水线假设、代码所有权假设和 EPIC / FEAT / TASK / BUG 模型。\n读取 .codex/init.generated.md、.codex/questionnaires/项目初始化问答.md、.codex/stacks/ 中相关技术栈模板，以及 docs/项目开发方案.md、docs/版本路线图.md、docs/环境矩阵.md、docs/发布流水线.md、docs/代码所有权.md、docs/项目任务看板.md。\n如果我已经粘贴了问答内容，请先把它整理进 .codex/questionnaires/项目初始化问答.md。\n然后补齐 .codex/ 和 docs/，不要修改业务代码。\n如果方案、版本路线图、落地环境、发布链路、代码所有权或项目任务模型不清楚，请先追问，不要直接进入编码。\n最后告诉我：方案结论、版本规划、环境和发布结论、代码所有权结论、项目任务模型、需要的 RFC/ADR、追踪编号、风险项、已补齐文件、阻塞问题和下一步建议。';
+    }
+
+    function updateAll() {
+      commandOutput.textContent = buildCommand();
+      questionnaireOutput.textContent = buildQuestionnaire();
+      promptOutput.textContent = buildPrompt(activePrompt);
+      copyStatus.textContent = '';
+    }
+
+    async function copyText(text, statusId, okText) {
+      const status = document.getElementById(statusId);
+      try {
+        await navigator.clipboard.writeText(text);
+        status.textContent = okText;
+        status.className = 'ok';
+      } catch (error) {
+        status.textContent = '复制失败，请手动选中内容复制。';
+        status.className = 'muted';
+      }
+    }
+
+    async function chooseFolder() {
+      if (!window.showDirectoryPicker) {
+        folderStatus.textContent = '当前浏览器不支持目录选择 API。请填写常用父目录和项目文件夹名，或直接填写完整目标路径。';
+        return;
+      }
+      try {
+        const handle = await window.showDirectoryPicker({ mode: 'read' });
+        folderName.value = handle.name;
+        folderStatus.textContent = '已选择文件夹名：' + handle.name + '。已按常用父目录自动生成完整目标路径；如实际路径不同，请手动修改。';
+        syncTargetPathFromParts();
+      } catch (error) {
+        folderStatus.textContent = '未选择文件夹。';
+      }
+    }
+
+    function resetExample() {
+      parentPath.value = 'D:\\JAVA-code';
+      folderName.value = 'demo-fullstack';
+      targetPath.value = 'D:\\JAVA-code\\demo-fullstack';
+      projectName.value = 'demo-fullstack';
+      projectName.dataset.autoFromFolder = 'true';
+      document.getElementById('projectType').value = 'Java + Vue 前后端项目';
+      document.getElementById('entryMode').value = '新项目';
+      document.getElementById('stage').value = 'MVP / 初始开发';
+      document.getElementById('goal').value = '实现一个可维护的前后端业务系统';
+      document.getElementById('landingConditions').value = '';
+      document.getElementById('architectureConcern').value = '';
+      document.getElementById('versionRoadmap').value = 'v0.1.0：完成最小功能闭环\nv0.1.1：review/refactor/documentation gate\nv0.2.0：扩展第二阶段核心能力\nv0.2.1：review/refactor/documentation gate';
+      document.getElementById('mustHave').value = '';
+      document.getElementById('notDo').value = '';
+      document.getElementById('dependencies').value = 'MySQL、Redis、MinIO、Kafka、Elasticsearch、Ollama / DeepSeek 本地版（deepseek-r1:7b，http://localhost:11434/v1）';
+      document.getElementById('validation').value = '';
+      stackList.querySelectorAll('input[type="checkbox"]').forEach(input => {
+        input.checked = input.value === 'java-springboot' || input.value === 'vue';
+      });
+      updateAll();
+    }
+
+    parentPath.addEventListener('input', syncTargetPathFromParts);
+    folderName.addEventListener('input', syncTargetPathFromParts);
+    targetPath.addEventListener('input', updateAll);
+    projectName.addEventListener('input', () => {
+      projectName.dataset.autoFromFolder = 'false';
+      updateAll();
+    });
+    stackList.addEventListener('change', updateAll);
+    ['entryMode', 'projectType', 'stage', 'goal', 'landingConditions', 'architectureConcern', 'versionRoadmap', 'mustHave', 'notDo', 'dependencies', 'permissions', 'validation'].forEach(id => {
+      document.getElementById(id).addEventListener('input', updateAll);
+      document.getElementById(id).addEventListener('change', updateAll);
+    });
+
+    document.getElementById('copyCommand').addEventListener('click', () => copyText(buildCommand(), 'copyStatus', '初始化命令已复制。'));
+    document.getElementById('copyQuestionnaire').addEventListener('click', () => copyText(buildQuestionnaire(), 'questionnaireStatus', '问答内容已复制。'));
+    document.getElementById('copyPrompt').addEventListener('click', () => copyText(buildPrompt(activePrompt), 'promptStatus', '提示词已复制。'));
+    document.getElementById('chooseFolder').addEventListener('click', chooseFolder);
+    document.getElementById('resetExample').addEventListener('click', resetExample);
+
+    document.querySelectorAll('.tab').forEach(button => {
+      button.addEventListener('click', () => {
+        document.querySelectorAll('.tab').forEach(tab => tab.classList.remove('active'));
+        button.classList.add('active');
+        activePrompt = button.dataset.prompt;
+        updateAll();
+      });
+    });
+
+    updateAll();
+  </script>
+</body>
+</html>
