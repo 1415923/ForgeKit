@@ -40,6 +40,13 @@ skill-name/
 
 重复流程先登记到 `.codex/commands-catalog.md`。自动化前先读取 `governance/team-agent-rollout.md` 和 `.codex/hooks.md`，不要默认启用 MCP 或外部写操作。
 
+生成项目内可用的只读辅助脚本：
+
+- `scripts/detect-local-toolchain.ps1`：检测本地工具链和 LSP 候选。
+- `scripts/run-harness-check.ps1`：检查 AGENTS、治理入口、commands 和 hooks 是否完整。
+
+初始化后如果项目方向仍不清楚，先读取 `docs/Codex下一步工作单.md`，继续确认 MVP、落地环境、验证方式和依赖裁剪。
+
 ## 推荐 Skill 类型
 
 | Skill | 场景 |

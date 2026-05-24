@@ -40,6 +40,18 @@
 # 待补充
 ```
 
+## Codex Harness 检查
+
+```powershell
+powershell -ExecutionPolicy Bypass -File .\scripts\run-harness-check.ps1
+```
+
+## 本地工具链检测
+
+```powershell
+powershell -ExecutionPolicy Bypass -File .\scripts\detect-local-toolchain.ps1
+```
+
 ## 数据库迁移
 
 ```powershell

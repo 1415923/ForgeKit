@@ -173,6 +173,16 @@ function Get-TrialRecordRef {
     return "docs/$name.md"
 }
 
+function Get-CodexNextWorkOrderPath {
+    $name = "Codex" + ([char]0x4E0B).ToString() + ([char]0x4E00).ToString() + ([char]0x6B65).ToString() + ([char]0x5DE5).ToString() + ([char]0x4F5C).ToString() + ([char]0x5355).ToString()
+    return "project-template\docs\$name.md"
+}
+
+function Get-CodexNextWorkOrderRef {
+    $name = "Codex" + ([char]0x4E0B).ToString() + ([char]0x4E00).ToString() + ([char]0x6B65).ToString() + ([char]0x5DE5).ToString() + ([char]0x4F5C).ToString() + ([char]0x5355).ToString()
+    return "docs/$name.md"
+}
+
 function Test-AgentsHarness {
     $agentsFiles = @(
         "AGENTS.md",
@@ -196,6 +206,7 @@ function Test-AgentsHarness {
     Test-RequiredPath (Get-ImplementationPlanPath)
     Test-RequiredPath (Get-SuitabilityPath)
     Test-RequiredPath (Get-TrialRecordPath)
+    Test-RequiredPath (Get-CodexNextWorkOrderPath)
     Test-RequiredPath "project-template\governance\agent-harness.md"
     Test-RequiredPath "project-template\governance\large-change-execution.md"
     Test-RequiredPath "project-template\governance\team-agent-rollout.md"
@@ -209,6 +220,7 @@ function Test-AgentsHarness {
     Test-RequiredPattern "project-template\AGENTS.md" "governance/team-agent-rollout.md" "Team rollout routing"
     Test-RequiredPattern "project-template\AGENTS.md" "governance/agent-suitability.md" "Agent suitability routing"
     Test-RequiredPattern "project-template\AGENTS.md" (Get-SuitabilityRef) "Suitability document routing"
+    Test-RequiredPattern "project-template\AGENTS.md" (Get-CodexNextWorkOrderRef) "Codex next work order routing"
     Test-RequiredPattern "project-template\AGENTS.md" (Get-ExplorationReportRef) "Exploration report routing"
     Test-RequiredPattern "project-template\AGENTS.md" (Get-ImplementationPlanRef) "Implementation plan routing"
 }
@@ -227,15 +239,35 @@ function Test-HarnessEntryConsistency {
     Test-RequiredPattern "project-template\.codex\skills.md" "governance/agent-harness.md" "Skills harness reference"
     Test-RequiredPattern "project-template\.codex\skills.md" "governance/team-agent-rollout.md" "Skills team rollout reference"
     Test-RequiredPattern "project-template\.agents\skills\README.md" "AGENTS.md" "Skill README AGENTS reference"
+    Test-RequiredPattern "project-template\.codex\skills.md" (Get-CodexNextWorkOrderRef) "Skills next work order reference"
+    Test-RequiredPattern "project-template\.agents\skills\README.md" "detect-local-toolchain.ps1" "Skill README toolchain detector reference"
+    Test-RequiredPattern "project-template\.agents\skills\README.md" "run-harness-check.ps1" "Skill README harness check reference"
     Test-RequiredPattern "scripts\init-project-template.ps1" "Start Codex from AGENTS.md" "Init script startup guidance"
     Test-RequiredPattern "scripts\init-project-template.ps1" "codebase map" "Init script codebase map guidance"
     Test-RequiredPattern "scripts\init-project-template.ps1" "large-change-execution.md" "Init script large-change guidance"
     Test-RequiredPattern "scripts\init-project-template.ps1" "team-agent-rollout.md" "Init script team rollout guidance"
+    Test-RequiredPattern "scripts\init-project-template.ps1" "detect-local-toolchain.ps1" "Init script toolchain detection guidance"
+    Test-RequiredPattern "scripts\init-project-template.ps1" "run-harness-check.ps1" "Init script harness check guidance"
     Test-RequiredPattern "使用说明.html" "startupOutput" "HTML startup output"
     Test-RequiredPattern "使用说明.html" "governance/agent-harness.md" "HTML harness prompt reference"
     Test-RequiredPattern "使用说明.html" "governance/large-change-execution.md" "HTML large-change prompt reference"
     Test-RequiredPattern "使用说明.html" "governance/agent-suitability.md" "HTML suitability prompt reference"
     Test-RequiredPattern "使用说明.html" "不要默认读取全部" "HTML context guard"
+    Test-RequiredPattern "使用说明.html" "detect-local-toolchain.ps1" "HTML executable harness prompt"
+    Test-RequiredPattern "使用说明.html" "run-harness-check.ps1" "HTML harness check prompt"
+}
+
+function Test-ExecutableHarness {
+    Test-RequiredPath "project-template\scripts\detect-local-toolchain.ps1"
+    Test-RequiredPath "project-template\scripts\run-harness-check.ps1"
+    Test-RequiredPath (Get-CodexNextWorkOrderPath)
+    Test-RequiredPattern "project-template\scripts\detect-local-toolchain.ps1" "Do not install missing tools" "Toolchain detector safety guard"
+    Test-RequiredPattern "project-template\scripts\run-harness-check.ps1" "Harness check passed" "Harness check success output"
+    Test-RequiredPattern "project-template\.codex\commands.md" "detect-local-toolchain.ps1" "Commands toolchain detector"
+    Test-RequiredPattern "project-template\.codex\commands.md" "run-harness-check.ps1" "Commands harness check"
+    Test-RequiredPattern "project-template\.codex\commands-catalog.md" "detect-local-toolchain" "Commands catalog toolchain detector"
+    Test-RequiredPattern "project-template\.codex\hooks.md" "run-harness-check.ps1" "Hooks harness check"
+    Test-RequiredPattern (Get-LocalToolchainPath) "detect-local-toolchain.ps1" "Local toolchain executable detector reference"
 }
 
 function Test-AgentSuitability {
@@ -386,6 +418,7 @@ Test-StackHarnessDetails
 Test-LargeChangeProtocol
 Test-TeamToolingProtocol
 Test-AgentSuitability
+Test-ExecutableHarness
 Test-SkillAscii
 Test-SkillFrontmatter
 Test-StaleText

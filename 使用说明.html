@@ -546,6 +546,7 @@
         '   docs/项目适用性评估.md',
         '   docs/代码库地图.md',
         '   docs/本地工具链检查.md',
+        '   docs/Codex下一步工作单.md',
         '   .codex/project.md、.codex/scope.md、.codex/commands.md',
         '',
         '3. 只按需读取技术栈：',
@@ -554,7 +555,11 @@
         '4. 需要策略或上下文分层时再读：',
         '   governance/agent-harness.md',
         '',
-        '5. 不要默认读取全部 governance/ 或 docs/；工具链未知时先询问，不要默认安装或启动服务。'
+        '5. 可选只读检查：',
+        '   powershell -ExecutionPolicy Bypass -File .\\scripts\\detect-local-toolchain.ps1',
+        '   powershell -ExecutionPolicy Bypass -File .\\scripts\\run-harness-check.ps1',
+        '',
+        '6. 不要默认读取全部 governance/ 或 docs/；工具链未知时先询问，不要默认安装或启动服务。'
       ].join('\n');
     }
 
@@ -575,7 +580,7 @@
         '- 项目入口：' + getValue('entryMode', '待补充'),
         '- 项目类型：' + getValue('projectType', '待补充'),
         '- 技术栈模板：' + (selectedStacks().join(', ') || '待补充'),
-        '- 推荐启动入口：AGENTS.md -> docs/代码库地图.md -> 相关 .codex/stacks/<stack>/',
+        '- 推荐启动入口：AGENTS.md -> docs/代码库地图.md -> docs/本地工具链检查.md -> docs/Codex下一步工作单.md -> 相关 .codex/stacks/<stack>/',
         '- 适用性已确认：' + (selectedSuitability().join(', ') || '待评估'),
         '',
         '## 项目目标',
@@ -602,9 +607,9 @@
       const name = projectName.value.trim() || '当前项目';
       const entry = getValue('entryMode', '新项目');
       if (entry === '接手既有项目') {
-        return '使用 .agents/skills/handover-review 接手这个既有项目，并根据下面的项目简报开始访谈。\n\n' + buildBrief() + '\n\n请先读取 AGENTS.md、docs/项目适用性评估.md、governance/agent-suitability.md、docs/代码库地图.md、docs/本地工具链检查.md、governance/流程总览.md、.codex/handover.md、README、启动文档、构建配置、.codex/project.md、.codex/scope.md、.codex/commands.md、.codex/stacks/ 中相关技术栈模板。不要默认读取全部 governance/ 或 docs/。不要默认改变大架构、对外 API、数据库语义或部署方式。先输出适用性结论、当前项目状态、兼容边界、P0/P1 风险、需要我确认的 3-5 个关键问题；确认前不要开始编码。';
+        return '使用 .agents/skills/handover-review 接手这个既有项目，并根据下面的项目简报开始访谈。\n\n' + buildBrief() + '\n\n请先读取 AGENTS.md、docs/项目适用性评估.md、governance/agent-suitability.md、docs/代码库地图.md、docs/本地工具链检查.md、docs/Codex下一步工作单.md、governance/流程总览.md、.codex/handover.md、README、启动文档、构建配置、.codex/project.md、.codex/scope.md、.codex/commands.md、.codex/stacks/ 中相关技术栈模板。必要时可以先运行 scripts/detect-local-toolchain.ps1 和 scripts/run-harness-check.ps1，但只能作为只读事实检查，不要自动安装工具或启动服务。不要默认读取全部 governance/ 或 docs/。不要默认改变大架构、对外 API、数据库语义或部署方式。先输出适用性结论、当前项目状态、兼容边界、P0/P1 风险、需要我确认的 3-5 个关键问题；确认前不要开始编码。';
       }
-      return '使用 .agents/skills/project-init 初始化这个项目，并根据下面的项目简报开始方案访谈。\n\n' + buildBrief() + '\n\n要求：\n1. 先读取 AGENTS.md、docs/项目适用性评估.md、governance/agent-suitability.md、docs/代码库地图.md、docs/本地工具链检查.md、governance/流程总览.md、governance/agent-harness.md、governance/project-bootstrap-fill.md、.codex/init.generated.md、.codex/questionnaires/、.codex/stacks/ 中相关技术栈模板。\n2. 按 ' + mode + ' 模式裁剪文档，不要把所有治理文件都读进上下文。\n3. 先判断项目适用性：如果不是 Suitable，请先说明缺失条件和最小补齐步骤，不要直接编码。\n4. 将稳定事实合并到第一版 .codex/ 和 docs/；未知项保留为待确认，不要编造。\n5. 输出适用性结论、方案状态、已写入文件、关键风险、初始 EPIC/FEAT/TASK、是否允许进入编码。\n6. 重点是继续和我确认项目方案：最后请提出 3-5 个最关键问题，而不是只列“已确认事实”。\n7. 没有项目适用性、项目开发方案、技术选型、落地条件、v0.1.0 范围和 v0.1.1 review/refactor gate 的第一版结论前，不要开始编码。';
+      return '使用 .agents/skills/project-init 初始化这个项目，并根据下面的项目简报开始方案访谈。\n\n' + buildBrief() + '\n\n要求：\n1. 先读取 AGENTS.md、docs/项目适用性评估.md、governance/agent-suitability.md、docs/代码库地图.md、docs/本地工具链检查.md、docs/Codex下一步工作单.md、governance/流程总览.md、governance/agent-harness.md、governance/project-bootstrap-fill.md、.codex/init.generated.md、.codex/questionnaires/、.codex/stacks/ 中相关技术栈模板。\n2. 按 ' + mode + ' 模式裁剪文档，不要把所有治理文件都读进上下文。\n3. 必要时可以运行 scripts/detect-local-toolchain.ps1 和 scripts/run-harness-check.ps1，但只能作为只读事实检查；不要自动安装工具、启动服务或修改系统配置。\n4. 先判断项目适用性：如果不是 Suitable，请先说明缺失条件和最小补齐步骤，不要直接编码。\n5. 将稳定事实合并到第一版 .codex/ 和 docs/；未知项保留为待确认，不要编造。\n6. 输出适用性结论、方案状态、已写入文件、关键风险、初始 EPIC/FEAT/TASK、是否允许进入编码。\n7. 重点是继续和我确认项目方案：最后请提出 3-5 个最关键问题，而不是只列“已确认事实”。\n8. 没有项目适用性、项目开发方案、技术选型、落地条件、v0.1.0 范围和 v0.1.1 review/refactor gate 的第一版结论前，不要开始编码。';
     }
 
     function buildPrompt(type) {

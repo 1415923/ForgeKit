@@ -37,6 +37,7 @@
 
 - 大任务、多模块改动、迁移、重构或高风险变更：先按 `governance/large-change-execution.md` 生成探索报告和实施计划，再进入编码。
 - 高频重复动作：先登记到 `.codex/commands-catalog.md`；需要自动化时再评估 `.codex/hooks.md`。
+- 初始化后方向不清楚：先读 `docs/Codex下一步工作单.md`，必要时运行 `scripts/detect-local-toolchain.ps1` 和 `scripts/run-harness-check.ps1` 作为只读事实检查。
 
 ## ECC 参考
 

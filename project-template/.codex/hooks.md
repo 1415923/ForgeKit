@@ -17,6 +17,8 @@
 | 触发点 | 动作 | 目的 | 风险 |
 | --- | --- | --- | --- |
 | 提交前 | 运行模板自检或项目 lint | 防止明显漂移 | 耗时、误阻断 |
+| 会话开始 | 运行 `scripts/run-harness-check.ps1` | 提前发现入口文件缺失 | 小项目可能觉得多余 |
+| 初始化后 | 运行 `scripts/detect-local-toolchain.ps1` | 辅助填写本地工具链检查 | 结果可能不完整 |
 | 大任务开始前 | 检查 `docs/探索报告.md` 和 `docs/实施计划.md` 是否存在 | 阻止直接大改 | 小任务误判 |
 | 发布前 | 检查版本记录、任务状态、测试记录 | 强化 release gate | 规则过严 |
 | 安全敏感变更 | 提醒安全审查和依赖审查 | 减少遗漏 | 需要准确识别 |
@@ -34,6 +36,12 @@
 ```powershell
 # H1: template validation
 powershell -ExecutionPolicy Bypass -File .\scripts\validate-template.ps1
+
+# H1: generated project harness check
+powershell -ExecutionPolicy Bypass -File .\scripts\run-harness-check.ps1
+
+# H1: local toolchain detection
+powershell -ExecutionPolicy Bypass -File .\scripts\detect-local-toolchain.ps1
 
 # H2: project test placeholder
 # Replace with project-specific test command in .codex/commands.md

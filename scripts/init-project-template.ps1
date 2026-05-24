@@ -78,11 +78,12 @@ function Write-InitMetadata {
         "2. project suitability assessment under docs",
         "3. docs codebase map",
         "4. local toolchain check document under docs",
-        "5. .codex/project.md, .codex/scope.md, .codex/commands.md",
-        "6. Related .codex/stacks/<stack>/ only",
-        "7. Task-specific governance files",
-        "8. For large changes, use governance/large-change-execution.md first",
-        "9. For commands, hooks, plugins, or MCP, use governance/team-agent-rollout.md first"
+        "5. Codex next-step work order under docs",
+        "6. .codex/project.md, .codex/scope.md, .codex/commands.md",
+        "7. Related .codex/stacks/<stack>/ only",
+        "8. Task-specific governance files",
+        "9. For large changes, use governance/large-change-execution.md first",
+        "10. For commands, hooks, plugins, or MCP, use governance/team-agent-rollout.md first"
     )
 
     Set-Content -LiteralPath $metadataFile -Value $lines -Encoding UTF8
@@ -147,8 +148,10 @@ Write-Host "1. Start Codex from AGENTS.md"
 Write-Host "2. Review the project suitability assessment document under docs (Chinese file name)"
 Write-Host "3. Review the codebase map document under docs (Chinese file name)"
 Write-Host "4. Review the local toolchain check document under docs (Chinese file name)"
-Write-Host "5. Review .codex/project.md, .codex/scope.md, and .codex/commands.md"
-Write-Host "6. Review related .codex/stacks/<stack>/ only"
-Write-Host "7. Use .codex/questionnaires/ to fill project-specific details"
-Write-Host "8. For large changes, use governance/large-change-execution.md first"
-Write-Host "9. For commands, hooks, plugins, or MCP, use governance/team-agent-rollout.md first"
+Write-Host "5. Review the Codex next-step work order under docs (Chinese file name)"
+Write-Host "6. Optionally run scripts/detect-local-toolchain.ps1 and scripts/run-harness-check.ps1"
+Write-Host "7. Review .codex/project.md, .codex/scope.md, and .codex/commands.md"
+Write-Host "8. Review related .codex/stacks/<stack> only"
+Write-Host "9. Use .codex/questionnaires/ to fill project-specific details"
+Write-Host "10. For large changes, use governance/large-change-execution.md first"
+Write-Host "11. For commands, hooks, plugins, or MCP, use governance/team-agent-rollout.md first"

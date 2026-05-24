@@ -25,6 +25,8 @@
 | 名称 | 命令来源 | 风险 | 备注 |
 | --- | --- | --- | --- |
 | validate-template | `scripts/validate-template.ps1` | 低 | 模板仓库使用 |
+| harness-check | `scripts/run-harness-check.ps1` | 低 | 生成项目使用，检查入口和治理结构 |
+| detect-local-toolchain | `scripts/detect-local-toolchain.ps1` | 低 | 只读检测本地工具和 LSP 候选 |
 | local-test | `.codex/commands.md` | 中 | 由项目填写 |
 | local-build | `.codex/commands.md` | 中 | 可能耗时 |
 | local-lint | `.codex/commands.md` | 低 / 中 | 取决于项目 |
@@ -41,4 +43,3 @@
 | Actions | lint/test/build/security scan | 项目成熟后 |
 | Dependabot | 依赖更新和安全提醒 | 生产项目建议 |
 | Secret scanning | GitHub 或 gitleaks | 高风险项目建议 |
-

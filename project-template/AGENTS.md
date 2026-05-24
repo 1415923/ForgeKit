@@ -9,18 +9,20 @@ Keep this file short. Put stable workflows in skills, stack-specific rules in `.
 1. Read this file first.
 2. Read `docs/代码库地图.md` to find likely modules, entry files, and local validation commands.
 3. Read `docs/本地工具链检查.md` when LSP, lint, test, build, or local validation commands matter.
-4. Read `.codex/project.md`, `.codex/scope.md`, and `.codex/commands.md` only as needed.
-5. Read only the selected stack folder under `.codex/stacks/`.
-6. Read `governance/agent-harness.md` when the task involves context strategy, large code search, AGENTS maintenance, or unclear entry points.
-7. Read `governance/large-change-execution.md` for large, cross-module, high-risk, migration, or refactor work.
-8. Read `governance/team-agent-rollout.md` only when the task involves commands, hooks, plugins, MCP, CI, issue trackers, or team rollout.
-9. Read `governance/agent-suitability.md` for project initialization, existing project handover, or when the project may not fit an AI agent workflow.
+4. Read `docs/Codex下一步工作单.md` after initialization or when project direction is unclear.
+5. Read `.codex/project.md`, `.codex/scope.md`, and `.codex/commands.md` only as needed.
+6. Read only the selected stack folder under `.codex/stacks/`.
+7. Read `governance/agent-harness.md` when the task involves context strategy, large code search, AGENTS maintenance, or unclear entry points.
+8. Read `governance/large-change-execution.md` for large, cross-module, high-risk, migration, or refactor work.
+9. Read `governance/team-agent-rollout.md` only when the task involves commands, hooks, plugins, MCP, CI, issue trackers, or team rollout.
+10. Read `governance/agent-suitability.md` for project initialization, existing project handover, or when the project may not fit an AI agent workflow.
 
 ## Task Routing
 
 | Task | Read First | Skill |
 | --- | --- | --- |
 | New project initialization | `governance/流程总览.md`, `governance/agent-harness.md`, `.codex/init.generated.md`, `.codex/questionnaires/` | `project-init` |
+| Post-init next step | `docs/Codex下一步工作单.md`, `docs/项目适用性评估.md`, `docs/本地工具链检查.md`, `.codex/init.generated.md` | `project-init` |
 | Project suitability assessment | `governance/agent-suitability.md`, `docs/项目适用性评估.md`, `docs/真实项目试用记录.md` | project-init or handover-review |
 | Fill docs from answers | `governance/project-bootstrap-fill.md`, `.codex/questionnaires/` | `project-init` or `project-bootstrap-fill` |
 | Existing project handover | `docs/代码库地图.md`, `.codex/handover.md`, `docs/既有项目接手审计.md` | `handover-review` |
@@ -36,6 +38,7 @@ Keep this file short. Put stable workflows in skills, stack-specific rules in `.
 - Do not read every file in `governance/` by default.
 - Do not read all `docs/` by default; use `docs/代码库地图.md` to choose what matters.
 - Do not install tools or start services just because `docs/本地工具链检查.md` has unknown values; ask first.
+- `scripts/detect-local-toolchain.ps1` and `scripts/run-harness-check.ps1` are read-only helpers; do not treat their output as permission to install or change anything.
 - Load only the selected stack folder under `.codex/stacks/`.
 - For Lite projects, keep governance lightweight and ask before expanding to Enterprise-level documents.
 - If suitability is Conditional or Custom, fill `docs/项目适用性评估.md` before broad coding.

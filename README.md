@@ -61,9 +61,10 @@
 1. `AGENTS.md`
 2. `docs/代码库地图.md`
 3. `docs/本地工具链检查.md`
-4. `.codex/project.md`、`.codex/scope.md`、`.codex/commands.md`
-5. 相关 `.codex/stacks/<stack>/`
-6. 任务需要的治理文件，例如 `governance/agent-harness.md`、`governance/definition-of-ready.md`
+4. `docs/Codex下一步工作单.md`
+5. `.codex/project.md`、`.codex/scope.md`、`.codex/commands.md`
+6. 相关 `.codex/stacks/<stack>/`
+7. 任务需要的治理文件，例如 `governance/agent-harness.md`、`governance/definition-of-ready.md`
 
 ## Agent Harness 演进
 
@@ -82,6 +83,8 @@ v0.3 之后的重点是把模板从“治理文档集合”推进为更成熟的
 `v0.6.0` 补齐团队工具链集成规划：新增 commands catalog、hooks 示例、team rollout 治理，并明确 plugin / MCP 不应过早启用。
 
 `v0.7.0` 补齐项目适用性评估和真实项目回灌：初始化时先判断项目是否适合 AI agent 工作流，不适合时先补工程条件或定制流程。
+
+`v0.8.0` 开始把文档型 harness 推进为可执行 harness：生成项目内提供本地工具链检测、harness 结构检查、Codex 下一步工作单和更明确的 hook/command 候选，但默认仍不自动启用外部工具或长期服务。
 
 ## 技术栈按需加载
 
