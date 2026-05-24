@@ -19,7 +19,12 @@ description: Initialize or repair a project's Codex workflow, interview the user
    - risks and blockers
    - Epic / Feature / Task / Bug model
    - version roadmap
-6. Fill or update:
+6. For large, cross-module, migration, refactor, or high-risk work, require the large-change protocol before implementation:
+   - read `governance/large-change-execution.md`
+   - create or update the exploration report in `docs/`
+   - create or update the implementation plan in `docs/`
+   - do not start broad coding until the implementation plan says coding is allowed
+7. Fill or update:
    - `.codex/project.md`
    - `.codex/scope.md`
    - `.codex/commands.md`
@@ -36,12 +41,14 @@ description: Initialize or repair a project's Codex workflow, interview the user
    - `docs/environment matrix`
    - `docs/release pipeline`
    - `docs/project task board`
-7. Preserve existing project-specific facts. Do not overwrite real information with template text.
-8. Do not modify business code unless the user explicitly asks.
+8. Preserve existing project-specific facts. Do not overwrite real information with template text.
+9. Do not modify business code unless the user explicitly asks.
 
 ## Gate Before Coding
 
 If the development plan, version roadmap, landing conditions, or first implementation slice are unclear, ask follow-up questions instead of starting implementation.
+
+If the requested work is large or cross-module, require exploration and implementation planning before coding.
 
 Do not recommend large-scale coding until there is at least a first version of:
 
@@ -54,6 +61,7 @@ Do not recommend large-scale coding until there is at least a first version of:
 - v0.1.0 scope and v0.1.1 review/refactor gate
 - first-pass environment matrix and release pipeline assumptions
 - first-pass Epic / Feature / Task / Bug model
+- exploration report and implementation plan for large changes
 
 ## Selection Rules
 

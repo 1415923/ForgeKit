@@ -30,6 +30,15 @@ skill-name/
 - 任务有稳定步骤、输入、输出和验证方式。
 - 普通 prompt 太长，且容易遗漏关键约束。
 - 需要把项目特定知识沉淀为可复用工作流。
+- `AGENTS.md` 已经开始变长，应该把细节下沉到 skill。
+
+## 大任务执行
+
+跨模块、大范围、高风险、迁移或重构任务不应直接编码。先读取 `governance/large-change-execution.md`，再维护探索报告和实施计划。
+
+## 团队工具链
+
+重复流程先登记到 `.codex/commands-catalog.md`。自动化前先读取 `governance/team-agent-rollout.md` 和 `.codex/hooks.md`，不要默认启用 MCP 或外部写操作。
 
 ## 推荐 Skill 类型
 
@@ -48,4 +57,5 @@ skill-name/
 - 确认是否需要网络、凭据或外部服务。
 - 确认是否会写入工作区之外。
 - 确认是否与项目规则冲突。
+- 确认是否会导致 Codex 默认读取过多无关上下文。
 - 只复制需要的 skill，不全量复制大型技能库。

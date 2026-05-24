@@ -10,7 +10,12 @@ description: Review code changes for bugs, regressions, security risks, compatib
 1. Read project rules: `.codex/rules.md`, `.codex/testing.md`, `.codex/security.md`, `governance/code-ownership-review-governance.md`, `governance/project-management-task-model.md`, code ownership and project task board documents in `docs/` if present, and relevant stack rules only.
 2. Inspect `git status` and `git diff` unless the user provided a specific diff.
 3. If changes touch API, database, configuration, deployment, permissions, security, external services, hardware interfaces, Critical ownership areas, or Unknown ownership areas, check whether change impact assessment and owner review exist.
-4. Prioritize findings in this order:
+4. If changes are large, cross-module, migration, refactor, or high-risk work, check whether the large-change protocol was followed:
+   - `governance/large-change-execution.md`
+   - exploration report in `docs/`
+   - implementation plan in `docs/`
+   - staged validation and review notes
+5. Prioritize findings in this order:
    - correctness bugs
    - behavioral regressions
    - security risks
@@ -19,8 +24,8 @@ description: Review code changes for bugs, regressions, security risks, compatib
    - data loss or migration risks
    - compatibility issues
    - missing tests
-4. Cite file paths and line numbers when possible.
-5. Do not lead with style comments unless they cause real risk.
+6. Cite file paths and line numbers when possible.
+7. Do not lead with style comments unless they cause real risk.
 
 ## Review Focus
 
@@ -32,6 +37,7 @@ description: Review code changes for bugs, regressions, security risks, compatib
 - Change impact assessment for high-impact changes.
 - Code ownership and required reviewer coverage for Critical or Unknown areas.
 - Task, Feature, Bug, and version state consistency.
+- Large-change exploration, implementation plan, staged validation, and session boundaries.
 - Async, concurrency, lifecycle, resource cleanup.
 - Tests that should exist for changed behavior.
 - Repeated defects that should trigger defect review.

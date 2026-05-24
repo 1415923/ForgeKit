@@ -50,10 +50,38 @@
 
 原则：
 
+- 先读 `AGENTS.md`，再读 `docs/代码库地图.md` 定位代码入口。
 - 按任务读取相关治理文件。
 - 按技术栈只读取 `.codex/stacks/<stack>/` 中相关模板。
 - 初始化阶段先访谈和确认方案，不直接编码。
 - Lite 项目不强行加载 Enterprise 级治理。
+
+推荐上下文优先级：
+
+1. `AGENTS.md`
+2. `docs/代码库地图.md`
+3. `docs/本地工具链检查.md`
+4. `.codex/project.md`、`.codex/scope.md`、`.codex/commands.md`
+5. 相关 `.codex/stacks/<stack>/`
+6. 任务需要的治理文件，例如 `governance/agent-harness.md`、`governance/definition-of-ready.md`
+
+## Agent Harness 演进
+
+v0.3 之后的重点是把模板从“治理文档集合”推进为更成熟的 AI agent harness。规划见：
+
+- `project-template/governance/v0.3-agent-harness-roadmap.md`
+
+该路线图会逐步补齐 AGENTS 分层、代码库地图、LSP / 子目录启动、大任务多会话执行、hooks / commands / plugin / MCP 规划，以及项目适用性评估。
+
+`v0.3.0` 已把 Agent Harness 基线落入模板：新增 `governance/agent-harness.md` 和 `docs/代码库地图.md`，并要求 HTML 工作台、README、AGENTS 和自检脚本都围绕这个入口体系维护。
+
+`v0.4.0` 补齐技术栈级启动和验证：Java、Vue、React、Python、Node、FPGA 模板现在都记录推荐启动目录、符号搜索 / LSP 方式、局部验证命令和忽略建议；生成项目内新增 `docs/本地工具链检查.md`。
+
+`v0.5.0` 补齐大任务多会话执行协议：跨模块、高风险、重构、迁移、接手整改等任务应先写 `docs/探索报告.md` 和 `docs/实施计划.md`，再拆分会话执行。
+
+`v0.6.0` 补齐团队工具链集成规划：新增 commands catalog、hooks 示例、team rollout 治理，并明确 plugin / MCP 不应过早启用。
+
+`v0.7.0` 补齐项目适用性评估和真实项目回灌：初始化时先判断项目是否适合 AI agent 工作流，不适合时先补工程条件或定制流程。
 
 ## 技术栈按需加载
 

@@ -13,6 +13,7 @@
 - 版本推进必须参考 `.codex/version-gates.md` 和 `docs/版本路线图.md`。
 - 接手既有项目必须先参考 `.codex/handover.md`，先审计和修复明确问题，再规划后续开发。
 - 复杂任务优先拆分为计划、实现、验证、审查四个阶段。
+- commands、hooks、plugin、MCP、CI、issue/PR 集成必须先参考 `governance/team-agent-rollout.md`。
 
 ## 开发边界
 
@@ -44,6 +45,7 @@
 - 引入新的重量级依赖。
 - 修改部署、权限、鉴权、安全策略。
 - 启用或修改 MCP、agent、skill、hook、插件。
+- 启用会联网、读取凭据、写外部系统或自动阻断流程的 command / hook / MCP。
 - 跳过 review/refactor 中版本，直接推进下一个大版本。
 
 ## 可选增强规则

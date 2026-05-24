@@ -12,8 +12,9 @@ description: Check release readiness and version-gate compliance for a project. 
 3. Verify that docs match visible behavior, APIs, database changes, config, and deployment changes.
 4. Check whether the current release is a major feature version or a review/refactor gate version.
 5. If the user wants to start the next major/minor version, verify that the previous review/refactor gate is complete.
-6. Identify required commands from `.codex/commands.md`; do not invent release commands when the project defines them.
-7. Do not commit, tag, push, publish, or deploy unless the user explicitly asks.
+6. For large, cross-module, migration, refactor, or high-risk releases, verify that the large-change protocol was followed and staged validation is recorded.
+7. Identify required commands from `.codex/commands.md`; do not invent release commands when the project defines them.
+8. Do not commit, tag, push, publish, or deploy unless the user explicitly asks.
 
 ## Checklist
 
@@ -32,6 +33,7 @@ description: Check release readiness and version-gate compliance for a project. 
 - High-impact changes have change impact assessments, validation, and rollback plans.
 - Critical or Unknown ownership areas have owner or reviewer confirmation.
 - Current version tasks, features, and bugs are closed, deferred, blocked, or explicitly dropped.
+- Large changes have exploration report, implementation plan, staged validation, and review notes.
 - SEV-1 / SEV-2 incidents and repeated defects have reviews and action items.
 - S2/S3 security risks are closed or explicitly accepted.
 - New or upgraded dependencies have dependency security review where needed.
@@ -64,6 +66,7 @@ End with:
 - CI/CD and environment gate notes.
 - Ownership and review gate notes.
 - Project task state notes.
+- Large-change execution notes.
 - Suggested commands.
 - Whether release is ready.
 - Whether the next major/minor version may start.

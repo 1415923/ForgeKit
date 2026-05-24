@@ -71,7 +71,18 @@ function Write-InitMetadata {
         "- ProjectName: $projectText",
         "- Stacks: $stackText",
         "",
-        "Use this file as initialization metadata. Merge real project facts into .codex/project.md and docs/technology-selection manually or with Codex."
+        "Use this file as initialization metadata. Merge real project facts into .codex/project.md, .codex/scope.md, the docs codebase map, the local toolchain check document, and docs/技术选型.md manually or with Codex.",
+        "",
+        "Recommended Codex startup order:",
+        "1. AGENTS.md",
+        "2. project suitability assessment under docs",
+        "3. docs codebase map",
+        "4. local toolchain check document under docs",
+        "5. .codex/project.md, .codex/scope.md, .codex/commands.md",
+        "6. Related .codex/stacks/<stack>/ only",
+        "7. Task-specific governance files",
+        "8. For large changes, use governance/large-change-execution.md first",
+        "9. For commands, hooks, plugins, or MCP, use governance/team-agent-rollout.md first"
     )
 
     Set-Content -LiteralPath $metadataFile -Value $lines -Encoding UTF8
@@ -132,6 +143,12 @@ Write-InitMetadata -DestinationDir $resolvedTarget -Name $ProjectName -SelectedS
 Write-Step "done"
 Write-Host ""
 Write-Host "Next steps:"
-Write-Host "1. Review .codex/project.md and .codex/scope.md"
-Write-Host "2. Review docs/technology-selection document"
-Write-Host "3. Use .codex/questionnaires/ to fill project-specific details"
+Write-Host "1. Start Codex from AGENTS.md"
+Write-Host "2. Review the project suitability assessment document under docs (Chinese file name)"
+Write-Host "3. Review the codebase map document under docs (Chinese file name)"
+Write-Host "4. Review the local toolchain check document under docs (Chinese file name)"
+Write-Host "5. Review .codex/project.md, .codex/scope.md, and .codex/commands.md"
+Write-Host "6. Review related .codex/stacks/<stack>/ only"
+Write-Host "7. Use .codex/questionnaires/ to fill project-specific details"
+Write-Host "8. For large changes, use governance/large-change-execution.md first"
+Write-Host "9. For commands, hooks, plugins, or MCP, use governance/team-agent-rollout.md first"
