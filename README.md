@@ -88,6 +88,8 @@ v0.3 之后的重点是把模板从“治理文档集合”推进为更成熟的
 
 `v0.9.0` 补齐 plugin 分发第一版：新增 `plugins/forgekit-codex-workflow/` 和 `.agents/plugins/marketplace.json`，把稳定 skills、只读脚本和模板资产打包为团队可安装的 Codex plugin。plugin 默认不启用 hook、MCP、外部写操作或公开市场发布。
 
+`v0.9.1` 完成 plugin review/refactor gate：检查分发包体积、重复资产、安全边界和升级路径，补齐安装、升级、安全和真实项目试用反馈文档。plugin 内顶层 `skills/` 与 `assets/project-template/.agents/skills/` 的重复是刻意保留，前者用于 plugin 发现，后者用于生成项目自包含。
+
 ## Plugin 分发
 
 本仓库提供 repo/team marketplace 示例：

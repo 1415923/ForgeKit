@@ -78,7 +78,7 @@ function Test-PluginManifest {
     if ($manifest.name -ne "forgekit-codex-workflow") {
         Add-Error "Unexpected plugin name: $($manifest.name)"
     }
-    if ($manifest.version -ne "0.9.0") {
+    if ($manifest.version -ne "0.9.1") {
         Add-Error "Unexpected plugin version: $($manifest.version)"
     }
     if ($manifest.skills -ne "./skills/") {
@@ -110,6 +110,10 @@ Test-RequiredPath "assets\project-template\.codex\config.example.toml"
 Test-RequiredPath "assets\templates\java-springboot\README.md"
 Test-RequiredPath "assets\templates\vue\README.md"
 Test-RequiredPath "assets\questionnaires\README.md"
+Test-RequiredPath "assets\docs\install.md"
+Test-RequiredPath "assets\docs\upgrade.md"
+Test-RequiredPath "assets\docs\safety.md"
+Test-RequiredPath "assets\docs\feedback.md"
 
 Test-ForbiddenPath "user-rules"
 Test-ForbiddenPath "document"

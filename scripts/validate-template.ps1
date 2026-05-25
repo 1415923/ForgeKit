@@ -293,6 +293,10 @@ function Test-PluginDistribution {
     Test-RequiredPath "plugins\forgekit-codex-workflow\assets\project-template\AGENTS.md"
     Test-RequiredPath "plugins\forgekit-codex-workflow\assets\templates\java-springboot\README.md"
     Test-RequiredPath "plugins\forgekit-codex-workflow\assets\questionnaires\README.md"
+    Test-RequiredPath "plugins\forgekit-codex-workflow\assets\docs\install.md"
+    Test-RequiredPath "plugins\forgekit-codex-workflow\assets\docs\upgrade.md"
+    Test-RequiredPath "plugins\forgekit-codex-workflow\assets\docs\safety.md"
+    Test-RequiredPath "plugins\forgekit-codex-workflow\assets\docs\feedback.md"
 
     if (Test-Path -LiteralPath $pluginRoot) {
         $forbidden = @("user-rules", "document", ".git")
@@ -309,7 +313,7 @@ function Test-PluginDistribution {
         if ($pluginJson.name -ne "forgekit-codex-workflow") {
             Add-Error "Unexpected plugin name in plugin.json: $($pluginJson.name)"
         }
-        if ($pluginJson.version -ne "0.9.0") {
+        if ($pluginJson.version -ne "0.9.1") {
             Add-Error "Unexpected plugin version in plugin.json: $($pluginJson.version)"
         }
         if ($pluginJson.skills -ne "./skills/") {
