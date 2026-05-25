@@ -26,11 +26,29 @@ English documentation: [README.md](README.md)
 
 ## 最快开始
 
+### 1. 先选模式
+
+复制命令前先决定项目按多深的流程走：
+
+| 模式 | 适用项目 | 命令参数 |
+| --- | --- | --- |
+| Lite | 小脚本、小工具、个人验证项目 | `-Mode Lite` |
+| Standard | 普通应用、API、内部系统、数据处理项目 | `-Mode Standard` |
+| Enterprise | 团队交付、生产系统、高风险变更、接手项目 | `-Mode Enterprise` |
+
+不确定时先选 `Standard`。
+
+### 2. 运行初始化命令
+
 在 plugin 目录下执行：
 
 ```powershell
-powershell -ExecutionPolicy Bypass -File .\scripts\init-project-template.ps1 -TargetPath "D:\projects\my-app" -ProjectName "my-app" -Stacks java-springboot,vue
+powershell -ExecutionPolicy Bypass -File .\scripts\init-project-template.ps1 -TargetPath "D:\projects\my-app" -ProjectName "my-app" -Mode Standard -Stacks java-springboot,vue
 ```
+
+脚本会把模式写入生成项目的 `.codex/init.generated.md`，Codex 启动读取上下文时能直接看到。
+
+### 3. 进入项目后让 Codex 读取入口
 
 然后进入生成出来的项目目录，让 Codex 从入口文件开始：
 
@@ -41,7 +59,7 @@ powershell -ExecutionPolicy Bypass -File .\scripts\init-project-template.ps1 -Ta
 如果你还不知道该选什么技术栈，可以先不传 `-Stacks`：
 
 ```powershell
-powershell -ExecutionPolicy Bypass -File .\scripts\init-project-template.ps1 -TargetPath "D:\projects\my-app" -ProjectName "my-app"
+powershell -ExecutionPolicy Bypass -File .\scripts\init-project-template.ps1 -TargetPath "D:\projects\my-app" -ProjectName "my-app" -Mode Standard
 ```
 
 后续让 Codex 在方案阶段帮你判断技术栈，再补充对应 stack 规则。
@@ -123,7 +141,7 @@ powershell -ExecutionPolicy Bypass -File .\scripts\validate-plugin-assets.ps1
 可选烟测：
 
 ```powershell
-powershell -ExecutionPolicy Bypass -File .\scripts\init-project-template.ps1 -TargetPath "D:\tmp\forgekit-plugin-smoke" -ProjectName "forgekit-plugin-smoke" -Stacks java-springboot,vue -Force
+powershell -ExecutionPolicy Bypass -File .\scripts\init-project-template.ps1 -TargetPath "D:\tmp\forgekit-plugin-smoke" -ProjectName "forgekit-plugin-smoke" -Mode Standard -Stacks java-springboot,vue -Force
 ```
 
 然后进入生成的烟测项目运行：
@@ -131,16 +149,6 @@ powershell -ExecutionPolicy Bypass -File .\scripts\init-project-template.ps1 -Ta
 ```powershell
 powershell -ExecutionPolicy Bypass -File .\scripts\run-harness-check.ps1
 ```
-
-## Lite / Standard / Enterprise 怎么选
-
-| 模式 | 适用项目 |
-| --- | --- |
-| Lite | 小脚本、小工具、个人验证项目 |
-| Standard | 普通应用、API、内部系统、数据处理项目 |
-| Enterprise | 团队交付、生产系统、高风险变更、接手项目 |
-
-默认建议从 Standard 开始。项目很小再降到 Lite；涉及生产、多人协作、安全、硬件或交付风险时用 Enterprise。
 
 ## 包结构说明
 

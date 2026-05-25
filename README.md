@@ -102,6 +102,8 @@ v0.3 之后的重点是把模板从“治理文档集合”推进为更成熟的
 
 `v0.9.7` 重写 plugin 推广文档：中英文 README 先说明 ForgeKit 是什么、适合谁、为什么要用，再给最短初始化路径、常见 stack 选择、生成内容和安全边界，避免用户一上来被资产清单和繁琐参数劝退。
 
+`v0.9.8` 修正初始化模式入口：`Lite / Standard / Enterprise` 不再放在 README 后半段作为说明，而是前置到 Quick Start，并新增初始化脚本 `-Mode` 参数写入 `.codex/init.generated.md`，让用户复制命令前就确定项目治理深度。
+
 ## Plugin 分发
 
 本仓库提供 repo/team marketplace 示例：
@@ -121,6 +123,7 @@ powershell -ExecutionPolicy Bypass -File .\plugins\forgekit-codex-workflow\scrip
 powershell -ExecutionPolicy Bypass -File .\plugins\forgekit-codex-workflow\scripts\init-project-template.ps1 `
   -TargetPath "D:\tmp\forgekit-plugin-smoke" `
   -ProjectName "forgekit-plugin-smoke" `
+  -Mode Standard `
   -Stacks java-springboot,vue
 ```
 
@@ -152,6 +155,7 @@ powershell -ExecutionPolicy Bypass -File .\plugins\forgekit-codex-workflow\scrip
 powershell -ExecutionPolicy Bypass -File .\scripts\init-project-template.ps1 `
   -TargetPath "D:\JAVA-code\demo-fullstack" `
   -ProjectName "demo-fullstack" `
+  -Mode Standard `
   -Stacks java-springboot,vue
 ```
 

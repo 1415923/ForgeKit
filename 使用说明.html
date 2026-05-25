@@ -555,7 +555,8 @@
       const lines = [
         'powershell -ExecutionPolicy Bypass -File ' + psQuote(scriptPath) + ' `',
         '  -TargetPath ' + psQuote(targetPath.value.trim() || 'D:\\JAVA-code\\demo') + ' `',
-        '  -ProjectName ' + psQuote(projectName.value.trim() || 'demo')
+        '  -ProjectName ' + psQuote(projectName.value.trim() || 'demo') + ' `',
+        '  -Mode ' + selectedMode()
       ];
       if (stackText) {
         lines[lines.length - 1] += ' `';

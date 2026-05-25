@@ -18,11 +18,29 @@ It is not a framework, scaffolded app, or deployment tool. It is a project workf
 
 ## Quick Start
 
+### 1. Choose A Mode First
+
+Pick the workflow depth before you copy the command:
+
+| Mode | Best for | Command value |
+| --- | --- | --- |
+| Lite | Small scripts, personal tools, quick prototypes | `-Mode Lite` |
+| Standard | Normal apps, APIs, internal systems, data projects | `-Mode Standard` |
+| Enterprise | Team delivery, production, high-risk or inherited projects | `-Mode Enterprise` |
+
+If unsure, use `Standard`.
+
+### 2. Run The Initializer
+
 Run from this plugin directory:
 
 ```powershell
-powershell -ExecutionPolicy Bypass -File .\scripts\init-project-template.ps1 -TargetPath "D:\projects\my-app" -ProjectName "my-app" -Stacks java-springboot,vue
+powershell -ExecutionPolicy Bypass -File .\scripts\init-project-template.ps1 -TargetPath "D:\projects\my-app" -ProjectName "my-app" -Mode Standard -Stacks java-springboot,vue
 ```
+
+The selected mode is written into `.codex/init.generated.md` in the generated project, so Codex sees it during startup.
+
+### 3. Start Codex
 
 Then start Codex inside the generated project and ask:
 
@@ -33,7 +51,7 @@ Read AGENTS.md and help me initialize this project with ForgeKit.
 Not sure which stack to choose yet? Omit `-Stacks` first:
 
 ```powershell
-powershell -ExecutionPolicy Bypass -File .\scripts\init-project-template.ps1 -TargetPath "D:\projects\my-app" -ProjectName "my-app"
+powershell -ExecutionPolicy Bypass -File .\scripts\init-project-template.ps1 -TargetPath "D:\projects\my-app" -ProjectName "my-app" -Mode Standard
 ```
 
 Codex can help you choose stacks during the planning phase.
@@ -107,7 +125,7 @@ powershell -ExecutionPolicy Bypass -File .\scripts\validate-plugin-assets.ps1
 Optional smoke test:
 
 ```powershell
-powershell -ExecutionPolicy Bypass -File .\scripts\init-project-template.ps1 -TargetPath "D:\tmp\forgekit-plugin-smoke" -ProjectName "forgekit-plugin-smoke" -Stacks java-springboot,vue -Force
+powershell -ExecutionPolicy Bypass -File .\scripts\init-project-template.ps1 -TargetPath "D:\tmp\forgekit-plugin-smoke" -ProjectName "forgekit-plugin-smoke" -Mode Standard -Stacks java-springboot,vue -Force
 ```
 
 Then run this inside the generated smoke project:
@@ -115,16 +133,6 @@ Then run this inside the generated smoke project:
 ```powershell
 powershell -ExecutionPolicy Bypass -File .\scripts\run-harness-check.ps1
 ```
-
-## When To Use Lite, Standard, Or Enterprise
-
-| Mode | Best for |
-| --- | --- |
-| Lite | Small scripts, personal tools, quick prototypes |
-| Standard | Normal apps, APIs, internal systems, data processing projects |
-| Enterprise | Team delivery, production systems, high-risk changes, inherited projects |
-
-Start with Standard unless the project is obviously tiny or clearly high-risk.
 
 ## Package Design
 

@@ -78,7 +78,7 @@ function Test-PluginManifest {
     if ($manifest.name -ne "forgekit-codex-workflow") {
         Add-Error "Unexpected plugin name: $($manifest.name)"
     }
-    if ($manifest.version -ne "0.9.7") {
+    if ($manifest.version -ne "0.9.8") {
         Add-Error "Unexpected plugin version: $($manifest.version)"
     }
     if ($manifest.skills -ne "./skills/") {
@@ -125,6 +125,16 @@ Test-RequiredPath "assets\docs\install.md"
 Test-RequiredPath "assets\docs\upgrade.md"
 Test-RequiredPath "assets\docs\safety.md"
 Test-RequiredPath "assets\docs\feedback.md"
+
+if (-not (Select-String -Path (Join-Path $pluginRoot "scripts\init-project-template.ps1") -Pattern "[ValidateSet(""Lite"", ""Standard"", ""Enterprise"")]" -SimpleMatch -Quiet)) {
+    Add-Error "Plugin initializer must expose -Mode Lite/Standard/Enterprise"
+}
+if (-not (Select-String -Path (Join-Path $pluginRoot "README.md") -Pattern "-Mode Standard" -SimpleMatch -Quiet)) {
+    Add-Error "English README must show -Mode in Quick Start"
+}
+if (-not (Select-String -Path (Join-Path $pluginRoot "README.zh-CN.md") -Pattern "-Mode Standard" -SimpleMatch -Quiet)) {
+    Add-Error "Chinese README must show -Mode in Quick Start"
+}
 
 Test-ForbiddenPath "user-rules"
 Test-ForbiddenPath "document"

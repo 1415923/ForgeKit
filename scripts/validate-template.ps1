@@ -283,6 +283,10 @@ function Test-HarnessEntryConsistency {
     Test-RequiredPattern "project-template\.agents\skills\README.md" "run-harness-check.ps1" "Skill README harness check reference"
     Test-RequiredPattern "project-template\.agents\skills\README.md" "forgekit-codex-workflow" "Skill README plugin distribution reference"
     Test-RequiredPattern "scripts\init-project-template.ps1" "Start Codex from AGENTS.md" "Init script startup guidance"
+    Test-RequiredPattern "scripts\init-project-template.ps1" "[ValidateSet(""Lite"", ""Standard"", ""Enterprise"")]" "Init script mode parameter"
+    Test-RequiredPattern "plugins\forgekit-codex-workflow\scripts\init-project-template.ps1" "[ValidateSet(""Lite"", ""Standard"", ""Enterprise"")]" "Plugin init script mode parameter"
+    Test-RequiredPattern "plugins\forgekit-codex-workflow\README.zh-CN.md" "-Mode Standard" "Plugin Chinese README mode quickstart"
+    Test-RequiredPattern "plugins\forgekit-codex-workflow\README.md" "-Mode Standard" "Plugin English README mode quickstart"
     Test-RequiredPattern "scripts\init-project-template.ps1" "codebase map" "Init script codebase map guidance"
     Test-RequiredPattern "scripts\init-project-template.ps1" "large-change-execution.md" "Init script large-change guidance"
     Test-RequiredPattern "scripts\init-project-template.ps1" "team-agent-rollout.md" "Init script team rollout guidance"
@@ -362,7 +366,7 @@ function Test-PluginDistribution {
         if ($pluginJson.name -ne "forgekit-codex-workflow") {
             Add-Error "Unexpected plugin name in plugin.json: $($pluginJson.name)"
         }
-        if ($pluginJson.version -ne "0.9.7") {
+        if ($pluginJson.version -ne "0.9.8") {
             Add-Error "Unexpected plugin version in plugin.json: $($pluginJson.version)"
         }
         $pluginSkillsPath = $pluginJson.PSObject.Properties["skills"].Value
@@ -684,7 +688,7 @@ function Test-PluginDistribution {
         if ($pluginJson.name -ne "forgekit-codex-workflow") {
             Add-Error "Unexpected plugin name in plugin.json: $($pluginJson.name)"
         }
-        if ($pluginJson.version -ne "0.9.7") {
+        if ($pluginJson.version -ne "0.9.8") {
             Add-Error "Unexpected plugin version in plugin.json: $($pluginJson.version)"
         }
         $pluginSkillsPath = $pluginJson.PSObject.Properties["skills"].Value
