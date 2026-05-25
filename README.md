@@ -100,6 +100,8 @@ v0.3 之后的重点是把模板从“治理文档集合”推进为更成熟的
 
 `v0.9.6` 扩展第三批语言包：新增 Kotlin Spring、Swift iOS、Ruby Rails、R Data Analysis 技术栈模板，覆盖 JVM Kotlin 后端、iOS 原生、Rails Web/API 和 R 可复现分析。重点记录协程、Xcode 签名、Rails migration/队列、多数据库、renv、隐私数据和报告渲染边界。
 
+`v0.9.7` 重写 plugin 推广文档：中英文 README 先说明 ForgeKit 是什么、适合谁、为什么要用，再给最短初始化路径、常见 stack 选择、生成内容和安全边界，避免用户一上来被资产清单和繁琐参数劝退。
+
 ## Plugin 分发
 
 本仓库提供 repo/team marketplace 示例：

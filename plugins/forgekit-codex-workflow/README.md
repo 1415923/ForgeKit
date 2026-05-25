@@ -1,108 +1,133 @@
-# ForgeKit Codex Workflow Plugin
-
-This plugin distributes the ForgeKit Codex workflow harness for team use.
+# ForgeKit Codex Workflow
 
 Chinese documentation: [README.zh-CN.md](README.zh-CN.md).
 
-## Included
+**A practical Codex workflow plugin for real software projects.**
 
-- Skills for project initialization, bootstrap filling, handover review, code review, release checks, and security review.
-- Read-only scripts for local toolchain detection and generated-project harness checks.
-- Template assets copied from ForgeKit `project-template/`, `templates/`, and `questionnaires/`.
-- Plugin docs under `assets/docs/` for install, upgrade, safety, and real-project trial feedback.
-- Command, hook, and MCP examples as documentation assets only.
+ForgeKit turns a new or existing repository into a Codex-ready project: clear startup context, planning documents, review gates, release checks, safety rules, and stack-specific guidance. It is built for teams that want Codex to work like a careful project collaborator instead of jumping straight from a vague idea into code.
 
-## Not Included
+It is not a framework, scaffolded app, or deployment tool. It is a project workflow harness: skills, templates, checklists, and validation scripts that help Codex ask better questions, keep decisions traceable, and stop before risky actions.
 
-- `user-rules/`, because those files contain machine-specific preferences and paths.
-- External development records under `document/`.
-- Enabled hooks or MCP servers.
-- Credentials, tokens, private service URLs, or deployment automation.
+## Why Use It
 
-## Initialize A Project
+- Start new projects with product and architecture discussion before implementation.
+- Hand over existing projects with audit-first review instead of blind refactoring.
+- Keep project docs, task plans, tests, release notes, and safety checks in one repeatable structure.
+- Load only the stack rules you need, avoiding irrelevant context.
+- Share the same Codex workflow across a team through one plugin package.
 
-Run the initializer from this plugin directory. The script copies ForgeKit template files into
-your target project directory and optionally copies selected stack templates into
-`.codex/stacks/<stack>/`.
+## Quick Start
 
-General form:
+Run from this plugin directory:
 
 ```powershell
-powershell -ExecutionPolicy Bypass -File .\scripts\init-project-template.ps1 `
-  -TargetPath "<absolute path to your project>" `
-  -ProjectName "<project name>" `
-  -Stacks <stack-1>,<stack-2>
+powershell -ExecutionPolicy Bypass -File .\scripts\init-project-template.ps1 -TargetPath "D:\projects\my-app" -ProjectName "my-app" -Stacks java-springboot,vue
 ```
 
-Parameters:
+Then start Codex inside the generated project and ask:
 
-- `-TargetPath`: Required. The project directory to initialize. Use an absolute path.
-- `-ProjectName`: Optional but recommended. Written into `.codex/init.generated.md`.
-- `-Stacks`: Optional. Comma-separated stack templates to add under `.codex/stacks/`.
-- `-Force`: Optional. Overwrites existing template files. Omit it for normal first-time use.
+```text
+Read AGENTS.md and help me initialize this project with ForgeKit.
+```
 
-Available stack values:
-
-- `java-springboot`
-- `vue`
-- `react`
-- `python-fastapi`
-- `node-express`
-- `csharp-dotnet`
-- `go-service`
-- `php-laravel`
-- `rust-cli-service`
-- `flutter-dart`
-- `cpp-cmake`
-- `kotlin-spring`
-- `swift-ios`
-- `ruby-rails`
-- `r-data-analysis`
-- `fpga-vivado-vitis`
-
-Examples:
-
-Java + Vue full-stack project:
+Not sure which stack to choose yet? Omit `-Stacks` first:
 
 ```powershell
-powershell -ExecutionPolicy Bypass -File .\scripts\init-project-template.ps1 `
-  -TargetPath "D:\JAVA-code\my-business-app" `
-  -ProjectName "my-business-app" `
-  -Stacks java-springboot,vue
+powershell -ExecutionPolicy Bypass -File .\scripts\init-project-template.ps1 -TargetPath "D:\projects\my-app" -ProjectName "my-app"
 ```
 
-Python FastAPI project:
+Codex can help you choose stacks during the planning phase.
 
-```powershell
-powershell -ExecutionPolicy Bypass -File .\scripts\init-project-template.ps1 `
-  -TargetPath "D:\projects\my-api" `
-  -ProjectName "my-api" `
-  -Stacks python-fastapi
-```
+## Common Stack Values
 
-Smoke-test example:
+| Project type | Use |
+| --- | --- |
+| Java + Vue full stack | `java-springboot,vue` |
+| Java backend | `java-springboot` |
+| Python API | `python-fastapi` |
+| Node API | `node-express` |
+| C# / .NET API or Worker | `csharp-dotnet` |
+| Go service or CLI | `go-service` |
+| Laravel app or API | `php-laravel` |
+| Rust CLI or service | `rust-cli-service` |
+| Flutter app | `flutter-dart` |
+| C++ CMake project | `cpp-cmake` |
+| Kotlin backend | `kotlin-spring` |
+| iOS app | `swift-ios` |
+| Rails app or API | `ruby-rails` |
+| R analysis / Shiny | `r-data-analysis` |
+| FPGA / HLS | `fpga-vivado-vitis` |
 
-```powershell
-powershell -ExecutionPolicy Bypass -File .\scripts\init-project-template.ps1 `
-  -TargetPath "D:\tmp\forgekit-plugin-smoke" `
-  -ProjectName "forgekit-plugin-smoke" `
-  -Stacks java-springboot,vue
-```
+Frontend-only projects can use `vue` or `react`.
 
-Then start Codex from the generated project `AGENTS.md`.
+## What You Get
 
-## Validate The Plugin Package
+Generated projects include:
+
+- `AGENTS.md`: the first file Codex should read.
+- `.codex/`: project facts, scope, commands, safety, testing, style, and selected stack guidance.
+- `.agents/skills/`: project initialization, handover review, code review, release check, and security review skills.
+- `docs/`: requirements, architecture, task board, roadmap, testing, deployment, risk, release, and traceability documents.
+- `governance/`: lightweight SDLC, definition of ready/done, change control, release, incident, security, and agent-harness guidance.
+- `scripts/`: read-only local toolchain and harness checks.
+
+The plugin package also includes top-level `skills/` so Codex can discover ForgeKit skills before a project is generated.
+
+## How ForgeKit Changes Codex Behavior
+
+For new project ideas, Codex should not immediately write code. ForgeKit asks it to:
+
+1. Clarify the product goal and user scenario.
+2. Compare feasible product and architecture options.
+3. Identify stack, environment, data, deployment, and validation constraints.
+4. Produce an execution summary.
+5. Wait for explicit confirmation before coding, installing dependencies, initializing Git, committing, pushing, deploying, or writing outside the project.
+
+For existing projects, ForgeKit starts with audit, codebase mapping, toolchain checks, and P0/P1 risk review before large changes.
+
+## Safety Boundary
+
+ForgeKit does not enable hooks or MCP by default.
+
+It does not include:
+
+- user-specific `user-rules/`
+- external development records under `document/`
+- credentials, tokens, private service URLs, or deployment automation
+- automatic issue, PR, deploy, tag, commit, or push actions
+
+High-risk actions still require explicit user confirmation.
+
+## Validate The Plugin
 
 ```powershell
 powershell -ExecutionPolicy Bypass -File .\scripts\validate-plugin-assets.ps1
 ```
 
-This check verifies the plugin manifest, required skills, template assets, and forbidden package paths.
+Optional smoke test:
 
-## Safety
+```powershell
+powershell -ExecutionPolicy Bypass -File .\scripts\init-project-template.ps1 -TargetPath "D:\tmp\forgekit-plugin-smoke" -ProjectName "forgekit-plugin-smoke" -Stacks java-springboot,vue -Force
+```
 
-The plugin does not enable hooks or MCP by default. External writes such as issue updates, pull requests, deploys, tags, or pushes still require explicit user confirmation.
+Then run this inside the generated smoke project:
 
-## v0.9.1 Gate
+```powershell
+powershell -ExecutionPolicy Bypass -File .\scripts\run-harness-check.ps1
+```
 
-The package keeps the full project template inside `assets/project-template/` so generated projects remain self-contained. The top-level `skills/` copy is intentionally separate so Codex can discover plugin skills before a project is generated.
+## When To Use Lite, Standard, Or Enterprise
+
+| Mode | Best for |
+| --- | --- |
+| Lite | Small scripts, personal tools, quick prototypes |
+| Standard | Normal apps, APIs, internal systems, data processing projects |
+| Enterprise | Team delivery, production systems, high-risk changes, inherited projects |
+
+Start with Standard unless the project is obviously tiny or clearly high-risk.
+
+## Package Design
+
+`assets/project-template/` keeps generated projects self-contained. The top-level `skills/` copy is intentional: it lets Codex discover ForgeKit skills from the plugin before any project exists.
+
+This plugin is the recommended distribution form for ForgeKit.
