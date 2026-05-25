@@ -2,6 +2,8 @@
 
 This plugin distributes the ForgeKit Codex workflow harness for team use.
 
+Chinese documentation: [README.zh-CN.md](README.zh-CN.md).
+
 ## Included
 
 - Skills for project initialization, bootstrap filling, handover review, code review, release checks, and security review.

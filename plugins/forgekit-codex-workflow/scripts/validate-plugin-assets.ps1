@@ -94,6 +94,7 @@ function Test-PluginManifest {
 
 Test-RequiredPath ".codex-plugin\plugin.json"
 Test-RequiredPath "README.md"
+Test-RequiredPath "README.zh-CN.md"
 Test-RequiredPath "skills\project-init\SKILL.md"
 Test-RequiredPath "skills\project-bootstrap-fill\SKILL.md"
 Test-RequiredPath "skills\handover-review\SKILL.md"

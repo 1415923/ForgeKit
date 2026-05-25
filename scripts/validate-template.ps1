@@ -280,6 +280,7 @@ function Test-PluginDistribution {
     Test-RequiredPath ".agents\plugins\marketplace.json"
     Test-RequiredPath "plugins\forgekit-codex-workflow\.codex-plugin\plugin.json"
     Test-RequiredPath "plugins\forgekit-codex-workflow\README.md"
+    Test-RequiredPath "plugins\forgekit-codex-workflow\README.zh-CN.md"
     Test-RequiredPath "plugins\forgekit-codex-workflow\skills\project-init\SKILL.md"
     Test-RequiredPath "plugins\forgekit-codex-workflow\skills\project-bootstrap-fill\SKILL.md"
     Test-RequiredPath "plugins\forgekit-codex-workflow\skills\handover-review\SKILL.md"
