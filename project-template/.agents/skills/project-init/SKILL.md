@@ -19,12 +19,28 @@ description: Initialize or repair a project's Codex workflow, interview the user
    - risks and blockers
    - Epic / Feature / Task / Bug model
    - version roadmap
-6. For large, cross-module, migration, refactor, or high-risk work, require the large-change protocol before implementation:
+6. Use iterative solution shaping, not a one-shot questionnaire:
+   - Ask only the next 3 to 5 highest-leverage questions.
+   - If the user cannot answer, provide 2 to 4 realistic options with tradeoffs and a recommended default.
+   - If current knowledge is insufficient, propose a research path: local docs to inspect, official docs to search, example projects to compare, or small throwaway prototypes to run.
+   - Clearly mark each item as Confirmed, Assumption, Research needed, or Deferred.
+   - Keep interviewing and revising the plan until v0.1.0 scope, data model, deployment target, validation command, and safety boundary are coherent.
+   - Do not treat "unknown" as a reason to stop; turn unknowns into decision options, research tasks, or deferred non-goals.
+7. When the user describes a product idea in natural language, translate it into:
+   - problem and target users
+   - MVP workflow
+   - explicit non-goals
+   - data and state boundaries
+   - technical options and recommendation
+   - validation strategy
+   - risks and open decisions
+   - first implementation slice, only when coding is allowed
+8. For large, cross-module, migration, refactor, or high-risk work, require the large-change protocol before implementation:
    - read `governance/large-change-execution.md`
    - create or update the exploration report in `docs/`
    - create or update the implementation plan in `docs/`
    - do not start broad coding until the implementation plan says coding is allowed
-7. Fill or update:
+9. Fill or update:
    - `.codex/project.md`
    - `.codex/scope.md`
    - `.codex/commands.md`
@@ -41,12 +57,15 @@ description: Initialize or repair a project's Codex workflow, interview the user
    - `docs/environment matrix`
    - `docs/release pipeline`
    - `docs/project task board`
-8. Preserve existing project-specific facts. Do not overwrite real information with template text.
-9. Do not modify business code unless the user explicitly asks.
+10. Preserve existing project-specific facts. Do not overwrite real information with template text.
+11. Remove or replace template history that belongs to ForgeKit itself. Generated projects must not keep ForgeKit Agent Harness roadmap tasks as if they were project tasks.
+12. Do not modify business code unless the user explicitly asks.
 
 ## Gate Before Coding
 
 If the development plan, version roadmap, landing conditions, or first implementation slice are unclear, ask follow-up questions instead of starting implementation.
+
+If the user cannot answer a gate question, do not repeat the same question. Provide a decision table, a recommended default, and a concrete way to verify the choice.
 
 If the requested work is large or cross-module, require exploration and implementation planning before coding.
 
@@ -78,7 +97,8 @@ End with:
 - Selected stack templates.
 - Files created or updated.
 - Plan status: confirmed, partial, or blocked.
-- Key decisions that still need user confirmation.
-- The next 3-5 questions to continue the project planning discussion.
+- Confirmed decisions, assumptions, research-needed items, and deferred non-goals.
+- The next 3-5 questions or decision options to continue the project planning discussion.
+- Reference or research suggestions when the user cannot decide from current context.
 - Suggested first implementation slice only if coding is allowed.
 - Validation commands that are safe to run.

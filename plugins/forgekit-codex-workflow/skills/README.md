@@ -47,6 +47,8 @@ skill-name/
 
 初始化后如果项目方向仍不清楚，先读取 `docs/Codex下一步工作单.md`，继续确认 MVP、落地环境、验证方式和依赖裁剪。
 
+ForgeKit 可通过 `forgekit-codex-workflow` plugin 分发这些稳定 skills 和模板资产。plugin 只是分发入口；引入第三方或团队 plugin 前仍需审查权限、网络、凭据、写入范围和上下文污染风险。
+
 ## 推荐 Skill 类型
 
 | Skill | 场景 |

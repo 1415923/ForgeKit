@@ -90,6 +90,8 @@ v0.3 之后的重点是把模板从“治理文档集合”推进为更成熟的
 
 `v0.9.1` 完成 plugin review/refactor gate：检查分发包体积、重复资产、安全边界和升级路径，补齐安装、升级、安全和真实项目试用反馈文档。plugin 内顶层 `skills/` 与 `assets/project-template/.agents/skills/` 的重复是刻意保留，前者用于 plugin 发现，后者用于生成项目自包含。
 
+`v0.9.2` 回灌真实项目试用反馈：强化初始化阶段的多轮方案访谈，要求用户答不上来时给出候选方案、推荐默认值和查阅资料路径；同时清理生成项目路线图和任务看板中的 ForgeKit 自身历史任务。
+
 ## Plugin 分发
 
 本仓库提供 repo/team marketplace 示例：

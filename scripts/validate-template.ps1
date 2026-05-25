@@ -314,7 +314,7 @@ function Test-PluginDistribution {
         if ($pluginJson.name -ne "forgekit-codex-workflow") {
             Add-Error "Unexpected plugin name in plugin.json: $($pluginJson.name)"
         }
-        if ($pluginJson.version -ne "0.9.1") {
+        if ($pluginJson.version -ne "0.9.2") {
             Add-Error "Unexpected plugin version in plugin.json: $($pluginJson.version)"
         }
         if ($pluginJson.skills -ne "./skills/") {
@@ -471,6 +471,10 @@ function Test-StaleText {
     Test-NoPattern "project-template\.agents\skills\project-init\SKILL.md" "docs/project development plan" "Stale document path"
     Test-NoPattern "project-template\.agents\skills\project-init\SKILL.md" "docs/version roadmap" "Stale document path"
     Test-NoPattern "scripts\init-project-template.ps1" "docs/technology selection document" "Stale init text"
+    Test-NoPattern "project-template\docs\版本路线图.md" "TASK-HARNESS" "ForgeKit harness task leaked into generated roadmap"
+    Test-NoPattern "project-template\docs\版本路线图.md" "FEAT-HARNESS" "ForgeKit harness feature leaked into generated roadmap"
+    Test-NoPattern "project-template\docs\项目任务看板.md" "TASK-HARNESS" "ForgeKit harness task leaked into generated task board"
+    Test-NoPattern "project-template\docs\项目任务看板.md" "FEAT-HARNESS" "ForgeKit harness feature leaked into generated task board"
 }
 
 Test-RequiredPath "README.md"
