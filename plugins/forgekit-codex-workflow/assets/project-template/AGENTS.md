@@ -58,6 +58,8 @@ Keep this file short. Put stable workflows in skills, stack-specific rules in `.
 ## Gates
 
 - Do not start broad coding without a first-pass project plan and version scope.
+- For new projects, product and architecture discussion is a required phase. Do not treat a few engineering parameter answers as approval to implement.
+- Before business code, dependency install, Git init, commit, push, deployment, or other external action, show an execution summary and wait for explicit user confirmation.
 - Do not start large cross-module implementation before exploration and implementation plan are complete.
 - Do not start the next major version before the review/refactor gate is complete, unless the user explicitly accepts the risk.
 - Do not deploy, push, tag, run migrations, or start long-running services without explicit user confirmation.

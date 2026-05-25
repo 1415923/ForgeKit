@@ -183,6 +183,21 @@ function Get-CodexNextWorkOrderRef {
     return "docs/$name.md"
 }
 
+function Get-VersionRoadmapPath {
+    $name = ([char]0x7248).ToString() + ([char]0x672C).ToString() + ([char]0x8DEF).ToString() + ([char]0x7EBF).ToString() + ([char]0x56FE).ToString()
+    return "project-template\docs\$name.md"
+}
+
+function Get-ProjectTaskBoardPath {
+    $name = ([char]0x9879).ToString() + ([char]0x76EE).ToString() + ([char]0x4EFB).ToString() + ([char]0x52A1).ToString() + ([char]0x770B).ToString() + ([char]0x677F).ToString()
+    return "project-template\docs\$name.md"
+}
+
+function Get-ProjectPlanPath {
+    $name = ([char]0x9879).ToString() + ([char]0x76EE).ToString() + ([char]0x5F00).ToString() + ([char]0x53D1).ToString() + ([char]0x65B9).ToString() + ([char]0x6848).ToString()
+    return "project-template\docs\$name.md"
+}
+
 function Test-AgentsHarness {
     $agentsFiles = @(
         "AGENTS.md",
@@ -260,6 +275,8 @@ function Test-HarnessEntryConsistency {
     Test-RequiredPattern "使用说明.html" "detect-local-toolchain.ps1" "HTML executable harness prompt"
     Test-RequiredPattern "使用说明.html" "run-harness-check.ps1" "HTML harness check prompt"
     Test-RequiredPattern "使用说明.html" "plugins/forgekit-codex-workflow/" "HTML plugin distribution reference"
+    Test-RequiredPattern "使用说明.html" "Execution Confirmation" "HTML execution confirmation prompt"
+    Test-RequiredPattern "使用说明.html" "产品方案商讨" "HTML product planning prompt"
 }
 
 function Test-ExecutableHarness {
@@ -314,10 +331,11 @@ function Test-PluginDistribution {
         if ($pluginJson.name -ne "forgekit-codex-workflow") {
             Add-Error "Unexpected plugin name in plugin.json: $($pluginJson.name)"
         }
-        if ($pluginJson.version -ne "0.9.2") {
+        if ($pluginJson.version -ne "0.9.3") {
             Add-Error "Unexpected plugin version in plugin.json: $($pluginJson.version)"
         }
-        if ($pluginJson.skills -ne "./skills/") {
+        $pluginSkillsPath = $pluginJson.PSObject.Properties["skills"].Value
+        if ($pluginSkillsPath -ne "./skills/") {
             Add-Error "Plugin skills path must be ./skills/"
         }
         if ($pluginJson.PSObject.Properties.Name -contains "mcpServers") {
@@ -471,10 +489,217 @@ function Test-StaleText {
     Test-NoPattern "project-template\.agents\skills\project-init\SKILL.md" "docs/project development plan" "Stale document path"
     Test-NoPattern "project-template\.agents\skills\project-init\SKILL.md" "docs/version roadmap" "Stale document path"
     Test-NoPattern "scripts\init-project-template.ps1" "docs/technology selection document" "Stale init text"
-    Test-NoPattern "project-template\docs\版本路线图.md" "TASK-HARNESS" "ForgeKit harness task leaked into generated roadmap"
-    Test-NoPattern "project-template\docs\版本路线图.md" "FEAT-HARNESS" "ForgeKit harness feature leaked into generated roadmap"
-    Test-NoPattern "project-template\docs\项目任务看板.md" "TASK-HARNESS" "ForgeKit harness task leaked into generated task board"
-    Test-NoPattern "project-template\docs\项目任务看板.md" "FEAT-HARNESS" "ForgeKit harness feature leaked into generated task board"
+    Test-NoPattern (Get-VersionRoadmapPath) "TASK-HARNESS" "ForgeKit harness task leaked into generated roadmap"
+    Test-NoPattern (Get-VersionRoadmapPath) "FEAT-HARNESS" "ForgeKit harness feature leaked into generated roadmap"
+    Test-NoPattern (Get-ProjectTaskBoardPath) "TASK-HARNESS" "ForgeKit harness task leaked into generated task board"
+    Test-NoPattern (Get-ProjectTaskBoardPath) "FEAT-HARNESS" "ForgeKit harness feature leaked into generated task board"
+    Test-RequiredPattern "project-template\.agents\skills\project-init\SKILL.md" "Execution Confirmation" "Project init execution confirmation gate"
+    Test-RequiredPattern "project-template\AGENTS.md" "execution summary" "AGENTS execution summary gate"
+    Test-RequiredPattern (Get-CodexNextWorkOrderPath) "Execution Confirmation" "Next work order execution confirmation gate"
+    Test-RequiredPattern (Get-ProjectPlanPath) "Product Shape Options" "Project plan product-shape section"
+    Test-RequiredPattern "project-template\.codex\scope.md" "Execution Confirmation" "Scope execution confirmation gate"
+}
+
+function Test-StackTemplates {
+    $requiredStacks = @(
+        "java-springboot",
+        "vue",
+        "react",
+        "python-fastapi",
+        "node-express",
+        "fpga-vivado-vitis"
+    )
+    foreach ($stack in $requiredStacks) {
+        Test-RequiredPath "templates\$stack\README.md"
+        Test-RequiredPath "templates\$stack\commands.md"
+        Test-RequiredPath "templates\$stack\codex-addons.md"
+        Test-RequiredPath "templates\$stack\checklist.md"
+        Test-RequiredPath "templates\$stack\docs-notes.md"
+    }
+}
+
+function Test-PromptTemplates {
+    $promptDir = Join-Path $repoRoot "prompts"
+    if (-not (Test-Path -LiteralPath $promptDir)) {
+        Add-Error "Missing prompt directory: prompts"
+        return
+    }
+    $promptCount = (Get-ChildItem -LiteralPath $promptDir -Filter "*.prompt.md" -File).Count
+    if ($promptCount -lt 7) {
+        Add-Error "Expected at least 7 prompt templates, found $promptCount"
+    }
+}
+
+function Test-StackHarnessDetails {
+    $requiredStacks = @(
+        "java-springboot",
+        "vue",
+        "react",
+        "python-fastapi",
+        "node-express",
+        "fpga-vivado-vitis"
+    )
+    foreach ($stack in $requiredStacks) {
+        $readme = "templates\$stack\README.md"
+        $commands = "templates\$stack\commands.md"
+        Test-RequiredPattern $readme "Codex" "Stack Codex startup guidance"
+        Test-RequiredPattern $readme "LSP" "Stack LSP or symbol guidance"
+        Test-RequiredPattern $readme "Ignore guidance" "Stack ignore guidance"
+        Test-RequiredPattern $commands "Local validation" "Stack local validation commands"
+
+        $readmePath = Join-Path $repoRoot $readme
+        $commandsPath = Join-Path $repoRoot $commands
+        $readmeLines = (Get-Content -LiteralPath $readmePath).Count
+        $commandsLines = (Get-Content -LiteralPath $commandsPath).Count
+        if ($readmeLines -gt 80) {
+            Add-Error "Stack README is too long: $readme has $readmeLines lines"
+        }
+        if ($commandsLines -gt 80) {
+            Add-Error "Stack commands file is too long: $commands has $commandsLines lines"
+        }
+    }
+}
+
+function Test-LargeChangeProtocol {
+    Test-RequiredPath "project-template\governance\large-change-execution.md"
+    Test-RequiredPath (Get-ExplorationReportPath)
+    Test-RequiredPath (Get-ImplementationPlanPath)
+    Test-RequiredPattern "project-template\.agents\skills\project-init\SKILL.md" "large-change protocol" "Project init large-change gate"
+    Test-RequiredPattern "project-template\.agents\skills\code-review\SKILL.md" "large-change protocol" "Code review large-change gate"
+    Test-RequiredPattern "project-template\.agents\skills\release-check\SKILL.md" "large-change protocol" "Release check large-change gate"
+    Test-RequiredPattern "使用说明.html" "data-prompt=""large""" "HTML large-change tab"
+
+    $largeChangeFiles = @(
+        "project-template\governance\large-change-execution.md",
+        (Get-ExplorationReportPath),
+        (Get-ImplementationPlanPath)
+    )
+    foreach ($relativePath in $largeChangeFiles) {
+        $path = Join-Path $repoRoot $relativePath
+        if (-not (Test-Path -LiteralPath $path)) {
+            continue
+        }
+        $lineCount = (Get-Content -LiteralPath $path).Count
+        if ($lineCount -gt 100) {
+            Add-Error "Large-change document is too long: $relativePath has $lineCount lines"
+        }
+    }
+}
+
+function Test-TeamToolingProtocol {
+    Test-RequiredPath "project-template\governance\team-agent-rollout.md"
+    Test-RequiredPath "project-template\.codex\commands-catalog.md"
+    Test-RequiredPath "project-template\.codex\hooks.md"
+    Test-RequiredPattern "project-template\governance\team-agent-rollout.md" "AGENTS -> skills -> commands -> hooks -> plugin -> MCP" "Team rollout order"
+    Test-RequiredPattern "project-template\.codex\commands-catalog.md" "GitHub" "GitHub integration catalog"
+    Test-RequiredPattern "project-template\.codex\hooks.md" "Opt-in only" "Hooks opt-in guard"
+    Test-RequiredPattern "project-template\.codex\config.example.toml" "team-agent-rollout.md" "MCP rollout reference"
+    Test-RequiredPattern "project-template\AGENTS.md" "commands-catalog.md" "Commands catalog routing"
+    Test-RequiredPattern "project-template\AGENTS.md" "hooks.md" "Hooks routing"
+    Test-RequiredPattern "project-template\.codex\security.md" "config.example.toml" "Security MCP config guard"
+    Test-RequiredPattern "project-template\.codex\rules.md" "team-agent-rollout.md" "Rules team rollout guard"
+
+    $configPath = Join-Path $repoRoot "project-template\.codex\config.example.toml"
+    if (Test-Path -LiteralPath $configPath) {
+        $activeMcp = Select-String -Path $configPath -Pattern "^\s*\[mcp_servers\."
+        foreach ($match in $activeMcp) {
+            Add-Error "MCP example must stay commented in project-template\.codex\config.example.toml:$($match.LineNumber)"
+        }
+    }
+}
+
+function Test-AgentSuitability {
+    Test-RequiredPath "project-template\governance\agent-suitability.md"
+    Test-RequiredPath (Get-SuitabilityPath)
+    Test-RequiredPath (Get-TrialRecordPath)
+    Test-RequiredPattern "project-template\governance\agent-suitability.md" "Suitable" "Suitability outcomes"
+    Test-RequiredPattern "project-template\governance\agent-suitability.md" "Conditional" "Conditional suitability outcome"
+    Test-RequiredPattern "project-template\governance\agent-suitability.md" "Custom" "Custom suitability outcome"
+    Test-RequiredPattern "使用说明.html" "suitabilityList" "HTML suitability checklist"
+    Test-RequiredPattern "使用说明.html" "适用性已确认" "HTML suitability brief"
+}
+
+function Test-ExecutableHarness {
+    Test-RequiredPath "project-template\scripts\detect-local-toolchain.ps1"
+    Test-RequiredPath "project-template\scripts\run-harness-check.ps1"
+    Test-RequiredPath (Get-CodexNextWorkOrderPath)
+    Test-RequiredPattern "project-template\scripts\detect-local-toolchain.ps1" "Do not install missing tools" "Toolchain detector safety guard"
+    Test-RequiredPattern "project-template\scripts\run-harness-check.ps1" "Harness check passed" "Harness check success output"
+    Test-RequiredPattern "project-template\.codex\commands.md" "detect-local-toolchain.ps1" "Commands toolchain detector"
+    Test-RequiredPattern "project-template\.codex\commands.md" "run-harness-check.ps1" "Commands harness check"
+    Test-RequiredPattern "project-template\.codex\commands-catalog.md" "detect-local-toolchain" "Commands catalog toolchain detector"
+    Test-RequiredPattern "project-template\.codex\hooks.md" "run-harness-check.ps1" "Hooks harness check"
+    Test-RequiredPattern (Get-LocalToolchainPath) "detect-local-toolchain.ps1" "Local toolchain executable detector reference"
+}
+
+function Test-PluginDistribution {
+    $pluginRoot = Join-Path $repoRoot "plugins\forgekit-codex-workflow"
+    Test-RequiredPath ".agents\plugins\marketplace.json"
+    Test-RequiredPath "plugins\forgekit-codex-workflow\.codex-plugin\plugin.json"
+    Test-RequiredPath "plugins\forgekit-codex-workflow\README.md"
+    Test-RequiredPath "plugins\forgekit-codex-workflow\README.zh-CN.md"
+    Test-RequiredPath "plugins\forgekit-codex-workflow\skills\project-init\SKILL.md"
+    Test-RequiredPath "plugins\forgekit-codex-workflow\skills\project-bootstrap-fill\SKILL.md"
+    Test-RequiredPath "plugins\forgekit-codex-workflow\skills\handover-review\SKILL.md"
+    Test-RequiredPath "plugins\forgekit-codex-workflow\skills\code-review\SKILL.md"
+    Test-RequiredPath "plugins\forgekit-codex-workflow\skills\release-check\SKILL.md"
+    Test-RequiredPath "plugins\forgekit-codex-workflow\skills\security-review\SKILL.md"
+    Test-RequiredPath "plugins\forgekit-codex-workflow\scripts\init-project-template.ps1"
+    Test-RequiredPath "plugins\forgekit-codex-workflow\scripts\validate-plugin-assets.ps1"
+    Test-RequiredPath "plugins\forgekit-codex-workflow\scripts\detect-local-toolchain.ps1"
+    Test-RequiredPath "plugins\forgekit-codex-workflow\scripts\run-harness-check.ps1"
+    Test-RequiredPath "plugins\forgekit-codex-workflow\assets\project-template\AGENTS.md"
+    Test-RequiredPath "plugins\forgekit-codex-workflow\assets\templates\java-springboot\README.md"
+    Test-RequiredPath "plugins\forgekit-codex-workflow\assets\questionnaires\README.md"
+    Test-RequiredPath "plugins\forgekit-codex-workflow\assets\docs\install.md"
+    Test-RequiredPath "plugins\forgekit-codex-workflow\assets\docs\upgrade.md"
+    Test-RequiredPath "plugins\forgekit-codex-workflow\assets\docs\safety.md"
+    Test-RequiredPath "plugins\forgekit-codex-workflow\assets\docs\feedback.md"
+
+    if (Test-Path -LiteralPath $pluginRoot) {
+        $forbidden = @("user-rules", "document", ".git")
+        foreach ($item in $forbidden) {
+            if (Test-Path -LiteralPath (Join-Path $pluginRoot $item)) {
+                Add-Error "Forbidden path in plugin package: plugins\forgekit-codex-workflow\$item"
+            }
+        }
+    }
+
+    $pluginJsonPath = Join-Path $repoRoot "plugins\forgekit-codex-workflow\.codex-plugin\plugin.json"
+    if (Test-Path -LiteralPath $pluginJsonPath) {
+        $pluginJson = Get-Content -LiteralPath $pluginJsonPath -Raw | ConvertFrom-Json
+        if ($pluginJson.name -ne "forgekit-codex-workflow") {
+            Add-Error "Unexpected plugin name in plugin.json: $($pluginJson.name)"
+        }
+        if ($pluginJson.version -ne "0.9.3") {
+            Add-Error "Unexpected plugin version in plugin.json: $($pluginJson.version)"
+        }
+        $pluginSkillsPath = $pluginJson.PSObject.Properties["skills"].Value
+        if ($pluginSkillsPath -ne "./skills/") {
+            Add-Error "Plugin skills path must be ./skills/"
+        }
+        if ($pluginJson.PSObject.Properties.Name -contains "mcpServers") {
+            Add-Error "Plugin must not enable MCP by default"
+        }
+        if ($pluginJson.PSObject.Properties.Name -contains "hooks") {
+            Add-Error "Plugin must not enable hooks by default"
+        }
+    }
+}
+
+function Test-StaleText {
+    Test-NoPattern "project-template\.agents\skills\project-init\SKILL.md" "docs/project development plan" "Stale document path"
+    Test-NoPattern "project-template\.agents\skills\project-init\SKILL.md" "docs/version roadmap" "Stale document path"
+    Test-NoPattern "scripts\init-project-template.ps1" "docs/technology selection document" "Stale init text"
+    Test-NoPattern (Get-VersionRoadmapPath) "TASK-HARNESS" "ForgeKit harness task leaked into generated roadmap"
+    Test-NoPattern (Get-VersionRoadmapPath) "FEAT-HARNESS" "ForgeKit harness feature leaked into generated roadmap"
+    Test-NoPattern (Get-ProjectTaskBoardPath) "TASK-HARNESS" "ForgeKit harness task leaked into generated task board"
+    Test-NoPattern (Get-ProjectTaskBoardPath) "FEAT-HARNESS" "ForgeKit harness feature leaked into generated task board"
+    Test-RequiredPattern "project-template\.agents\skills\project-init\SKILL.md" "Execution Confirmation" "Project init execution confirmation gate"
+    Test-RequiredPattern "project-template\AGENTS.md" "execution summary" "AGENTS execution summary gate"
+    Test-RequiredPattern (Get-CodexNextWorkOrderPath) "Execution Confirmation" "Next work order execution confirmation gate"
+    Test-RequiredPattern (Get-ProjectPlanPath) "Product Shape Options" "Project plan product-shape section"
+    Test-RequiredPattern "project-template\.codex\scope.md" "Execution Confirmation" "Scope execution confirmation gate"
 }
 
 Test-RequiredPath "README.md"

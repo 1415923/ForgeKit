@@ -23,6 +23,7 @@ description: Initialize or repair a project's Codex workflow, interview the user
    - Ask only the next 3 to 5 highest-leverage questions.
    - If the user cannot answer, provide 2 to 4 realistic options with tradeoffs and a recommended default.
    - If current knowledge is insufficient, propose a research path: local docs to inspect, official docs to search, example projects to compare, or small throwaway prototypes to run.
+   - For new product ideas, treat product and architecture discussion as a dedicated phase. Do not collapse it into a few engineering parameter questions.
    - Clearly mark each item as Confirmed, Assumption, Research needed, or Deferred.
    - Keep interviewing and revising the plan until v0.1.0 scope, data model, deployment target, validation command, and safety boundary are coherent.
    - Do not treat "unknown" as a reason to stop; turn unknowns into decision options, research tasks, or deferred non-goals.
@@ -35,12 +36,18 @@ description: Initialize or repair a project's Codex workflow, interview the user
    - validation strategy
    - risks and open decisions
    - first implementation slice, only when coding is allowed
-8. For large, cross-module, migration, refactor, or high-risk work, require the large-change protocol before implementation:
+8. For new projects, discuss product shape before implementation:
+   - Provide 2 to 4 possible product shapes when the user's goal is broad or ambiguous.
+   - Compare scope, complexity, deployment cost, long-term evolution, and non-goals.
+   - Propose a long-term version roadmap with concrete v0.1.0, v0.2.0, v0.3.0, and v1.0.0 outcomes.
+   - If public references would help, ask whether to search official docs, public projects, or product examples before finalizing the plan.
+   - Summarize what was learned from local files or external research, and say when research has not been done.
+9. For large, cross-module, migration, refactor, or high-risk work, require the large-change protocol before implementation:
    - read `governance/large-change-execution.md`
    - create or update the exploration report in `docs/`
    - create or update the implementation plan in `docs/`
    - do not start broad coding until the implementation plan says coding is allowed
-9. Fill or update:
+10. Fill or update:
    - `.codex/project.md`
    - `.codex/scope.md`
    - `.codex/commands.md`
@@ -57,9 +64,9 @@ description: Initialize or repair a project's Codex workflow, interview the user
    - `docs/environment matrix`
    - `docs/release pipeline`
    - `docs/project task board`
-10. Preserve existing project-specific facts. Do not overwrite real information with template text.
-11. Remove or replace template history that belongs to ForgeKit itself. Generated projects must not keep ForgeKit Agent Harness roadmap tasks as if they were project tasks.
-12. Do not modify business code unless the user explicitly asks.
+11. Preserve existing project-specific facts. Do not overwrite real information with template text.
+12. Remove or replace template history that belongs to ForgeKit itself. Generated projects must not keep ForgeKit Agent Harness roadmap tasks as if they were project tasks.
+13. Do not modify business code unless the user explicitly asks.
 
 ## Gate Before Coding
 
@@ -68,6 +75,21 @@ If the development plan, version roadmap, landing conditions, or first implement
 If the user cannot answer a gate question, do not repeat the same question. Provide a decision table, a recommended default, and a concrete way to verify the choice.
 
 If the requested work is large or cross-module, require exploration and implementation planning before coding.
+
+Before creating business code, installing dependencies, initializing Git, committing, pushing, or performing any external write, output an "Execution Confirmation" summary and wait for explicit user confirmation. The summary must include:
+
+- one-sentence final project goal
+- product shape chosen and alternatives rejected
+- v0.1.0, v0.2.0, v0.3.0, and v1.0.0 roadmap
+- what this implementation will do and explicitly not do
+- technology stack, storage, authentication, deployment, and validation choices
+- reference or research status, including whether web research was skipped
+- major risks and safety boundaries
+- files to create or modify
+- commands to run
+- external actions such as Git init, commit, push, issue/PR updates, deployment, or service start
+
+User replies such as "allow generating the project", "use MySQL", or "go ahead with dependencies" are not enough by themselves. Treat them as partial decisions unless they explicitly confirm the full execution summary.
 
 Do not recommend large-scale coding until there is at least a first version of:
 
