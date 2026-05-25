@@ -329,6 +329,18 @@
               <span><span class="stack-title">PHP Laravel</span><span class="stack-desc">Laravel 后台、CRUD、API、队列、migration。</span></span>
             </label>
             <label class="stack">
+              <input type="checkbox" value="rust-cli-service">
+              <span><span class="stack-title">Rust CLI / Service</span><span class="stack-desc">Rust CLI、系统工具、高性能服务、Cargo。</span></span>
+            </label>
+            <label class="stack">
+              <input type="checkbox" value="flutter-dart">
+              <span><span class="stack-title">Flutter Dart</span><span class="stack-desc">跨端 App、移动端、Web、桌面、状态管理。</span></span>
+            </label>
+            <label class="stack">
+              <input type="checkbox" value="cpp-cmake">
+              <span><span class="stack-title">C++ CMake</span><span class="stack-desc">C++ 库、CLI、算法模块、CMake、CTest。</span></span>
+            </label>
+            <label class="stack">
               <input type="checkbox" value="fpga-vivado-vitis">
               <span><span class="stack-title">FPGA Vivado/Vitis</span><span class="stack-desc">FPGA、Vivado、Vitis、Vitis HLS、板卡验证。</span></span>
             </label>
@@ -352,7 +364,7 @@
           <pre><code id="startupOutput"></code></pre>
 
           <h3>常见组合</h3>
-          <p class="muted">普通 Java 前后端项目选 <code>java-springboot</code> + <code>vue</code>。C# 企业 API 选 <code>csharp-dotnet</code>；Go 服务或 CLI 选 <code>go-service</code>；Laravel 后台或 API 选 <code>php-laravel</code>。只选实际需要的模板，避免无关规则进入上下文。</p>
+          <p class="muted">普通 Java 前后端项目选 <code>java-springboot</code> + <code>vue</code>。Rust 工具选 <code>rust-cli-service</code>；Flutter App 选 <code>flutter-dart</code>；C++ 工程选 <code>cpp-cmake</code>。只选实际需要的模板，避免无关规则进入上下文。</p>
 
           <h3>Plugin 分发</h3>
           <p class="muted">v0.9.0 提供 <code>plugins/forgekit-codex-workflow/</code> 和 <code>.agents/plugins/marketplace.json</code>，用于团队分发稳定 skills、模板资产和只读检查脚本。plugin 不包含 <code>user-rules/</code> 或外部开发记录，也不默认启用 hook、MCP 或外部写操作。</p>
@@ -385,6 +397,9 @@
                 <option>C# .NET API / Worker 项目</option>
                 <option>Go 服务 / CLI 项目</option>
                 <option>Laravel 后台 / API 项目</option>
+                <option>Rust CLI / Service 项目</option>
+                <option>Flutter 跨端 App 项目</option>
+                <option>C++ CMake 工程</option>
                 <option>FPGA / HLS 项目</option>
                 <option>其他</option>
               </select>
@@ -550,6 +565,9 @@
         'csharp-dotnet': 'C# .NET：从解决方案或项目根目录启动，优先找 .sln / .csproj / Program.cs。',
         'go-service': 'Go Service：从 go.mod 所在模块根目录启动，优先找 cmd / internal / pkg / *_test.go。',
         'php-laravel': 'PHP Laravel：从 artisan 所在项目根目录启动，优先找 routes / app / database / tests。',
+        'rust-cli-service': 'Rust CLI / Service：从 Cargo.toml 所在 crate 或 workspace 根目录启动，优先找 src / tests / Cargo.lock。',
+        'flutter-dart': 'Flutter Dart：从 pubspec.yaml 所在项目根目录启动，优先找 lib / test / integration_test / 平台目录。',
+        'cpp-cmake': 'C++ CMake：从 CMakeLists.txt 或 CMakePresets.json 所在根目录启动，优先找 src / include / tests。',
         'fpga-vivado-vitis': 'FPGA Vivado/Vitis：从硬件工程根目录启动，优先找 Vivado/Vitis 工程、HLS 工程和仿真脚本。'
       };
       const selected = selectedStacks();

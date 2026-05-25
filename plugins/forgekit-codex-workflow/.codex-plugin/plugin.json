@@ -1,6 +1,6 @@
 {
   "name": "forgekit-codex-workflow",
-  "version": "0.9.4",
+  "version": "0.9.5",
   "description": "Reusable Codex workflow harness for project initialization, handover, review, release, and safety checks.",
   "author": {
     "name": "ForgeKit Maintainers"

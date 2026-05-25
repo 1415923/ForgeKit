@@ -208,6 +208,9 @@ function Get-RequiredStacks {
         "csharp-dotnet",
         "go-service",
         "php-laravel",
+        "rust-cli-service",
+        "flutter-dart",
+        "cpp-cmake",
         "fpga-vivado-vitis"
     )
 }
@@ -327,6 +330,9 @@ function Test-PluginDistribution {
     Test-RequiredPath "plugins\forgekit-codex-workflow\assets\templates\csharp-dotnet\README.md"
     Test-RequiredPath "plugins\forgekit-codex-workflow\assets\templates\go-service\README.md"
     Test-RequiredPath "plugins\forgekit-codex-workflow\assets\templates\php-laravel\README.md"
+    Test-RequiredPath "plugins\forgekit-codex-workflow\assets\templates\rust-cli-service\README.md"
+    Test-RequiredPath "plugins\forgekit-codex-workflow\assets\templates\flutter-dart\README.md"
+    Test-RequiredPath "plugins\forgekit-codex-workflow\assets\templates\cpp-cmake\README.md"
     Test-RequiredPath "plugins\forgekit-codex-workflow\assets\questionnaires\README.md"
     Test-RequiredPath "plugins\forgekit-codex-workflow\assets\docs\install.md"
     Test-RequiredPath "plugins\forgekit-codex-workflow\assets\docs\upgrade.md"
@@ -348,7 +354,7 @@ function Test-PluginDistribution {
         if ($pluginJson.name -ne "forgekit-codex-workflow") {
             Add-Error "Unexpected plugin name in plugin.json: $($pluginJson.name)"
         }
-        if ($pluginJson.version -ne "0.9.4") {
+        if ($pluginJson.version -ne "0.9.5") {
             Add-Error "Unexpected plugin version in plugin.json: $($pluginJson.version)"
         }
         $pluginSkillsPath = $pluginJson.PSObject.Properties["skills"].Value
@@ -642,6 +648,9 @@ function Test-PluginDistribution {
     Test-RequiredPath "plugins\forgekit-codex-workflow\assets\templates\csharp-dotnet\README.md"
     Test-RequiredPath "plugins\forgekit-codex-workflow\assets\templates\go-service\README.md"
     Test-RequiredPath "plugins\forgekit-codex-workflow\assets\templates\php-laravel\README.md"
+    Test-RequiredPath "plugins\forgekit-codex-workflow\assets\templates\rust-cli-service\README.md"
+    Test-RequiredPath "plugins\forgekit-codex-workflow\assets\templates\flutter-dart\README.md"
+    Test-RequiredPath "plugins\forgekit-codex-workflow\assets\templates\cpp-cmake\README.md"
     Test-RequiredPath "plugins\forgekit-codex-workflow\assets\questionnaires\README.md"
     Test-RequiredPath "plugins\forgekit-codex-workflow\assets\docs\install.md"
     Test-RequiredPath "plugins\forgekit-codex-workflow\assets\docs\upgrade.md"
@@ -663,7 +672,7 @@ function Test-PluginDistribution {
         if ($pluginJson.name -ne "forgekit-codex-workflow") {
             Add-Error "Unexpected plugin name in plugin.json: $($pluginJson.name)"
         }
-        if ($pluginJson.version -ne "0.9.4") {
+        if ($pluginJson.version -ne "0.9.5") {
             Add-Error "Unexpected plugin version in plugin.json: $($pluginJson.version)"
         }
         $pluginSkillsPath = $pluginJson.PSObject.Properties["skills"].Value

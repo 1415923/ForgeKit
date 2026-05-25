@@ -51,6 +51,9 @@ Available stack values:
 - `csharp-dotnet`
 - `go-service`
 - `php-laravel`
+- `rust-cli-service`
+- `flutter-dart`
+- `cpp-cmake`
 - `fpga-vivado-vitis`
 
 Examples:

@@ -20,6 +20,9 @@
 | `csharp-dotnet/` | C#/.NET、ASP.NET Core、Worker Service | SDK、DI、配置、EF Core、测试、发布 |
 | `go-service/` | Go HTTP API、CLI、微服务、后台任务 | Go modules、包边界、context、并发、测试 |
 | `php-laravel/` | Laravel 后台、业务 CRUD、API 服务 | Composer、Artisan、migration、队列、测试 |
+| `rust-cli-service/` | Rust CLI、系统工具、高性能服务 | Cargo、错误处理、clippy、测试、发布 |
+| `flutter-dart/` | Flutter 跨端 App、移动端、Web、桌面 | Dart、状态管理、平台权限、测试、签名 |
+| `cpp-cmake/` | C++ 库、CLI、算法模块、嵌入式配套 | CMake、编译器、ABI、CTest、依赖 |
 | `fpga-vivado-vitis/` | FPGA、Vivado、Vitis、Vitis HLS | HLS、综合、仿真、板卡、脚本 |
 
 ## 推荐加载方式
@@ -34,6 +37,9 @@
 | C# 企业 API / Worker | `project-template/` + `templates/csharp-dotnet/` |
 | Go 服务 / CLI | `project-template/` + `templates/go-service/` |
 | Laravel 后台 / API | `project-template/` + `templates/php-laravel/` |
+| Rust CLI / Service | `project-template/` + `templates/rust-cli-service/` |
+| Flutter 跨端 App | `project-template/` + `templates/flutter-dart/` |
+| C++ CMake 工程 | `project-template/` + `templates/cpp-cmake/` |
 | FPGA / HLS 项目 | `project-template/` + `templates/fpga-vivado-vitis/` |
 
 ## 脚本加载方式
