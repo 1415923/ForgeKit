@@ -86,6 +86,30 @@ v0.3 之后的重点是把模板从“治理文档集合”推进为更成熟的
 
 `v0.8.0` 开始把文档型 harness 推进为可执行 harness：生成项目内提供本地工具链检测、harness 结构检查、Codex 下一步工作单和更明确的 hook/command 候选，但默认仍不自动启用外部工具或长期服务。
 
+`v0.9.0` 补齐 plugin 分发第一版：新增 `plugins/forgekit-codex-workflow/` 和 `.agents/plugins/marketplace.json`，把稳定 skills、只读脚本和模板资产打包为团队可安装的 Codex plugin。plugin 默认不启用 hook、MCP、外部写操作或公开市场发布。
+
+## Plugin 分发
+
+本仓库提供 repo/team marketplace 示例：
+
+- `.agents/plugins/marketplace.json`
+- `plugins/forgekit-codex-workflow/`
+
+plugin 用于分发 ForgeKit 的 skills、初始化脚本、只读检查脚本和模板资产。它不包含 `user-rules/` 或外部开发记录目录。验证 plugin 包：
+
+```powershell
+powershell -ExecutionPolicy Bypass -File .\plugins\forgekit-codex-workflow\scripts\validate-plugin-assets.ps1
+```
+
+从 plugin 资产初始化烟测项目：
+
+```powershell
+powershell -ExecutionPolicy Bypass -File .\plugins\forgekit-codex-workflow\scripts\init-project-template.ps1 `
+  -TargetPath "D:\tmp\forgekit-plugin-smoke" `
+  -ProjectName "forgekit-plugin-smoke" `
+  -Stacks java-springboot,vue
+```
+
 ## 技术栈按需加载
 
 全局规则只保留跨项目共性。Java、前端、Python、FPGA 等专用规则放在 `templates/`，按项目选择。

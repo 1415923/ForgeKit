@@ -24,6 +24,7 @@ This repository maintains a reusable Codex CLI workflow template.
   - `project-template/.codex/skills.md`
   - `project-template/.agents/skills/README.md`
   - `scripts/validate-template.ps1`
+- Plugin distribution lives under `plugins/forgekit-codex-workflow/` with repo marketplace metadata in `.agents/plugins/marketplace.json`; do not package `user-rules/` or external development records.
 
 ## Harness Rules
 

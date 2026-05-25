@@ -230,18 +230,22 @@ function Test-HarnessEntryConsistency {
     Test-RequiredPattern "README.md" "Agent Harness" "Root README harness section"
     Test-RequiredPattern "README.md" $codebaseMapRef "Root README codebase map reference"
     Test-RequiredPattern "README.md" (Get-LocalToolchainRef) "Root README local toolchain reference"
+    Test-RequiredPattern "README.md" "plugins/forgekit-codex-workflow/" "Root README plugin distribution reference"
     Test-RequiredPattern "project-template\README.md" "governance/agent-harness.md" "Template README harness reference"
     Test-RequiredPattern "project-template\README.md" "governance/large-change-execution.md" "Template README large-change reference"
     Test-RequiredPattern "project-template\README.md" "governance/team-agent-rollout.md" "Template README team rollout reference"
     Test-RequiredPattern "project-template\README.md" "governance/agent-suitability.md" "Template README suitability reference"
+    Test-RequiredPattern "project-template\README.md" "forgekit-codex-workflow" "Template README plugin reference"
     Test-RequiredPattern "project-template\README.md" $codebaseMapRef "Template README codebase map reference"
     Test-RequiredPattern "project-template\README.md" (Get-LocalToolchainRef) "Template README local toolchain reference"
     Test-RequiredPattern "project-template\.codex\skills.md" "governance/agent-harness.md" "Skills harness reference"
     Test-RequiredPattern "project-template\.codex\skills.md" "governance/team-agent-rollout.md" "Skills team rollout reference"
     Test-RequiredPattern "project-template\.agents\skills\README.md" "AGENTS.md" "Skill README AGENTS reference"
     Test-RequiredPattern "project-template\.codex\skills.md" (Get-CodexNextWorkOrderRef) "Skills next work order reference"
+    Test-RequiredPattern "project-template\.codex\skills.md" "forgekit-codex-workflow" "Skills plugin distribution reference"
     Test-RequiredPattern "project-template\.agents\skills\README.md" "detect-local-toolchain.ps1" "Skill README toolchain detector reference"
     Test-RequiredPattern "project-template\.agents\skills\README.md" "run-harness-check.ps1" "Skill README harness check reference"
+    Test-RequiredPattern "project-template\.agents\skills\README.md" "forgekit-codex-workflow" "Skill README plugin distribution reference"
     Test-RequiredPattern "scripts\init-project-template.ps1" "Start Codex from AGENTS.md" "Init script startup guidance"
     Test-RequiredPattern "scripts\init-project-template.ps1" "codebase map" "Init script codebase map guidance"
     Test-RequiredPattern "scripts\init-project-template.ps1" "large-change-execution.md" "Init script large-change guidance"
@@ -255,6 +259,7 @@ function Test-HarnessEntryConsistency {
     Test-RequiredPattern "使用说明.html" "不要默认读取全部" "HTML context guard"
     Test-RequiredPattern "使用说明.html" "detect-local-toolchain.ps1" "HTML executable harness prompt"
     Test-RequiredPattern "使用说明.html" "run-harness-check.ps1" "HTML harness check prompt"
+    Test-RequiredPattern "使用说明.html" "plugins/forgekit-codex-workflow/" "HTML plugin distribution reference"
 }
 
 function Test-ExecutableHarness {
@@ -268,6 +273,74 @@ function Test-ExecutableHarness {
     Test-RequiredPattern "project-template\.codex\commands-catalog.md" "detect-local-toolchain" "Commands catalog toolchain detector"
     Test-RequiredPattern "project-template\.codex\hooks.md" "run-harness-check.ps1" "Hooks harness check"
     Test-RequiredPattern (Get-LocalToolchainPath) "detect-local-toolchain.ps1" "Local toolchain executable detector reference"
+}
+
+function Test-PluginDistribution {
+    $pluginRoot = Join-Path $repoRoot "plugins\forgekit-codex-workflow"
+    Test-RequiredPath ".agents\plugins\marketplace.json"
+    Test-RequiredPath "plugins\forgekit-codex-workflow\.codex-plugin\plugin.json"
+    Test-RequiredPath "plugins\forgekit-codex-workflow\README.md"
+    Test-RequiredPath "plugins\forgekit-codex-workflow\skills\project-init\SKILL.md"
+    Test-RequiredPath "plugins\forgekit-codex-workflow\skills\project-bootstrap-fill\SKILL.md"
+    Test-RequiredPath "plugins\forgekit-codex-workflow\skills\handover-review\SKILL.md"
+    Test-RequiredPath "plugins\forgekit-codex-workflow\skills\code-review\SKILL.md"
+    Test-RequiredPath "plugins\forgekit-codex-workflow\skills\release-check\SKILL.md"
+    Test-RequiredPath "plugins\forgekit-codex-workflow\skills\security-review\SKILL.md"
+    Test-RequiredPath "plugins\forgekit-codex-workflow\scripts\init-project-template.ps1"
+    Test-RequiredPath "plugins\forgekit-codex-workflow\scripts\validate-plugin-assets.ps1"
+    Test-RequiredPath "plugins\forgekit-codex-workflow\scripts\detect-local-toolchain.ps1"
+    Test-RequiredPath "plugins\forgekit-codex-workflow\scripts\run-harness-check.ps1"
+    Test-RequiredPath "plugins\forgekit-codex-workflow\assets\project-template\AGENTS.md"
+    Test-RequiredPath "plugins\forgekit-codex-workflow\assets\templates\java-springboot\README.md"
+    Test-RequiredPath "plugins\forgekit-codex-workflow\assets\questionnaires\README.md"
+
+    if (Test-Path -LiteralPath $pluginRoot) {
+        $forbidden = @("user-rules", "document", ".git")
+        foreach ($item in $forbidden) {
+            if (Test-Path -LiteralPath (Join-Path $pluginRoot $item)) {
+                Add-Error "Forbidden path in plugin package: plugins\forgekit-codex-workflow\$item"
+            }
+        }
+    }
+
+    $pluginJsonPath = Join-Path $repoRoot "plugins\forgekit-codex-workflow\.codex-plugin\plugin.json"
+    if (Test-Path -LiteralPath $pluginJsonPath) {
+        $pluginJson = Get-Content -LiteralPath $pluginJsonPath -Raw | ConvertFrom-Json
+        if ($pluginJson.name -ne "forgekit-codex-workflow") {
+            Add-Error "Unexpected plugin name in plugin.json: $($pluginJson.name)"
+        }
+        if ($pluginJson.version -ne "0.9.0") {
+            Add-Error "Unexpected plugin version in plugin.json: $($pluginJson.version)"
+        }
+        if ($pluginJson.skills -ne "./skills/") {
+            Add-Error "Plugin skills path must be ./skills/"
+        }
+        if ($pluginJson.PSObject.Properties.Name -contains "mcpServers") {
+            Add-Error "Plugin must not enable MCP by default"
+        }
+        if ($pluginJson.PSObject.Properties.Name -contains "hooks") {
+            Add-Error "Plugin must not enable hooks by default"
+        }
+    }
+
+    $marketplacePath = Join-Path $repoRoot ".agents\plugins\marketplace.json"
+    if (Test-Path -LiteralPath $marketplacePath) {
+        $marketplace = Get-Content -LiteralPath $marketplacePath -Raw | ConvertFrom-Json
+        $entry = @($marketplace.plugins | Where-Object { $_.name -eq "forgekit-codex-workflow" })
+        if ($entry.Count -ne 1) {
+            Add-Error "Marketplace must include exactly one forgekit-codex-workflow entry"
+        } else {
+            if ($entry[0].source.path -ne "./plugins/forgekit-codex-workflow") {
+                Add-Error "Marketplace source path must be ./plugins/forgekit-codex-workflow"
+            }
+            if ($entry[0].policy.installation -ne "AVAILABLE") {
+                Add-Error "Marketplace install policy must be AVAILABLE"
+            }
+            if ($entry[0].policy.authentication -ne "ON_INSTALL") {
+                Add-Error "Marketplace auth policy must be ON_INSTALL"
+            }
+        }
+    }
 }
 
 function Test-AgentSuitability {
@@ -419,6 +492,7 @@ Test-LargeChangeProtocol
 Test-TeamToolingProtocol
 Test-AgentSuitability
 Test-ExecutableHarness
+Test-PluginDistribution
 Test-SkillAscii
 Test-SkillFrontmatter
 Test-StaleText

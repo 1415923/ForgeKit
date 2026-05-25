@@ -1,0 +1,34 @@
+{
+  "name": "forgekit-codex-workflow",
+  "version": "0.9.0",
+  "description": "Reusable Codex workflow harness for project initialization, handover, review, release, and safety checks.",
+  "author": {
+    "name": "ForgeKit Maintainers"
+  },
+  "license": "MIT",
+  "keywords": [
+    "codex",
+    "workflow",
+    "harness",
+    "skills",
+    "project-template"
+  ],
+  "skills": "./skills/",
+  "interface": {
+    "displayName": "ForgeKit Codex Workflow",
+    "shortDescription": "Project workflow harness for Codex teams.",
+    "longDescription": "Distributes ForgeKit skills, template assets, and read-only validation scripts for repeatable Codex project workflows.",
+    "developerName": "ForgeKit Maintainers",
+    "category": "Productivity",
+    "capabilities": [
+      "Skills",
+      "Templates",
+      "Local validation"
+    ],
+    "defaultPrompt": [
+      "Initialize a project with ForgeKit workflow.",
+      "Run a handover review with ForgeKit.",
+      "Check this project before release."
+    ]
+  }
+}

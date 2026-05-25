@@ -1,0 +1,20 @@
+{
+  "name": "forgekit-local",
+  "interface": {
+    "displayName": "ForgeKit Local"
+  },
+  "plugins": [
+    {
+      "name": "forgekit-codex-workflow",
+      "source": {
+        "source": "local",
+        "path": "./plugins/forgekit-codex-workflow"
+      },
+      "policy": {
+        "installation": "AVAILABLE",
+        "authentication": "ON_INSTALL"
+      },
+      "category": "Productivity"
+    }
+  ]
+}
