@@ -23,6 +23,10 @@
 | `rust-cli-service/` | Rust CLI、系统工具、高性能服务 | Cargo、错误处理、clippy、测试、发布 |
 | `flutter-dart/` | Flutter 跨端 App、移动端、Web、桌面 | Dart、状态管理、平台权限、测试、签名 |
 | `cpp-cmake/` | C++ 库、CLI、算法模块、嵌入式配套 | CMake、编译器、ABI、CTest、依赖 |
+| `kotlin-spring/` | Kotlin 后端、Spring Boot、Ktor 原型 | 协程、Gradle Kotlin DSL、JPA、测试 |
+| `swift-ios/` | iOS 原生 App、SwiftUI、UIKit | Xcode、签名、权限、测试、发布 |
+| `ruby-rails/` | Rails Web、后台系统、API-only Rails | MVC、migration、队列、缓存、测试 |
+| `r-data-analysis/` | R 数据分析、科研脚本、报表、Shiny | renv、数据、随机种子、报告、可复现 |
 | `fpga-vivado-vitis/` | FPGA、Vivado、Vitis、Vitis HLS | HLS、综合、仿真、板卡、脚本 |
 
 ## 推荐加载方式
@@ -40,6 +44,10 @@
 | Rust CLI / Service | `project-template/` + `templates/rust-cli-service/` |
 | Flutter 跨端 App | `project-template/` + `templates/flutter-dart/` |
 | C++ CMake 工程 | `project-template/` + `templates/cpp-cmake/` |
+| Kotlin 后端 | `project-template/` + `templates/kotlin-spring/` |
+| Swift iOS App | `project-template/` + `templates/swift-ios/` |
+| Rails Web / API | `project-template/` + `templates/ruby-rails/` |
+| R 数据分析 / Shiny | `project-template/` + `templates/r-data-analysis/` |
 | FPGA / HLS 项目 | `project-template/` + `templates/fpga-vivado-vitis/` |
 
 ## 脚本加载方式

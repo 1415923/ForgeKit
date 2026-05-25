@@ -54,6 +54,10 @@ Available stack values:
 - `rust-cli-service`
 - `flutter-dart`
 - `cpp-cmake`
+- `kotlin-spring`
+- `swift-ios`
+- `ruby-rails`
+- `r-data-analysis`
 - `fpga-vivado-vitis`
 
 Examples:

@@ -12,7 +12,7 @@
 - `prompts/`：项目初始化、需求分析、架构设计、代码实现、代码审查、版本发布等对话模板。
 - `checklists/`：项目启动、功能开发、发布前检查清单。
 - `references/`：外部项目和方法论的借鉴评估，目前包含 ECC。
-- `templates/`：按技术栈拆分的项目模板补充，例如 Java、Vue、React、Python、Node、C#/.NET、Go、Laravel、Rust、Flutter、C++、FPGA。
+- `templates/`：按技术栈拆分的项目模板补充，例如 Java、Vue、React、Python、Node、C#/.NET、Go、Laravel、Rust、Flutter、C++、Kotlin、Swift、Rails、R、FPGA。
 - `scripts/`：初始化脚本，例如把模板复制到新项目。
 - `questionnaires/`：项目启动问答表。
 
@@ -98,6 +98,8 @@ v0.3 之后的重点是把模板从“治理文档集合”推进为更成熟的
 
 `v0.9.5` 扩展第二批语言包：新增 Rust CLI/Service、Flutter Dart、C++ CMake 技术栈模板，覆盖系统工具/高性能服务、跨端 App 和 C/C++ 工程。重点记录 Cargo、Flutter SDK、CMake/编译器、签名/证书、unsafe/FFI、ABI、平台差异和大下载/发布动作的确认边界。
 
+`v0.9.6` 扩展第三批语言包：新增 Kotlin Spring、Swift iOS、Ruby Rails、R Data Analysis 技术栈模板，覆盖 JVM Kotlin 后端、iOS 原生、Rails Web/API 和 R 可复现分析。重点记录协程、Xcode 签名、Rails migration/队列、多数据库、renv、隐私数据和报告渲染边界。
+
 ## Plugin 分发
 
 本仓库提供 repo/team marketplace 示例：
@@ -122,7 +124,7 @@ powershell -ExecutionPolicy Bypass -File .\plugins\forgekit-codex-workflow\scrip
 
 ## 技术栈按需加载
 
-全局规则只保留跨项目共性。Java、前端、Python、Node、C#/.NET、Go、Laravel、Rust、Flutter、C++、FPGA 等专用规则放在 `templates/`，按项目选择。
+全局规则只保留跨项目共性。Java、前端、Python、Node、C#/.NET、Go、Laravel、Rust、Flutter、C++、Kotlin、Swift、Rails、R、FPGA 等专用规则放在 `templates/`，按项目选择。
 
 例如：
 
@@ -134,6 +136,10 @@ powershell -ExecutionPolicy Bypass -File .\plugins\forgekit-codex-workflow\scrip
 - Rust CLI / Service：加载 `project-template/` + `templates/rust-cli-service/`。
 - Flutter 跨端 App：加载 `project-template/` + `templates/flutter-dart/`。
 - C++ CMake 工程：加载 `project-template/` + `templates/cpp-cmake/`。
+- Kotlin 后端：加载 `project-template/` + `templates/kotlin-spring/`。
+- Swift iOS App：加载 `project-template/` + `templates/swift-ios/`。
+- Rails Web / API：加载 `project-template/` + `templates/ruby-rails/`。
+- R 数据分析 / Shiny：加载 `project-template/` + `templates/r-data-analysis/`。
 - FPGA 项目：加载 `project-template/` + `templates/fpga-vivado-vitis/`。
 
 不要让 Java 项目读取 FPGA 规则，也不要让 Laravel 项目读取 C# 规则；只加载当前项目实际需要的 stack，避免 context rot。

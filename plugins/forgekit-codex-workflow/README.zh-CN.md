@@ -10,7 +10,7 @@
 - `scripts/detect-local-toolchain.ps1`：只读检测本地工具链。
 - `scripts/run-harness-check.ps1`：只读检查生成项目的 harness 入口。
 - `assets/project-template/`：生成项目时使用的基础模板。
-- `assets/templates/`：Java、Vue、React、Python、Node、C#/.NET、Go、Laravel、Rust、Flutter、C++、FPGA 等技术栈模板。
+- `assets/templates/`：Java、Vue、React、Python、Node、C#/.NET、Go、Laravel、Rust、Flutter、C++、Kotlin、Swift、Rails、R、FPGA 等技术栈模板。
 - `assets/docs/`：安装、升级、安全和真实项目试用反馈说明。
 
 ## 不包含内容
@@ -55,6 +55,10 @@ powershell -ExecutionPolicy Bypass -File .\scripts\init-project-template.ps1 `
 - `rust-cli-service`：Rust CLI、系统工具、高性能服务。
 - `flutter-dart`：Flutter 跨端 App、移动端、Web、桌面。
 - `cpp-cmake`：C++ 库、CLI、算法模块、CMake 工程。
+- `kotlin-spring`：Kotlin 后端、Spring Boot、Ktor 原型。
+- `swift-ios`：iOS 原生 App、SwiftUI、UIKit。
+- `ruby-rails`：Rails Web、后台系统、API-only Rails。
+- `r-data-analysis`：R 数据分析、报表、Shiny、可复现项目。
 - `fpga-vivado-vitis`：FPGA、Vivado、Vitis、Vitis HLS 项目。
 
 常见示例：

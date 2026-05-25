@@ -78,7 +78,7 @@ function Test-PluginManifest {
     if ($manifest.name -ne "forgekit-codex-workflow") {
         Add-Error "Unexpected plugin name: $($manifest.name)"
     }
-    if ($manifest.version -ne "0.9.5") {
+    if ($manifest.version -ne "0.9.6") {
         Add-Error "Unexpected plugin version: $($manifest.version)"
     }
     if ($manifest.skills -ne "./skills/") {
@@ -116,6 +116,10 @@ Test-RequiredPath "assets\templates\php-laravel\README.md"
 Test-RequiredPath "assets\templates\rust-cli-service\README.md"
 Test-RequiredPath "assets\templates\flutter-dart\README.md"
 Test-RequiredPath "assets\templates\cpp-cmake\README.md"
+Test-RequiredPath "assets\templates\kotlin-spring\README.md"
+Test-RequiredPath "assets\templates\swift-ios\README.md"
+Test-RequiredPath "assets\templates\ruby-rails\README.md"
+Test-RequiredPath "assets\templates\r-data-analysis\README.md"
 Test-RequiredPath "assets\questionnaires\README.md"
 Test-RequiredPath "assets\docs\install.md"
 Test-RequiredPath "assets\docs\upgrade.md"
