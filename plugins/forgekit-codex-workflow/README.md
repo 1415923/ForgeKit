@@ -21,7 +21,56 @@ Chinese documentation: [README.zh-CN.md](README.zh-CN.md).
 
 ## Initialize A Project
 
-From this plugin directory:
+Run the initializer from this plugin directory. The script copies ForgeKit template files into
+your target project directory and optionally copies selected stack templates into
+`.codex/stacks/<stack>/`.
+
+General form:
+
+```powershell
+powershell -ExecutionPolicy Bypass -File .\scripts\init-project-template.ps1 `
+  -TargetPath "<absolute path to your project>" `
+  -ProjectName "<project name>" `
+  -Stacks <stack-1>,<stack-2>
+```
+
+Parameters:
+
+- `-TargetPath`: Required. The project directory to initialize. Use an absolute path.
+- `-ProjectName`: Optional but recommended. Written into `.codex/init.generated.md`.
+- `-Stacks`: Optional. Comma-separated stack templates to add under `.codex/stacks/`.
+- `-Force`: Optional. Overwrites existing template files. Omit it for normal first-time use.
+
+Available stack values:
+
+- `java-springboot`
+- `vue`
+- `react`
+- `python-fastapi`
+- `node-express`
+- `fpga-vivado-vitis`
+
+Examples:
+
+Java + Vue full-stack project:
+
+```powershell
+powershell -ExecutionPolicy Bypass -File .\scripts\init-project-template.ps1 `
+  -TargetPath "D:\JAVA-code\my-business-app" `
+  -ProjectName "my-business-app" `
+  -Stacks java-springboot,vue
+```
+
+Python FastAPI project:
+
+```powershell
+powershell -ExecutionPolicy Bypass -File .\scripts\init-project-template.ps1 `
+  -TargetPath "D:\projects\my-api" `
+  -ProjectName "my-api" `
+  -Stacks python-fastapi
+```
+
+Smoke-test example:
 
 ```powershell
 powershell -ExecutionPolicy Bypass -File .\scripts\init-project-template.ps1 `

@@ -24,7 +24,54 @@
 
 ## 初始化项目
 
-在 plugin 目录下运行：
+在 plugin 目录下运行初始化脚本。这个脚本会把 ForgeKit 的基础模板复制到目标项目目录，并按你选择的技术栈把模板放到目标项目的 `.codex/stacks/<stack>/` 下。
+
+通用命令格式：
+
+```powershell
+powershell -ExecutionPolicy Bypass -File .\scripts\init-project-template.ps1 `
+  -TargetPath "<你的项目绝对路径>" `
+  -ProjectName "<项目名称>" `
+  -Stacks <技术栈1>,<技术栈2>
+```
+
+参数说明：
+
+- `-TargetPath`：必填。要初始化的项目目录，建议使用绝对路径。
+- `-ProjectName`：可选但建议填写。会写入 `.codex/init.generated.md`。
+- `-Stacks`：可选。要加入的技术栈模板，多个值用英文逗号分隔。
+- `-Force`：可选。覆盖已有模板文件。首次初始化普通项目时不要加。
+
+可选技术栈：
+
+- `java-springboot`：Java Spring Boot 后端。
+- `vue`：Vue/Vite 前端。
+- `react`：React 前端。
+- `python-fastapi`：Python FastAPI 服务。
+- `node-express`：Node.js / Express 后端。
+- `fpga-vivado-vitis`：FPGA、Vivado、Vitis、Vitis HLS 项目。
+
+常见示例：
+
+Java + Vue 前后端项目：
+
+```powershell
+powershell -ExecutionPolicy Bypass -File .\scripts\init-project-template.ps1 `
+  -TargetPath "D:\JAVA-code\my-business-app" `
+  -ProjectName "my-business-app" `
+  -Stacks java-springboot,vue
+```
+
+Python FastAPI 项目：
+
+```powershell
+powershell -ExecutionPolicy Bypass -File .\scripts\init-project-template.ps1 `
+  -TargetPath "D:\projects\my-api" `
+  -ProjectName "my-api" `
+  -Stacks python-fastapi
+```
+
+烟测示例：
 
 ```powershell
 powershell -ExecutionPolicy Bypass -File .\scripts\init-project-template.ps1 `
