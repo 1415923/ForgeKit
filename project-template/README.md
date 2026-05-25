@@ -55,6 +55,8 @@
 
 使用优先级：`AGENTS.md` -> `docs/代码库地图.md` -> `docs/本地工具链检查.md` -> `docs/Codex下一步工作单.md` -> `.codex/` -> 相关 `.codex/stacks/<stack>/` -> 任务相关治理文件。不要默认读取全部治理文档。
 
+常见 stack 名称：`java-springboot`、`vue`、`react`、`python-fastapi`、`node-express`、`csharp-dotnet`、`go-service`、`php-laravel`、`fpga-vivado-vitis`。只读取当前项目实际选择的 stack，避免把无关语言规则混入上下文。
+
 大任务优先级：先完成 `docs/探索报告.md`，再完成 `docs/实施计划.md`，确认后才进入分阶段编码。
 
 团队工具链优先级：先沉淀 command，再考虑 hook；跨项目稳定后再考虑 plugin；MCP 默认只读优先，写操作必须人工确认。

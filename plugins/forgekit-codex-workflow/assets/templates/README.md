@@ -17,6 +17,9 @@
 | `react/` | React、Vite/Next 风格前端 | 组件、hooks、状态、路由、测试 |
 | `python-fastapi/` | Python API、FastAPI、脚本服务 | 虚拟环境、依赖、API、pytest |
 | `node-express/` | Node.js 后端、Express API | npm/pnpm、路由、中间件、测试 |
+| `csharp-dotnet/` | C#/.NET、ASP.NET Core、Worker Service | SDK、DI、配置、EF Core、测试、发布 |
+| `go-service/` | Go HTTP API、CLI、微服务、后台任务 | Go modules、包边界、context、并发、测试 |
+| `php-laravel/` | Laravel 后台、业务 CRUD、API 服务 | Composer、Artisan、migration、队列、测试 |
 | `fpga-vivado-vitis/` | FPGA、Vivado、Vitis、Vitis HLS | HLS、综合、仿真、板卡、脚本 |
 
 ## 推荐加载方式
@@ -28,6 +31,9 @@
 | React 前端 | `project-template/` + `templates/react/` |
 | Python API | `project-template/` + `templates/python-fastapi/` |
 | Node 后端 | `project-template/` + `templates/node-express/` |
+| C# 企业 API / Worker | `project-template/` + `templates/csharp-dotnet/` |
+| Go 服务 / CLI | `project-template/` + `templates/go-service/` |
+| Laravel 后台 / API | `project-template/` + `templates/php-laravel/` |
 | FPGA / HLS 项目 | `project-template/` + `templates/fpga-vivado-vitis/` |
 
 ## 脚本加载方式

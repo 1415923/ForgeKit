@@ -12,7 +12,7 @@
 - `prompts/`：项目初始化、需求分析、架构设计、代码实现、代码审查、版本发布等对话模板。
 - `checklists/`：项目启动、功能开发、发布前检查清单。
 - `references/`：外部项目和方法论的借鉴评估，目前包含 ECC。
-- `templates/`：按技术栈拆分的项目模板补充，例如 Java、Vue、React、Python、Node、FPGA。
+- `templates/`：按技术栈拆分的项目模板补充，例如 Java、Vue、React、Python、Node、C#/.NET、Go、Laravel、FPGA。
 - `scripts/`：初始化脚本，例如把模板复制到新项目。
 - `questionnaires/`：项目启动问答表。
 
@@ -94,6 +94,8 @@ v0.3 之后的重点是把模板从“治理文档集合”推进为更成熟的
 
 `v0.9.3` 强化新项目执行门禁：方案商讨必须作为独立阶段，编码、依赖安装、Git 初始化、commit、push、部署或外部写操作前，必须先在会话中展示执行前确认摘要并等待用户明确确认完整方案。
 
+`v0.9.4` 扩展第一批主流语言包：新增 C#/.NET、Go Service、PHP Laravel 技术栈模板，并吸收 AGENTS.md、Microsoft skills、Arc、Superpowers、BMAD、YAAH、Harness Skills、CodeAlive 等项目的低风险实践：按需加载、初始化追问、最小验证命令、危险命令确认和共享输出契约意识。默认仍不启用 MCP、hook、session tracking 或多 agent 运行时。
+
 ## Plugin 分发
 
 本仓库提供 repo/team marketplace 示例：
@@ -118,15 +120,18 @@ powershell -ExecutionPolicy Bypass -File .\plugins\forgekit-codex-workflow\scrip
 
 ## 技术栈按需加载
 
-全局规则只保留跨项目共性。Java、前端、Python、FPGA 等专用规则放在 `templates/`，按项目选择。
+全局规则只保留跨项目共性。Java、前端、Python、Node、C#/.NET、Go、Laravel、FPGA 等专用规则放在 `templates/`，按项目选择。
 
 例如：
 
 - Java 后端项目：加载 `project-template/` + `templates/java-springboot/`。
 - Java + Vue 项目：加载 `project-template/` + `templates/java-springboot/` + `templates/vue/`。
+- C# 企业 API / Worker：加载 `project-template/` + `templates/csharp-dotnet/`。
+- Go 服务 / CLI：加载 `project-template/` + `templates/go-service/`。
+- Laravel 后台 / API：加载 `project-template/` + `templates/php-laravel/`。
 - FPGA 项目：加载 `project-template/` + `templates/fpga-vivado-vitis/`。
 
-不要让 Java 项目读取 FPGA 规则，也不要让 FPGA 项目读取前端规则。
+不要让 Java 项目读取 FPGA 规则，也不要让 Laravel 项目读取 C# 规则；只加载当前项目实际需要的 stack，避免 context rot。
 
 ## 初始化脚本示例
 

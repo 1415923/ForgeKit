@@ -198,6 +198,20 @@ function Get-ProjectPlanPath {
     return "project-template\docs\$name.md"
 }
 
+function Get-RequiredStacks {
+    return @(
+        "java-springboot",
+        "vue",
+        "react",
+        "python-fastapi",
+        "node-express",
+        "csharp-dotnet",
+        "go-service",
+        "php-laravel",
+        "fpga-vivado-vitis"
+    )
+}
+
 function Test-AgentsHarness {
     $agentsFiles = @(
         "AGENTS.md",
@@ -310,6 +324,9 @@ function Test-PluginDistribution {
     Test-RequiredPath "plugins\forgekit-codex-workflow\scripts\run-harness-check.ps1"
     Test-RequiredPath "plugins\forgekit-codex-workflow\assets\project-template\AGENTS.md"
     Test-RequiredPath "plugins\forgekit-codex-workflow\assets\templates\java-springboot\README.md"
+    Test-RequiredPath "plugins\forgekit-codex-workflow\assets\templates\csharp-dotnet\README.md"
+    Test-RequiredPath "plugins\forgekit-codex-workflow\assets\templates\go-service\README.md"
+    Test-RequiredPath "plugins\forgekit-codex-workflow\assets\templates\php-laravel\README.md"
     Test-RequiredPath "plugins\forgekit-codex-workflow\assets\questionnaires\README.md"
     Test-RequiredPath "plugins\forgekit-codex-workflow\assets\docs\install.md"
     Test-RequiredPath "plugins\forgekit-codex-workflow\assets\docs\upgrade.md"
@@ -331,7 +348,7 @@ function Test-PluginDistribution {
         if ($pluginJson.name -ne "forgekit-codex-workflow") {
             Add-Error "Unexpected plugin name in plugin.json: $($pluginJson.name)"
         }
-        if ($pluginJson.version -ne "0.9.3") {
+        if ($pluginJson.version -ne "0.9.4") {
             Add-Error "Unexpected plugin version in plugin.json: $($pluginJson.version)"
         }
         $pluginSkillsPath = $pluginJson.PSObject.Properties["skills"].Value
@@ -426,14 +443,7 @@ function Test-LargeChangeProtocol {
 }
 
 function Test-StackHarnessDetails {
-    $requiredStacks = @(
-        "java-springboot",
-        "vue",
-        "react",
-        "python-fastapi",
-        "node-express",
-        "fpga-vivado-vitis"
-    )
+    $requiredStacks = Get-RequiredStacks
     foreach ($stack in $requiredStacks) {
         $readme = "templates\$stack\README.md"
         $commands = "templates\$stack\commands.md"
@@ -456,14 +466,7 @@ function Test-StackHarnessDetails {
 }
 
 function Test-StackTemplates {
-    $requiredStacks = @(
-        "java-springboot",
-        "vue",
-        "react",
-        "python-fastapi",
-        "node-express",
-        "fpga-vivado-vitis"
-    )
+    $requiredStacks = Get-RequiredStacks
     foreach ($stack in $requiredStacks) {
         Test-RequiredPath "templates\$stack\README.md"
         Test-RequiredPath "templates\$stack\commands.md"
@@ -501,14 +504,7 @@ function Test-StaleText {
 }
 
 function Test-StackTemplates {
-    $requiredStacks = @(
-        "java-springboot",
-        "vue",
-        "react",
-        "python-fastapi",
-        "node-express",
-        "fpga-vivado-vitis"
-    )
+    $requiredStacks = Get-RequiredStacks
     foreach ($stack in $requiredStacks) {
         Test-RequiredPath "templates\$stack\README.md"
         Test-RequiredPath "templates\$stack\commands.md"
@@ -531,14 +527,7 @@ function Test-PromptTemplates {
 }
 
 function Test-StackHarnessDetails {
-    $requiredStacks = @(
-        "java-springboot",
-        "vue",
-        "react",
-        "python-fastapi",
-        "node-express",
-        "fpga-vivado-vitis"
-    )
+    $requiredStacks = Get-RequiredStacks
     foreach ($stack in $requiredStacks) {
         $readme = "templates\$stack\README.md"
         $commands = "templates\$stack\commands.md"
@@ -650,6 +639,9 @@ function Test-PluginDistribution {
     Test-RequiredPath "plugins\forgekit-codex-workflow\scripts\run-harness-check.ps1"
     Test-RequiredPath "plugins\forgekit-codex-workflow\assets\project-template\AGENTS.md"
     Test-RequiredPath "plugins\forgekit-codex-workflow\assets\templates\java-springboot\README.md"
+    Test-RequiredPath "plugins\forgekit-codex-workflow\assets\templates\csharp-dotnet\README.md"
+    Test-RequiredPath "plugins\forgekit-codex-workflow\assets\templates\go-service\README.md"
+    Test-RequiredPath "plugins\forgekit-codex-workflow\assets\templates\php-laravel\README.md"
     Test-RequiredPath "plugins\forgekit-codex-workflow\assets\questionnaires\README.md"
     Test-RequiredPath "plugins\forgekit-codex-workflow\assets\docs\install.md"
     Test-RequiredPath "plugins\forgekit-codex-workflow\assets\docs\upgrade.md"
@@ -671,7 +663,7 @@ function Test-PluginDistribution {
         if ($pluginJson.name -ne "forgekit-codex-workflow") {
             Add-Error "Unexpected plugin name in plugin.json: $($pluginJson.name)"
         }
-        if ($pluginJson.version -ne "0.9.3") {
+        if ($pluginJson.version -ne "0.9.4") {
             Add-Error "Unexpected plugin version in plugin.json: $($pluginJson.version)"
         }
         $pluginSkillsPath = $pluginJson.PSObject.Properties["skills"].Value

@@ -317,6 +317,18 @@
               <span><span class="stack-title">Node Express</span><span class="stack-desc">Node.js 后端、Express API、路由、中间件。</span></span>
             </label>
             <label class="stack">
+              <input type="checkbox" value="csharp-dotnet">
+              <span><span class="stack-title">C# .NET</span><span class="stack-desc">ASP.NET Core API、Worker Service、企业后端。</span></span>
+            </label>
+            <label class="stack">
+              <input type="checkbox" value="go-service">
+              <span><span class="stack-title">Go Service</span><span class="stack-desc">Go API、CLI、微服务、后台任务、并发服务。</span></span>
+            </label>
+            <label class="stack">
+              <input type="checkbox" value="php-laravel">
+              <span><span class="stack-title">PHP Laravel</span><span class="stack-desc">Laravel 后台、CRUD、API、队列、migration。</span></span>
+            </label>
+            <label class="stack">
               <input type="checkbox" value="fpga-vivado-vitis">
               <span><span class="stack-title">FPGA Vivado/Vitis</span><span class="stack-desc">FPGA、Vivado、Vitis、Vitis HLS、板卡验证。</span></span>
             </label>
@@ -340,7 +352,7 @@
           <pre><code id="startupOutput"></code></pre>
 
           <h3>常见组合</h3>
-          <p class="muted">普通 Java 前后端项目选 <code>java-springboot</code> + <code>vue</code>。只有后端只选 Java；只有前端只选 Vue 或 React；FPGA 项目只选 FPGA 模板，除非确实还有软件端。</p>
+          <p class="muted">普通 Java 前后端项目选 <code>java-springboot</code> + <code>vue</code>。C# 企业 API 选 <code>csharp-dotnet</code>；Go 服务或 CLI 选 <code>go-service</code>；Laravel 后台或 API 选 <code>php-laravel</code>。只选实际需要的模板，避免无关规则进入上下文。</p>
 
           <h3>Plugin 分发</h3>
           <p class="muted">v0.9.0 提供 <code>plugins/forgekit-codex-workflow/</code> 和 <code>.agents/plugins/marketplace.json</code>，用于团队分发稳定 skills、模板资产和只读检查脚本。plugin 不包含 <code>user-rules/</code> 或外部开发记录，也不默认启用 hook、MCP 或外部写操作。</p>
@@ -370,6 +382,9 @@
                 <option>React 前端项目</option>
                 <option>Python API 项目</option>
                 <option>Node 后端项目</option>
+                <option>C# .NET API / Worker 项目</option>
+                <option>Go 服务 / CLI 项目</option>
+                <option>Laravel 后台 / API 项目</option>
                 <option>FPGA / HLS 项目</option>
                 <option>其他</option>
               </select>
@@ -532,6 +547,9 @@
         'react': 'React：从前端模块根目录启动，优先找 package.json / src / 路由配置。',
         'python-fastapi': 'Python FastAPI：从 API 模块根目录启动，优先找 pyproject.toml / requirements.txt / app。',
         'node-express': 'Node Express：从 Node 服务根目录启动，优先找 package.json / src / 路由配置。',
+        'csharp-dotnet': 'C# .NET：从解决方案或项目根目录启动，优先找 .sln / .csproj / Program.cs。',
+        'go-service': 'Go Service：从 go.mod 所在模块根目录启动，优先找 cmd / internal / pkg / *_test.go。',
+        'php-laravel': 'PHP Laravel：从 artisan 所在项目根目录启动，优先找 routes / app / database / tests。',
         'fpga-vivado-vitis': 'FPGA Vivado/Vitis：从硬件工程根目录启动，优先找 Vivado/Vitis 工程、HLS 工程和仿真脚本。'
       };
       const selected = selectedStacks();

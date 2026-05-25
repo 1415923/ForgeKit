@@ -48,6 +48,9 @@ Available stack values:
 - `react`
 - `python-fastapi`
 - `node-express`
+- `csharp-dotnet`
+- `go-service`
+- `php-laravel`
 - `fpga-vivado-vitis`
 
 Examples:
