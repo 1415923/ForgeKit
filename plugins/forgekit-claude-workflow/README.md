@@ -10,15 +10,18 @@ ForgeKit is not an app framework, code scaffold, or deployment tool. It helps Cl
 
 ## What This Version Does
 
-`v0.11.0` provides the Claude Code plugin package:
+`v0.11.1` provides the Claude Code plugin package and generated-project entry:
 
 - `.claude-plugin/plugin.json` for Claude Code plugin discovery.
 - ForgeKit workflow skills under `skills/`.
 - Shared template assets under `assets/`.
-- Read-only validation and inspection scripts under `scripts/`.
+- Initialization, read-only validation, and inspection scripts under `scripts/`.
 - Separate package validation with `scripts/validate-plugin-assets.ps1`.
+- `CLAUDE.md` and `.claude/skills/forgekit-project-workflow/` for the generated project's Claude Code entry.
 
 This version does not enable hooks, MCP, subagents, slash commands, deployment, issue writes, Git writes, or external automation by default.
+
+The Claude entry follows an ECC-style "shared core assets plus thin tool entry" approach. `.claude/skills/forgekit-project-workflow/` only routes and gates work; project facts still live in `.codex/`, `docs/`, and `governance/`.
 
 ## Boundary With ECC
 
@@ -48,7 +51,15 @@ The manifest is:
 plugins/forgekit-claude-workflow/.claude-plugin/plugin.json
 ```
 
-### Step 2: Start Claude Code in your project
+### Step 2: Generate the project entry
+
+```powershell
+powershell -ExecutionPolicy Bypass -File .\scripts\init-project-template.ps1 -TargetPath "D:\projects\my-app" -ProjectName "my-app" -Mode Standard
+```
+
+This generates `CLAUDE.md` and `.claude/skills/forgekit-project-workflow/`, while keeping shared project facts in `.codex/`, `docs/`, and `governance/`.
+
+### Step 3: Start Claude Code in your project
 
 ```powershell
 cd D:\projects\my-app
@@ -57,7 +68,7 @@ claude
 
 If your Claude Code command is different, use your normal command. The important part is that the working directory is the project root.
 
-### Step 3: Ask Claude Code to use ForgeKit
+### Step 4: Ask Claude Code to use ForgeKit
 
 ```text
 Use ForgeKit to initialize or review this project. Start by clarifying discovery state before implementation.
@@ -108,4 +119,4 @@ forgekit-claude-workflow/
 
 ## Roadmap Boundary
 
-This is the first Claude Code distribution layer. Native generated-project support for `CLAUDE.md` and `.claude/skills/` is planned as a later step.
+This is the Claude Code project-entry adapter, not an ECC-style runtime enhancement layer. ForgeKit does not enable hooks, MCP, subagents, or slash commands by default.

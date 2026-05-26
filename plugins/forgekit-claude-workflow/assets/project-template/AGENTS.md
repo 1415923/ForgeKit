@@ -2,6 +2,8 @@
 
 This file is the first lightweight entry point for Codex in this project. Use it to avoid loading the entire governance set into context.
 
+Claude Code users should start from `CLAUDE.md`; both entry files route to the same project facts under `.codex/`, `docs/`, and `governance/`.
+
 Keep this file short. Put stable workflows in skills, stack-specific rules in `.codex/stacks/`, and detailed governance in `governance/`.
 
 ## Startup Order

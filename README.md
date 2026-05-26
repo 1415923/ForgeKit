@@ -126,6 +126,8 @@ v0.3 之后的重点是把模板从“治理文档集合”推进为更成熟的
 
 `v0.11.0` 新增 Claude Code 并列分发包：`plugins/forgekit-claude-workflow/` 提供 `.claude-plugin/plugin.json`、ForgeKit skills、共享模板资产和独立校验脚本；仓库根目录新增 `.claude-plugin/marketplace.json` 作为本地 Claude Code marketplace 示例。此版本不默认启用 hook、MCP、subagent、slash command 或外部自动化。
 
+`v0.11.1` 补齐 Claude Code 生成项目入口：新增 `CLAUDE.md` 和 `.claude/skills/forgekit-project-workflow/` 轻量入口 skill，并恢复 Claude plugin 初始化脚本。该入口按 ECC 式“共享核心资产 + 工具薄入口”思路设计，不复制全量 skills，项目事实仍集中在 `.codex/`、`docs/` 和 `governance/`。
+
 ## Plugin 分发
 
 本仓库提供 repo/team marketplace 示例：
@@ -152,7 +154,7 @@ Claude Code 并列分发包位于：
 powershell -ExecutionPolicy Bypass -File .\plugins\forgekit-claude-workflow\scripts\validate-plugin-assets.ps1
 ```
 
-`0.11.0` 只提供 Claude Code plugin 分发层，生成项目里的 `CLAUDE.md` 和 `.claude/skills/` 原生入口放到后续版本推进。
+`0.11.1` 起 Claude Code plugin 可以生成带 `CLAUDE.md` 和 `.claude/skills/forgekit-project-workflow/` 的项目入口。
 
 从 plugin 资产初始化烟测项目：
 

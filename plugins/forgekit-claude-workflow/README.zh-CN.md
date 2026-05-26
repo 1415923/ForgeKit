@@ -10,15 +10,18 @@ ForgeKit 不是业务框架脚手架，也不是自动部署工具。它让 Clau
 
 ## 当前版本做什么
 
-`v0.11.0` 提供 Claude Code plugin 分发包：
+`v0.11.1` 提供 Claude Code plugin 分发包和生成项目入口：
 
 - `.claude-plugin/plugin.json`，用于 Claude Code plugin 发现。
 - `skills/`，包含 ForgeKit 工作流 skills。
 - `assets/`，包含共享模板资产。
-- `scripts/`，包含只读检测和校验脚本。
+- `scripts/`，包含初始化、只读检测和校验脚本。
 - `scripts/validate-plugin-assets.ps1`，用于独立校验 Claude 分发包。
+- `CLAUDE.md` 和 `.claude/skills/forgekit-project-workflow/`，用于生成项目的 Claude Code 第一入口。
 
 这一版不会默认启用 hook、MCP、subagent、slash command、部署、issue 写入、Git 写入或外部自动化。
+
+Claude 入口按 ECC 式“共享核心资产 + 工具薄入口”思路设计：`.claude/skills/forgekit-project-workflow/` 只负责路由和门禁，不复制全量 skills；项目事实仍集中写入 `.codex/`、`docs/` 和 `governance/`。
 
 ## 与 ECC 的边界
 
@@ -48,7 +51,15 @@ manifest 位置是：
 plugins/forgekit-claude-workflow/.claude-plugin/plugin.json
 ```
 
-### 第二步：在目标项目启动 Claude Code
+### 第二步：生成项目入口
+
+```powershell
+powershell -ExecutionPolicy Bypass -File .\scripts\init-project-template.ps1 -TargetPath "D:\projects\my-app" -ProjectName "my-app" -Mode Standard
+```
+
+这会生成 `CLAUDE.md` 和 `.claude/skills/forgekit-project-workflow/`，同时保留共享的 `.codex/`、`docs/` 和 `governance/` 项目事实目录。
+
+### 第三步：在目标项目启动 Claude Code
 
 ```powershell
 cd D:\projects\my-app
@@ -57,7 +68,7 @@ claude
 
 如果你的 Claude Code 启动命令不是 `claude`，就用你平时的启动方式；关键是工作目录必须是目标项目根目录。
 
-### 第三步：让 Claude Code 使用 ForgeKit
+### 第四步：让 Claude Code 使用 ForgeKit
 
 ```text
 请使用 ForgeKit 初始化或审查这个项目。实现前先确认 discovery state。
@@ -108,4 +119,4 @@ forgekit-claude-workflow/
 
 ## 路线边界
 
-这是 Claude Code 的第一层分发适配。生成项目里的 `CLAUDE.md` 和 `.claude/skills/` 原生入口放到后续版本推进。
+这是 Claude Code 的项目入口适配，不是 ECC 式运行时增强层。ForgeKit 不默认启用 hook、MCP、subagent 或 slash command。

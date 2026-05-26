@@ -75,11 +75,14 @@ function Test-PluginManifest {
     if ($manifest.name -ne "forgekit-claude-workflow") {
         Add-Error "Unexpected plugin name: $($manifest.name)"
     }
-    if ($manifest.version -ne "0.11.0") {
+    if ($manifest.version -ne "0.11.1") {
         Add-Error "Unexpected plugin version: $($manifest.version)"
     }
     if ([string]::IsNullOrWhiteSpace($manifest.description)) {
         Add-Error "Plugin manifest must include description"
+    }
+    if (-not ($manifest.PSObject.Properties.Name -contains "skills")) {
+        Add-Error "Plugin manifest must expose skills"
     }
     if ($manifest.PSObject.Properties.Name -contains "mcpServers") {
         Add-Error "Claude plugin must not enable MCP by default"
@@ -98,10 +101,13 @@ Test-RequiredPath "skills\handover-review\SKILL.md"
 Test-RequiredPath "skills\code-review\SKILL.md"
 Test-RequiredPath "skills\release-check\SKILL.md"
 Test-RequiredPath "skills\security-review\SKILL.md"
+Test-RequiredPath "scripts\init-project-template.ps1"
 Test-RequiredPath "scripts\validate-plugin-assets.ps1"
 Test-RequiredPath "scripts\detect-local-toolchain.ps1"
 Test-RequiredPath "scripts\run-harness-check.ps1"
 Test-RequiredPath "assets\project-template\AGENTS.md"
+Test-RequiredPath "assets\project-template\CLAUDE.md"
+Test-RequiredPath "assets\project-template\.claude\skills\forgekit-project-workflow\SKILL.md"
 Test-RequiredPath "assets\project-template\.codex\stacks\README.md"
 Test-RequiredPath "assets\templates\java-springboot\README.md"
 Test-RequiredPath "assets\templates\vue\README.md"
@@ -119,6 +125,12 @@ if (-not (Select-String -Path (Join-Path $pluginRoot 'README.md') -Pattern '.cla
 if (-not (Select-String -Path (Join-Path $pluginRoot 'README.zh-CN.md') -Pattern '.claude-plugin/plugin.json' -SimpleMatch -Quiet)) {
     Add-Error "Chinese README must explain Claude plugin manifest path"
 }
+if (-not (Select-String -Path (Join-Path $pluginRoot 'README.md') -Pattern 'init-project-template.ps1' -SimpleMatch -Quiet)) {
+    Add-Error "English README must show Claude initializer"
+}
+if (-not (Select-String -Path (Join-Path $pluginRoot 'README.zh-CN.md') -Pattern 'init-project-template.ps1' -SimpleMatch -Quiet)) {
+    Add-Error "Chinese README must show Claude initializer"
+}
 
 $projectInitSkill = Join-Path $pluginRoot 'skills\project-init\SKILL.md'
 if (-not (Select-String -Path $projectInitSkill -Pattern 'Classify the discovery state' -SimpleMatch -Quiet)) {
@@ -129,6 +141,7 @@ if (-not (Select-String -Path $projectInitSkill -Pattern 'existing-project-scan'
 }
 
 Test-ForbiddenPath ".codex-plugin"
+Test-ForbiddenPath "assets\project-template\.claude\skills\project-init"
 Test-ForbiddenPath "user-rules"
 Test-ForbiddenPath "document"
 Test-ForbiddenPath ".git"

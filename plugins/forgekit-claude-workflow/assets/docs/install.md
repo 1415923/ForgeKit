@@ -19,4 +19,13 @@ After installing or loading the plugin, verify the package from the repository r
 powershell -ExecutionPolicy Bypass -File .\plugins\forgekit-claude-workflow\scripts\validate-plugin-assets.ps1
 ```
 
-Version `0.11.0` distributes Claude Code skills and shared ForgeKit assets only. Native generated-project support for `CLAUDE.md` and `.claude/skills/` is planned for a later version.
+Generate a Claude-ready project entry:
+
+```powershell
+powershell -ExecutionPolicy Bypass -File .\plugins\forgekit-claude-workflow\scripts\init-project-template.ps1 `
+  -TargetPath "D:\tmp\forgekit-claude-smoke" `
+  -ProjectName "forgekit-claude-smoke" `
+  -Mode Standard
+```
+
+Version `0.11.1` generates `CLAUDE.md` and `.claude/skills/forgekit-project-workflow/` as a thin Claude Code entry while keeping shared project facts in `.codex/`, `docs/`, and `governance/`.

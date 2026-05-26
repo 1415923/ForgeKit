@@ -4,7 +4,7 @@
 
 ## 初始化顺序
 
-1. 读取 `AGENTS.md`，确认任务路由和禁止动作。
+1. Codex 读取 `AGENTS.md`；Claude Code 读取 `CLAUDE.md`，确认任务路由和禁止动作。
 2. 读取 `docs/代码库地图.md`，找到代码搜索起点、推荐启动目录和局部验证命令。
 3. 读取 `docs/本地工具链检查.md`，确认 LSP、lint、test、build 和局部验证能力。
 4. 读取 `docs/Codex下一步工作单.md`，把初始化摘要推进为方案访谈和任务拆分。
@@ -30,7 +30,8 @@
 
 ## 可选增强
 
-- `.agents/skills/`：项目级 skills，内置项目初始化、代码审查、发布检查和安全审查。
+- `.agents/skills/`：Codex 项目级 skills，内置项目初始化、代码审查、发布检查和安全审查。
+- `.claude/skills/forgekit-project-workflow/`：Claude Code 轻量入口 skill，按 ECC 式薄入口思路路由到共享项目文档和治理规则，不复制全量 skills。
 - `.codex/agents/`：多 agent 角色设计，默认不启用。
 - `.codex/config.example.toml`：Codex 配置示例，默认不覆盖用户配置。
 
@@ -41,6 +42,7 @@
 ## Agent Harness
 
 - `AGENTS.md`：Codex 第一入口，只放任务路由、上下文规则和禁止动作。
+- `CLAUDE.md`：Claude Code 第一入口，只放任务路由、上下文规则和禁止动作。
 - `docs/代码库地图.md`：代码搜索起点，记录模块、入口文件、常用关键词和局部验证命令。
 - `docs/本地工具链检查.md`：记录各技术栈 LSP、lint、test、build 和局部验证能力。
 - `governance/agent-harness.md`：说明 AGENTS 分层、agentic search、停止编码条件和输出要求。
@@ -53,7 +55,7 @@
 - `.codex/commands-catalog.md`、`.codex/hooks.md`：可选命令和 hook 候选，默认不自动启用。
 - `scripts/detect-local-toolchain.ps1`、`scripts/run-harness-check.ps1`：只读检测脚本，用于把 harness 从文档推进到可执行检查。
 
-使用优先级：`AGENTS.md` -> `docs/代码库地图.md` -> `docs/本地工具链检查.md` -> `docs/Codex下一步工作单.md` -> `.codex/` -> 相关 `.codex/stacks/<stack>/` -> 任务相关治理文件。不要默认读取全部治理文档。
+使用优先级：Codex 从 `AGENTS.md` 开始，Claude Code 从 `CLAUDE.md` 开始，然后进入 `docs/代码库地图.md` -> `docs/本地工具链检查.md` -> `docs/Codex下一步工作单.md` -> `.codex/` -> 相关 `.codex/stacks/<stack>/` -> 任务相关治理文件。不要默认读取全部治理文档。
 
 常见 stack 名称：`java-springboot`、`vue`、`react`、`python-fastapi`、`node-express`、`csharp-dotnet`、`go-service`、`php-laravel`、`rust-cli-service`、`flutter-dart`、`cpp-cmake`、`kotlin-spring`、`swift-ios`、`ruby-rails`、`r-data-analysis`、`fpga-vivado-vitis`。只读取当前项目实际选择的 stack，避免把无关语言规则混入上下文。
 
@@ -62,6 +64,8 @@
 团队工具链优先级：先沉淀 command，再考虑 hook；跨项目稳定后再考虑 plugin；MCP 默认只读优先，写操作必须人工确认。
 
 ForgeKit v0.9.0 提供 `forgekit-codex-workflow` plugin 作为团队分发形态。plugin 只用于分发稳定 skills、模板资产和只读检查脚本；生成项目仍应按本文件和 `AGENTS.md` 的边界执行，不因安装 plugin 而默认启用 hook、MCP 或外部写操作。
+
+ForgeKit v0.11.1 增加 Claude Code 生成项目入口：`CLAUDE.md` 和 `.claude/skills/forgekit-project-workflow/`。Claude 入口是薄入口，只负责路由和门禁；共享项目事实仍写入 `.codex/`、`docs/` 和 `governance/`，避免为不同 AI 工具维护多套项目事实。
 
 适用性优先级：无 Git、目录混乱、无法验证、大量二进制或非工程师主导的项目，不应直接套用 Standard / Enterprise，应先补工程条件或走 Custom。
 

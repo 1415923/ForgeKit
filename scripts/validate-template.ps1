@@ -345,6 +345,8 @@ function Test-PluginDistribution {
     Test-RequiredPath "plugins\forgekit-codex-workflow\scripts\detect-local-toolchain.ps1"
     Test-RequiredPath "plugins\forgekit-codex-workflow\scripts\run-harness-check.ps1"
     Test-RequiredPath "plugins\forgekit-codex-workflow\assets\project-template\AGENTS.md"
+    Test-RequiredPath "plugins\forgekit-codex-workflow\assets\project-template\CLAUDE.md"
+    Test-RequiredPath "plugins\forgekit-codex-workflow\assets\project-template\.claude\skills\forgekit-project-workflow\SKILL.md"
     Test-RequiredPath "plugins\forgekit-codex-workflow\assets\project-template\.codex\stacks\README.md"
     Test-RequiredPath "plugins\forgekit-codex-workflow\assets\project-template\.codex\stacks\README.md"
     Test-RequiredPath "plugins\forgekit-codex-workflow\assets\templates\java-springboot\README.md"
@@ -531,10 +533,13 @@ function Test-ClaudePluginDistribution {
     Test-RequiredPath "plugins\forgekit-claude-workflow\skills\code-review\SKILL.md"
     Test-RequiredPath "plugins\forgekit-claude-workflow\skills\release-check\SKILL.md"
     Test-RequiredPath "plugins\forgekit-claude-workflow\skills\security-review\SKILL.md"
+    Test-RequiredPath "plugins\forgekit-claude-workflow\scripts\init-project-template.ps1"
     Test-RequiredPath "plugins\forgekit-claude-workflow\scripts\validate-plugin-assets.ps1"
     Test-RequiredPath "plugins\forgekit-claude-workflow\scripts\detect-local-toolchain.ps1"
     Test-RequiredPath "plugins\forgekit-claude-workflow\scripts\run-harness-check.ps1"
     Test-RequiredPath "plugins\forgekit-claude-workflow\assets\project-template\AGENTS.md"
+    Test-RequiredPath "plugins\forgekit-claude-workflow\assets\project-template\CLAUDE.md"
+    Test-RequiredPath "plugins\forgekit-claude-workflow\assets\project-template\.claude\skills\forgekit-project-workflow\SKILL.md"
     Test-RequiredPath "plugins\forgekit-claude-workflow\assets\project-template\.codex\stacks\README.md"
     Test-RequiredPath "plugins\forgekit-claude-workflow\assets\templates\java-springboot\README.md"
     Test-RequiredPath "plugins\forgekit-claude-workflow\assets\questionnaires\README.md"
@@ -563,8 +568,11 @@ function Test-ClaudePluginDistribution {
         if ($pluginJson.name -ne "forgekit-claude-workflow") {
             Add-Error "Unexpected Claude plugin name in plugin.json: $($pluginJson.name)"
         }
-        if ($pluginJson.version -ne "0.11.0") {
+        if ($pluginJson.version -ne "0.11.1") {
             Add-Error "Unexpected Claude plugin version in plugin.json: $($pluginJson.version)"
+        }
+        if (-not ($pluginJson.PSObject.Properties.Name -contains "skills")) {
+            Add-Error "Claude plugin manifest must expose skills"
         }
         if ($pluginJson.PSObject.Properties.Name -contains "mcpServers") {
             Add-Error "Claude plugin must not enable MCP by default"
@@ -816,7 +824,9 @@ Test-RequiredPath "AGENTS.md"
 Test-RequiredPath "scripts\init-project-template.ps1"
 Test-RequiredPath "project-template\README.md"
 Test-RequiredPath "project-template\AGENTS.md"
+Test-RequiredPath "project-template\CLAUDE.md"
 Test-RequiredPath "project-template\.codex\rules.md"
+Test-RequiredPath "project-template\.claude\skills\forgekit-project-workflow\SKILL.md"
 Test-RequiredPath "project-template\.agents\skills\project-init\SKILL.md"
 Test-RequiredPath "project-template\.agents\skills\project-bootstrap-fill\SKILL.md"
 Test-RequiredPath "project-template\.agents\skills\handover-review\SKILL.md"
