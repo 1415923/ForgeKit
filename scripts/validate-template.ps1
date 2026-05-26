@@ -264,6 +264,8 @@ function Test-AgentsHarness {
 function Test-HarnessEntryConsistency {
     $codebaseMapRef = Get-CodebaseMapRef
     Test-RequiredPattern "README.md" "Agent Harness" "Root README harness section"
+    Test-RequiredPattern "README.md" "agent runtime" "Root README ECC boundary"
+    Test-RequiredPattern "README.md" "ECC" "Root README ECC reference"
     Test-RequiredPattern "README.md" $codebaseMapRef "Root README codebase map reference"
     Test-RequiredPattern "README.md" (Get-LocalToolchainRef) "Root README local toolchain reference"
     Test-RequiredPattern "README.md" "plugins/forgekit-codex-workflow/" "Root README plugin distribution reference"
@@ -289,6 +291,10 @@ function Test-HarnessEntryConsistency {
     Test-RequiredPattern "plugins\forgekit-codex-workflow\README.md" "-Mode Standard" "Plugin English README mode quickstart"
     Test-RequiredPattern "plugins\forgekit-codex-workflow\README.zh-CN.md" "Discovery Interview" "Plugin Chinese README discovery interview"
     Test-RequiredPattern "plugins\forgekit-codex-workflow\README.md" "Discovery Interview" "Plugin English README discovery interview"
+    Test-RequiredPattern "plugins\forgekit-codex-workflow\README.zh-CN.md" "agent runtime" "Codex plugin ECC boundary"
+    Test-RequiredPattern "plugins\forgekit-codex-workflow\README.md" "Boundary With ECC" "Codex plugin English ECC boundary"
+    Test-RequiredPattern "plugins\forgekit-codex-workflow\README.zh-CN.md" "ECC" "Codex plugin ECC reference"
+    Test-RequiredPattern "plugins\forgekit-codex-workflow\README.md" "Do not replicate ECC" "Codex plugin English no ECC clone boundary"
     Test-NoPattern "plugins\forgekit-codex-workflow\README.zh-CN.md" "## 常用技术栈" "Plugin README must not front-load stack selection"
     Test-NoPattern "plugins\forgekit-codex-workflow\README.md" "## Common Stacks" "Plugin README must not front-load stack selection"
     Test-RequiredPattern "scripts\init-project-template.ps1" "codebase map" "Init script codebase map guidance"
@@ -536,6 +542,10 @@ function Test-ClaudePluginDistribution {
     Test-RequiredPattern "README.md" "plugins/forgekit-claude-workflow/" "Root README Claude plugin distribution reference"
     Test-RequiredPattern "plugins\forgekit-claude-workflow\README.zh-CN.md" ".claude-plugin/plugin.json" "Claude Chinese README manifest path"
     Test-RequiredPattern "plugins\forgekit-claude-workflow\README.md" ".claude-plugin/plugin.json" "Claude English README manifest path"
+    Test-RequiredPattern "plugins\forgekit-claude-workflow\README.zh-CN.md" "Claude Code runtime" "Claude plugin ECC boundary"
+    Test-RequiredPattern "plugins\forgekit-claude-workflow\README.md" "Boundary With ECC" "Claude plugin English ECC boundary"
+    Test-RequiredPattern "plugins\forgekit-claude-workflow\README.zh-CN.md" "ECC" "Claude plugin ECC reference"
+    Test-RequiredPattern "plugins\forgekit-claude-workflow\README.md" "Do not replicate ECC" "Claude plugin English no ECC clone boundary"
     Test-RequiredPattern "plugins\forgekit-claude-workflow\skills\project-init\SKILL.md" "existing-project-scan" "Claude project-init discovery state"
 
     if (Test-Path -LiteralPath $pluginRoot) {

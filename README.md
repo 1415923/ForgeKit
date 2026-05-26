@@ -44,6 +44,20 @@
 
 默认推荐 `Standard`。小项目可以从 `Lite` 开始；涉及公司交付、生产环境、安全、硬件或多人协作时，用 `Enterprise`。
 
+## 与 ECC 的边界
+
+ForgeKit 不定位为“小 ECC”，也不和 ECC 竞争 agent runtime。ECC 的重点是增强 AI 编程工具本身，包括 skills、commands、hooks、memory、MCP、多 agent、AgentShield、安全扫描、成本控制和跨工具适配。
+
+ForgeKit 的边界是项目级 workflow harness：把一个新项目或既有项目整理成 AI 可以稳定接手的工程现场，重点放在项目入口、方案访谈、既有项目扫描、项目文档、版本路线、任务拆分、审查门禁、发布检查和安全确认。
+
+因此 ForgeKit 默认不做这些事：
+
+- 不默认启用 hooks、MCP、memory、session tracking 或多 agent 运行时。
+- 不复刻 ECC 的命令体系、安全工具、成本控制或自动化运行时。
+- 不把工具增强当成主要目标。
+
+ForgeKit 可以和 ECC 共存：ECC 负责增强 Claude Code / Codex 等 AI 工具，ForgeKit 负责让具体项目有清晰、可审计、可交付的协作流程。
+
 ## Codex 上下文入口
 
 生成到具体项目后，Codex 应先读取 `AGENTS.md`。它是轻量入口，只负责路由任务和控制上下文，不要求一次性读取所有治理文档。

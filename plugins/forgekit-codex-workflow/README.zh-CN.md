@@ -20,6 +20,18 @@ English documentation: [README.md](README.md)
 
 生成项目后，Codex 的第一入口永远是目标项目里的 `AGENTS.md`。
 
+## 与 ECC 的边界
+
+ForgeKit Codex Workflow 不是“小 ECC”，也不和 ECC 竞争 agent runtime。ECC 更像 AI 编程工具增强套件，覆盖 commands、hooks、memory、MCP、多 agent、安全工具和跨工具适配。
+
+ForgeKit 的职责更窄：把一个真实项目整理成 Codex 可稳定接手的工程现场，重点是项目入口、方案访谈、既有项目扫描、项目文档、版本路线、任务拆分、审查门禁、发布检查和安全确认。
+
+默认边界：
+
+- 不默认启用 hook、MCP、memory、session tracking 或多 agent 运行时。
+- 不复刻 ECC 的命令体系、安全工具、成本控制或自动化运行时。
+- 可以和 ECC 共存：ECC 增强 AI 工具，ForgeKit 约束具体项目的交付流程。
+
 ## 最新动态
 
 当前 plugin 已经具备：

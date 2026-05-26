@@ -20,6 +20,18 @@ ForgeKit is not an app framework, code scaffold, or deployment tool. It helps Cl
 
 This version does not enable hooks, MCP, subagents, slash commands, deployment, issue writes, Git writes, or external automation by default.
 
+## Boundary With ECC
+
+ForgeKit Claude Workflow is not a smaller ECC and does not compete with the Claude Code runtime. ECC is closer to an AI coding tool enhancement suite, covering commands, hooks, memory, MCP, multi-agent workflows, security tools, and cross-tool adapters.
+
+ForgeKit has a narrower job: make a real project ready for stable Claude Code handover. Its focus is project entry points, discovery interviews, existing-project scans, project documents, version roadmaps, task breakdown, review gates, release checks, and execution confirmation.
+
+Default boundaries:
+
+- Do not enable hooks, MCP, memory, session tracking, subagents, or slash commands by default.
+- Do not replicate ECC's command system, security tooling, cost controls, or automation runtime.
+- Coexist with ECC: ECC enhances the AI tool; ForgeKit constrains the concrete project's delivery workflow.
+
 ## Quick Start
 
 ### Step 1: Add the local plugin marketplace or plugin path

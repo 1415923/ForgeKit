@@ -20,6 +20,18 @@ If this is your first time here, read only these sections:
 
 After generation, the first file Codex should read is always `AGENTS.md` in the target project.
 
+## Boundary With ECC
+
+ForgeKit Codex Workflow is not a smaller ECC and does not compete with ECC as an agent runtime. ECC is closer to an AI coding tool enhancement suite, covering commands, hooks, memory, MCP, multi-agent workflows, security tools, and cross-tool adapters.
+
+ForgeKit has a narrower job: make a real project ready for stable Codex handover. Its focus is project entry points, discovery interviews, existing-project scans, project documents, version roadmaps, task breakdown, review gates, release checks, and execution confirmation.
+
+Default boundaries:
+
+- Do not enable hooks, MCP, memory, session tracking, or multi-agent runtimes by default.
+- Do not replicate ECC's command system, security tooling, cost controls, or automation runtime.
+- Coexist with ECC: ECC enhances the AI tool; ForgeKit constrains the concrete project's delivery workflow.
+
 ## What's New
 
 The current plugin includes:

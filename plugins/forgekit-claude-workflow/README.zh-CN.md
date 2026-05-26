@@ -20,6 +20,18 @@ ForgeKit 不是业务框架脚手架，也不是自动部署工具。它让 Clau
 
 这一版不会默认启用 hook、MCP、subagent、slash command、部署、issue 写入、Git 写入或外部自动化。
 
+## 与 ECC 的边界
+
+ForgeKit Claude Workflow 不是“小 ECC”，也不和 ECC 竞争 Claude Code runtime。ECC 更像 AI 编程工具增强套件，覆盖 commands、hooks、memory、MCP、多 agent、安全工具和跨工具适配。
+
+ForgeKit 的职责更窄：把一个真实项目整理成 Claude Code 可稳定接手的工程现场，重点是项目入口、方案访谈、既有项目扫描、项目文档、版本路线、任务拆分、审查门禁、发布检查和安全确认。
+
+默认边界：
+
+- 不默认启用 hook、MCP、memory、session tracking、subagent 或 slash command。
+- 不复刻 ECC 的命令体系、安全工具、成本控制或自动化运行时。
+- 可以和 ECC 共存：ECC 增强 AI 工具，ForgeKit 约束具体项目的交付流程。
+
 ## 快速开始
 
 ### 第一步：添加本地 plugin marketplace 或 plugin 路径
