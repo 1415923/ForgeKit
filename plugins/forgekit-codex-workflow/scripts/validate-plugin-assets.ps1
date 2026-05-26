@@ -78,7 +78,7 @@ function Test-PluginManifest {
     if ($manifest.name -ne "forgekit-codex-workflow") {
         Add-Error "Unexpected plugin name: $($manifest.name)"
     }
-    if ($manifest.version -ne "0.9.9") {
+    if ($manifest.version -ne "0.10.0") {
         Add-Error "Unexpected plugin version: $($manifest.version)"
     }
     if ($manifest.skills -ne "./skills/") {
@@ -108,6 +108,7 @@ Test-RequiredPath "assets\project-template\AGENTS.md"
 Test-RequiredPath "assets\project-template\.codex\commands.md"
 Test-RequiredPath "assets\project-template\.codex\hooks.md"
 Test-RequiredPath "assets\project-template\.codex\config.example.toml"
+Test-RequiredPath "assets\project-template\.codex\stacks\README.md"
 Test-RequiredPath "assets\templates\java-springboot\README.md"
 Test-RequiredPath "assets\templates\vue\README.md"
 Test-RequiredPath "assets\templates\csharp-dotnet\README.md"
@@ -132,6 +133,12 @@ if (-not (Select-String -Path (Join-Path $pluginRoot 'scripts\init-project-templ
 if (-not (Select-String -Path (Join-Path $pluginRoot 'README.md') -Pattern '-Mode Standard' -SimpleMatch -Quiet)) {
     Add-Error "English README must show -Mode in Quick Start"
 }
+if (-not (Select-String -Path (Join-Path $pluginRoot 'README.md') -Pattern 'Discovery Interview' -SimpleMatch -Quiet)) {
+    Add-Error "English README must explain discovery interview"
+}
+if (Select-String -Path (Join-Path $pluginRoot 'README.md') -Pattern '## Common Stacks' -SimpleMatch -Quiet) {
+    Add-Error "English README must not front-load stack selection"
+}
 if (-not (Select-String -Path (Join-Path $pluginRoot 'README.md') -Pattern 'cd D:\projects\my-app' -SimpleMatch -Quiet)) {
     Add-Error "English README must show how to enter the generated project"
 }
@@ -140,6 +147,12 @@ if (-not (Select-String -Path (Join-Path $pluginRoot 'README.md') -Pattern 'Read
 }
 if (-not (Select-String -Path (Join-Path $pluginRoot 'README.zh-CN.md') -Pattern '-Mode Standard' -SimpleMatch -Quiet)) {
     Add-Error "Chinese README must show -Mode in Quick Start"
+}
+if (-not (Select-String -Path (Join-Path $pluginRoot 'README.zh-CN.md') -Pattern 'Discovery Interview' -SimpleMatch -Quiet)) {
+    Add-Error "Chinese README must explain discovery interview"
+}
+if (Select-String -Path (Join-Path $pluginRoot 'README.zh-CN.md') -Pattern '## 常用技术栈' -SimpleMatch -Quiet) {
+    Add-Error "Chinese README must not front-load stack selection"
 }
 if (-not (Select-String -Path (Join-Path $pluginRoot 'README.zh-CN.md') -Pattern 'cd D:\projects\my-app' -SimpleMatch -Quiet)) {
     Add-Error "Chinese README must show how to enter the generated project"

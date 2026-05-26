@@ -287,7 +287,12 @@ function Test-HarnessEntryConsistency {
     Test-RequiredPattern "plugins\forgekit-codex-workflow\scripts\init-project-template.ps1" "[ValidateSet(""Lite"", ""Standard"", ""Enterprise"")]" "Plugin init script mode parameter"
     Test-RequiredPattern "plugins\forgekit-codex-workflow\README.zh-CN.md" "-Mode Standard" "Plugin Chinese README mode quickstart"
     Test-RequiredPattern "plugins\forgekit-codex-workflow\README.md" "-Mode Standard" "Plugin English README mode quickstart"
+    Test-RequiredPattern "plugins\forgekit-codex-workflow\README.zh-CN.md" "Discovery Interview" "Plugin Chinese README discovery interview"
+    Test-RequiredPattern "plugins\forgekit-codex-workflow\README.md" "Discovery Interview" "Plugin English README discovery interview"
+    Test-NoPattern "plugins\forgekit-codex-workflow\README.zh-CN.md" "## 常用技术栈" "Plugin README must not front-load stack selection"
+    Test-NoPattern "plugins\forgekit-codex-workflow\README.md" "## Common Stacks" "Plugin README must not front-load stack selection"
     Test-RequiredPattern "scripts\init-project-template.ps1" "codebase map" "Init script codebase map guidance"
+    Test-RequiredPattern "scripts\init-project-template.ps1" "StackSelection: deferred" "Init script deferred stack guidance"
     Test-RequiredPattern "scripts\init-project-template.ps1" "large-change-execution.md" "Init script large-change guidance"
     Test-RequiredPattern "scripts\init-project-template.ps1" "team-agent-rollout.md" "Init script team rollout guidance"
     Test-RequiredPattern "scripts\init-project-template.ps1" "detect-local-toolchain.ps1" "Init script toolchain detection guidance"
@@ -334,6 +339,8 @@ function Test-PluginDistribution {
     Test-RequiredPath "plugins\forgekit-codex-workflow\scripts\detect-local-toolchain.ps1"
     Test-RequiredPath "plugins\forgekit-codex-workflow\scripts\run-harness-check.ps1"
     Test-RequiredPath "plugins\forgekit-codex-workflow\assets\project-template\AGENTS.md"
+    Test-RequiredPath "plugins\forgekit-codex-workflow\assets\project-template\.codex\stacks\README.md"
+    Test-RequiredPath "plugins\forgekit-codex-workflow\assets\project-template\.codex\stacks\README.md"
     Test-RequiredPath "plugins\forgekit-codex-workflow\assets\templates\java-springboot\README.md"
     Test-RequiredPath "plugins\forgekit-codex-workflow\assets\templates\csharp-dotnet\README.md"
     Test-RequiredPath "plugins\forgekit-codex-workflow\assets\templates\go-service\README.md"
@@ -366,7 +373,7 @@ function Test-PluginDistribution {
         if ($pluginJson.name -ne "forgekit-codex-workflow") {
             Add-Error "Unexpected plugin name in plugin.json: $($pluginJson.name)"
         }
-        if ($pluginJson.version -ne "0.9.9") {
+        if ($pluginJson.version -ne "0.10.0") {
             Add-Error "Unexpected plugin version in plugin.json: $($pluginJson.version)"
         }
         $pluginSkillsPath = $pluginJson.PSObject.Properties["skills"].Value
@@ -515,6 +522,9 @@ function Test-StaleText {
     Test-NoPattern (Get-ProjectTaskBoardPath) "TASK-HARNESS" "ForgeKit harness task leaked into generated task board"
     Test-NoPattern (Get-ProjectTaskBoardPath) "FEAT-HARNESS" "ForgeKit harness feature leaked into generated task board"
     Test-RequiredPattern "project-template\.agents\skills\project-init\SKILL.md" "Execution Confirmation" "Project init execution confirmation gate"
+    Test-RequiredPattern "project-template\.agents\skills\project-init\SKILL.md" "Do not make stack selection the first user task" "Project init deferred stack rule"
+    Test-RequiredPattern "project-template\.agents\skills\project-init\SKILL.md" "Infer stack" "Project init existing-project stack inference"
+    Test-RequiredPath "project-template\.codex\stacks\README.md"
     Test-RequiredPattern "project-template\AGENTS.md" "execution summary" "AGENTS execution summary gate"
     Test-RequiredPattern (Get-CodexNextWorkOrderPath) "Execution Confirmation" "Next work order execution confirmation gate"
     Test-RequiredPattern (Get-ProjectPlanPath) "Product Shape Options" "Project plan product-shape section"
@@ -688,7 +698,7 @@ function Test-PluginDistribution {
         if ($pluginJson.name -ne "forgekit-codex-workflow") {
             Add-Error "Unexpected plugin name in plugin.json: $($pluginJson.name)"
         }
-        if ($pluginJson.version -ne "0.9.9") {
+        if ($pluginJson.version -ne "0.10.0") {
             Add-Error "Unexpected plugin version in plugin.json: $($pluginJson.version)"
         }
         $pluginSkillsPath = $pluginJson.PSObject.Properties["skills"].Value
@@ -713,6 +723,9 @@ function Test-StaleText {
     Test-NoPattern (Get-ProjectTaskBoardPath) "TASK-HARNESS" "ForgeKit harness task leaked into generated task board"
     Test-NoPattern (Get-ProjectTaskBoardPath) "FEAT-HARNESS" "ForgeKit harness feature leaked into generated task board"
     Test-RequiredPattern "project-template\.agents\skills\project-init\SKILL.md" "Execution Confirmation" "Project init execution confirmation gate"
+    Test-RequiredPattern "project-template\.agents\skills\project-init\SKILL.md" "Do not make stack selection the first user task" "Project init deferred stack rule"
+    Test-RequiredPattern "project-template\.agents\skills\project-init\SKILL.md" "Infer stack" "Project init existing-project stack inference"
+    Test-RequiredPath "project-template\.codex\stacks\README.md"
     Test-RequiredPattern "project-template\AGENTS.md" "execution summary" "AGENTS execution summary gate"
     Test-RequiredPattern (Get-CodexNextWorkOrderPath) "Execution Confirmation" "Next work order execution confirmation gate"
     Test-RequiredPattern (Get-ProjectPlanPath) "Product Shape Options" "Project plan product-shape section"

@@ -58,10 +58,10 @@
 powershell -ExecutionPolicy Bypass -File .\scripts\init-project-template.ps1 `
   -TargetPath "D:\JAVA-code\demo" `
   -ProjectName "demo" `
-  -Stacks java-springboot,vue
+  -Mode Standard
 ```
 
-脚本会把技术栈模板复制到目标项目：
+初始化时可以不选择技术栈。方案访谈或现有项目扫描确认后，再把技术栈模板复制到目标项目：
 
 ```text
 .codex/stacks/<stack>/

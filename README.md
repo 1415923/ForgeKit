@@ -106,6 +106,8 @@ v0.3 之后的重点是把模板从“治理文档集合”推进为更成熟的
 
 `v0.9.9` 按 ECC README 框架重排 plugin 推广文档：补齐指南、最新动态、三步快速开始、跨平台支持、检测和工具、里面有什么，并把进入目标项目后启动 Codex 和发送启动提示词写成明确步骤。
 
+`v0.10.0` 修正项目初始化和方案确认流程：不再要求用户初始化时选择技术栈；新项目先通过多轮方案访谈、资料查阅和 v0.1.0 最小闭环确认来收敛方案；既有项目先扫描 README、依赖、构建、脚本、测试和源码目录推断现有技术栈，新增功能、修复和重构默认沿用现状。
+
 ## Plugin 分发
 
 本仓库提供 repo/team marketplace 示例：
@@ -125,13 +127,12 @@ powershell -ExecutionPolicy Bypass -File .\plugins\forgekit-codex-workflow\scrip
 powershell -ExecutionPolicy Bypass -File .\plugins\forgekit-codex-workflow\scripts\init-project-template.ps1 `
   -TargetPath "D:\tmp\forgekit-plugin-smoke" `
   -ProjectName "forgekit-plugin-smoke" `
-  -Mode Standard `
-  -Stacks java-springboot,vue
+  -Mode Standard
 ```
 
 ## 技术栈按需加载
 
-全局规则只保留跨项目共性。Java、前端、Python、Node、C#/.NET、Go、Laravel、Rust、Flutter、C++、Kotlin、Swift、Rails、R、FPGA 等专用规则放在 `templates/`，按项目选择。
+全局规则只保留跨项目共性。Java、前端、Python、Node、C#/.NET、Go、Laravel、Rust、Flutter、C++、Kotlin、Swift、Rails、R、FPGA 等专用规则放在 `templates/`，但不要求初始化时选择。新项目在方案访谈后按需加入；既有项目先由 Codex 扫描项目文件推断。
 
 例如：
 
@@ -157,11 +158,10 @@ powershell -ExecutionPolicy Bypass -File .\plugins\forgekit-codex-workflow\scrip
 powershell -ExecutionPolicy Bypass -File .\scripts\init-project-template.ps1 `
   -TargetPath "D:\JAVA-code\demo-fullstack" `
   -ProjectName "demo-fullstack" `
-  -Mode Standard `
-  -Stacks java-springboot,vue
+  -Mode Standard
 ```
 
-脚本默认不覆盖已有文件。技术栈模板会放到目标项目的 `.codex/stacks/<stack>/`，再由 Codex 或人工按项目需要合并。
+脚本默认不覆盖已有文件。初始化后 `.codex/stacks/README.md` 会说明技术栈尚未选择是正常状态；后续确认或推断出技术栈后，再把对应模板放到目标项目的 `.codex/stacks/<stack>/`。
 
 ## ECC 借鉴策略
 

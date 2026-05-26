@@ -15,7 +15,7 @@ If this is your first time here, read only these sections:
 | Topic | What to read |
 | --- | --- |
 | Quick Start | Initialize a project and start Codex in 3 steps |
-| Common Stacks | Choose the right `-Stacks` value |
+| Discovery Interview | Let Codex clarify product shape and stack decisions through conversation |
 | Safety Boundary | Understand what the plugin will not automate |
 
 After generation, the first file Codex should read is always `AGENTS.md` in the target project.
@@ -26,7 +26,7 @@ The current plugin includes:
 
 - Skills for project initialization, handover review, code review, release check, and security review.
 - Three project modes: Lite, Standard, and Enterprise, written during initialization with `-Mode`.
-- Stack templates for Java, Vue, React, Python, Node, C#/.NET, Go, Laravel, Rust, Flutter, C++, Kotlin, Swift, Rails, R, and FPGA.
+- Stack templates that can be loaded after the product and architecture direction is understood.
 - Read-only scripts for local toolchain checks and harness checks.
 - Plugin package validation to keep user paths, external records, and `.git/` out of the distribution.
 
@@ -35,14 +35,10 @@ The current plugin includes:
 ### Step 1: Generate a project from the plugin directory
 
 ```powershell
-powershell -ExecutionPolicy Bypass -File .\scripts\init-project-template.ps1 -TargetPath "D:\projects\my-app" -ProjectName "my-app" -Mode Standard -Stacks java-springboot,vue
-```
-
-If you are not sure which stack to use yet, omit `-Stacks`:
-
-```powershell
 powershell -ExecutionPolicy Bypass -File .\scripts\init-project-template.ps1 -TargetPath "D:\projects\my-app" -ProjectName "my-app" -Mode Standard
 ```
+
+Do not rush stack selection here. For new projects, stack decisions should come after product shape, users, runtime constraints, validation needs, and deployment expectations are understood. For existing projects, Codex should scan the current repository first and infer the stack from real files.
 
 ### Step 2: Start Codex from the generated project
 
@@ -59,7 +55,7 @@ If your Codex startup command is different, use your normal command. The importa
 Read AGENTS.md and help me initialize this project with ForgeKit.
 ```
 
-This starts the actual project planning conversation. Codex will read the entry files and use your selected `-Mode`, `-Stacks`, and project facts.
+This starts the actual project planning conversation. Codex will read the entry files and use your selected `-Mode` and project facts.
 
 ## Project Modes
 
@@ -71,29 +67,17 @@ This starts the actual project planning conversation. Codex will read the entry 
 
 If unsure, use `Standard`. The selected mode is written into `.codex/init.generated.md`.
 
-## Common Stacks
+## Discovery Interview
 
-| Project type | `-Stacks` value |
-| --- | --- |
-| Java + Vue full stack | `java-springboot,vue` |
-| Java backend | `java-springboot` |
-| Vue frontend | `vue` |
-| React frontend | `react` |
-| Python API | `python-fastapi` |
-| Node API | `node-express` |
-| C# / .NET API or Worker | `csharp-dotnet` |
-| Go service or CLI | `go-service` |
-| Laravel app or API | `php-laravel` |
-| Rust CLI or service | `rust-cli-service` |
-| Flutter app | `flutter-dart` |
-| C++ CMake project | `cpp-cmake` |
-| Kotlin backend | `kotlin-spring` |
-| iOS app | `swift-ios` |
-| Rails app or API | `ruby-rails` |
-| R analysis / Shiny | `r-data-analysis` |
-| FPGA / HLS | `fpga-vivado-vitis` |
+For a new project, Codex should not start with five fixed technical questions. It should first clarify:
 
-Choose only the stack templates your project actually needs.
+1. Who the project serves, what pain it solves, and how success is measured.
+2. Possible product shapes, including scope, cost, risks, and explicit non-goals.
+3. Whether official docs, public repositories, product examples, or technical references should be researched.
+4. The v0.1.0 minimum closed loop before architecture and stack decisions.
+5. Options, defaults, and verification paths when the user cannot answer yet.
+
+For an existing project, Codex should not ask the user to restate the stack. It should scan the repository, README, build files, dependency files, scripts, and tests. New features, fixes, and refactors should default to the existing stack unless the user explicitly asks for migration or architectural change.
 
 ## Cross-Platform Support
 
@@ -118,7 +102,7 @@ powershell -ExecutionPolicy Bypass -File .\scripts\validate-plugin-assets.ps1
 Generate a smoke-test project:
 
 ```powershell
-powershell -ExecutionPolicy Bypass -File .\scripts\init-project-template.ps1 -TargetPath "D:\tmp\forgekit-plugin-smoke" -ProjectName "forgekit-plugin-smoke" -Mode Standard -Stacks java-springboot,vue -Force
+powershell -ExecutionPolicy Bypass -File .\scripts\init-project-template.ps1 -TargetPath "D:\tmp\forgekit-plugin-smoke" -ProjectName "forgekit-plugin-smoke" -Mode Standard -Force
 ```
 
 Run the harness check inside a generated project:
@@ -192,7 +176,7 @@ For new project ideas, Codex should:
 
 1. Clarify the product goal, user scenario, and real problem.
 2. Compare feasible product and architecture options.
-3. Confirm stack, environment, data, deployment, testing, and acceptance constraints.
+3. Confirm environment, data, deployment, testing, and acceptance constraints, then confirm the stack when the plan is clear enough.
 4. Produce an execution confirmation summary.
 5. Wait for explicit confirmation before coding, installing dependencies, initializing Git, committing, pushing, deploying, or writing outside the project.
 

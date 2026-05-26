@@ -1,6 +1,6 @@
 ---
 name: project-init
-description: Initialize or repair a project's Codex workflow, interview the user about project plan and architecture, and fill first-version `.codex/` and `docs/` files from questionnaire answers. Use when Codex is asked to set up a new project, process initialization answers, discuss architecture before implementation, choose stack templates, or decide whether coding may start.
+description: Initialize or repair a project's Codex workflow, discover product requirements, inspect existing projects before asking stack questions, and fill first-version `.codex/` and `docs/` files from confirmed facts. Use when Codex is asked to set up a project, clarify a vague idea, process initialization answers, discuss architecture before implementation, or decide whether coding may start.
 ---
 
 # Project Init
@@ -8,14 +8,20 @@ description: Initialize or repair a project's Codex workflow, interview the user
 ## Workflow
 
 1. Read `AGENTS.md` first if present, then read the governance overview, `.codex/init.generated.md`, `.codex/questionnaires/`, existing `.codex/`, existing `docs/`, and project root files.
-2. Identify the project type, active stack templates, current phase, delivery target, and hardware/software landing conditions.
-3. If `.codex/stacks/` exists, read only relevant stack folders. Do not load unrelated stacks.
+2. Identify whether this is a new project idea, an existing project handover, or a feature/change request inside an existing project.
+3. Inspect local evidence before asking stack questions:
+   - For existing projects, scan README files, build files, dependency manifests, scripts, tests, source roots, and config files to infer the current stack and constraints.
+   - For new empty projects, treat missing `.codex/stacks/` or empty stacks as a normal planning state, not an error.
+   - Read `.codex/stacks/<stack>/` only when the stack is already present, selected in metadata, or clearly inferred from local evidence.
 4. If questionnaire answers exist, use `governance/project-bootstrap-fill.md` to convert them into first-version `.codex/` rules and `docs/`.
-5. Interview the user before large-scale coding when key facts are unclear:
-   - problem definition
-   - technical stack options and decision
-   - hardware/software landing conditions
-   - architecture direction
+5. Interview the user before large-scale coding when key facts are unclear. Do not start with a fixed list of technical questions. Choose the next question from the current uncertainty:
+   - product goal and target users
+   - current workflow or pain point
+   - success criteria and acceptance evidence
+   - product shape options and non-goals
+   - existing system constraints, if any
+   - research needed before deciding
+   - v0.1.0 minimum closed loop
    - risks and blockers
    - Epic / Feature / Task / Bug model
    - version roadmap
@@ -23,16 +29,16 @@ description: Initialize or repair a project's Codex workflow, interview the user
    - Ask only the next 3 to 5 highest-leverage questions.
    - If the user cannot answer, provide 2 to 4 realistic options with tradeoffs and a recommended default.
    - If current knowledge is insufficient, propose a research path: local docs to inspect, official docs to search, example projects to compare, or small throwaway prototypes to run.
-   - For new product ideas, treat product and architecture discussion as a dedicated phase. Do not collapse it into a few engineering parameter questions.
+   - For new product ideas, treat product discovery and architecture discussion as a dedicated phase. Do not collapse it into engineering parameter questions such as framework, database, login, or directory structure.
    - Clearly mark each item as Confirmed, Assumption, Research needed, or Deferred.
-   - Keep interviewing and revising the plan until v0.1.0 scope, data model, deployment target, validation command, and safety boundary are coherent.
+   - Keep interviewing and revising the plan until the problem, product shape, v0.1.0 scope, validation evidence, and safety boundary are coherent. Technical stack may remain undecided until product constraints justify it.
    - Do not treat "unknown" as a reason to stop; turn unknowns into decision options, research tasks, or deferred non-goals.
 7. When the user describes a product idea in natural language, translate it into:
    - problem and target users
    - MVP workflow
    - explicit non-goals
    - data and state boundaries
-   - technical options and recommendation
+   - technical constraints and research options, without forcing a stack decision too early
    - validation strategy
    - risks and open decisions
    - first implementation slice, only when coding is allowed
@@ -42,12 +48,18 @@ description: Initialize or repair a project's Codex workflow, interview the user
    - Propose a long-term version roadmap with concrete v0.1.0, v0.2.0, v0.3.0, and v1.0.0 outcomes.
    - If public references would help, ask whether to search official docs, public projects, or product examples before finalizing the plan.
    - Summarize what was learned from local files or external research, and say when research has not been done.
-9. For large, cross-module, migration, refactor, or high-risk work, require the large-change protocol before implementation:
+   - Do not ask the user to choose a stack at the beginning. Present stack options only after product shape, runtime constraints, integration points, team skills, and validation needs are known.
+9. For existing projects, use repository evidence first:
+   - Infer stack, commands, architecture, and test strategy from files before asking the user.
+   - New features and fixes should default to the existing stack and architecture.
+   - Ask about stack migration, database replacement, framework changes, or major refactors only when the user explicitly requests them or local evidence shows a blocking conflict.
+   - If local evidence is missing or contradictory, summarize what was found and ask targeted questions about the contradiction.
+10. For large, cross-module, migration, refactor, or high-risk work, require the large-change protocol before implementation:
    - read `governance/large-change-execution.md`
    - create or update the exploration report in `docs/`
    - create or update the implementation plan in `docs/`
    - do not start broad coding until the implementation plan says coding is allowed
-10. Fill or update:
+11. Fill or update:
    - `.codex/project.md`
    - `.codex/scope.md`
    - `.codex/commands.md`
@@ -64,9 +76,9 @@ description: Initialize or repair a project's Codex workflow, interview the user
    - `docs/environment matrix`
    - `docs/release pipeline`
    - `docs/project task board`
-11. Preserve existing project-specific facts. Do not overwrite real information with template text.
-12. Remove or replace template history that belongs to ForgeKit itself. Generated projects must not keep ForgeKit Agent Harness roadmap tasks as if they were project tasks.
-13. Do not modify business code unless the user explicitly asks.
+12. Preserve existing project-specific facts. Do not overwrite real information with template text.
+13. Remove or replace template history that belongs to ForgeKit itself. Generated projects must not keep ForgeKit Agent Harness roadmap tasks as if they were project tasks.
+14. Do not modify business code unless the user explicitly asks.
 
 ## Gate Before Coding
 
@@ -82,7 +94,7 @@ Before creating business code, installing dependencies, initializing Git, commit
 - product shape chosen and alternatives rejected
 - v0.1.0, v0.2.0, v0.3.0, and v1.0.0 roadmap
 - what this implementation will do and explicitly not do
-- technology stack, storage, authentication, deployment, and validation choices
+- product constraints, technology stack status, storage/auth/deployment status, and validation choices
 - reference or research status, including whether web research was skipped
 - major risks and safety boundaries
 - files to create or modify
@@ -95,7 +107,7 @@ Do not recommend large-scale coding until there is at least a first version of:
 
 - project plan
 - version roadmap
-- technical stack decision
+- technical stack status: confirmed, inferred from existing project, assumption, research needed, or deferred
 - software/hardware conditions
 - architecture governance and ADR needs
 - RFC needs, traceability IDs, readiness, and risks
@@ -106,17 +118,19 @@ Do not recommend large-scale coding until there is at least a first version of:
 
 ## Selection Rules
 
-- Use `templates/README.md` only to decide which stack template applies.
-- For Java projects, read `java-springboot` only when Java/Spring Boot is present.
-- For FPGA projects, read `fpga-vivado-vitis` only when Vivado/Vitis/HLS is present.
-- For full-stack projects, read only the backend and frontend stacks actually present.
+- Do not make stack selection the first user task.
+- Use `templates/README.md` only after a stack is confirmed or inferred from local evidence.
+- For existing projects, infer stack from repository files before asking the user.
+- For Java projects, read `java-springboot` only when Java/Spring Boot is present or selected after planning.
+- For FPGA projects, read `fpga-vivado-vitis` only when Vivado/Vitis/HLS is present or selected after planning.
+- For full-stack projects, read only the backend and frontend stacks actually present or selected after planning.
 
 ## Output
 
 End with:
 
 - Project classification.
-- Selected stack templates.
+- Stack status: none yet, selected by metadata, inferred from files, or deferred pending planning.
 - Files created or updated.
 - Plan status: confirmed, partial, or blocked.
 - Confirmed decisions, assumptions, research-needed items, and deferred non-goals.

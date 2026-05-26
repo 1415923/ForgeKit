@@ -64,7 +64,7 @@ function Write-InitMetadata {
     )
 
     $metadataFile = Join-Path $DestinationDir ".codex\init.generated.md"
-    $stackText = if ($SelectedStacks.Count -gt 0) { $SelectedStacks -join ", " } else { "" }
+    $stackText = if ($SelectedStacks.Count -gt 0) { $SelectedStacks -join ", " } else { "deferred" }
     $projectText = if ([string]::IsNullOrWhiteSpace($Name)) { "" } else { $Name }
 
     $lines = @(
@@ -75,8 +75,14 @@ function Write-InitMetadata {
         "- ProjectName: $projectText",
         "- Mode: $SelectedMode",
         "- Stacks: $stackText",
+        "- StackSelection: deferred means no stack was chosen during initialization. This is normal.",
         "",
         "Use this file as initialization metadata. Merge real project facts into .codex/project.md, .codex/scope.md, the docs codebase map, the local toolchain check document, and docs/技术选型.md manually or with Codex.",
+        "",
+        "Stack guidance:",
+        "- New projects: confirm product shape, users, constraints, risks, and the v0.1.0 closed loop before choosing a stack.",
+        "- Existing projects: infer the stack from project files before asking the user technical-stack questions.",
+        "- Feature, fix, and refactor work defaults to the existing stack unless the user explicitly asks for migration or architecture change.",
         "",
         "Mode guidance:",
         "- Lite: keep only essential docs and commands for small scripts, tools, and prototypes.",
@@ -90,7 +96,7 @@ function Write-InitMetadata {
         "4. local toolchain check document under docs",
         "5. Codex next-step work order under docs",
         "6. .codex/project.md, .codex/scope.md, .codex/commands.md",
-        "7. Related .codex/stacks/<stack>/ only",
+        "7. .codex/stacks/README.md, then related .codex/stacks/<stack>/ only when a stack is confirmed",
         "8. Task-specific governance files",
         "9. For large changes, use governance/large-change-execution.md first",
         "10. For commands, hooks, plugins, or MCP, use governance/team-agent-rollout.md first"
@@ -161,7 +167,7 @@ Write-Host "4. Review the local toolchain check document under docs (Chinese fil
 Write-Host "5. Review the Codex next-step work order under docs (Chinese file name)"
 Write-Host "6. Optionally run scripts/detect-local-toolchain.ps1 and scripts/run-harness-check.ps1"
 Write-Host "7. Review .codex/project.md, .codex/scope.md, and .codex/commands.md"
-Write-Host "8. Review related .codex/stacks/<stack> only"
+Write-Host "8. Review .codex/stacks/README.md, then related .codex/stacks/<stack> only when a stack is confirmed"
 Write-Host "9. Use .codex/questionnaires/ to fill project-specific details"
 Write-Host "10. For large changes, use governance/large-change-execution.md first"
 Write-Host "11. For commands, hooks, plugins, or MCP, use governance/team-agent-rollout.md first"

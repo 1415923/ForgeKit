@@ -24,5 +24,5 @@ Then run a smoke initialization:
 powershell -ExecutionPolicy Bypass -File .\plugins\forgekit-codex-workflow\scripts\init-project-template.ps1 `
   -TargetPath "D:\tmp\forgekit-plugin-smoke" `
   -ProjectName "forgekit-plugin-smoke" `
-  -Stacks java-springboot,vue
+  -Mode Standard
 ```
