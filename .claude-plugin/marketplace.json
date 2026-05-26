@@ -1,0 +1,18 @@
+{
+  "$schema": "https://json.schemastore.org/claude-code-marketplace.json",
+  "name": "forgekit-local",
+  "version": "0.11.0",
+  "description": "Local ForgeKit Claude Code plugin marketplace.",
+  "owner": {
+    "name": "ForgeKit Maintainers"
+  },
+  "plugins": [
+    {
+      "name": "forgekit-claude-workflow",
+      "description": "ForgeKit workflow skills for Claude Code project initialization, handover, review, release, and safety checks.",
+      "version": "0.11.0",
+      "source": "./plugins/forgekit-claude-workflow",
+      "category": "productivity"
+    }
+  ]
+}

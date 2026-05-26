@@ -513,6 +513,69 @@ function Test-PromptTemplates {
     }
 }
 
+function Test-ClaudePluginDistribution {
+    $pluginRoot = Join-Path $repoRoot "plugins\forgekit-claude-workflow"
+    Test-RequiredPath ".claude-plugin\marketplace.json"
+    Test-RequiredPath "plugins\forgekit-claude-workflow\.claude-plugin\plugin.json"
+    Test-RequiredPath "plugins\forgekit-claude-workflow\README.md"
+    Test-RequiredPath "plugins\forgekit-claude-workflow\README.zh-CN.md"
+    Test-RequiredPath "plugins\forgekit-claude-workflow\skills\project-init\SKILL.md"
+    Test-RequiredPath "plugins\forgekit-claude-workflow\skills\project-bootstrap-fill\SKILL.md"
+    Test-RequiredPath "plugins\forgekit-claude-workflow\skills\handover-review\SKILL.md"
+    Test-RequiredPath "plugins\forgekit-claude-workflow\skills\code-review\SKILL.md"
+    Test-RequiredPath "plugins\forgekit-claude-workflow\skills\release-check\SKILL.md"
+    Test-RequiredPath "plugins\forgekit-claude-workflow\skills\security-review\SKILL.md"
+    Test-RequiredPath "plugins\forgekit-claude-workflow\scripts\validate-plugin-assets.ps1"
+    Test-RequiredPath "plugins\forgekit-claude-workflow\scripts\detect-local-toolchain.ps1"
+    Test-RequiredPath "plugins\forgekit-claude-workflow\scripts\run-harness-check.ps1"
+    Test-RequiredPath "plugins\forgekit-claude-workflow\assets\project-template\AGENTS.md"
+    Test-RequiredPath "plugins\forgekit-claude-workflow\assets\project-template\.codex\stacks\README.md"
+    Test-RequiredPath "plugins\forgekit-claude-workflow\assets\templates\java-springboot\README.md"
+    Test-RequiredPath "plugins\forgekit-claude-workflow\assets\questionnaires\README.md"
+    Test-RequiredPath "plugins\forgekit-claude-workflow\assets\docs\install.md"
+    Test-RequiredPattern "README.md" "plugins/forgekit-claude-workflow/" "Root README Claude plugin distribution reference"
+    Test-RequiredPattern "plugins\forgekit-claude-workflow\README.zh-CN.md" ".claude-plugin/plugin.json" "Claude Chinese README manifest path"
+    Test-RequiredPattern "plugins\forgekit-claude-workflow\README.md" ".claude-plugin/plugin.json" "Claude English README manifest path"
+    Test-RequiredPattern "plugins\forgekit-claude-workflow\skills\project-init\SKILL.md" "existing-project-scan" "Claude project-init discovery state"
+
+    if (Test-Path -LiteralPath $pluginRoot) {
+        $forbidden = @("user-rules", "document", ".git", ".codex-plugin")
+        foreach ($item in $forbidden) {
+            if (Test-Path -LiteralPath (Join-Path $pluginRoot $item)) {
+                Add-Error "Forbidden path in Claude plugin package: plugins\forgekit-claude-workflow\$item"
+            }
+        }
+    }
+
+    $pluginJsonPath = Join-Path $repoRoot "plugins\forgekit-claude-workflow\.claude-plugin\plugin.json"
+    if (Test-Path -LiteralPath $pluginJsonPath) {
+        $pluginJson = Get-Content -LiteralPath $pluginJsonPath -Raw | ConvertFrom-Json
+        if ($pluginJson.name -ne "forgekit-claude-workflow") {
+            Add-Error "Unexpected Claude plugin name in plugin.json: $($pluginJson.name)"
+        }
+        if ($pluginJson.version -ne "0.11.0") {
+            Add-Error "Unexpected Claude plugin version in plugin.json: $($pluginJson.version)"
+        }
+        if ($pluginJson.PSObject.Properties.Name -contains "mcpServers") {
+            Add-Error "Claude plugin must not enable MCP by default"
+        }
+        if ($pluginJson.PSObject.Properties.Name -contains "hooks") {
+            Add-Error "Claude plugin must not enable hooks by default"
+        }
+    }
+
+    $marketplacePath = Join-Path $repoRoot ".claude-plugin\marketplace.json"
+    if (Test-Path -LiteralPath $marketplacePath) {
+        $marketplaceJson = Get-Content -LiteralPath $marketplacePath -Raw | ConvertFrom-Json
+        $pluginEntry = $marketplaceJson.plugins | Where-Object { $_.name -eq "forgekit-claude-workflow" } | Select-Object -First 1
+        if (-not $pluginEntry) {
+            Add-Error "Claude marketplace must list forgekit-claude-workflow"
+        } elseif ($pluginEntry.source -ne "./plugins/forgekit-claude-workflow") {
+            Add-Error "Claude marketplace source must point to ./plugins/forgekit-claude-workflow"
+        }
+    }
+}
+
 function Test-StaleText {
     Test-NoPattern "project-template\.agents\skills\project-init\SKILL.md" "docs/project development plan" "Stale document path"
     Test-NoPattern "project-template\.agents\skills\project-init\SKILL.md" "docs/version roadmap" "Stale document path"
@@ -763,6 +826,7 @@ Test-TeamToolingProtocol
 Test-AgentSuitability
 Test-ExecutableHarness
 Test-PluginDistribution
+Test-ClaudePluginDistribution
 Test-SkillAscii
 Test-SkillFrontmatter
 Test-StaleText

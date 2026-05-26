@@ -1,0 +1,4 @@
+interface:
+  display_name: "Project Init"
+  short_description: "Initialize project rules and docs"
+  default_prompt: "Initialize this project using its questionnaire, .codex rules, and selected stack templates."

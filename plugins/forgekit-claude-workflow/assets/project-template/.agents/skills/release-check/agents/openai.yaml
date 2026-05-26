@@ -1,0 +1,4 @@
+interface:
+  display_name: "Release Check"
+  short_description: "Prepare and verify a release"
+  default_prompt: "Check whether this project is ready to release and list blockers, risks, and required commands."
