@@ -104,6 +104,8 @@ v0.3 之后的重点是把模板从“治理文档集合”推进为更成熟的
 
 `v0.9.8` 修正初始化模式入口：`Lite / Standard / Enterprise` 不再放在 README 后半段作为说明，而是前置到 Quick Start，并新增初始化脚本 `-Mode` 参数写入 `.codex/init.generated.md`，让用户复制命令前就确定项目治理深度。
 
+`v0.9.9` 按 ECC README 框架重排 plugin 推广文档：补齐指南、最新动态、三步快速开始、跨平台支持、检测和工具、里面有什么，并把进入目标项目后启动 Codex 和发送启动提示词写成明确步骤。
+
 ## Plugin 分发
 
 本仓库提供 repo/team marketplace 示例：
