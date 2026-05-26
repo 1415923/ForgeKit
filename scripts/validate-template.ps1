@@ -373,7 +373,7 @@ function Test-PluginDistribution {
         if ($pluginJson.name -ne "forgekit-codex-workflow") {
             Add-Error "Unexpected plugin name in plugin.json: $($pluginJson.name)"
         }
-        if ($pluginJson.version -ne "0.10.0") {
+        if ($pluginJson.version -ne "0.10.1") {
             Add-Error "Unexpected plugin version in plugin.json: $($pluginJson.version)"
         }
         $pluginSkillsPath = $pluginJson.PSObject.Properties["skills"].Value
@@ -524,6 +524,9 @@ function Test-StaleText {
     Test-RequiredPattern "project-template\.agents\skills\project-init\SKILL.md" "Execution Confirmation" "Project init execution confirmation gate"
     Test-RequiredPattern "project-template\.agents\skills\project-init\SKILL.md" "Do not make stack selection the first user task" "Project init deferred stack rule"
     Test-RequiredPattern "project-template\.agents\skills\project-init\SKILL.md" "Infer stack" "Project init existing-project stack inference"
+    Test-RequiredPattern "project-template\.agents\skills\project-init\SKILL.md" "Classify the discovery state" "Project init discovery state gate"
+    Test-RequiredPattern "project-template\.agents\skills\project-init\SKILL.md" "options-needed" "Project init options state"
+    Test-RequiredPattern "project-template\.agents\skills\project-init\SKILL.md" "research-needed" "Project init research state"
     Test-RequiredPath "project-template\.codex\stacks\README.md"
     Test-RequiredPattern "project-template\AGENTS.md" "execution summary" "AGENTS execution summary gate"
     Test-RequiredPattern (Get-CodexNextWorkOrderPath) "Execution Confirmation" "Next work order execution confirmation gate"
@@ -698,7 +701,7 @@ function Test-PluginDistribution {
         if ($pluginJson.name -ne "forgekit-codex-workflow") {
             Add-Error "Unexpected plugin name in plugin.json: $($pluginJson.name)"
         }
-        if ($pluginJson.version -ne "0.10.0") {
+        if ($pluginJson.version -ne "0.10.1") {
             Add-Error "Unexpected plugin version in plugin.json: $($pluginJson.version)"
         }
         $pluginSkillsPath = $pluginJson.PSObject.Properties["skills"].Value
@@ -725,6 +728,9 @@ function Test-StaleText {
     Test-RequiredPattern "project-template\.agents\skills\project-init\SKILL.md" "Execution Confirmation" "Project init execution confirmation gate"
     Test-RequiredPattern "project-template\.agents\skills\project-init\SKILL.md" "Do not make stack selection the first user task" "Project init deferred stack rule"
     Test-RequiredPattern "project-template\.agents\skills\project-init\SKILL.md" "Infer stack" "Project init existing-project stack inference"
+    Test-RequiredPattern "project-template\.agents\skills\project-init\SKILL.md" "Classify the discovery state" "Project init discovery state gate"
+    Test-RequiredPattern "project-template\.agents\skills\project-init\SKILL.md" "options-needed" "Project init options state"
+    Test-RequiredPattern "project-template\.agents\skills\project-init\SKILL.md" "research-needed" "Project init research state"
     Test-RequiredPath "project-template\.codex\stacks\README.md"
     Test-RequiredPattern "project-template\AGENTS.md" "execution summary" "AGENTS execution summary gate"
     Test-RequiredPattern (Get-CodexNextWorkOrderPath) "Execution Confirmation" "Next work order execution confirmation gate"

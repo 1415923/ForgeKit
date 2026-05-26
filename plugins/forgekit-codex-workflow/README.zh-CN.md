@@ -27,6 +27,7 @@ English documentation: [README.md](README.md)
 - 项目初始化、既有项目接手、代码审查、发布检查、安全审查等 skills。
 - Lite / Standard / Enterprise 三种项目模式，初始化时通过 `-Mode` 写入项目。
 - 多种技术栈模板可在方案确认后再加载，不要求用户在初始化前选择。
+- 方案访谈状态机：`unclear`、`options-needed`、`research-needed`、`existing-project-scan`、`ready-for-plan`。
 - 只读工具链检测和 harness 结构检查脚本。
 - plugin 分发包校验，避免把个人路径、外部开发记录或 `.git/` 打包进去。
 
@@ -78,6 +79,16 @@ codex
 5. 用户答不上来时，给候选方案、推荐默认值和验证办法，而不是重复追问。
 
 既有项目不要先问技术栈。Codex 应该先扫描项目目录、README、构建文件、依赖文件、启动脚本和测试命令，基于现状推断技术栈；新增功能、修复和重构默认基于现有技术栈进行，除非用户明确要求迁移或重构架构。
+
+ForgeKit 会把访谈推进到一个明确状态：
+
+| 状态 | Codex 应该做什么 |
+| --- | --- |
+| `unclear` | 只追问目标、用户、痛点、成功标准和不做什么 |
+| `options-needed` | 给 2 到 4 个可行产品形态或范围方案，并说明取舍和推荐默认值 |
+| `research-needed` | 明确未知点、阻塞的决策、要查的官方资料/GitHub 项目/原型验证 |
+| `existing-project-scan` | 先扫描现有项目文件，汇报推断出的技术栈、命令、测试和矛盾点 |
+| `ready-for-plan` | 停止泛泛追问，输出项目方案、路线图、任务拆分和执行确认 |
 
 ## 跨平台支持
 

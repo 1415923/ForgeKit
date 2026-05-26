@@ -25,7 +25,19 @@ description: Initialize or repair a project's Codex workflow, discover product r
    - risks and blockers
    - Epic / Feature / Task / Bug model
    - version roadmap
-6. Use iterative solution shaping, not a one-shot questionnaire:
+6. Classify the discovery state before asking the next question:
+   - `unclear`: The user has an idea, complaint, or goal, but the target users, problem, product shape, or success criteria are not coherent yet. Ask product-level questions only.
+   - `options-needed`: The problem is understandable, but there are multiple viable product shapes or scope paths. Present 2 to 4 options with tradeoffs, recommend one default, and ask the user to choose or reject.
+   - `research-needed`: A decision depends on external facts, official docs, public examples, compatibility, policy, market behavior, or unfamiliar technology. Propose concrete references to inspect, search queries to run, GitHub examples to compare, or a throwaway prototype.
+   - `existing-project-scan`: The user is handing over a repo, adding a feature, fixing a bug, or refactoring existing code. Scan local files first, infer stack and constraints, then ask only targeted questions about contradictions or missing evidence.
+   - `ready-for-plan`: The problem, users, product shape, v0.1.0 closed loop, constraints, validation evidence, and major risks are coherent enough to write a plan. Produce the plan and execution summary instead of continuing broad discovery.
+7. Apply the discovery state rules:
+   - In `unclear`, ask at most 3 high-leverage questions about WHAT, WHY, WHO, success, and non-goals. Do not ask framework, database, auth, hosting, or directory questions.
+   - In `options-needed`, provide a comparison table: option, scope, cost, risk, validation path, and why it may fit. Include a recommended default and a conservative fallback.
+   - In `research-needed`, do not pretend to know. State the unknown, the decision it blocks, the sources or repositories to check, and what evidence would change the recommendation.
+   - In `existing-project-scan`, report the files inspected, inferred stack, commands, test strategy, integration points, and contradictions before asking the user.
+   - In `ready-for-plan`, stop asking exploratory questions and write the structured project plan, roadmap, task model, risks, and execution confirmation.
+8. Use iterative solution shaping, not a one-shot questionnaire:
    - Ask only the next 3 to 5 highest-leverage questions.
    - If the user cannot answer, provide 2 to 4 realistic options with tradeoffs and a recommended default.
    - If current knowledge is insufficient, propose a research path: local docs to inspect, official docs to search, example projects to compare, or small throwaway prototypes to run.
@@ -33,7 +45,7 @@ description: Initialize or repair a project's Codex workflow, discover product r
    - Clearly mark each item as Confirmed, Assumption, Research needed, or Deferred.
    - Keep interviewing and revising the plan until the problem, product shape, v0.1.0 scope, validation evidence, and safety boundary are coherent. Technical stack may remain undecided until product constraints justify it.
    - Do not treat "unknown" as a reason to stop; turn unknowns into decision options, research tasks, or deferred non-goals.
-7. When the user describes a product idea in natural language, translate it into:
+9. When the user describes a product idea in natural language, translate it into:
    - problem and target users
    - MVP workflow
    - explicit non-goals
@@ -42,24 +54,24 @@ description: Initialize or repair a project's Codex workflow, discover product r
    - validation strategy
    - risks and open decisions
    - first implementation slice, only when coding is allowed
-8. For new projects, discuss product shape before implementation:
+10. For new projects, discuss product shape before implementation:
    - Provide 2 to 4 possible product shapes when the user's goal is broad or ambiguous.
    - Compare scope, complexity, deployment cost, long-term evolution, and non-goals.
    - Propose a long-term version roadmap with concrete v0.1.0, v0.2.0, v0.3.0, and v1.0.0 outcomes.
    - If public references would help, ask whether to search official docs, public projects, or product examples before finalizing the plan.
    - Summarize what was learned from local files or external research, and say when research has not been done.
    - Do not ask the user to choose a stack at the beginning. Present stack options only after product shape, runtime constraints, integration points, team skills, and validation needs are known.
-9. For existing projects, use repository evidence first:
+11. For existing projects, use repository evidence first:
    - Infer stack, commands, architecture, and test strategy from files before asking the user.
    - New features and fixes should default to the existing stack and architecture.
    - Ask about stack migration, database replacement, framework changes, or major refactors only when the user explicitly requests them or local evidence shows a blocking conflict.
    - If local evidence is missing or contradictory, summarize what was found and ask targeted questions about the contradiction.
-10. For large, cross-module, migration, refactor, or high-risk work, require the large-change protocol before implementation:
+12. For large, cross-module, migration, refactor, or high-risk work, require the large-change protocol before implementation:
    - read `governance/large-change-execution.md`
    - create or update the exploration report in `docs/`
    - create or update the implementation plan in `docs/`
    - do not start broad coding until the implementation plan says coding is allowed
-11. Fill or update:
+13. Fill or update:
    - `.codex/project.md`
    - `.codex/scope.md`
    - `.codex/commands.md`
@@ -76,9 +88,9 @@ description: Initialize or repair a project's Codex workflow, discover product r
    - `docs/environment matrix`
    - `docs/release pipeline`
    - `docs/project task board`
-12. Preserve existing project-specific facts. Do not overwrite real information with template text.
-13. Remove or replace template history that belongs to ForgeKit itself. Generated projects must not keep ForgeKit Agent Harness roadmap tasks as if they were project tasks.
-14. Do not modify business code unless the user explicitly asks.
+14. Preserve existing project-specific facts. Do not overwrite real information with template text.
+15. Remove or replace template history that belongs to ForgeKit itself. Generated projects must not keep ForgeKit Agent Harness roadmap tasks as if they were project tasks.
+16. Do not modify business code unless the user explicitly asks.
 
 ## Gate Before Coding
 
@@ -130,6 +142,7 @@ Do not recommend large-scale coding until there is at least a first version of:
 End with:
 
 - Project classification.
+- Discovery state: unclear, options-needed, research-needed, existing-project-scan, or ready-for-plan.
 - Stack status: none yet, selected by metadata, inferred from files, or deferred pending planning.
 - Files created or updated.
 - Plan status: confirmed, partial, or blocked.

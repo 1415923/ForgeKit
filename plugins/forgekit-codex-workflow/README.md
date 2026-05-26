@@ -27,6 +27,7 @@ The current plugin includes:
 - Skills for project initialization, handover review, code review, release check, and security review.
 - Three project modes: Lite, Standard, and Enterprise, written during initialization with `-Mode`.
 - Stack templates that can be loaded after the product and architecture direction is understood.
+- Discovery states: `unclear`, `options-needed`, `research-needed`, `existing-project-scan`, and `ready-for-plan`.
 - Read-only scripts for local toolchain checks and harness checks.
 - Plugin package validation to keep user paths, external records, and `.git/` out of the distribution.
 
@@ -78,6 +79,16 @@ For a new project, Codex should not start with five fixed technical questions. I
 5. Options, defaults, and verification paths when the user cannot answer yet.
 
 For an existing project, Codex should not ask the user to restate the stack. It should scan the repository, README, build files, dependency files, scripts, and tests. New features, fixes, and refactors should default to the existing stack unless the user explicitly asks for migration or architectural change.
+
+ForgeKit drives the interview toward a concrete state:
+
+| State | What Codex should do |
+| --- | --- |
+| `unclear` | Ask only about goal, users, pain, success evidence, and non-goals |
+| `options-needed` | Provide 2 to 4 viable product-shape or scope options with tradeoffs and a recommended default |
+| `research-needed` | Name the unknown, the blocked decision, and the official docs, GitHub examples, or prototype to inspect |
+| `existing-project-scan` | Inspect local files first, then report inferred stack, commands, tests, integration points, and contradictions |
+| `ready-for-plan` | Stop broad discovery and produce the project plan, roadmap, task split, and execution confirmation |
 
 ## Cross-Platform Support
 

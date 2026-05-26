@@ -78,7 +78,7 @@ function Test-PluginManifest {
     if ($manifest.name -ne "forgekit-codex-workflow") {
         Add-Error "Unexpected plugin name: $($manifest.name)"
     }
-    if ($manifest.version -ne "0.10.0") {
+    if ($manifest.version -ne "0.10.1") {
         Add-Error "Unexpected plugin version: $($manifest.version)"
     }
     if ($manifest.skills -ne "./skills/") {
@@ -153,6 +153,17 @@ if (-not (Select-String -Path (Join-Path $pluginRoot 'README.zh-CN.md') -Pattern
 }
 if (Select-String -Path (Join-Path $pluginRoot 'README.zh-CN.md') -Pattern '## 常用技术栈' -SimpleMatch -Quiet) {
     Add-Error "Chinese README must not front-load stack selection"
+}
+
+$projectInitSkill = Join-Path $pluginRoot 'skills\project-init\SKILL.md'
+if (-not (Select-String -Path $projectInitSkill -Pattern 'Classify the discovery state' -SimpleMatch -Quiet)) {
+    Add-Error "Project init skill must classify discovery state"
+}
+if (-not (Select-String -Path $projectInitSkill -Pattern 'options-needed' -SimpleMatch -Quiet)) {
+    Add-Error "Project init skill must include options-needed state"
+}
+if (-not (Select-String -Path $projectInitSkill -Pattern 'research-needed' -SimpleMatch -Quiet)) {
+    Add-Error "Project init skill must include research-needed state"
 }
 if (-not (Select-String -Path (Join-Path $pluginRoot 'README.zh-CN.md') -Pattern 'cd D:\projects\my-app' -SimpleMatch -Quiet)) {
     Add-Error "Chinese README must show how to enter the generated project"
