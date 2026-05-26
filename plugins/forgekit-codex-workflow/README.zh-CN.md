@@ -41,6 +41,16 @@ powershell -ExecutionPolicy Bypass -File .\scripts\init-project-template.ps1 -Ta
 
 不要在这一步急着选择技术栈。新项目的技术栈应在产品形态、用户场景、运行环境、验证方式和约束条件讨论清楚后再确定；既有项目则应先扫描现有代码和配置来识别技术栈。
 
+模式是第一步里唯一需要先确定的参数：
+
+| 模式 | 适用项目 | 命令参数 |
+| --- | --- | --- |
+| Lite | 小脚本、小工具、个人验证项目 | `-Mode Lite` |
+| Standard | 普通应用、API、内部系统、数据处理项目 | `-Mode Standard` |
+| Enterprise | 团队交付、生产系统、高风险变更、接手项目 | `-Mode Enterprise` |
+
+不确定时先选 `Standard`。模式会写入 `.codex/init.generated.md`，Codex 启动时可以直接读取。
+
 ### 第二步：进入生成出来的项目
 
 ```powershell
@@ -57,16 +67,6 @@ codex
 ```
 
 这一步才会真正开始项目方案访谈。Codex 会先读入口文件和初始化信息，再根据 `-Mode`、项目现状和你的项目简报继续追问。
-
-## 模式怎么选
-
-| 模式 | 适用项目 | 命令参数 |
-| --- | --- | --- |
-| Lite | 小脚本、小工具、个人验证项目 | `-Mode Lite` |
-| Standard | 普通应用、API、内部系统、数据处理项目 | `-Mode Standard` |
-| Enterprise | 团队交付、生产系统、高风险变更、接手项目 | `-Mode Enterprise` |
-
-不确定时先选 `Standard`。模式会写入 `.codex/init.generated.md`，Codex 启动时可以直接读取。
 
 ## 方案访谈怎么进行（Discovery Interview）
 

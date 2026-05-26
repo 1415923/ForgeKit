@@ -41,6 +41,16 @@ powershell -ExecutionPolicy Bypass -File .\scripts\init-project-template.ps1 -Ta
 
 Do not rush stack selection here. For new projects, stack decisions should come after product shape, users, runtime constraints, validation needs, and deployment expectations are understood. For existing projects, Codex should scan the current repository first and infer the stack from real files.
 
+Mode is the only decision to make in Step 1:
+
+| Mode | Best for | Command value |
+| --- | --- | --- |
+| Lite | Small scripts, personal tools, quick prototypes | `-Mode Lite` |
+| Standard | Normal apps, APIs, internal systems, data projects | `-Mode Standard` |
+| Enterprise | Team delivery, production, high-risk or inherited projects | `-Mode Enterprise` |
+
+If unsure, use `Standard`. The selected mode is written into `.codex/init.generated.md`.
+
 ### Step 2: Start Codex from the generated project
 
 ```powershell
@@ -57,16 +67,6 @@ Read AGENTS.md and help me initialize this project with ForgeKit.
 ```
 
 This starts the actual project planning conversation. Codex will read the entry files and use your selected `-Mode` and project facts.
-
-## Project Modes
-
-| Mode | Best for | Command value |
-| --- | --- | --- |
-| Lite | Small scripts, personal tools, quick prototypes | `-Mode Lite` |
-| Standard | Normal apps, APIs, internal systems, data projects | `-Mode Standard` |
-| Enterprise | Team delivery, production, high-risk or inherited projects | `-Mode Enterprise` |
-
-If unsure, use `Standard`. The selected mode is written into `.codex/init.generated.md`.
 
 ## Discovery Interview
 
