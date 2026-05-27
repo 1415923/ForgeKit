@@ -1,225 +1,249 @@
-# ForgeKit AI 项目开发流程模板
+# ForgeKit
 
-ForgeKit 是一套项目级 AI 协作开发流程模板，用于让 Codex、Claude Code 等 AI 编程工具在新项目和既有项目里按同一套工程现场工作。
+English documentation: [README.en.md](README.en.md)
 
-它分为两层：
+**ForgeKit 是一套面向真实软件项目的 AI 协作工作流插件。**
 
-- `user-rules/`：用户级规则，描述本机环境、权限策略、Git 使用习惯和通用协作偏好。
-- `project-template/`：项目级模板，复制到具体项目根目录后，用于约束目标、范围、架构、代码风格、测试、文档和版本管理。
+它不是业务框架脚手架，也不是自动部署工具。它做的是把一个新项目或既有项目整理成 Codex、Claude Code 等 AI 编程工具能稳定接手的工程现场：有入口、有方案访谈、有项目文档、有技术栈按需加载、有审查和发布检查，也有高风险动作确认。
 
-辅助目录：
+换句话说，ForgeKit 让 AI 助手先问清楚目标、方案、风险和验证方式，再进入编码。
 
-- `prompts/`：项目初始化、需求分析、架构设计、代码实现、代码审查、版本发布等对话模板。
-- `checklists/`：项目启动、功能开发、发布前检查清单。
-- `references/`：外部项目和方法论的借鉴评估，目前包含 ECC。
-- `templates/`：按技术栈拆分的项目模板补充，例如 Java、Vue、React、Python、Node、C#/.NET、Go、Laravel、Rust、Flutter、C++、Kotlin、Swift、Rails、R、FPGA。
-- `scripts/`：初始化脚本，例如把模板复制到新项目。
-- `questionnaires/`：项目启动问答表。
+## 指南
 
-## 推荐使用方式
+如果你是第一次使用，只需要看三块：
 
-先判断项目入口：
+| 主题 | 该看什么 |
+| --- | --- |
+| 快速开始 | 直接按下面 3 步初始化并启动 AI 助手 |
+| 方案访谈 | 不知道技术栈或产品形态时，让 AI 助手先追问和调研 |
+| 安全边界 | 想知道插件会不会自动安装、部署、push 时看这里 |
 
-- 新项目：先与 AI 助手反复确认项目开发方案、技术栈选择、软硬件落地条件、环境矩阵、发布流水线、代码所有权、项目任务模型和版本路线图。
-- 接手既有项目：先做现状审计、大规模代码审查、运行环境和 CI/CD 链路梳理、代码所有权梳理、任务/缺陷模型梳理、P0/P1 缺陷修复和兼容边界记录，不默认大改架构。
-
-通用步骤：
-
-1. 先完善 `user-rules/`，把你的电脑环境和固定偏好写清楚。
-2. 用 `scripts/init-project-template.ps1` 或手动方式把 `project-template/` 复制到项目根目录。
-3. 根据技术栈只选择需要的 `templates/<stack>/`，不要全量复制。
-4. 先读取 `governance/流程总览.md`。
-5. 新项目使用 `project-init`，它会合并初始化、问答填充和方案访谈。
-6. 既有项目使用 `handover-review`，先审计和修 P0/P1，再规划后续开发。
-7. 每次开发功能时，按 `checklists/功能开发检查清单.md` 执行。
-8. 每次发布前，按 `checklists/发布前检查清单.md`、`checklists/版本推进闸门检查清单.md`、`docs/环境矩阵.md`、`docs/发布流水线.md`、`docs/代码所有权.md` 和 `docs/项目任务看板.md` 核对。
-
-## 使用模式
-
-| 模式 | 适用项目 | 建议维护内容 |
-| --- | --- | --- |
-| Lite | 小脚本、小工具、个人验证项目 | `.codex/`、`docs/项目开发方案.md`、`docs/版本更新记录.md`、必要命令 |
-| Standard | 普通前后端、API、数据处理、内部业务项目 | Lite + 需求、架构、技术选型、版本路线图、任务看板、测试、发布检查 |
-| Enterprise | 多人协作、接手项目、交付项目、高风险项目 | Standard + ADR/RFC、风险、变更影响、代码所有权、CI/CD、安全治理、事故复盘、质量指标 |
-
-默认推荐 `Standard`。小项目可以从 `Lite` 开始；涉及公司交付、生产环境、安全、硬件或多人协作时，用 `Enterprise`。
+生成项目后，Codex 的第一入口是目标项目里的 `AGENTS.md`，Claude Code 的第一入口是 `CLAUDE.md`。两者共享同一套 `.codex/`、`docs/` 和 `governance/` 项目事实。
 
 ## 与 ECC 的边界
 
-ForgeKit 不定位为“小 ECC”，也不和 ECC 竞争 agent runtime。ECC 的重点是增强 AI 编程工具本身，包括 skills、commands、hooks、memory、MCP、多 agent、AgentShield、安全扫描、成本控制和跨工具适配。
+ForgeKit 不是“小 ECC”，也不和 ECC 竞争 agent runtime。ECC 更像 AI 编程工具增强套件，覆盖 commands、hooks、memory、MCP、多 agent、安全工具和跨工具适配。
 
-ForgeKit 的边界是项目级 workflow harness：把一个新项目或既有项目整理成 AI 可以稳定接手的工程现场，重点放在项目入口、方案访谈、既有项目扫描、项目文档、版本路线、任务拆分、审查门禁、发布检查和安全确认。
+ForgeKit 的职责更窄：把一个真实项目整理成 AI 助手可稳定接手的工程现场，重点是项目入口、方案访谈、既有项目扫描、项目文档、版本路线、任务拆分、审查门禁、发布检查和安全确认。
 
-因此 ForgeKit 默认不做这些事：
+默认边界：
 
-- 不默认启用 hooks、MCP、memory、session tracking 或多 agent 运行时。
+- 不默认启用 hook、MCP、memory、session tracking 或多 agent 运行时。
 - 不复刻 ECC 的命令体系、安全工具、成本控制或自动化运行时。
-- 不把工具增强当成主要目标。
+- 可以和 ECC 共存：ECC 增强 AI 工具，ForgeKit 约束具体项目的交付流程。
 
-ForgeKit 可以和 ECC 共存：ECC 负责增强 Claude Code / Codex 等 AI 工具，ForgeKit 负责让具体项目有清晰、可审计、可交付的协作流程。
+## 最新动态
 
-## AI 工具上下文入口
+当前 plugin 已经具备：
 
-生成到具体项目后，Codex 应先读取 `AGENTS.md`，Claude Code 应先读取 `CLAUDE.md`。两者都是轻量入口，只负责路由任务和控制上下文，不要求一次性读取所有治理文档。
+- 项目初始化、既有项目接手、代码审查、发布检查、安全审查等 skills。
+- Codex / Claude Code 通用的根级 plugin 结构。
+- Lite / Standard / Enterprise 三种项目模式，初始化时通过 `-Mode` 写入项目。
+- 多种技术栈模板可在方案确认后再加载，不要求用户在初始化前选择。
+- 方案访谈状态机：`unclear`、`options-needed`、`research-needed`、`existing-project-scan`、`ready-for-plan`。
+- 只读工具链检测和 harness 结构检查脚本。
+- plugin 分发校验，避免把个人路径、外部开发记录或 `.git/` 打包进去。
 
-原则：
+## 快速开始
 
-- 先读 `AGENTS.md`，再读 `docs/代码库地图.md` 定位代码入口。
-- 按任务读取相关治理文件。
-- 按技术栈只读取 `.codex/stacks/<stack>/` 中相关模板。
-- 初始化阶段先访谈和确认方案，不直接编码。
-- Lite 项目不强行加载 Enterprise 级治理。
+### 第一步：在 ForgeKit 目录生成项目
 
-推荐上下文优先级：
+```powershell
+powershell -ExecutionPolicy Bypass -File .\scripts\init-project-template.ps1 -TargetPath "D:\projects\my-app" -ProjectName "my-app" -Mode Standard
+```
 
-1. `AGENTS.md`
-2. `docs/代码库地图.md`
-3. `docs/本地工具链检查.md`
-4. `docs/Codex下一步工作单.md`
-5. `.codex/project.md`、`.codex/scope.md`、`.codex/commands.md`
-6. 相关 `.codex/stacks/<stack>/`
-7. 任务需要的治理文件，例如 `governance/agent-harness.md`、`governance/definition-of-ready.md`
+不要在这一步急着选择技术栈。新项目的技术栈应在产品形态、用户场景、运行环境、验证方式和约束条件讨论清楚后再确定；既有项目则应先扫描现有代码和配置来识别技术栈。
 
-## Agent Harness 演进
+模式是第一步里唯一需要先确定的参数：
 
-v0.3 之后的重点是把模板从“治理文档集合”推进为更成熟的 AI agent harness。规划见：
+| 模式 | 适用项目 | 命令参数 |
+| --- | --- | --- |
+| Lite | 小脚本、小工具、个人验证项目 | `-Mode Lite` |
+| Standard | 普通应用、API、内部系统、数据处理项目 | `-Mode Standard` |
+| Enterprise | 团队交付、生产系统、高风险变更、接手项目 | `-Mode Enterprise` |
 
-- `project-template/governance/v0.3-agent-harness-roadmap.md`
+不确定时先选 `Standard`。模式会写入 `.codex/init.generated.md` 和 `.claude/init.generated.md`，AI 助手启动时可以直接读取。
 
-该路线图会逐步补齐 AGENTS 分层、代码库地图、LSP / 子目录启动、大任务多会话执行、hooks / commands / plugin / MCP 规划，以及项目适用性评估。
+### 第二步：进入生成出来的项目
 
-`v0.3.0` 已把 Agent Harness 基线落入模板：新增 `governance/agent-harness.md` 和 `docs/代码库地图.md`，并要求 HTML 工作台、README、AGENTS 和自检脚本都围绕这个入口体系维护。
+Codex：
 
-`v0.4.0` 补齐技术栈级启动和验证：Java、Vue、React、Python、Node、FPGA 模板现在都记录推荐启动目录、符号搜索 / LSP 方式、局部验证命令和忽略建议；生成项目内新增 `docs/本地工具链检查.md`。
+```powershell
+cd D:\projects\my-app
+codex
+```
 
-`v0.5.0` 补齐大任务多会话执行协议：跨模块、高风险、重构、迁移、接手整改等任务应先写 `docs/探索报告.md` 和 `docs/实施计划.md`，再拆分会话执行。
+Claude Code：
 
-`v0.6.0` 补齐团队工具链集成规划：新增 commands catalog、hooks 示例、team rollout 治理，并明确 plugin / MCP 不应过早启用。
+```powershell
+cd D:\projects\my-app
+claude
+```
 
-`v0.7.0` 补齐项目适用性评估和真实项目回灌：初始化时先判断项目是否适合 AI agent 工作流，不适合时先补工程条件或定制流程。
+如果你的启动命令不同，就用你平时的启动方式；关键是工作目录必须是生成后的项目根目录。
 
-`v0.8.0` 开始把文档型 harness 推进为可执行 harness：生成项目内提供本地工具链检测、harness 结构检查、Codex 下一步工作单和更明确的 hook/command 候选，但默认仍不自动启用外部工具或长期服务。
+### 第三步：把这句话发给 AI 助手
 
-`v0.9.0` 补齐 plugin 分发第一版：新增 `plugins/forgekit-codex-workflow/` 和 `.agents/plugins/marketplace.json`，把稳定 skills、只读脚本和模板资产打包为团队可安装的 Codex plugin。plugin 默认不启用 hook、MCP、外部写操作或公开市场发布。
+Codex：
 
-`v0.9.1` 完成 plugin review/refactor gate：检查分发包体积、重复资产、安全边界和升级路径，补齐安装、升级、安全和真实项目试用反馈文档。plugin 内顶层 `skills/` 与 `assets/project-template/.agents/skills/` 的重复是刻意保留，前者用于 plugin 发现，后者用于生成项目自包含。
+```text
+请读取 AGENTS.md，并按 ForgeKit 流程帮我初始化这个项目。
+```
 
-`v0.9.2` 回灌真实项目试用反馈：强化初始化阶段的多轮方案访谈，要求用户答不上来时给出候选方案、推荐默认值和查阅资料路径；同时清理生成项目路线图和任务看板中的 ForgeKit 自身历史任务。
+Claude Code：
 
-`v0.9.3` 强化新项目执行门禁：方案商讨必须作为独立阶段，编码、依赖安装、Git 初始化、commit、push、部署或外部写操作前，必须先在会话中展示执行前确认摘要并等待用户明确确认完整方案。
+```text
+请读取 CLAUDE.md，并按 ForgeKit 流程帮我初始化这个项目。
+```
 
-`v0.9.4` 扩展第一批主流语言包：新增 C#/.NET、Go Service、PHP Laravel 技术栈模板，并吸收 AGENTS.md、Microsoft skills、Arc、Superpowers、BMAD、YAAH、Harness Skills、CodeAlive 等项目的低风险实践：按需加载、初始化追问、最小验证命令、危险命令确认和共享输出契约意识。默认仍不启用 MCP、hook、session tracking 或多 agent 运行时。
+这一步才会真正开始项目方案访谈。AI 助手会先读入口文件和初始化信息，再根据 `-Mode`、项目现状和你的项目简报继续追问。
 
-`v0.9.5` 扩展第二批语言包：新增 Rust CLI/Service、Flutter Dart、C++ CMake 技术栈模板，覆盖系统工具/高性能服务、跨端 App 和 C/C++ 工程。重点记录 Cargo、Flutter SDK、CMake/编译器、签名/证书、unsafe/FFI、ABI、平台差异和大下载/发布动作的确认边界。
+## 方案访谈怎么进行
 
-`v0.9.6` 扩展第三批语言包：新增 Kotlin Spring、Swift iOS、Ruby Rails、R Data Analysis 技术栈模板，覆盖 JVM Kotlin 后端、iOS 原生、Rails Web/API 和 R 可复现分析。重点记录协程、Xcode 签名、Rails migration/队列、多数据库、renv、隐私数据和报告渲染边界。
+新项目不要先问 5 个固定技术问题。AI 助手应该先把问题本身聊清楚：
 
-`v0.9.7` 重写 plugin 推广文档：中英文 README 先说明 ForgeKit 是什么、适合谁、为什么要用，再给最短初始化路径、常见 stack 选择、生成内容和安全边界，避免用户一上来被资产清单和繁琐参数劝退。
+1. 这个项目服务谁，解决什么痛点，成功标准是什么。
+2. 可能的产品形态有哪些，各自范围、成本、风险和不做什么。
+3. 是否需要查官方文档、公开项目、同类产品或技术资料。
+4. 先确定 v0.1.0 最小闭环，再讨论架构和技术栈。
+5. 用户答不上来时，给候选方案、推荐默认值和验证办法，而不是重复追问。
 
-`v0.9.8` 修正初始化模式入口：`Lite / Standard / Enterprise` 不再放在 README 后半段作为说明，而是前置到 Quick Start，并新增初始化脚本 `-Mode` 参数写入 `.codex/init.generated.md`，让用户复制命令前就确定项目治理深度。
+既有项目不要先问技术栈。AI 助手应该先扫描项目目录、README、构建文件、依赖文件、启动脚本和测试命令，基于现状推断技术栈；新增功能、修复和重构默认基于现有技术栈进行，除非用户明确要求迁移或重构架构。
 
-`v0.9.9` 按 ECC README 框架重排 plugin 推广文档：补齐指南、最新动态、三步快速开始、跨平台支持、检测和工具、里面有什么，并把进入目标项目后启动 Codex 和发送启动提示词写成明确步骤。
+ForgeKit 会把访谈推进到一个明确状态：
 
-`v0.10.0` 修正项目初始化和方案确认流程：不再要求用户初始化时选择技术栈；新项目先通过多轮方案访谈、资料查阅和 v0.1.0 最小闭环确认来收敛方案；既有项目先扫描 README、依赖、构建、脚本、测试和源码目录推断现有技术栈，新增功能、修复和重构默认沿用现状。
-
-`v0.10.1` 把方案访谈升级为 discovery state 流程：`unclear` 只问目标和用户，`options-needed` 给候选方案和推荐默认值，`research-needed` 明确要查的资料和验证方式，`existing-project-scan` 先扫描老项目，`ready-for-plan` 停止泛泛追问并输出方案、路线图、任务拆分和执行确认。
-
-`v0.11.0` 新增 Claude Code 并列分发包：`plugins/forgekit-claude-workflow/` 提供 `.claude-plugin/plugin.json`、ForgeKit skills、共享模板资产和独立校验脚本；仓库根目录新增 `.claude-plugin/marketplace.json` 作为本地 Claude Code marketplace 示例。此版本不默认启用 hook、MCP、subagent、slash command 或外部自动化。
-
-`v0.11.1` 补齐 Claude Code 生成项目入口：新增 `CLAUDE.md` 和 `.claude/skills/forgekit-project-workflow/` 轻量入口 skill，并恢复 Claude plugin 初始化脚本。该入口按 ECC 式“共享核心资产 + 工具薄入口”思路设计，不复制全量 skills，项目事实仍集中在 `.codex/`、`docs/` 和 `governance/`。
-
-`v0.12.0` 按 ECC 式仓库框架重构分发表面：移除 `plugins/forgekit-codex-workflow/` 和 `plugins/forgekit-claude-workflow/` 双子包，改为仓库根级统一 plugin。`.codex-plugin/plugin.json` 与 `.claude-plugin/plugin.json` 都指向共享 `skills/`，`.agents/plugins/marketplace.json` 与 `.claude-plugin/marketplace.json` 都把仓库根 `./` 作为 source。
+| 状态 | AI 助手应该做什么 |
+| --- | --- |
+| `unclear` | 只追问目标、用户、痛点、成功标准和不做什么 |
+| `options-needed` | 给 2 到 4 个可行产品形态或范围方案，并说明取舍和推荐默认值 |
+| `research-needed` | 明确未知点、阻塞的决策、要查的官方资料/GitHub 项目/原型验证 |
+| `existing-project-scan` | 先扫描现有项目文件，汇报推断出的技术栈、命令、测试和矛盾点 |
+| `ready-for-plan` | 停止泛泛追问，输出项目方案、路线图、任务拆分和执行确认 |
 
 ## Root-level plugin surface
 
-ForgeKit 0.12.0 之后不再维护 Claude/Codex 两个 plugin 子目录。仓库根就是统一分发表面：
+ForgeKit 0.12.0 起不再维护 Codex / Claude Code 两个独立 plugin 子目录。仓库根目录就是统一分发表面：
 
-- `.codex-plugin/plugin.json`：Codex plugin manifest，`skills` 指向 `./skills/`。
-- `.claude-plugin/plugin.json`：Claude Code plugin manifest，`skills` 指向 `./skills/`。
-- `.agents/plugins/marketplace.json`：Codex/Agents 本地 marketplace，source 为 `./`。
-- `.claude-plugin/marketplace.json`：Claude Code 本地 marketplace，source 为 `./`。
-- `skills/`：唯一的 plugin skills 来源。
-- `project-template/`、`templates/`、`questionnaires/`、`scripts/`：共享项目模板、技术栈补充、问答和工具脚本。
+```text
+ForgeKit/
+├─ .codex-plugin/
+│  └─ plugin.json                 # Codex plugin metadata
+├─ .claude-plugin/
+│  ├─ plugin.json                 # Claude Code plugin metadata
+│  └─ marketplace.json            # Claude Code local marketplace example
+├─ .agents/plugins/
+│  └─ marketplace.json            # Codex local marketplace example
+├─ skills/                        # Codex / Claude Code 共享 skills
+├─ scripts/
+│  ├─ init-project-template.ps1    # 初始化目标项目
+│  └─ validate-plugin-assets.ps1   # 校验根级 plugin 分发表面
+├─ project-template/               # 生成项目的基础模板
+├─ templates/                      # 各技术栈模板
+└─ questionnaires/                 # 初始化问答
+```
 
-验证统一 plugin 表面：
+` .codex-plugin/plugin.json` 和 `.claude-plugin/plugin.json` 都指向 `./skills/`。两个 marketplace 都把仓库根 `./` 作为 source。
+
+## 跨平台支持
+
+ForgeKit 的核心资产是 Markdown、skills 和 PowerShell 脚本。
+
+| 平台 | 支持情况 |
+| --- | --- |
+| Windows | 当前主要支持平台，初始化和校验脚本为 PowerShell |
+| macOS / Linux | 生成后的 Markdown、skills 和项目规则可用；初始化脚本需要 PowerShell 7 或手动复制 |
+| Codex CLI | 通过生成项目的 `AGENTS.md`、`.codex/`、`.agents/skills/` 工作 |
+| Claude Code | 通过生成项目的 `CLAUDE.md`、`.claude/skills/` 和共享项目文档工作 |
+
+ForgeKit 不会自动安装 JDK、Node、Python、Flutter、Xcode、Rust、CMake 等工具。缺什么工具由检测脚本记录，再由用户决定是否安装。
+
+## 检测和工具
+
+验证根级 plugin 表面：
 
 ```powershell
 powershell -ExecutionPolicy Bypass -File .\scripts\validate-plugin-assets.ps1
 ```
 
-## Codex / Claude Code 使用
-
-Codex 本地 marketplace：
-
-```text
-.agents/plugins/marketplace.json
-```
-
-Claude Code 本地 marketplace：
-
-```text
-.claude-plugin/marketplace.json
-```
-
-初始化项目：
+验证模板结构：
 
 ```powershell
-powershell -ExecutionPolicy Bypass -File .\scripts\init-project-template.ps1 `
-  -TargetPath "D:\tmp\forgekit-plugin-smoke" `
-  -ProjectName "forgekit-plugin-smoke" `
-  -Mode Standard
+powershell -ExecutionPolicy Bypass -File .\scripts\validate-template.ps1
 ```
 
-生成项目后，Codex 从 `AGENTS.md` 开始，Claude Code 从 `CLAUDE.md` 开始；两者共享 `.codex/`、`docs/` 和 `governance/` 中的项目事实。
+生成烟测项目：
+
+```powershell
+powershell -ExecutionPolicy Bypass -File .\scripts\init-project-template.ps1 -TargetPath "D:\tmp\forgekit-plugin-smoke" -ProjectName "forgekit-plugin-smoke" -Mode Standard -Force
+```
+
+在生成项目中检查 harness 入口：
+
+```powershell
+powershell -ExecutionPolicy Bypass -File .\scripts\run-harness-check.ps1
+```
+
+在生成项目中检测本地工具链：
+
+```powershell
+powershell -ExecutionPolicy Bypass -File .\scripts\detect-local-toolchain.ps1
+```
+
+这些脚本只做检查和复制模板，不会自动安装工具、启动服务或部署项目。
+
+## 生成项目里有什么
+
+```text
+AGENTS.md                         # Codex 入口
+CLAUDE.md                         # Claude Code 入口
+.codex/                           # Codex 项目上下文、命令、规则、初始化记录
+.claude/                          # Claude Code 轻量入口和初始化记录
+.agents/skills/                   # 生成项目自包含 skills
+docs/代码库地图.md                # 代码入口和模块地图
+docs/本地工具链检查.md            # 工具链和验证能力记录
+docs/Codex下一步工作单.md         # 下一步工作单
+docs/
+governance/
+scripts/
+```
 
 ## 技术栈按需加载
 
-全局规则只保留跨项目共性。Java、前端、Python、Node、C#/.NET、Go、Laravel、Rust、Flutter、C++、Kotlin、Swift、Rails、R、FPGA 等专用规则放在 `templates/`，但不要求初始化时选择。新项目在方案访谈后按需加入；既有项目先由 Codex 扫描项目文件推断。
+全局规则只保留跨项目共性。Java、Vue、React、Python、Node、C#/.NET、Go、Laravel、Rust、Flutter、C++、Kotlin、Swift、Rails、R、FPGA 等专用规则放在 `templates/`，但不要求初始化时选择。
 
-例如：
-
-- Java 后端项目：加载 `project-template/` + `templates/java-springboot/`。
-- Java + Vue 项目：加载 `project-template/` + `templates/java-springboot/` + `templates/vue/`。
-- C# 企业 API / Worker：加载 `project-template/` + `templates/csharp-dotnet/`。
-- Go 服务 / CLI：加载 `project-template/` + `templates/go-service/`。
-- Laravel 后台 / API：加载 `project-template/` + `templates/php-laravel/`。
-- Rust CLI / Service：加载 `project-template/` + `templates/rust-cli-service/`。
-- Flutter 跨端 App：加载 `project-template/` + `templates/flutter-dart/`。
-- C++ CMake 工程：加载 `project-template/` + `templates/cpp-cmake/`。
-- Kotlin 后端：加载 `project-template/` + `templates/kotlin-spring/`。
-- Swift iOS App：加载 `project-template/` + `templates/swift-ios/`。
-- Rails Web / API：加载 `project-template/` + `templates/ruby-rails/`。
-- R 数据分析 / Shiny：加载 `project-template/` + `templates/r-data-analysis/`。
-- FPGA 项目：加载 `project-template/` + `templates/fpga-vivado-vitis/`。
+新项目在方案访谈后按需加入；既有项目先由 AI 助手扫描项目文件推断。
 
 不要让 Java 项目读取 FPGA 规则，也不要让 Laravel 项目读取 C# 规则；只加载当前项目实际需要的 stack，避免 context rot。
 
-## 初始化脚本示例
+## 安全边界
 
-```powershell
-powershell -ExecutionPolicy Bypass -File .\scripts\init-project-template.ps1 `
-  -TargetPath "D:\JAVA-code\demo-fullstack" `
-  -ProjectName "demo-fullstack" `
-  -Mode Standard
-```
+这个 plugin 是分发包，不是自动化开关。
 
-脚本默认不覆盖已有文件。初始化后 `.codex/stacks/README.md` 会说明技术栈尚未选择是正常状态；后续确认或推断出技术栈后，再把对应模板放到目标项目的 `.codex/stacks/<stack>/`。
+它不会默认启用：
 
-## ECC 借鉴策略
+- hook
+- MCP
+- 外部账号集成
+- 自动部署
+- 自动创建 issue / PR
+- 自动 commit / tag / push
 
-本模板参考 ECC 的 agents、skills、rules、MCP 和安全边界思想，但不要求安装 ECC。
+它也不包含：
 
-采用原则：
+- `user-rules/`，因为里面通常有个人电脑路径和权限偏好。
+- 外部开发记录目录 `document/`。
+- 凭据、token、私有服务地址或部署自动化。
 
-- 把 ECC 当作能力库和规则参考，不当作本模板的替代品。
-- 默认保持模板轻量，内置少量项目治理 skills，并预留 `.codex/agents/` 和 `.codex/config.example.toml`。
-- 需要安全审查、E2E、API 设计、多 agent、MCP 时，再按项目选择性引入。
-- 不全量复制第三方 skills、hooks、commands 或 MCP 配置。
+高风险动作仍然必须由用户明确确认。
 
-## 分层原则
+## ForgeKit 会怎样约束 AI 助手
 
-用户级规则回答：Codex 在我的电脑上应该怎么做事。
+新项目阶段，AI 助手应该先做这些事：
 
-项目级规则回答：Codex 在这个项目里应该怎么设计、实现、测试和交付。
+1. 追问产品目标、用户场景和真正要解决的问题。
+2. 给出多个可实现方案，并说明取舍。
+3. 确认环境、数据、部署、测试、验收方式，并在方案足够清楚后再确认技术栈。
+4. 输出执行前确认摘要。
+5. 等你明确确认后，才开始写业务代码、安装依赖、初始化 Git、commit、push、部署或写外部目录。
 
-不要把项目业务需求写进用户级规则；不要把本机路径、个人权限偏好写进项目级规则。
+接手既有项目时，AI 助手应该先做审计、代码库地图、工具链检查、P0/P1 风险识别，再谈大改。
