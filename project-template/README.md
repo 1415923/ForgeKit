@@ -63,9 +63,9 @@
 
 团队工具链优先级：先沉淀 command，再考虑 hook；跨项目稳定后再考虑 plugin；MCP 默认只读优先，写操作必须人工确认。
 
-ForgeKit v0.9.0 提供 `forgekit-codex-workflow` plugin 作为团队分发形态。plugin 只用于分发稳定 skills、模板资产和只读检查脚本；生成项目仍应按本文件和 `AGENTS.md` 的边界执行，不因安装 plugin 而默认启用 hook、MCP 或外部写操作。
+ForgeKit v0.12.0 改为 ECC 式根级统一 plugin 表面：`.codex-plugin/`、`.claude-plugin/` 和共享 `skills/` 位于仓库根，不再维护 Codex/Claude 两个 plugin 子目录。生成项目仍应按本文件、`AGENTS.md` 和 `CLAUDE.md` 的边界执行，不因安装 plugin 而默认启用 hook、MCP 或外部写操作。
 
-ForgeKit v0.11.1 增加 Claude Code 生成项目入口：`CLAUDE.md` 和 `.claude/skills/forgekit-project-workflow/`。Claude 入口是薄入口，只负责路由和门禁；共享项目事实仍写入 `.codex/`、`docs/` 和 `governance/`，避免为不同 AI 工具维护多套项目事实。
+Claude Code 入口是薄入口：`CLAUDE.md` 和 `.claude/skills/forgekit-project-workflow/` 只负责路由和门禁；共享项目事实仍写入 `.codex/`、`docs/` 和 `governance/`，避免为不同 AI 工具维护多套项目事实。
 
 适用性优先级：无 Git、目录混乱、无法验证、大量二进制或非工程师主导的项目，不应直接套用 Standard / Enterprise，应先补工程条件或走 Custom。
 

@@ -1,6 +1,6 @@
-# Codex CLI 开发流程模板
+# ForgeKit AI 项目开发流程模板
 
-这是一套用于不同语言、不同项目中复用的 Codex CLI 协作开发流程模板。
+ForgeKit 是一套项目级 AI 协作开发流程模板，用于让 Codex、Claude Code 等 AI 编程工具在新项目和既有项目里按同一套工程现场工作。
 
 它分为两层：
 
@@ -20,7 +20,7 @@
 
 先判断项目入口：
 
-- 新项目：先与 Codex 反复确认项目开发方案、技术栈选择、软硬件落地条件、环境矩阵、发布流水线、代码所有权、项目任务模型和版本路线图。
+- 新项目：先与 AI 助手反复确认项目开发方案、技术栈选择、软硬件落地条件、环境矩阵、发布流水线、代码所有权、项目任务模型和版本路线图。
 - 接手既有项目：先做现状审计、大规模代码审查、运行环境和 CI/CD 链路梳理、代码所有权梳理、任务/缺陷模型梳理、P0/P1 缺陷修复和兼容边界记录，不默认大改架构。
 
 通用步骤：
@@ -58,9 +58,9 @@ ForgeKit 的边界是项目级 workflow harness：把一个新项目或既有项
 
 ForgeKit 可以和 ECC 共存：ECC 负责增强 Claude Code / Codex 等 AI 工具，ForgeKit 负责让具体项目有清晰、可审计、可交付的协作流程。
 
-## Codex 上下文入口
+## AI 工具上下文入口
 
-生成到具体项目后，Codex 应先读取 `AGENTS.md`。它是轻量入口，只负责路由任务和控制上下文，不要求一次性读取所有治理文档。
+生成到具体项目后，Codex 应先读取 `AGENTS.md`，Claude Code 应先读取 `CLAUDE.md`。两者都是轻量入口，只负责路由任务和控制上下文，不要求一次性读取所有治理文档。
 
 原则：
 
@@ -128,42 +128,49 @@ v0.3 之后的重点是把模板从“治理文档集合”推进为更成熟的
 
 `v0.11.1` 补齐 Claude Code 生成项目入口：新增 `CLAUDE.md` 和 `.claude/skills/forgekit-project-workflow/` 轻量入口 skill，并恢复 Claude plugin 初始化脚本。该入口按 ECC 式“共享核心资产 + 工具薄入口”思路设计，不复制全量 skills，项目事实仍集中在 `.codex/`、`docs/` 和 `governance/`。
 
-## Plugin 分发
+`v0.12.0` 按 ECC 式仓库框架重构分发表面：移除 `plugins/forgekit-codex-workflow/` 和 `plugins/forgekit-claude-workflow/` 双子包，改为仓库根级统一 plugin。`.codex-plugin/plugin.json` 与 `.claude-plugin/plugin.json` 都指向共享 `skills/`，`.agents/plugins/marketplace.json` 与 `.claude-plugin/marketplace.json` 都把仓库根 `./` 作为 source。
 
-本仓库提供 repo/team marketplace 示例：
+## Root-level plugin surface
 
-- `.agents/plugins/marketplace.json`
-- `plugins/forgekit-codex-workflow/`
+ForgeKit 0.12.0 之后不再维护 Claude/Codex 两个 plugin 子目录。仓库根就是统一分发表面：
 
-plugin 用于分发 ForgeKit 的 skills、初始化脚本、只读检查脚本和模板资产。它不包含 `user-rules/` 或外部开发记录目录。验证 plugin 包：
+- `.codex-plugin/plugin.json`：Codex plugin manifest，`skills` 指向 `./skills/`。
+- `.claude-plugin/plugin.json`：Claude Code plugin manifest，`skills` 指向 `./skills/`。
+- `.agents/plugins/marketplace.json`：Codex/Agents 本地 marketplace，source 为 `./`。
+- `.claude-plugin/marketplace.json`：Claude Code 本地 marketplace，source 为 `./`。
+- `skills/`：唯一的 plugin skills 来源。
+- `project-template/`、`templates/`、`questionnaires/`、`scripts/`：共享项目模板、技术栈补充、问答和工具脚本。
+
+验证统一 plugin 表面：
 
 ```powershell
-powershell -ExecutionPolicy Bypass -File .\plugins\forgekit-codex-workflow\scripts\validate-plugin-assets.ps1
+powershell -ExecutionPolicy Bypass -File .\scripts\validate-plugin-assets.ps1
 ```
 
-## Claude Code 分发
+## Codex / Claude Code 使用
 
-Claude Code 并列分发包位于：
+Codex 本地 marketplace：
 
-- `.claude-plugin/marketplace.json`
-- `plugins/forgekit-claude-workflow/`
-
-验证 Claude Code plugin 包：
-
-```powershell
-powershell -ExecutionPolicy Bypass -File .\plugins\forgekit-claude-workflow\scripts\validate-plugin-assets.ps1
+```text
+.agents/plugins/marketplace.json
 ```
 
-`0.11.1` 起 Claude Code plugin 可以生成带 `CLAUDE.md` 和 `.claude/skills/forgekit-project-workflow/` 的项目入口。
+Claude Code 本地 marketplace：
 
-从 plugin 资产初始化烟测项目：
+```text
+.claude-plugin/marketplace.json
+```
+
+初始化项目：
 
 ```powershell
-powershell -ExecutionPolicy Bypass -File .\plugins\forgekit-codex-workflow\scripts\init-project-template.ps1 `
+powershell -ExecutionPolicy Bypass -File .\scripts\init-project-template.ps1 `
   -TargetPath "D:\tmp\forgekit-plugin-smoke" `
   -ProjectName "forgekit-plugin-smoke" `
   -Mode Standard
 ```
+
+生成项目后，Codex 从 `AGENTS.md` 开始，Claude Code 从 `CLAUDE.md` 开始；两者共享 `.codex/`、`docs/` 和 `governance/` 中的项目事实。
 
 ## 技术栈按需加载
 

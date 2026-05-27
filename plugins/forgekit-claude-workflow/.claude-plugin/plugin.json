@@ -1,8 +1,0 @@
-{
-  "name": "forgekit-claude-workflow",
-  "description": "Reusable ForgeKit workflow skills for Claude Code project initialization, handover, review, release, and safety checks.",
-  "version": "0.11.1",
-  "skills": [
-    "./skills/"
-  ]
-}

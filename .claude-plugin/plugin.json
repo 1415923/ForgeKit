@@ -1,0 +1,20 @@
+{
+  "name": "forgekit",
+  "version": "0.12.0",
+  "description": "Project-level workflow harness for Claude Code, Codex, and adjacent AI coding tools.",
+  "author": {
+    "name": "ForgeKit Maintainers"
+  },
+  "license": "MIT",
+  "keywords": [
+    "claude-code",
+    "codex",
+    "workflow",
+    "harness",
+    "skills",
+    "project-template"
+  ],
+  "skills": [
+    "./skills/"
+  ]
+}

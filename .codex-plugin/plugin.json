@@ -1,0 +1,35 @@
+{
+  "name": "forgekit",
+  "version": "0.12.0",
+  "description": "Project-level workflow harness for Codex, Claude Code, and adjacent AI coding tools.",
+  "author": {
+    "name": "ForgeKit Maintainers"
+  },
+  "license": "MIT",
+  "keywords": [
+    "codex",
+    "claude-code",
+    "workflow",
+    "harness",
+    "skills",
+    "project-template"
+  ],
+  "skills": "./skills/",
+  "interface": {
+    "displayName": "ForgeKit",
+    "shortDescription": "Project workflow harness for AI coding tools.",
+    "longDescription": "ForgeKit provides shared skills, project templates, and read-only checks for project initialization, handover, review, release, and safety gates across Codex and Claude Code.",
+    "developerName": "ForgeKit Maintainers",
+    "category": "Productivity",
+    "capabilities": [
+      "Skills",
+      "Templates",
+      "Local validation"
+    ],
+    "defaultPrompt": [
+      "Use ForgeKit to initialize this project.",
+      "Use ForgeKit to run a handover review.",
+      "Use ForgeKit to check this project before release."
+    ]
+  }
+}

@@ -5,10 +5,11 @@
   },
   "plugins": [
     {
-      "name": "forgekit-codex-workflow",
+      "name": "forgekit",
+      "version": "0.12.0",
       "source": {
         "source": "local",
-        "path": "./plugins/forgekit-codex-workflow"
+        "path": "./"
       },
       "policy": {
         "installation": "AVAILABLE",

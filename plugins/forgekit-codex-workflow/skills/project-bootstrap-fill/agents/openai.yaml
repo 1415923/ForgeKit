@@ -1,4 +1,0 @@
-interface:
-  display_name: "Project Bootstrap Fill"
-  short_description: "Fill first-version project docs from questionnaire answers."
-  default_prompt: "Use project-bootstrap-fill to convert questionnaire answers into first-version Codex project docs."

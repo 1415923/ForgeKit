@@ -819,9 +819,82 @@ function Test-StaleText {
     Test-RequiredPattern "project-template\.codex\scope.md" "Execution Confirmation" "Scope execution confirmation gate"
 }
 
+function Test-HarnessEntryConsistency {
+    $codebaseMapRef = Get-CodebaseMapRef
+    Test-RequiredPattern "README.md" "Root-level plugin surface" "Root README unified plugin surface"
+    Test-RequiredPattern "README.md" ".codex-plugin/plugin.json" "Root README Codex root manifest"
+    Test-RequiredPattern "README.md" ".claude-plugin/plugin.json" "Root README Claude root manifest"
+    Test-RequiredPattern "README.md" "./skills/" "Root README shared skills reference"
+    Test-RequiredPattern "README.md" $codebaseMapRef "Root README codebase map reference"
+    Test-RequiredPattern "project-template\README.md" "v0.12.0" "Template README unified plugin note"
+    Test-RequiredPattern "project-template\README.md" "CLAUDE.md" "Template README Claude entry"
+    Test-RequiredPattern "project-template\README.md" $codebaseMapRef "Template README codebase map reference"
+    Test-RequiredPattern "project-template\.codex\skills.md" "v0.12.0" "Skills unified plugin note"
+    Test-RequiredPattern "project-template\.agents\skills\README.md" "v0.12.0" "Skill README unified plugin note"
+    Test-RequiredPattern "scripts\init-project-template.ps1" "CLAUDE.md" "Init script Claude startup guidance"
+    Test-RequiredPattern "scripts\init-project-template.ps1" "[ValidateSet(""Lite"", ""Standard"", ""Enterprise"")]" "Init script mode parameter"
+    Test-RequiredPattern "scripts\init-project-template.ps1" "StackSelection: deferred" "Init script deferred stack guidance"
+    Test-RequiredPattern "使用说明.html" "startupOutput" "HTML startup output"
+    Test-RequiredPattern "使用说明.html" "governance/agent-harness.md" "HTML harness prompt reference"
+}
+
+function Test-PluginDistribution {
+    Test-RequiredPath ".agents\plugins\marketplace.json"
+    Test-RequiredPath ".claude-plugin\marketplace.json"
+    Test-RequiredPath ".codex-plugin\plugin.json"
+    Test-RequiredPath ".claude-plugin\plugin.json"
+    Test-RequiredPath "skills\project-init\SKILL.md"
+    Test-RequiredPath "skills\project-bootstrap-fill\SKILL.md"
+    Test-RequiredPath "skills\handover-review\SKILL.md"
+    Test-RequiredPath "skills\code-review\SKILL.md"
+    Test-RequiredPath "skills\release-check\SKILL.md"
+    Test-RequiredPath "skills\security-review\SKILL.md"
+    Test-RequiredPath "scripts\validate-plugin-assets.ps1"
+    Test-RequiredPattern "skills\project-init\SKILL.md" "existing-project-scan" "Root project-init discovery state"
+    if (Test-Path -LiteralPath (Join-Path $repoRoot "plugins\forgekit-codex-workflow")) {
+        Add-Error "Codex plugin subdirectory must not exist in unified 0.12.0 surface"
+    }
+    if (Test-Path -LiteralPath (Join-Path $repoRoot "plugins\forgekit-claude-workflow")) {
+        Add-Error "Claude plugin subdirectory must not exist in unified 0.12.0 surface"
+    }
+
+    $codexPluginJson = Get-Content -LiteralPath (Join-Path $repoRoot ".codex-plugin\plugin.json") -Raw | ConvertFrom-Json
+    if ($codexPluginJson.name -ne "forgekit") {
+        Add-Error "Unexpected Codex plugin name in root plugin.json: $($codexPluginJson.name)"
+    }
+    if ($codexPluginJson.version -ne "0.12.0") {
+        Add-Error "Unexpected Codex plugin version in root plugin.json: $($codexPluginJson.version)"
+    }
+    if ($codexPluginJson.skills -ne "./skills/") {
+        Add-Error "Root Codex plugin skills must be ./skills/"
+    }
+
+    $claudePluginJson = Get-Content -LiteralPath (Join-Path $repoRoot ".claude-plugin\plugin.json") -Raw | ConvertFrom-Json
+    if ($claudePluginJson.name -ne "forgekit") {
+        Add-Error "Unexpected Claude plugin name in root plugin.json: $($claudePluginJson.name)"
+    }
+    if ($claudePluginJson.version -ne "0.12.0") {
+        Add-Error "Unexpected Claude plugin version in root plugin.json: $($claudePluginJson.version)"
+    }
+    $claudeSkills = @($claudePluginJson.skills)
+    if ($claudeSkills.Count -ne 1 -or $claudeSkills[0] -ne "./skills/") {
+        Add-Error "Root Claude plugin skills must be ./skills/"
+    }
+}
+
+function Test-ClaudePluginDistribution {
+    Test-RequiredPath ".claude-plugin\plugin.json"
+    Test-RequiredPath ".claude-plugin\marketplace.json"
+    Test-RequiredPath "project-template\CLAUDE.md"
+    Test-RequiredPath "project-template\.claude\skills\forgekit-project-workflow\SKILL.md"
+    Test-RequiredPattern "project-template\CLAUDE.md" "Claude Code Project Guide" "Claude project guide"
+    Test-RequiredPattern "project-template\.claude\skills\forgekit-project-workflow\SKILL.md" "Discovery State" "Claude thin entry skill"
+}
+
 Test-RequiredPath "README.md"
 Test-RequiredPath "AGENTS.md"
 Test-RequiredPath "scripts\init-project-template.ps1"
+Test-RequiredPath "scripts\validate-plugin-assets.ps1"
 Test-RequiredPath "project-template\README.md"
 Test-RequiredPath "project-template\AGENTS.md"
 Test-RequiredPath "project-template\CLAUDE.md"

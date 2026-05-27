@@ -1,4 +1,0 @@
-interface:
-  display_name: "Security Review"
-  short_description: "Review security-sensitive changes"
-  default_prompt: "Review this project or change for secrets, permissions, unsafe input handling, and external-action risks."

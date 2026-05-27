@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Codex 项目初始化工作台</title>
+  <title>ForgeKit 项目初始化工作台</title>
   <style>
     :root {
       --bg: #f7f8fa;
@@ -245,8 +245,8 @@
 <body>
   <header>
     <div class="wrap">
-      <h1>Codex 项目初始化工作台</h1>
-      <p class="muted">选择项目模式，生成初始化命令和一条可直接开启方案访谈的 Codex 提示词。</p>
+      <h1>ForgeKit 项目初始化工作台</h1>
+      <p class="muted">选择项目模式，生成初始化命令和一条可直接开启方案访谈的 AI 助手提示词。</p>
     </div>
   </header>
 
@@ -374,16 +374,16 @@
         <div>
           <h3>复制到 PowerShell 执行</h3>
           <pre><code id="commandOutput"></code></pre>
-          <p class="muted">执行后进入目标项目目录，再把第 4 步提示词发给 Codex。</p>
+          <p class="muted">执行后进入目标项目目录，再把第 4 步提示词发给 Codex 或 Claude Code。</p>
 
-          <h3>推荐 Codex 启动入口</h3>
+          <h3>推荐启动入口</h3>
           <pre><code id="startupOutput"></code></pre>
 
           <h3>常见组合</h3>
           <p class="muted">普通 Java 前后端项目选 <code>java-springboot</code> + <code>vue</code>。Kotlin 后端选 <code>kotlin-spring</code>；iOS App 选 <code>swift-ios</code>；Rails 项目选 <code>ruby-rails</code>；R 分析选 <code>r-data-analysis</code>。只选实际需要的模板。</p>
 
           <h3>Plugin 分发</h3>
-          <p class="muted">v0.9.0 提供 <code>plugins/forgekit-codex-workflow/</code> 和 <code>.agents/plugins/marketplace.json</code>，用于团队分发稳定 skills、模板资产和只读检查脚本。plugin 不包含 <code>user-rules/</code> 或外部开发记录，也不默认启用 hook、MCP 或外部写操作。</p>
+          <p class="muted">v0.12.0 起仓库根目录就是统一 plugin 表面：<code>.codex-plugin/plugin.json</code>、<code>.claude-plugin/plugin.json</code> 和共享 <code>skills/</code> 同时服务 Codex 与 Claude Code。plugin 不包含 <code>user-rules/</code> 或外部开发记录，也不默认启用 hook、MCP 或外部写操作。</p>
         </div>
       </div>
     </section>
