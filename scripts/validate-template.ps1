@@ -318,13 +318,24 @@ function Test-HarnessEntryConsistency {
 function Test-ExecutableHarness {
     Test-RequiredPath "project-template\scripts\detect-local-toolchain.ps1"
     Test-RequiredPath "project-template\scripts\run-harness-check.ps1"
+    Test-RequiredPath "project-template\scripts\check-doc-sync.ps1"
+    Test-RequiredPath "project-template\scripts\check-doc-sync.sh"
+    Test-RequiredPath "project-template\scripts\install-hooks.ps1"
+    Test-RequiredPath "project-template\scripts\install-hooks.sh"
     Test-RequiredPath (Get-CodexNextWorkOrderPath)
     Test-RequiredPattern "project-template\scripts\detect-local-toolchain.ps1" "Do not install missing tools" "Toolchain detector safety guard"
     Test-RequiredPattern "project-template\scripts\run-harness-check.ps1" "Harness check passed" "Harness check success output"
     Test-RequiredPattern "project-template\.codex\commands.md" "detect-local-toolchain.ps1" "Commands toolchain detector"
     Test-RequiredPattern "project-template\.codex\commands.md" "run-harness-check.ps1" "Commands harness check"
+    Test-RequiredPattern "project-template\.codex\commands.md" "check-doc-sync.ps1" "Commands document sync check"
+    Test-RequiredPattern "project-template\.codex\commands.md" "check-doc-sync.sh" "Commands document sync check bash"
+    Test-RequiredPattern "project-template\.codex\commands.md" "install-hooks.ps1" "Commands hook installer"
+    Test-RequiredPattern "project-template\.codex\commands.md" "install-hooks.sh" "Commands hook installer bash"
     Test-RequiredPattern "project-template\.codex\commands-catalog.md" "detect-local-toolchain" "Commands catalog toolchain detector"
     Test-RequiredPattern "project-template\.codex\hooks.md" "run-harness-check.ps1" "Hooks harness check"
+    Test-RequiredPattern "project-template\.codex\hooks.md" "check-doc-sync.ps1" "Hooks document sync check"
+    Test-RequiredPattern "project-template\.codex\hooks.md" "check-doc-sync.sh" "Hooks document sync check bash"
+    Test-RequiredPattern "project-template\.codex\hooks.md" "install-hooks.sh" "Hooks installer bash"
     Test-RequiredPattern (Get-LocalToolchainPath) "detect-local-toolchain.ps1" "Local toolchain executable detector reference"
 }
 
@@ -453,9 +464,13 @@ function Test-LargeChangeProtocol {
     Test-RequiredPath "project-template\governance\large-change-execution.md"
     Test-RequiredPath (Get-ExplorationReportPath)
     Test-RequiredPath (Get-ImplementationPlanPath)
+    Test-RequiredPath "project-template\.agents\skills\large-change-planning\SKILL.md"
     Test-RequiredPattern "project-template\.agents\skills\project-init\SKILL.md" "large-change protocol" "Project init large-change gate"
     Test-RequiredPattern "project-template\.agents\skills\code-review\SKILL.md" "large-change protocol" "Code review large-change gate"
     Test-RequiredPattern "project-template\.agents\skills\release-check\SKILL.md" "large-change protocol" "Release check large-change gate"
+    Test-RequiredPattern "project-template\.agents\skills\large-change-planning\SKILL.md" "staged implementation plan" "Large-change planning output"
+    Test-RequiredPattern "project-template\AGENTS.md" "large-change-planning" "AGENTS large-change skill routing"
+    Test-RequiredPattern "project-template\CLAUDE.md" "large-change-planning" "CLAUDE large-change skill routing"
     Test-RequiredPattern "使用说明.html" "data-prompt=""large""" "HTML large-change tab"
 
     $largeChangeFiles = @(
@@ -722,9 +737,13 @@ function Test-AgentSuitability {
     Test-RequiredPath "project-template\governance\agent-suitability.md"
     Test-RequiredPath (Get-SuitabilityPath)
     Test-RequiredPath (Get-TrialRecordPath)
+    Test-RequiredPath "project-template\.agents\skills\project-suitability\SKILL.md"
     Test-RequiredPattern "project-template\governance\agent-suitability.md" "Suitable" "Suitability outcomes"
     Test-RequiredPattern "project-template\governance\agent-suitability.md" "Conditional" "Conditional suitability outcome"
     Test-RequiredPattern "project-template\governance\agent-suitability.md" "Custom" "Custom suitability outcome"
+    Test-RequiredPattern "project-template\.agents\skills\project-suitability\SKILL.md" "Suitable, Conditional, or Custom" "Project suitability skill outcome"
+    Test-RequiredPattern "project-template\AGENTS.md" "project-suitability" "AGENTS suitability skill routing"
+    Test-RequiredPattern "project-template\CLAUDE.md" "project-suitability" "CLAUDE suitability skill routing"
     Test-RequiredPattern "使用说明.html" "suitabilityList" "HTML suitability checklist"
     Test-RequiredPattern "使用说明.html" "适用性已确认" "HTML suitability brief"
 }
@@ -732,13 +751,24 @@ function Test-AgentSuitability {
 function Test-ExecutableHarness {
     Test-RequiredPath "project-template\scripts\detect-local-toolchain.ps1"
     Test-RequiredPath "project-template\scripts\run-harness-check.ps1"
+    Test-RequiredPath "project-template\scripts\check-doc-sync.ps1"
+    Test-RequiredPath "project-template\scripts\check-doc-sync.sh"
+    Test-RequiredPath "project-template\scripts\install-hooks.ps1"
+    Test-RequiredPath "project-template\scripts\install-hooks.sh"
     Test-RequiredPath (Get-CodexNextWorkOrderPath)
     Test-RequiredPattern "project-template\scripts\detect-local-toolchain.ps1" "Do not install missing tools" "Toolchain detector safety guard"
     Test-RequiredPattern "project-template\scripts\run-harness-check.ps1" "Harness check passed" "Harness check success output"
     Test-RequiredPattern "project-template\.codex\commands.md" "detect-local-toolchain.ps1" "Commands toolchain detector"
     Test-RequiredPattern "project-template\.codex\commands.md" "run-harness-check.ps1" "Commands harness check"
+    Test-RequiredPattern "project-template\.codex\commands.md" "check-doc-sync.ps1" "Commands document sync check"
+    Test-RequiredPattern "project-template\.codex\commands.md" "check-doc-sync.sh" "Commands document sync check bash"
+    Test-RequiredPattern "project-template\.codex\commands.md" "install-hooks.ps1" "Commands hook installer"
+    Test-RequiredPattern "project-template\.codex\commands.md" "install-hooks.sh" "Commands hook installer bash"
     Test-RequiredPattern "project-template\.codex\commands-catalog.md" "detect-local-toolchain" "Commands catalog toolchain detector"
     Test-RequiredPattern "project-template\.codex\hooks.md" "run-harness-check.ps1" "Hooks harness check"
+    Test-RequiredPattern "project-template\.codex\hooks.md" "check-doc-sync.ps1" "Hooks document sync check"
+    Test-RequiredPattern "project-template\.codex\hooks.md" "check-doc-sync.sh" "Hooks document sync check bash"
+    Test-RequiredPattern "project-template\.codex\hooks.md" "install-hooks.sh" "Hooks installer bash"
     Test-RequiredPattern (Get-LocalToolchainPath) "detect-local-toolchain.ps1" "Local toolchain executable detector reference"
 }
 
@@ -854,8 +884,10 @@ function Test-PluginDistribution {
     Test-RequiredPath ".claude-plugin\plugin.json"
     Test-RequiredPath "skills\project-init\SKILL.md"
     Test-RequiredPath "skills\project-bootstrap-fill\SKILL.md"
+    Test-RequiredPath "skills\project-suitability\SKILL.md"
     Test-RequiredPath "skills\document-backfill\SKILL.md"
     Test-RequiredPath "skills\handover-review\SKILL.md"
+    Test-RequiredPath "skills\large-change-planning\SKILL.md"
     Test-RequiredPath "skills\code-review\SKILL.md"
     Test-RequiredPath "skills\release-check\SKILL.md"
     Test-RequiredPath "skills\security-review\SKILL.md"
@@ -866,6 +898,8 @@ function Test-PluginDistribution {
     Test-RequiredPattern "skills\project-init\SKILL.md" "document backfill pass" "Root project-init document backfill pass"
     Test-RequiredPattern "skills\handover-review\SKILL.md" "Document backfill pass" "Root handover document backfill pass"
     Test-RequiredPattern "skills\document-backfill\SKILL.md" "Process exactly one source document at a time" "Root document backfill one-source rule"
+    Test-RequiredPattern "skills\project-suitability\SKILL.md" "Suitable, Conditional, or Custom" "Root project suitability outcome"
+    Test-RequiredPattern "skills\large-change-planning\SKILL.md" "staged implementation plan" "Root large-change planning output"
     if (Test-Path -LiteralPath (Join-Path $repoRoot "plugins\forgekit-codex-workflow")) {
         Add-Error "Codex plugin subdirectory must not exist in unified 0.12.0 surface"
     }
@@ -877,7 +911,7 @@ function Test-PluginDistribution {
     if ($codexPluginJson.name -ne "forgekit") {
         Add-Error "Unexpected Codex plugin name in root plugin.json: $($codexPluginJson.name)"
     }
-    if ($codexPluginJson.version -ne "0.12.0") {
+    if ($codexPluginJson.version -ne "0.13.0") {
         Add-Error "Unexpected Codex plugin version in root plugin.json: $($codexPluginJson.version)"
     }
     if ($codexPluginJson.skills -ne "./skills/") {
@@ -888,7 +922,7 @@ function Test-PluginDistribution {
     if ($claudePluginJson.name -ne "forgekit") {
         Add-Error "Unexpected Claude plugin name in root plugin.json: $($claudePluginJson.name)"
     }
-    if ($claudePluginJson.version -ne "0.12.0") {
+    if ($claudePluginJson.version -ne "0.13.0") {
         Add-Error "Unexpected Claude plugin version in root plugin.json: $($claudePluginJson.version)"
     }
     $claudeSkills = @($claudePluginJson.skills)
@@ -918,8 +952,10 @@ Test-RequiredPath "project-template\.codex\rules.md"
 Test-RequiredPath "project-template\.claude\skills\forgekit-project-workflow\SKILL.md"
     Test-RequiredPath "project-template\.agents\skills\project-init\SKILL.md"
     Test-RequiredPath "project-template\.agents\skills\project-bootstrap-fill\SKILL.md"
+    Test-RequiredPath "project-template\.agents\skills\project-suitability\SKILL.md"
     Test-RequiredPath "project-template\.agents\skills\document-backfill\SKILL.md"
     Test-RequiredPath "project-template\.agents\skills\handover-review\SKILL.md"
+Test-RequiredPath "project-template\.agents\skills\large-change-planning\SKILL.md"
 Test-RequiredPath "project-template\.agents\skills\code-review\SKILL.md"
 Test-RequiredPath "project-template\.agents\skills\release-check\SKILL.md"
 Test-RequiredPath "project-template\.agents\skills\security-review\SKILL.md"

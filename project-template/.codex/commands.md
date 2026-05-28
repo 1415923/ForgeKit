@@ -52,6 +52,64 @@ powershell -ExecutionPolicy Bypass -File .\scripts\run-harness-check.ps1
 powershell -ExecutionPolicy Bypass -File .\scripts\detect-local-toolchain.ps1
 ```
 
+## 文档同步检查
+
+Windows PowerShell：
+
+```powershell
+powershell -ExecutionPolicy Bypass -File .\scripts\check-doc-sync.ps1
+```
+
+Ubuntu / macOS：
+
+```bash
+./scripts/check-doc-sync.sh
+```
+
+默认只提示不阻断；如果团队确认要作为 hook 阻断，可使用：
+
+```powershell
+powershell -ExecutionPolicy Bypass -File .\scripts\check-doc-sync.ps1 -Strict
+```
+
+```bash
+./scripts/check-doc-sync.sh --strict
+```
+
+## 安装可选 Hooks
+
+Windows PowerShell：
+
+```powershell
+powershell -ExecutionPolicy Bypass -File .\scripts\install-hooks.ps1 -Profile docs-warn -Target git
+```
+
+Ubuntu / macOS：
+
+```bash
+./scripts/install-hooks.sh --profile docs-warn --target git
+```
+
+查看状态：
+
+```powershell
+powershell -ExecutionPolicy Bypass -File .\scripts\install-hooks.ps1 -Status
+```
+
+```bash
+./scripts/install-hooks.sh --status
+```
+
+卸载：
+
+```powershell
+powershell -ExecutionPolicy Bypass -File .\scripts\install-hooks.ps1 -Uninstall
+```
+
+```bash
+./scripts/install-hooks.sh --uninstall
+```
+
 ## 数据库迁移
 
 ```powershell

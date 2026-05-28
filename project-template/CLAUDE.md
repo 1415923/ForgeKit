@@ -16,6 +16,7 @@ Keep this file short. Put stable workflows in skills, stack-specific rules in `.
 8. Read `governance/agent-harness.md` when the task involves context strategy, large code search, or unclear entry points.
 9. Read `governance/large-change-execution.md` for large, cross-module, high-risk, migration, or refactor work.
 10. Read `governance/team-agent-rollout.md` only when the task involves commands, hooks, plugins, MCP, CI, issue trackers, or team rollout.
+11. Read `governance/agent-suitability.md` for initialization, existing project handover, or when project fit is unclear.
 
 ## Task Routing
 
@@ -23,10 +24,12 @@ Keep this file short. Put stable workflows in skills, stack-specific rules in `.
 | --- | --- | --- |
 | New project initialization | `governance/流程总览.md`, `governance/agent-harness.md`, `.claude/init.generated.md`, `.codex/questionnaires/` | `project-init` |
 | Post-init next step | `docs/Codex下一步工作单.md`, `docs/项目适用性评估.md`, `docs/本地工具链检查.md`, `.claude/init.generated.md` | `project-init` |
+| Project suitability assessment | `governance/agent-suitability.md`, `docs/项目适用性评估.md`, `docs/真实项目试用记录.md` | `project-suitability` |
 | Existing project handover | existing README/usage/setup/test/deploy docs first, then `docs/代码库地图.md`, `.codex/handover.md`, `docs/既有项目接手审计.md` | `handover-review` |
 | Backfill ForgeKit docs from existing docs | source docs one at a time, then target files under `docs/` | `document-backfill` |
 | Feature implementation | `.codex/rules.md`, `.codex/scope.md`, `.codex/commands.md`, relevant `.codex/stacks/` only | relevant stack rules |
-| Large or cross-module change | `governance/large-change-execution.md`, `docs/探索报告.md`, `docs/实施计划.md`, relevant stack rules | project-init or code-review |
+| Large or cross-module change | `governance/large-change-execution.md`, `docs/探索报告.md`, `docs/实施计划.md`, relevant stack rules | `large-change-planning` |
+| Document synchronization check | `.codex/hooks.md`, `.codex/commands.md`, `docs/版本更新记录.md`, related docs | `release-check` |
 | Code review | `.codex/testing.md`, `.codex/security.md`, `docs/代码所有权.md`, `docs/项目任务看板.md` | `code-review` |
 | Release or version gate | `.codex/version-gates.md`, `docs/版本路线图.md`, `docs/版本更新记录.md` | `release-check` |
 | Security-sensitive change | `.codex/security.md`, `governance/security-governance.md` | `security-review` |
@@ -38,9 +41,11 @@ Keep this file short. Put stable workflows in skills, stack-specific rules in `.
 - Do not install tools or start services just because `docs/本地工具链检查.md` has unknown values; ask first.
 - `scripts/detect-local-toolchain.ps1` and `scripts/run-harness-check.ps1` are read-only helpers.
 - Load only the selected stack folder under `.codex/stacks/`.
+- If suitability is Conditional or Custom, fill `docs/项目适用性评估.md` before broad coding.
 - If the project plan, technology choice, landing conditions, or version scope are unclear, interview the user before coding.
 - For existing projects, read existing docs and extract answers before asking broad handover questions.
 - When backfilling `docs/` from existing project documents, process one source document at a time and update target docs before reading the next source document.
+- After manual doc fixes or release-note changes, optionally run `scripts/check-doc-sync.ps1` to look for related docs, stale descriptions, and Changed entries without reasons.
 - For large or cross-module changes, search first, summarize findings, then propose a plan before editing.
 - Do not enable hooks, plugins, MCP, issue tracker writes, or CI changes without explicit user confirmation.
 

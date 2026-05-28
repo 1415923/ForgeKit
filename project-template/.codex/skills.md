@@ -8,7 +8,10 @@
 | --- | --- | --- |
 | project-init | 项目初始化、补齐 `.codex/` 和 `docs/` | 已内置于 `.agents/skills/project-init/` |
 | project-bootstrap-fill | 根据初始化问答生成第一版项目规则和文档 | 已内置于 `.agents/skills/project-bootstrap-fill/` |
+| project-suitability | 初始化、接手或风险不明时评估是否适合 ForgeKit 工作流 | 已内置于 `.agents/skills/project-suitability/` |
+| document-backfill | 逐篇阅读既有项目文档并回填 ForgeKit `docs/` | 已内置于 `.agents/skills/document-backfill/` |
 | handover-review | 接手既有项目、现状审计、兼容边界、缺陷修复计划 | 已内置于 `.agents/skills/handover-review/` |
+| large-change-planning | 大任务、跨模块、高风险、迁移或重构前的探索和实施计划 | 已内置于 `.agents/skills/large-change-planning/` |
 | code-review | 审查 diff、查找 bug、回归、安全风险、测试缺口 | 已内置于 `.agents/skills/code-review/` |
 | release-check | 发布前检查、版本记录、测试构建、部署风险 | 已内置于 `.agents/skills/release-check/` |
 | security-review | 权限、鉴权、凭据、外部输入、依赖变化 | 已内置于 `.agents/skills/security-review/` |
@@ -35,7 +38,7 @@
 
 ## 项目自定义工作流
 
-- 大任务、多模块改动、迁移、重构或高风险变更：先按 `governance/large-change-execution.md` 生成探索报告和实施计划，再进入编码。
+- 大任务、多模块改动、迁移、重构或高风险变更：优先使用 `large-change-planning`，按 `governance/large-change-execution.md` 生成探索报告和实施计划，再进入编码。
 - 高频重复动作：先登记到 `.codex/commands-catalog.md`；需要自动化时再评估 `.codex/hooks.md`。
 - 初始化后方向不清楚：先读 `docs/Codex下一步工作单.md`，必要时运行 `scripts/detect-local-toolchain.ps1` 和 `scripts/run-harness-check.ps1` 作为只读事实检查。
 

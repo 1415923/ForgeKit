@@ -53,7 +53,8 @@
 - `docs/项目适用性评估.md`、`docs/真实项目试用记录.md`：初始化前判断适用性，并把真实项目经验回灌。
 - `docs/Codex下一步工作单.md`：初始化后继续访谈、确认 MVP、落地条件和验证方式。
 - `.codex/commands-catalog.md`、`.codex/hooks.md`：可选命令和 hook 候选，默认不自动启用。
-- `scripts/detect-local-toolchain.ps1`、`scripts/run-harness-check.ps1`：只读检测脚本，用于把 harness 从文档推进到可执行检查。
+- `scripts/detect-local-toolchain.ps1`、`scripts/run-harness-check.ps1`、`scripts/check-doc-sync.ps1`、`scripts/check-doc-sync.sh`：只读检测脚本，用于把 harness 从文档推进到可执行检查。
+- `scripts/install-hooks.ps1`、`scripts/install-hooks.sh`：opt-in 安装、查看、卸载 Git hook，不默认启用。
 
 使用优先级：Codex 从 `AGENTS.md` 开始，Claude Code 从 `CLAUDE.md` 开始，然后进入 `docs/代码库地图.md` -> `docs/本地工具链检查.md` -> `docs/Codex下一步工作单.md` -> `.codex/` -> 相关 `.codex/stacks/<stack>/` -> 任务相关治理文件。不要默认读取全部治理文档。
 
@@ -61,7 +62,7 @@
 
 大任务优先级：先完成 `docs/探索报告.md`，再完成 `docs/实施计划.md`，确认后才进入分阶段编码。
 
-团队工具链优先级：先沉淀 command，再考虑 hook；跨项目稳定后再考虑 plugin；MCP 默认只读优先，写操作必须人工确认。
+团队工具链优先级：先沉淀 command，再考虑 hook；跨项目稳定后再考虑 plugin；MCP 默认只读优先，写操作必须人工确认。文档同步类 hook 建议从 `scripts/check-doc-sync.ps1` 或 `scripts/check-doc-sync.sh` 的只提示模式开始，确认噪音可接受后再使用 strict 模式。
 
 ForgeKit v0.12.0 改为 ECC 式根级统一 plugin 表面：`.codex-plugin/`、`.claude-plugin/` 和共享 `skills/` 位于仓库根，不再维护 Codex/Claude 两个 plugin 子目录。生成项目仍应按本文件、`AGENTS.md` 和 `CLAUDE.md` 的边界执行，不因安装 plugin 而默认启用 hook、MCP 或外部写操作。
 

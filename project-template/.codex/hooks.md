@@ -22,6 +22,47 @@
 | 大任务开始前 | 检查 `docs/探索报告.md` 和 `docs/实施计划.md` 是否存在 | 阻止直接大改 | 小任务误判 |
 | 发布前 | 检查版本记录、任务状态、测试记录 | 强化 release gate | 规则过严 |
 | 安全敏感变更 | 提醒安全审查和依赖审查 | 减少遗漏 | 需要准确识别 |
+| 文档修改后 / 提交前 | 运行 `scripts/check-doc-sync.ps1` 或 `scripts/check-doc-sync.sh` | 提醒相关文档、过期描述和版本记录原因 | 可能有噪音，默认只提示 |
+
+## 一键启用
+
+ForgeKit 默认不启用 hook。需要时先用 warning 模式安装 Git hook：
+
+Windows PowerShell：
+
+```powershell
+powershell -ExecutionPolicy Bypass -File .\scripts\install-hooks.ps1 -Profile docs-warn -Target git
+```
+
+Ubuntu / macOS：
+
+```bash
+./scripts/install-hooks.sh --profile docs-warn --target git
+```
+
+确认噪音可接受后，再切换严格模式：
+
+```powershell
+powershell -ExecutionPolicy Bypass -File .\scripts\install-hooks.ps1 -Profile docs-strict -Target git
+```
+
+```bash
+./scripts/install-hooks.sh --profile docs-strict --target git
+```
+
+查看状态或卸载：
+
+```powershell
+powershell -ExecutionPolicy Bypass -File .\scripts\install-hooks.ps1 -Status
+powershell -ExecutionPolicy Bypass -File .\scripts\install-hooks.ps1 -Uninstall
+```
+
+```bash
+./scripts/install-hooks.sh --status
+./scripts/install-hooks.sh --uninstall
+```
+
+`-Target claude` 和 `-Target codex` 目前只输出说明，不直接改全局配置。不同 CLI 的生命周期 hook 加载规则仍在变化；跨工具最稳的是先使用 Git hook。
 
 ## 安全边界
 
@@ -43,6 +84,46 @@ powershell -ExecutionPolicy Bypass -File .\scripts\run-harness-check.ps1
 # H1: local toolchain detection
 powershell -ExecutionPolicy Bypass -File .\scripts\detect-local-toolchain.ps1
 
+# H1: document sync check, warn only
+powershell -ExecutionPolicy Bypass -File .\scripts\check-doc-sync.ps1
+
+# H1: document sync check, strict mode for opt-in hooks
+powershell -ExecutionPolicy Bypass -File .\scripts\check-doc-sync.ps1 -Strict
+
+# H1: document sync check on Ubuntu / macOS, warn only
+./scripts/check-doc-sync.sh
+
+# H1: document sync check on Ubuntu / macOS, strict mode for opt-in hooks
+./scripts/check-doc-sync.sh --strict
+
 # H2: project test placeholder
 # Replace with project-specific test command in .codex/commands.md
 ```
+
+## 手动 Git Hook 示例
+
+通常不需要手写，优先使用 `scripts/install-hooks.*`。如果需要手动安装，可以参考下面内容。
+
+Windows PowerShell 项目：
+
+```powershell
+New-Item -ItemType Directory -Force .git\hooks
+@'
+powershell -ExecutionPolicy Bypass -File .\scripts\check-doc-sync.ps1
+exit 0
+'@ | Set-Content .git\hooks\pre-commit -Encoding ASCII
+```
+
+Ubuntu / macOS 项目：
+
+```bash
+mkdir -p .git/hooks
+cat > .git/hooks/pre-commit <<'EOF'
+#!/usr/bin/env bash
+./scripts/check-doc-sync.sh
+exit 0
+EOF
+chmod +x .git/hooks/pre-commit
+```
+
+确认噪音可接受后，再把命令改为 `-Strict` 或 `--strict`。

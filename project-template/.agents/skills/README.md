@@ -19,8 +19,10 @@ skill-name/
 | --- | --- |
 | `project-init` | 初始化或修复项目 `.codex/` 和 `docs/` |
 | `project-bootstrap-fill` | 根据项目初始化问答补齐第一版 `.codex/` 和 `docs/` |
+| `project-suitability` | 评估新项目或既有项目是否适合直接套用 ForgeKit AI 工作流 |
 | `document-backfill` | 逐篇消化既有项目文档并回填 ForgeKit `docs/` |
 | `handover-review` | 接手既有项目时做现状审计、兼容边界和缺陷修复计划 |
+| `large-change-planning` | 大范围、跨模块、迁移、重构或高风险任务的探索和分阶段计划 |
 | `code-review` | 审查改动中的 bug、回归、安全风险和测试缺口 |
 | `release-check` | 发布前检查版本、文档、测试、构建、部署风险 |
 | `security-review` | 审查密钥、权限、外部输入、外部动作等安全风险 |
@@ -35,7 +37,7 @@ skill-name/
 
 ## 大任务执行
 
-跨模块、大范围、高风险、迁移或重构任务不应直接编码。先读取 `governance/large-change-execution.md`，再维护探索报告和实施计划。
+跨模块、大范围、高风险、迁移或重构任务不应直接编码。优先使用 `large-change-planning`，并根据 `governance/large-change-execution.md` 维护探索报告和实施计划。
 
 ## 团队工具链
 

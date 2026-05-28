@@ -27,6 +27,8 @@
 | validate-template | `scripts/validate-template.ps1` | 低 | 模板仓库使用 |
 | harness-check | `scripts/run-harness-check.ps1` | 低 | 生成项目使用，检查入口和治理结构 |
 | detect-local-toolchain | `scripts/detect-local-toolchain.ps1` | 低 | 只读检测本地工具和 LSP 候选 |
+| check-doc-sync | `scripts/check-doc-sync.ps1` / `scripts/check-doc-sync.sh` | 低 | 只读检查文档同步、过期描述和版本记录原因 |
+| install-hooks | `scripts/install-hooks.ps1` / `scripts/install-hooks.sh` | 中 | opt-in 安装、查看或卸载 Git 文档同步 hook |
 | local-test | `.codex/commands.md` | 中 | 由项目填写 |
 | local-build | `.codex/commands.md` | 中 | 可能耗时 |
 | local-lint | `.codex/commands.md` | 低 / 中 | 取决于项目 |

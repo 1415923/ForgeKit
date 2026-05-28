@@ -36,13 +36,16 @@ Default boundaries:
 
 The current plugin includes:
 
-- Skills for project initialization, handover review, code review, release check, and security review.
+- Skills for project initialization, project suitability assessment, handover review, large-change planning, code review, release check, and security review.
 - `document-backfill` for digesting existing project documents one by one and migrating facts into ForgeKit `docs/`.
+- `project-suitability` for assessing whether Lite, Standard, Enterprise, or Custom flow fits the project.
+- `large-change-planning` for exploring, planning, confirming, and staging broad or risky work before coding.
 - One root-level plugin surface shared by Codex and Claude Code.
 - Three project modes: Lite, Standard, and Enterprise, written during initialization with `-Mode`.
 - Stack templates that can be loaded after the product and architecture direction is understood.
 - Discovery states: `unclear`, `options-needed`, `research-needed`, `existing-project-scan`, and `ready-for-plan`.
 - Read-only scripts for local toolchain checks and harness checks.
+- Optional document sync check script for related-doc drift, stale descriptions, and `Changed` entries without reasons.
 - Plugin validation to keep user paths, external records, and `.git/` out of the distribution.
 
 ## Quick Start
@@ -147,6 +150,24 @@ Expected behavior:
 4. Update the matching ForgeKit docs immediately and record source paths.
 5. Report the migrated facts and unknowns for that source document, then move to the next one.
 
+## Large Changes And Suitability
+
+Before initialization, handover, or broad changes, do not push the AI assistant straight into coding.
+
+When project fit is unclear, use:
+
+```text
+Use project-suitability to inspect existing files and documents, assess whether ForgeKit fits this project, and recommend a mode.
+```
+
+For broad, cross-module, migration, refactor, or high-risk work, use:
+
+```text
+Use large-change-planning to prepare an exploration report and staged implementation plan before implementation.
+```
+
+Both flows are evidence-first: read what exists, identify missing conditions and risks, then decide whether implementation is appropriate.
+
 ## Root-level plugin surface
 
 Since ForgeKit 0.12.0, there are no separate Codex and Claude Code plugin subdirectories. The repository root is the unified plugin surface:
@@ -214,6 +235,36 @@ ForgeKit is mostly Markdown, skills, and PowerShell scripts.
 ForgeKit does not install JDK, Node, Python, Flutter, Xcode, Rust, CMake, or other toolchains. Missing tools are reported by detection scripts so the user can decide what to install.
 
 ## Checks And Tools
+
+Check document synchronization in a generated project:
+
+Windows:
+
+```powershell
+powershell -ExecutionPolicy Bypass -File .\scripts\check-doc-sync.ps1
+```
+
+Ubuntu / macOS:
+
+```bash
+./scripts/check-doc-sync.sh
+```
+
+The script warns by default and does not block. It is suitable for manual review or session-end checks. After the team accepts the noise level, wire it as an opt-in hook as described in `.codex/hooks.md`.
+
+Install the optional Git hook with one command:
+
+Windows:
+
+```powershell
+powershell -ExecutionPolicy Bypass -File .\scripts\install-hooks.ps1 -Profile docs-warn -Target git
+```
+
+Ubuntu / macOS:
+
+```bash
+./scripts/install-hooks.sh --profile docs-warn --target git
+```
 
 Validate the root plugin surface:
 

@@ -1,0 +1,4 @@
+interface:
+  display_name: "Project Suitability"
+  short_description: "Assess ForgeKit workflow fit before coding"
+  default_prompt: "Use project-suitability to assess this project before broad AI-assisted coding."

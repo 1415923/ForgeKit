@@ -1,0 +1,4 @@
+interface:
+  display_name: "Large Change Planning"
+  short_description: "Plan broad or risky changes before coding"
+  default_prompt: "Use large-change-planning to explore the current project and prepare a staged implementation plan before broad implementation."

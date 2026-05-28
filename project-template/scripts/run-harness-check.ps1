@@ -39,6 +39,10 @@ Test-PathRequired "governance\agent-harness.md"
 Test-PathRequired "governance\large-change-execution.md"
 Test-PathRequired "governance\team-agent-rollout.md"
 Test-PathRequired "governance\agent-suitability.md"
+Test-PathRequired "scripts\check-doc-sync.ps1"
+Test-PathRequired "scripts\check-doc-sync.sh"
+Test-PathRequired "scripts\install-hooks.ps1"
+Test-PathRequired "scripts\install-hooks.sh"
 
 $agentsPath = Join-Path $repoRoot "AGENTS.md"
 if (Test-Path -LiteralPath $agentsPath) {
@@ -52,6 +56,8 @@ Test-FileContains "AGENTS.md" "Do not read every file"
 Test-FileContains "AGENTS.md" "large-change-execution.md"
 Test-FileContains "AGENTS.md" "team-agent-rollout.md"
 Test-FileContains ".codex\hooks.md" "Opt-in only"
+Test-FileContains ".codex\hooks.md" "check-doc-sync.ps1"
+Test-FileContains ".codex\hooks.md" "install-hooks.sh"
 
 if ($errors.Count -gt 0) {
     Write-Host "[fail] Harness check failed"

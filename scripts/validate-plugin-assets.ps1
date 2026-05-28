@@ -63,7 +63,7 @@ function Test-PluginManifest {
     if ($codexManifest.name -ne "forgekit") {
         Add-Error "Unexpected Codex plugin name: $($codexManifest.name)"
     }
-    if ($codexManifest.version -ne "0.12.0") {
+    if ($codexManifest.version -ne "0.13.0") {
         Add-Error "Unexpected Codex plugin version: $($codexManifest.version)"
     }
     if ($codexManifest.skills -ne "./skills/") {
@@ -74,7 +74,7 @@ function Test-PluginManifest {
     if ($claudeManifest.name -ne "forgekit") {
         Add-Error "Unexpected Claude plugin name: $($claudeManifest.name)"
     }
-    if ($claudeManifest.version -ne "0.12.0") {
+    if ($claudeManifest.version -ne "0.13.0") {
         Add-Error "Unexpected Claude plugin version: $($claudeManifest.version)"
     }
     $claudeSkills = @($claudeManifest.skills)
@@ -95,8 +95,10 @@ Test-RequiredPath ".agents\plugins\marketplace.json"
 Test-RequiredPath ".claude-plugin\marketplace.json"
 Test-RequiredPath "skills\project-init\SKILL.md"
 Test-RequiredPath "skills\project-bootstrap-fill\SKILL.md"
+Test-RequiredPath "skills\project-suitability\SKILL.md"
 Test-RequiredPath "skills\document-backfill\SKILL.md"
 Test-RequiredPath "skills\handover-review\SKILL.md"
+Test-RequiredPath "skills\large-change-planning\SKILL.md"
 Test-RequiredPath "skills\code-review\SKILL.md"
 Test-RequiredPath "skills\release-check\SKILL.md"
 Test-RequiredPath "skills\security-review\SKILL.md"
@@ -112,6 +114,8 @@ Test-RequiredPath "scripts\init-project-template.sh"
 Test-RequiredPattern "README.md" "Root-level plugin surface" "Unified root plugin section"
 Test-RequiredPattern "scripts\init-project-template.ps1" "CLAUDE.md" "Unified initializer Claude guidance"
 Test-RequiredPattern "skills\project-init\SKILL.md" "Classify the discovery state" "Project init discovery state"
+Test-RequiredPattern "skills\project-suitability\SKILL.md" "Suitable, Conditional, or Custom" "Project suitability outcome"
+Test-RequiredPattern "skills\large-change-planning\SKILL.md" "staged implementation plan" "Large change planning output"
 
 Test-ForbiddenPath "plugins\forgekit-codex-workflow"
 Test-ForbiddenPath "plugins\forgekit-claude-workflow"
