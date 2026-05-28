@@ -28,7 +28,7 @@ Keep this file short. Put stable workflows in skills, stack-specific rules in `.
 | Project suitability assessment | `governance/agent-suitability.md`, `docs/项目适用性评估.md`, `docs/真实项目试用记录.md` | project-init or handover-review |
 | Fill docs from answers | `governance/project-bootstrap-fill.md`, `.codex/questionnaires/` | `project-init` or `project-bootstrap-fill` |
 | Existing project handover | existing README/usage/setup/test/deploy docs first, then `docs/代码库地图.md`, `.codex/handover.md`, `docs/既有项目接手审计.md` | `handover-review` |
-| Backfill ForgeKit docs from existing docs | source docs one at a time, then target files under `docs/` | `handover-review` or `project-init` |
+| Backfill ForgeKit docs from existing docs | source docs one at a time, then target files under `docs/` | `document-backfill` |
 | Feature implementation | `.codex/rules.md`, `.codex/scope.md`, `.codex/commands.md`, relevant `.codex/stacks/` only | relevant stack rules |
 | Large or cross-module change | `governance/large-change-execution.md`, `docs/探索报告.md`, `docs/实施计划.md`, relevant stack rules | project-init or code-review |
 | Commands, hooks, plugin, MCP, CI integration | `governance/team-agent-rollout.md`, `.codex/commands-catalog.md`, `.codex/hooks.md`, `.codex/config.example.toml` | release-check or security-review |

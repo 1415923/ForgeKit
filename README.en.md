@@ -37,6 +37,7 @@ Default boundaries:
 The current plugin includes:
 
 - Skills for project initialization, handover review, code review, release check, and security review.
+- `document-backfill` for digesting existing project documents one by one and migrating facts into ForgeKit `docs/`.
 - One root-level plugin surface shared by Codex and Claude Code.
 - Three project modes: Lite, Standard, and Enterprise, written during initialization with `-Mode`.
 - Stack templates that can be loaded after the product and architecture direction is understood.
@@ -127,6 +128,24 @@ ForgeKit drives the interview toward a concrete state:
 | `research-needed` | Name the unknown, the blocked decision, and the official docs, GitHub examples, or prototype to inspect |
 | `existing-project-scan` | Read existing docs and local files first, then report files read, extracted facts, inferred stack, commands, tests, integration points, and contradictions |
 | `ready-for-plan` | Stop broad discovery and produce the project plan, roadmap, task split, and execution confirmation |
+
+## Existing Document Backfill
+
+If a project already has many old documents, such as README files, usage notes, test plans, architecture docs, or deployment notes, do not ask the AI to read everything at once and summarize it.
+
+Use the `document-backfill` flow:
+
+```text
+Use document-backfill to read documents under <old-docs-dir> one source document at a time and complete ForgeKit docs as you go. Do not read every document into one large summary.
+```
+
+Expected behavior:
+
+1. List the source document queue and target `docs/`.
+2. Read exactly one source document.
+3. Extract transferable facts, test plans, startup steps, deployment constraints, known issues, and acceptance evidence.
+4. Update the matching ForgeKit docs immediately and record source paths.
+5. Report the migrated facts and unknowns for that source document, then move to the next one.
 
 ## Root-level plugin surface
 

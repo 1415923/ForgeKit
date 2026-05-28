@@ -24,7 +24,7 @@ Keep this file short. Put stable workflows in skills, stack-specific rules in `.
 | New project initialization | `governance/流程总览.md`, `governance/agent-harness.md`, `.claude/init.generated.md`, `.codex/questionnaires/` | `project-init` |
 | Post-init next step | `docs/Codex下一步工作单.md`, `docs/项目适用性评估.md`, `docs/本地工具链检查.md`, `.claude/init.generated.md` | `project-init` |
 | Existing project handover | existing README/usage/setup/test/deploy docs first, then `docs/代码库地图.md`, `.codex/handover.md`, `docs/既有项目接手审计.md` | `handover-review` |
-| Backfill ForgeKit docs from existing docs | source docs one at a time, then target files under `docs/` | `handover-review` or `project-init` |
+| Backfill ForgeKit docs from existing docs | source docs one at a time, then target files under `docs/` | `document-backfill` |
 | Feature implementation | `.codex/rules.md`, `.codex/scope.md`, `.codex/commands.md`, relevant `.codex/stacks/` only | relevant stack rules |
 | Large or cross-module change | `governance/large-change-execution.md`, `docs/探索报告.md`, `docs/实施计划.md`, relevant stack rules | project-init or code-review |
 | Code review | `.codex/testing.md`, `.codex/security.md`, `docs/代码所有权.md`, `docs/项目任务看板.md` | `code-review` |
