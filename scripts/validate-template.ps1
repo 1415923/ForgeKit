@@ -608,6 +608,10 @@ function Test-StaleText {
     Test-RequiredPattern "project-template\.agents\skills\project-init\SKILL.md" "Classify the discovery state" "Project init discovery state gate"
     Test-RequiredPattern "project-template\.agents\skills\project-init\SKILL.md" "evidence extracted" "Project init existing-project evidence summary"
     Test-RequiredPattern "project-template\.agents\skills\handover-review\SKILL.md" "Evidence-first gate" "Handover evidence-first gate"
+    Test-RequiredPattern "project-template\.agents\skills\project-init\SKILL.md" "document backfill pass" "Project init document backfill pass"
+    Test-RequiredPattern "project-template\.agents\skills\handover-review\SKILL.md" "Document backfill pass" "Handover document backfill pass"
+    Test-RequiredPattern "project-template\AGENTS.md" "one source document at a time" "AGENTS doc backfill routing"
+    Test-RequiredPattern "project-template\CLAUDE.md" "one source document at a time" "CLAUDE doc backfill routing"
     Test-RequiredPattern "project-template\AGENTS.md" "existing README/usage/setup/test/deploy docs first" "AGENTS existing project docs-first routing"
     Test-RequiredPattern "project-template\CLAUDE.md" "existing README/usage/setup/test/deploy docs first" "CLAUDE existing project docs-first routing"
     Test-RequiredPattern "project-template\.agents\skills\project-init\SKILL.md" "options-needed" "Project init options state"
@@ -857,6 +861,8 @@ function Test-PluginDistribution {
     Test-RequiredPattern "skills\project-init\SKILL.md" "existing-project-scan" "Root project-init discovery state"
     Test-RequiredPattern "skills\project-init\SKILL.md" "evidence extracted" "Root project-init evidence summary"
     Test-RequiredPattern "skills\handover-review\SKILL.md" "Evidence-first gate" "Root handover evidence-first gate"
+    Test-RequiredPattern "skills\project-init\SKILL.md" "document backfill pass" "Root project-init document backfill pass"
+    Test-RequiredPattern "skills\handover-review\SKILL.md" "Document backfill pass" "Root handover document backfill pass"
     if (Test-Path -LiteralPath (Join-Path $repoRoot "plugins\forgekit-codex-workflow")) {
         Add-Error "Codex plugin subdirectory must not exist in unified 0.12.0 surface"
     }

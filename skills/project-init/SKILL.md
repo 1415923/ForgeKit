@@ -70,6 +70,8 @@ description: Initialize or repair a project's Codex workflow, discover product r
    - New features and fixes should default to the existing stack and architecture.
    - Ask about stack migration, database replacement, framework changes, or major refactors only when the user explicitly requests them or local evidence shows a blocking conflict.
    - If local evidence is missing or contradictory, summarize what was found and ask targeted questions about the contradiction.
+   - When the user asks to fill ForgeKit docs from existing project documents, use a document backfill pass: list candidate source docs, process one source document at a time, update target docs immediately, record source paths for imported facts when practical, and only then move to the next source document.
+   - Do not read all old documents into one large summary before writing. Preserve detailed test plans, usage steps, setup assumptions, deployment notes, known issues, and acceptance evidence.
 12. For large, cross-module, migration, refactor, or high-risk work, require the large-change protocol before implementation:
    - read `governance/large-change-execution.md`
    - create or update the exploration report in `docs/`

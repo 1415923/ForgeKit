@@ -13,9 +13,15 @@ description: Audit and stabilize an inherited or existing project before further
    - Extract answers from those files first. Do not ask the user for facts already present in inspected docs unless the docs are contradictory, stale, unsafe, or incomplete.
    - Report the evidence summary before questions: files read, stack facts, startup commands, test commands, deployment notes, environment variables, known limitations, contradictions, and remaining unknowns.
    - Ask only targeted questions about contradictions, missing evidence, or decisions that local files cannot answer.
-3. Identify current technology stack, runtime environment, deployment method, CI/CD path, task or issue model, upstream/downstream dependencies, and compatibility boundaries from evidence.
-4. Run or propose safe read-only checks first: `git status`, build config inspection, test command discovery, service requirements.
-5. Perform broad review before changing code:
+3. Document backfill pass when the user asks to complete ForgeKit `docs/` from existing project documents:
+   - First list candidate source documents and target ForgeKit docs. Do not read every source document into one large summary.
+   - Process one source document at a time. For each source document: read it, extract transferable facts, identify the target docs to update, write those target docs immediately, then summarize what was migrated and what remains unknown.
+   - Keep source traceability in target docs by recording source file paths for imported facts when practical.
+   - Preserve details such as test scenarios, startup steps, environment assumptions, deployment paths, known defects, API behavior, hardware/software prerequisites, and acceptance evidence. Do not collapse them into a generic project summary.
+   - Ask the user only after the current source document has been digested, or when a contradiction blocks accurate backfill.
+4. Identify current technology stack, runtime environment, deployment method, CI/CD path, task or issue model, upstream/downstream dependencies, and compatibility boundaries from evidence.
+5. Run or propose safe read-only checks first: `git status`, build config inspection, test command discovery, service requirements.
+6. Perform broad review before changing code:
    - startup and build risks
    - correctness bugs
    - security risks
@@ -24,14 +30,14 @@ description: Audit and stabilize an inherited or existing project before further
    - task or issue model gaps
    - duplicated or excessive files
    - missing tests and docs
-6. Classify issues:
+7. Classify issues:
    - P0: cannot start, data loss, security critical, main flow broken
    - P1: clear bug, important compatibility risk, important test gap
    - P2: quality, duplication, local design debt
    - P3: major architecture or technology change
-7. Fix P0/P1 first with minimal compatible changes.
-8. Put P2/P3 into roadmap or review/refactor gate. Do not make large architecture changes during handover unless the user explicitly confirms.
-9. For high-impact changes, require change impact assessment before implementation.
+8. Fix P0/P1 first with minimal compatible changes.
+9. Put P2/P3 into roadmap or review/refactor gate. Do not make large architecture changes during handover unless the user explicitly confirms.
+10. For high-impact changes, require change impact assessment before implementation.
 
 ## Compatibility Boundaries
 
@@ -71,6 +77,7 @@ Update or create:
 End with:
 
 - Evidence read and facts extracted.
+- Source documents migrated and target docs updated.
 - Current project status.
 - Compatibility boundaries.
 - P0/P1 defects and proposed fixes.
