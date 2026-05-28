@@ -48,8 +48,16 @@ The current plugin includes:
 
 ### Step 1: Generate a project from the ForgeKit directory
 
+Windows PowerShell:
+
 ```powershell
 powershell -ExecutionPolicy Bypass -File .\scripts\init-project-template.ps1 -TargetPath "D:\projects\my-app" -ProjectName "my-app" -Mode Standard
+```
+
+Ubuntu / macOS:
+
+```bash
+./scripts/init-project-template.sh --target-path "$HOME/projects/my-app" --project-name "my-app" --mode Standard
 ```
 
 Do not rush stack selection here. For new projects, stack decisions should come after product shape, users, runtime constraints, validation needs, and deployment expectations are understood. For existing projects, the AI assistant should scan the current repository first and infer the stack from real files.
@@ -144,6 +152,35 @@ ForgeKit/
 
 Both `.codex-plugin/plugin.json` and `.claude-plugin/plugin.json` point to `./skills/`. Both marketplace examples point to the repository root `./`.
 
+## Claude Code CLI on Ubuntu
+
+If you only want Claude Code to work on a project in Ubuntu, the most reliable path is to generate the project template first instead of installing the plugin first:
+
+```bash
+git clone https://github.com/1415923/Codex-template.git ForgeKit
+cd ForgeKit
+chmod +x scripts/init-project-template.sh
+./scripts/init-project-template.sh --target-path "$HOME/projects/my-app" --project-name "my-app" --mode Standard
+cd "$HOME/projects/my-app"
+claude
+```
+
+Then send this message in Claude Code:
+
+```text
+Read CLAUDE.md and help me initialize this project with ForgeKit.
+```
+
+If you want to install ForgeKit through the Claude Code plugin marketplace flow, add the marketplace and install the plugin from inside Claude Code:
+
+```text
+/plugin marketplace add /absolute/path/to/ForgeKit
+/plugin install forgekit@forgekit-local --scope local
+/reload-plugins
+```
+
+If plugin installation fails, use the template generation flow above. It does not depend on Claude Code's plugin marketplace; it works through the generated `CLAUDE.md` and `.claude/skills/`.
+
 ## Cross-Platform Support
 
 ForgeKit is mostly Markdown, skills, and PowerShell scripts.
@@ -151,7 +188,7 @@ ForgeKit is mostly Markdown, skills, and PowerShell scripts.
 | Platform | Support |
 | --- | --- |
 | Windows | Primary supported platform; initializer and validation scripts are PowerShell |
-| macOS / Linux | Generated Markdown, skills, and project rules are usable; initialization needs PowerShell 7 or manual copy |
+| macOS / Linux | Bash initializer is supported; PowerShell 7 or manual copy also works |
 | Codex CLI | Works through generated `AGENTS.md`, `.codex/`, and `.agents/skills/` |
 | Claude Code | Works through generated `CLAUDE.md`, `.claude/skills/`, and shared project documents |
 
@@ -175,6 +212,12 @@ Generate a smoke-test project:
 
 ```powershell
 powershell -ExecutionPolicy Bypass -File .\scripts\init-project-template.ps1 -TargetPath "D:\tmp\forgekit-plugin-smoke" -ProjectName "forgekit-plugin-smoke" -Mode Standard -Force
+```
+
+Ubuntu / macOS:
+
+```bash
+./scripts/init-project-template.sh --target-path /tmp/forgekit-plugin-smoke --project-name forgekit-plugin-smoke --mode Standard --force
 ```
 
 Run the harness check inside a generated project:

@@ -106,6 +106,7 @@ Test-RequiredPath "project-template\.codex\stacks\README.md"
 Test-RequiredPath "project-template\scripts\detect-local-toolchain.ps1"
 Test-RequiredPath "project-template\scripts\run-harness-check.ps1"
 Test-RequiredPath "scripts\init-project-template.ps1"
+Test-RequiredPath "scripts\init-project-template.sh"
 
 Test-RequiredPattern "README.md" "Root-level plugin surface" "Unified root plugin section"
 Test-RequiredPattern "scripts\init-project-template.ps1" "CLAUDE.md" "Unified initializer Claude guidance"

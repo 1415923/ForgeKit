@@ -894,6 +894,7 @@ function Test-ClaudePluginDistribution {
 Test-RequiredPath "README.md"
 Test-RequiredPath "AGENTS.md"
 Test-RequiredPath "scripts\init-project-template.ps1"
+Test-RequiredPath "scripts\init-project-template.sh"
 Test-RequiredPath "scripts\validate-plugin-assets.ps1"
 Test-RequiredPath "project-template\README.md"
 Test-RequiredPath "project-template\AGENTS.md"
