@@ -8,9 +8,14 @@ description: Audit and stabilize an inherited or existing project before further
 ## Workflow
 
 1. Read the governance overview in `governance/`, `.codex/handover.md`, project root files, `.codex/`, `docs/`, build configs, startup docs, and relevant stack rules.
-2. Identify current technology stack, runtime environment, deployment method, CI/CD path, task or issue model, upstream/downstream dependencies, and compatibility boundaries.
-3. Run or propose safe read-only checks first: `git status`, build config inspection, test command discovery, service requirements.
-4. Perform broad review before changing code:
+2. Evidence-first gate for existing projects:
+   - Before asking broad questions, inspect candidate docs: root README, docs README, usage guide, install/setup guide, quick start, test guide, deployment guide, API docs, architecture notes, changelog, CI config, dependency manifests, package scripts, Makefile, Docker files, and test directories.
+   - Extract answers from those files first. Do not ask the user for facts already present in inspected docs unless the docs are contradictory, stale, unsafe, or incomplete.
+   - Report the evidence summary before questions: files read, stack facts, startup commands, test commands, deployment notes, environment variables, known limitations, contradictions, and remaining unknowns.
+   - Ask only targeted questions about contradictions, missing evidence, or decisions that local files cannot answer.
+3. Identify current technology stack, runtime environment, deployment method, CI/CD path, task or issue model, upstream/downstream dependencies, and compatibility boundaries from evidence.
+4. Run or propose safe read-only checks first: `git status`, build config inspection, test command discovery, service requirements.
+5. Perform broad review before changing code:
    - startup and build risks
    - correctness bugs
    - security risks
@@ -19,14 +24,14 @@ description: Audit and stabilize an inherited or existing project before further
    - task or issue model gaps
    - duplicated or excessive files
    - missing tests and docs
-5. Classify issues:
+6. Classify issues:
    - P0: cannot start, data loss, security critical, main flow broken
    - P1: clear bug, important compatibility risk, important test gap
    - P2: quality, duplication, local design debt
    - P3: major architecture or technology change
-6. Fix P0/P1 first with minimal compatible changes.
-7. Put P2/P3 into roadmap or review/refactor gate. Do not make large architecture changes during handover unless the user explicitly confirms.
-8. For high-impact changes, require change impact assessment before implementation.
+7. Fix P0/P1 first with minimal compatible changes.
+8. Put P2/P3 into roadmap or review/refactor gate. Do not make large architecture changes during handover unless the user explicitly confirms.
+9. For high-impact changes, require change impact assessment before implementation.
 
 ## Compatibility Boundaries
 
@@ -65,6 +70,7 @@ Update or create:
 
 End with:
 
+- Evidence read and facts extracted.
 - Current project status.
 - Compatibility boundaries.
 - P0/P1 defects and proposed fixes.

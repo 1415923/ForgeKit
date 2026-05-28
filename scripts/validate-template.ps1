@@ -606,6 +606,10 @@ function Test-StaleText {
     Test-RequiredPattern "project-template\.agents\skills\project-init\SKILL.md" "Do not make stack selection the first user task" "Project init deferred stack rule"
     Test-RequiredPattern "project-template\.agents\skills\project-init\SKILL.md" "Infer stack" "Project init existing-project stack inference"
     Test-RequiredPattern "project-template\.agents\skills\project-init\SKILL.md" "Classify the discovery state" "Project init discovery state gate"
+    Test-RequiredPattern "project-template\.agents\skills\project-init\SKILL.md" "evidence extracted" "Project init existing-project evidence summary"
+    Test-RequiredPattern "project-template\.agents\skills\handover-review\SKILL.md" "Evidence-first gate" "Handover evidence-first gate"
+    Test-RequiredPattern "project-template\AGENTS.md" "existing README/usage/setup/test/deploy docs first" "AGENTS existing project docs-first routing"
+    Test-RequiredPattern "project-template\CLAUDE.md" "existing README/usage/setup/test/deploy docs first" "CLAUDE existing project docs-first routing"
     Test-RequiredPattern "project-template\.agents\skills\project-init\SKILL.md" "options-needed" "Project init options state"
     Test-RequiredPattern "project-template\.agents\skills\project-init\SKILL.md" "research-needed" "Project init research state"
     Test-RequiredPath "project-template\.codex\stacks\README.md"
@@ -851,6 +855,8 @@ function Test-PluginDistribution {
     Test-RequiredPath "skills\security-review\SKILL.md"
     Test-RequiredPath "scripts\validate-plugin-assets.ps1"
     Test-RequiredPattern "skills\project-init\SKILL.md" "existing-project-scan" "Root project-init discovery state"
+    Test-RequiredPattern "skills\project-init\SKILL.md" "evidence extracted" "Root project-init evidence summary"
+    Test-RequiredPattern "skills\handover-review\SKILL.md" "Evidence-first gate" "Root handover evidence-first gate"
     if (Test-Path -LiteralPath (Join-Path $repoRoot "plugins\forgekit-codex-workflow")) {
         Add-Error "Codex plugin subdirectory must not exist in unified 0.12.0 surface"
     }

@@ -10,7 +10,8 @@ description: Initialize or repair a project's Codex workflow, discover product r
 1. Read `AGENTS.md` first if present, then read the governance overview, `.codex/init.generated.md`, `.codex/questionnaires/`, existing `.codex/`, existing `docs/`, and project root files.
 2. Identify whether this is a new project idea, an existing project handover, or a feature/change request inside an existing project.
 3. Inspect local evidence before asking stack questions:
-   - For existing projects, scan README files, build files, dependency manifests, scripts, tests, source roots, and config files to infer the current stack and constraints.
+   - For existing projects, scan README files, usage docs, setup docs, test docs, deployment docs, build files, dependency manifests, scripts, tests, source roots, and config files to infer the current stack and constraints.
+   - Treat existing project documentation as evidence, not as a note to review later. Read the docs and extract answers before asking the user.
    - For new empty projects, treat missing `.codex/stacks/` or empty stacks as a normal planning state, not an error.
    - Read `.codex/stacks/<stack>/` only when the stack is already present, selected in metadata, or clearly inferred from local evidence.
 4. If questionnaire answers exist, use `governance/project-bootstrap-fill.md` to convert them into first-version `.codex/` rules and `docs/`.
@@ -62,7 +63,10 @@ description: Initialize or repair a project's Codex workflow, discover product r
    - Summarize what was learned from local files or external research, and say when research has not been done.
    - Do not ask the user to choose a stack at the beginning. Present stack options only after product shape, runtime constraints, integration points, team skills, and validation needs are known.
 11. For existing projects, use repository evidence first:
-   - Infer stack, commands, architecture, and test strategy from files before asking the user.
+   - Read candidate docs before asking broad handover questions: root README, docs README, usage guide, install/setup guide, quick start, test guide, deployment guide, API docs, architecture notes, changelog, CI config, and script files.
+   - Infer stack, commands, architecture, test strategy, deployment path, and known constraints from files before asking the user.
+   - Produce a brief "evidence extracted" summary before questions: files read, facts found, commands found, tests found, deployment or runtime notes found, contradictions, and remaining unknowns.
+   - Do not ask for information already present in inspected docs unless it is contradictory, stale, unsafe, or incomplete. Quote the source file path when asking about such a conflict.
    - New features and fixes should default to the existing stack and architecture.
    - Ask about stack migration, database replacement, framework changes, or major refactors only when the user explicitly requests them or local evidence shows a blocking conflict.
    - If local evidence is missing or contradictory, summarize what was found and ask targeted questions about the contradiction.

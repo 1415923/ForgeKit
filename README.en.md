@@ -116,7 +116,7 @@ For a new project, the AI assistant should not start with five fixed technical q
 4. The v0.1.0 minimum closed loop before architecture and stack decisions.
 5. Options, defaults, and verification paths when the user cannot answer yet.
 
-For an existing project, the assistant should not ask the user to restate the stack. It should scan the repository, README, build files, dependency files, scripts, and tests. New features, fixes, and refactors should default to the existing stack unless the user explicitly asks for migration or architectural change.
+For an existing project, the assistant should not ask the user to restate the stack, and it should not merely list existing docs in the project plan without reading them. It should read existing README files, usage docs, install/setup docs, test docs, deployment docs, API docs, build files, dependency files, startup scripts, and test commands, then extract answers from them. Ask the user only when the docs are missing, contradictory, stale, or insufficient.
 
 ForgeKit drives the interview toward a concrete state:
 
@@ -125,7 +125,7 @@ ForgeKit drives the interview toward a concrete state:
 | `unclear` | Ask only about goal, users, pain, success evidence, and non-goals |
 | `options-needed` | Provide 2 to 4 viable product-shape or scope options with tradeoffs and a recommended default |
 | `research-needed` | Name the unknown, the blocked decision, and the official docs, GitHub examples, or prototype to inspect |
-| `existing-project-scan` | Inspect local files first, then report inferred stack, commands, tests, integration points, and contradictions |
+| `existing-project-scan` | Read existing docs and local files first, then report files read, extracted facts, inferred stack, commands, tests, integration points, and contradictions |
 | `ready-for-plan` | Stop broad discovery and produce the project plan, roadmap, task split, and execution confirmation |
 
 ## Root-level plugin surface
