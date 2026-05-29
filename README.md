@@ -111,6 +111,38 @@ Claude Code：
 
 这一步才会真正开始项目方案访谈。AI 助手会先读入口文件和初始化信息，再根据 `-Mode`、项目现状和你的项目简报继续追问。
 
+## 升级已有项目
+
+从旧版本 ForgeKit 升到新版本时，仍然使用初始化脚本，但要加升级模式，且不要加 `-Force` / `--force`：
+
+Windows：
+
+```powershell
+powershell -ExecutionPolicy Bypass -File .\scripts\init-project-template.ps1 -TargetPath "D:\projects\my-app" -ProjectName "my-app" -Mode Standard -Upgrade
+```
+
+Ubuntu / macOS：
+
+```bash
+./scripts/init-project-template.sh --target-path "$HOME/projects/my-app" --project-name "my-app" --mode Standard --upgrade
+```
+
+升级模式只补新版本里缺失的模板文件；已有的 `docs/`、`.codex/`、`AGENTS.md`、`CLAUDE.md` 和初始化元数据默认都会保留，不会覆盖项目真实记录。已有文件如果和新版模板不同，会记录到 `.codex/upgrade-report.md`，供人工或 AI 审查合并。
+
+如果想查看新版模板内容但不覆盖现有文件，可以导出模板副本：
+
+```powershell
+powershell -ExecutionPolicy Bypass -File .\scripts\init-project-template.ps1 -TargetPath "D:\projects\my-app" -ProjectName "my-app" -Mode Standard -Upgrade -ExportUpgradeTemplates
+```
+
+```bash
+./scripts/init-project-template.sh --target-path "$HOME/projects/my-app" --project-name "my-app" --mode Standard --upgrade --export-upgrade-templates
+```
+
+新版模板副本会放在 `.codex/upgrade-templates/`。`-Force` / `--force` 只适合重建临时目录或明确要覆盖模板文件时使用。
+
+升级后让 AI 助手读取 `.codex/automation-decision.md`、`.codex/hooks.md`、`.agents/skills/README.md` 和 `docs/代码库地图.md`，再判断哪些新能力需要合并进当前项目事实。
+
 ## 方案访谈怎么进行
 
 新项目不要先问 5 个固定技术问题。AI 助手应该先把问题本身聊清楚：

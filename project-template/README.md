@@ -28,6 +28,12 @@
 22. 技术债写入 `docs/技术债记录.md`，版本质量写入 `docs/质量指标记录.md`。
 23. 开始编码前，确认 Definition of Ready；完成时确认 Definition of Done。
 
+## 升级兼容
+
+从旧版本 ForgeKit 升级到新版本时，使用模板仓库里的初始化脚本加升级模式，不要使用 `-Force` / `--force`。升级模式只补缺失的新模板文件，不覆盖已有项目事实、项目文档、入口文件和初始化元数据。已有文件如果和新版模板不同，会进入 `.codex/upgrade-report.md`。
+
+升级后先查看 `.codex/upgrade-report.md`、新复制的 `.codex/automation-decision.md`、`.codex/hooks.md`、`.agents/skills/README.md` 和脚本目录，再人工或让 AI 判断是否需要合并到当前项目流程。需要 side-by-side diff 时，在模板仓库运行升级命令并加 `-ExportUpgradeTemplates` / `--export-upgrade-templates`。
+
 ## 可选增强
 
 - `.agents/skills/`：Codex 项目级 skills，内置项目初始化、代码审查、发布检查和安全审查。
