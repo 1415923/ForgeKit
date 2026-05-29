@@ -18,6 +18,7 @@ Keep this file short. Put stable workflows in skills, stack-specific rules in `.
 8. Read `governance/large-change-execution.md` for large, cross-module, high-risk, migration, or refactor work.
 9. Read `governance/team-agent-rollout.md` only when the task involves commands, hooks, plugins, MCP, CI, issue trackers, or team rollout.
 10. Read `governance/agent-suitability.md` for project initialization, existing project handover, or when the project may not fit an AI agent workflow.
+11. Read `.codex/automation-decision.md` before turning a repeated workflow into a skill, command, hook, script, plugin, or MCP.
 
 ## Task Routing
 
@@ -32,6 +33,7 @@ Keep this file short. Put stable workflows in skills, stack-specific rules in `.
 | Feature implementation | `.codex/rules.md`, `.codex/scope.md`, `.codex/commands.md`, relevant `.codex/stacks/` only | relevant stack rules |
 | Large or cross-module change | `governance/large-change-execution.md`, `docs/探索报告.md`, `docs/实施计划.md`, relevant stack rules | `large-change-planning` |
 | Commands, hooks, plugin, MCP, CI integration | `governance/team-agent-rollout.md`, `.codex/commands-catalog.md`, `.codex/hooks.md`, `.codex/config.example.toml` | release-check or security-review |
+| Automation boundary decision | `.codex/automation-decision.md`, `governance/team-agent-rollout.md` | relevant existing skill |
 | Document synchronization check | `.codex/hooks.md`, `.codex/commands.md`, `docs/版本更新记录.md`, related docs | `release-check` |
 | Code review | `.codex/testing.md`, `.codex/security.md`, `docs/代码所有权.md`, `docs/项目任务看板.md` | `code-review` |
 | Release or version gate | `.codex/version-gates.md`, `docs/版本路线图.md`, `docs/版本更新记录.md` | `release-check` |
@@ -43,6 +45,7 @@ Keep this file short. Put stable workflows in skills, stack-specific rules in `.
 - Do not read all `docs/` by default; use `docs/代码库地图.md` to choose what matters.
 - Do not install tools or start services just because `docs/本地工具链检查.md` has unknown values; ask first.
 - `scripts/detect-local-toolchain.ps1` and `scripts/run-harness-check.ps1` are read-only helpers; do not treat their output as permission to install or change anything.
+- Use `.codex/automation-decision.md` to decide whether repeated work belongs in a skill, command, hook, script, plugin, MCP, or documentation.
 - Load only the selected stack folder under `.codex/stacks/`.
 - For Lite projects, keep governance lightweight and ask before expanding to Enterprise-level documents.
 - If suitability is Conditional or Custom, fill `docs/项目适用性评估.md` before broad coding.

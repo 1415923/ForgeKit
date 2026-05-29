@@ -15,9 +15,6 @@
 | code-review | 审查 diff、查找 bug、回归、安全风险、测试缺口 | 已内置于 `.agents/skills/code-review/` |
 | release-check | 发布前检查、版本记录、测试构建、部署风险 | 已内置于 `.agents/skills/release-check/` |
 | security-review | 权限、鉴权、凭据、外部输入、依赖变化 | 已内置于 `.agents/skills/security-review/` |
-| api-design | REST/RPC 接口、错误码、响应格式 | 可按项目需要另建 |
-| e2e-testing | 关键用户流程验证 | 可按项目需要另建 |
-| docs-research | 查询官方文档、版本差异、迁移说明 | 需要网络时先确认 |
 
 ## 使用规则
 
@@ -35,11 +32,13 @@
 - `governance/agent-harness.md` 负责维护上下文分层、搜索方式和停止编码条件。
 - `governance/team-agent-rollout.md` 负责判断重复流程应该沉淀为 command、hook、plugin 还是 MCP。
 - 重复出现的长提示词应优先沉淀为项目 skill，而不是继续塞进 `AGENTS.md` 或 HTML。
+- 是否做成 skill、command、hook、script、plugin 或 MCP，先参考 `.codex/automation-decision.md`。
 
 ## 项目自定义工作流
 
 - 大任务、多模块改动、迁移、重构或高风险变更：优先使用 `large-change-planning`，按 `governance/large-change-execution.md` 生成探索报告和实施计划，再进入编码。
 - 高频重复动作：先登记到 `.codex/commands-catalog.md`；需要自动化时再评估 `.codex/hooks.md`。
+- `api-design`、`e2e-testing`、`docs-research` 等不要默认内置；只有当项目内反复出现且输入输出稳定时再自建。
 - 初始化后方向不清楚：先读 `docs/Codex下一步工作单.md`，必要时运行 `scripts/detect-local-toolchain.ps1` 和 `scripts/run-harness-check.ps1` 作为只读事实检查。
 
 ## ECC 参考

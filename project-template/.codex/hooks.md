@@ -2,6 +2,8 @@
 
 本文记录可选 hook 设计。Opt-in only：默认不启用任何 hook；启用前必须确认权限、噪音、误阻断和维护成本。
 
+新增或升级 hook 前，先阅读 `.codex/automation-decision.md`。Hook 只适合固定、低风险、可解释、可跳过的检查；需要 AI 判断或方案取舍的工作应做成 skill 或保留人工确认。
+
 ## Hook 分级
 
 | 等级 | 说明 | 示例 | 默认策略 |

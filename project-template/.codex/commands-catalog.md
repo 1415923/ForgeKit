@@ -6,6 +6,7 @@
 
 - 先把重复流程写成手动 command。
 - command 稳定、低风险、跨项目复用后，再考虑 skill 或 hook。
+- 是否进入 skill、command、hook、script、plugin 或 MCP，先参考 `.codex/automation-decision.md`。
 - 涉及外部系统、凭据、部署、Git push、长期服务的 command 必须人工确认。
 - 项目真实命令仍以 `.codex/commands.md` 为准。
 

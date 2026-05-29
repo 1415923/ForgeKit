@@ -53,6 +53,7 @@
 - `docs/项目适用性评估.md`、`docs/真实项目试用记录.md`：初始化前判断适用性，并把真实项目经验回灌。
 - `docs/Codex下一步工作单.md`：初始化后继续访谈、确认 MVP、落地条件和验证方式。
 - `.codex/commands-catalog.md`、`.codex/hooks.md`：可选命令和 hook 候选，默认不自动启用。
+- `.codex/automation-decision.md`：判断重复流程应该做成 skill、command、hook、script、plugin、MCP 还是保留文档。
 - `scripts/detect-local-toolchain.ps1`、`scripts/run-harness-check.ps1`、`scripts/check-doc-sync.ps1`、`scripts/check-doc-sync.sh`：只读检测脚本，用于把 harness 从文档推进到可执行检查。
 - `scripts/install-hooks.ps1`、`scripts/install-hooks.sh`：opt-in 安装、查看、卸载 Git hook，不默认启用。
 

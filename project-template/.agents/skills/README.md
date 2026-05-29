@@ -39,6 +39,10 @@ skill-name/
 
 跨模块、大范围、高风险、迁移或重构任务不应直接编码。优先使用 `large-change-planning`，并根据 `governance/large-change-execution.md` 维护探索报告和实施计划。
 
+## Skill / Hook 边界
+
+需要 AI 判断、访谈、方案取舍或审查意见的流程适合做 skill。固定、只读、可解释、可跳过的检查适合做 command 或 opt-in hook。新增前先参考 `.codex/automation-decision.md`，不要把简单脚本包装成 skill，也不要把产品或架构决策放进 hook。
+
 ## 团队工具链
 
 重复流程先登记到 `.codex/commands-catalog.md`。自动化前先读取 `governance/team-agent-rollout.md` 和 `.codex/hooks.md`，不要默认启用 MCP 或外部写操作。

@@ -40,6 +40,7 @@ The current plugin includes:
 - `document-backfill` for digesting existing project documents one by one and migrating facts into ForgeKit `docs/`.
 - `project-suitability` for assessing whether Lite, Standard, Enterprise, or Custom flow fits the project.
 - `large-change-planning` for exploring, planning, confirming, and staging broad or risky work before coding.
+- `.codex/automation-decision.md` in generated projects to decide whether a repeated workflow belongs in a skill, command, hook, script, plugin, MCP, or documentation.
 - One root-level plugin surface shared by Codex and Claude Code.
 - Three project modes: Lite, Standard, and Enterprise, written during initialization with `-Mode`.
 - Stack templates that can be loaded after the product and architecture direction is understood.
