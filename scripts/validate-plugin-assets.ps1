@@ -111,7 +111,7 @@ Test-RequiredPath "project-template\scripts\run-harness-check.ps1"
 Test-RequiredPath "scripts\init-project-template.ps1"
 Test-RequiredPath "scripts\init-project-template.sh"
 
-Test-RequiredPattern "README.md" "Root-level plugin surface" "Unified root plugin section"
+Test-RequiredPattern "README.md" "Plugin Distribution" "Unified root plugin section"
 Test-RequiredPattern "scripts\init-project-template.ps1" "CLAUDE.md" "Unified initializer Claude guidance"
 Test-RequiredPattern "skills\project-init\SKILL.md" "Classify the discovery state" "Project init discovery state"
 Test-RequiredPattern "skills\project-suitability\SKILL.md" "Suitable, Conditional, or Custom" "Project suitability outcome"

@@ -874,7 +874,7 @@ function Test-StaleText {
 
 function Test-HarnessEntryConsistency {
     $codebaseMapRef = Get-CodebaseMapRef
-    Test-RequiredPattern "README.md" "Root-level plugin surface" "Root README unified plugin surface"
+    Test-RequiredPattern "README.md" "Plugin Distribution" "Root README unified plugin surface"
     Test-RequiredPattern "README.md" ".codex-plugin/plugin.json" "Root README Codex root manifest"
     Test-RequiredPattern "README.md" ".claude-plugin/plugin.json" "Root README Claude root manifest"
     Test-RequiredPattern "README.md" "./skills/" "Root README shared skills reference"
