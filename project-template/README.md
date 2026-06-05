@@ -36,7 +36,7 @@
 
 ## 可选增强
 
-- `.agents/skills/`：Codex 项目级 skills，内置项目初始化、代码审查、发布检查和安全审查。
+- `.agents/skills/`：项目本地 skills，内置项目初始化、代码审查、发布检查和安全审查；引用 skill 时优先读取 `.agents/skills/<skill>/SKILL.md`。
 - `.claude/skills/forgekit-project-workflow/`：Claude Code 轻量入口 skill，按 ECC 式薄入口思路路由到共享项目文档和治理规则，不复制全量 skills。
 - `.codex/agents/`：多 agent 角色设计，默认不启用。
 - `.codex/config.example.toml`：Codex 配置示例，默认不覆盖用户配置。
@@ -63,7 +63,7 @@
 - `scripts/detect-local-toolchain.ps1`、`scripts/run-harness-check.ps1`、`scripts/check-doc-sync.ps1`、`scripts/check-doc-sync.sh`：只读检测脚本，用于把 harness 从文档推进到可执行检查。
 - `scripts/install-hooks.ps1`、`scripts/install-hooks.sh`：opt-in 安装、查看、卸载 Git hook，不默认启用。
 
-使用优先级：Codex 从 `AGENTS.md` 开始，Claude Code 从 `CLAUDE.md` 开始，然后进入 `docs/代码库地图.md` -> `docs/本地工具链检查.md` -> `docs/Codex下一步工作单.md` -> `.codex/` -> 相关 `.codex/stacks/<stack>/` -> 任务相关治理文件。不要默认读取全部治理文档。
+使用优先级：Codex 从 `AGENTS.md` 开始，Claude Code 从 `CLAUDE.md` 开始；如果任务命中 ForgeKit skill，优先读取项目内 `.agents/skills/<skill>/SKILL.md`，不要假设用户级或系统级 skill 路径存在；然后进入 `docs/代码库地图.md` -> `docs/本地工具链检查.md` -> `docs/Codex下一步工作单.md` -> `.codex/` -> 相关 `.codex/stacks/<stack>/` -> 任务相关治理文件。不要默认读取全部治理文档。
 
 常见 stack 名称：`java-springboot`、`vue`、`react`、`python-fastapi`、`node-express`、`csharp-dotnet`、`go-service`、`php-laravel`、`rust-cli-service`、`flutter-dart`、`cpp-cmake`、`kotlin-spring`、`swift-ios`、`ruby-rails`、`r-data-analysis`、`fpga-vivado-vitis`。只读取当前项目实际选择的 stack，避免把无关语言规则混入上下文。
 

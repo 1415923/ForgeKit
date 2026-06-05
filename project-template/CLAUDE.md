@@ -4,6 +4,8 @@ This file is the first lightweight entry point for Claude Code in this project. 
 
 Keep this file short. Put stable workflows in skills, stack-specific rules in `.codex/stacks/`, and detailed governance in `governance/`.
 
+When a task names a ForgeKit skill, read the project-local `.agents/skills/<skill>/SKILL.md` first. Do not assume a user-level or system-level skill path exists.
+
 ## Startup Order
 
 1. Read this file first.
@@ -21,7 +23,7 @@ Keep this file short. Put stable workflows in skills, stack-specific rules in `.
 
 ## Task Routing
 
-| Task | Read First | Skill |
+| Task | Read First | Local Skill |
 | --- | --- | --- |
 | New project initialization | `governance/流程总览.md`, `governance/agent-harness.md`, `.claude/init.generated.md`, `.codex/questionnaires/` | `project-init` |
 | Post-init next step | `docs/Codex下一步工作单.md`, `docs/项目适用性评估.md`, `docs/本地工具链检查.md`, `.claude/init.generated.md` | `project-init` |

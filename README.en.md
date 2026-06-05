@@ -55,13 +55,13 @@ claude
 Codex:
 
 ```text
-Read AGENTS.md and help me initialize this project with ForgeKit.
+Read AGENTS.md, prefer the project-local .agents/skills/project-init/SKILL.md, and help me initialize this project with ForgeKit. Do not read a user-level or system-level project-init path.
 ```
 
 Claude Code:
 
 ```text
-Read CLAUDE.md and help me initialize this project with ForgeKit.
+Read CLAUDE.md, prefer the project-local .agents/skills/project-init/SKILL.md, and help me initialize this project with ForgeKit. Do not read a user-level or system-level project-init path.
 ```
 
 ## Core Capabilities

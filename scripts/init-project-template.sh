@@ -351,8 +351,8 @@ echo "2. Start your AI coding tool from that project:"
 echo "   Codex: codex"
 echo "   Claude Code: claude"
 echo "3. Send the startup message:"
-echo "   Codex: Read AGENTS.md and help me initialize this project with ForgeKit."
-echo "   Claude Code: Read CLAUDE.md and help me initialize this project with ForgeKit."
+echo "   Codex: Read AGENTS.md, prefer .agents/skills/project-init/SKILL.md, and help me initialize this project with ForgeKit. Do not read a user-level or system-level project-init path."
+echo "   Claude Code: Read CLAUDE.md, prefer .agents/skills/project-init/SKILL.md, and help me initialize this project with ForgeKit. Do not read a user-level or system-level project-init path."
 echo
 echo "Do not choose a tech stack here. ForgeKit will confirm or infer it during the discovery interview."
 if [[ "$upgrade" -eq 1 ]]; then

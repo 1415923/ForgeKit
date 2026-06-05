@@ -259,6 +259,7 @@ function Test-AgentsHarness {
     Test-RequiredPattern "project-template\AGENTS.md" (Get-CodexNextWorkOrderRef) "Codex next work order routing"
     Test-RequiredPattern "project-template\AGENTS.md" (Get-ExplorationReportRef) "Exploration report routing"
     Test-RequiredPattern "project-template\AGENTS.md" (Get-ImplementationPlanRef) "Implementation plan routing"
+    Test-RequiredPattern "project-template\AGENTS.md" ".agents/skills/<skill>/SKILL.md" "AGENTS project-local skill resolution"
 }
 
 function Test-StackTemplates {
@@ -429,23 +430,29 @@ function Test-HarnessEntryConsistency {
     Test-RequiredPattern "README.md" $codebaseMapRef "Root README codebase map reference"
     Test-RequiredPattern "project-template\README.md" "v0.12.0" "Template README unified plugin note"
     Test-RequiredPattern "project-template\README.md" "CLAUDE.md" "Template README Claude entry"
+    Test-RequiredPattern "project-template\README.md" ".agents/skills/<skill>/SKILL.md" "Template README project-local skill resolution"
     Test-RequiredPattern "project-template\README.md" $codebaseMapRef "Template README codebase map reference"
     Test-RequiredPattern "project-template\.codex\skills.md" "v0.12.0" "Skills unified plugin note"
     Test-RequiredPattern "project-template\.agents\skills\README.md" "v0.12.0" "Skill README unified plugin note"
     Test-RequiredPattern "scripts\init-project-template.ps1" "CLAUDE.md" "Init script Claude startup guidance"
+    Test-RequiredPattern "scripts\init-project-template.ps1" ".agents/skills/project-init/SKILL.md" "PowerShell init project-local startup skill"
     Test-RequiredPattern "scripts\init-project-template.ps1" "[ValidateSet(""Lite"", ""Standard"", ""Enterprise"")]" "Init script mode parameter"
     Test-RequiredPattern "scripts\init-project-template.ps1" "StackSelection: deferred" "Init script deferred stack guidance"
     Test-RequiredPattern "scripts\init-project-template.ps1" "Upgrade" "Init script upgrade mode"
     Test-RequiredPattern "scripts\init-project-template.ps1" "upgrade-report.md" "Init script upgrade report"
     Test-RequiredPattern "scripts\init-project-template.ps1" "ExportUpgradeTemplates" "Init script export upgrade templates"
     Test-RequiredPattern "scripts\init-project-template.sh" "--upgrade" "Bash init upgrade mode"
+    Test-RequiredPattern "scripts\init-project-template.sh" ".agents/skills/project-init/SKILL.md" "Bash init project-local startup skill"
     Test-RequiredPattern "scripts\init-project-template.sh" "upgrade-report.md" "Bash init upgrade report"
     Test-RequiredPattern "scripts\init-project-template.sh" "--export-upgrade-templates" "Bash init export upgrade templates"
     Test-RequiredPattern "README.md" "-Upgrade" "Root README upgrade guidance"
     Test-RequiredPattern "README.md" "upgrade-report.md" "Root README upgrade report guidance"
+    Test-RequiredPattern "README.md" ".agents/skills/project-init/SKILL.md" "Root README project-local startup skill"
     Test-RequiredPattern "README.en.md" "-Upgrade" "English README upgrade guidance"
     Test-RequiredPattern "README.en.md" "upgrade-report.md" "English README upgrade report guidance"
+    Test-RequiredPattern "README.en.md" ".agents/skills/project-init/SKILL.md" "English README project-local startup skill"
     Test-RequiredPattern "使用说明.html" "startupOutput" "HTML startup output"
+    Test-RequiredPattern "使用说明.html" ".agents/skills/project-init/SKILL.md" "HTML project-local startup skill"
     Test-RequiredPattern "使用说明.html" "governance/agent-harness.md" "HTML harness prompt reference"
 }
 
@@ -509,6 +516,7 @@ function Test-ClaudePluginDistribution {
     Test-RequiredPath "project-template\CLAUDE.md"
     Test-RequiredPath "project-template\.claude\skills\forgekit-project-workflow\SKILL.md"
     Test-RequiredPattern "project-template\CLAUDE.md" "Claude Code Project Guide" "Claude project guide"
+    Test-RequiredPattern "project-template\CLAUDE.md" ".agents/skills/<skill>/SKILL.md" "CLAUDE project-local skill resolution"
     Test-RequiredPattern "project-template\.claude\skills\forgekit-project-workflow\SKILL.md" "Discovery State" "Claude thin entry skill"
 }
 

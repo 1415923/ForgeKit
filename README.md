@@ -55,13 +55,13 @@ claude
 Codex：
 
 ```text
-请读取 AGENTS.md，并按 ForgeKit 流程帮我初始化这个项目。
+请读取 AGENTS.md，并优先使用项目内 .agents/skills/project-init/SKILL.md，按 ForgeKit 流程帮我初始化这个项目。不要读取用户级或系统级 project-init 路径。
 ```
 
 Claude Code：
 
 ```text
-请读取 CLAUDE.md，并按 ForgeKit 流程帮我初始化这个项目。
+请读取 CLAUDE.md，并优先使用项目内 .agents/skills/project-init/SKILL.md，按 ForgeKit 流程帮我初始化这个项目。不要读取用户级或系统级 project-init 路径。
 ```
 
 ## 核心能力
