@@ -53,6 +53,7 @@ Keep this file short. Put stable workflows in skills, stack-specific rules in `.
 - For existing projects, read existing docs and extract answers before asking broad handover questions.
 - When backfilling `docs/` from existing project documents, process one source document at a time and update target docs before reading the next source document.
 - After manual doc fixes or release-note changes, optionally run `scripts/check-doc-sync.ps1` to look for related docs, stale descriptions, and Changed entries without reasons.
+- For implementation tasks, apply `.codex/rules.md`: think before coding, keep changes simple, edit surgically, and verify against explicit goals.
 - For large or cross-module changes, search first, summarize findings, then propose a plan before editing.
 - For large changes, create or update `docs/探索报告.md` and `docs/实施计划.md` before broad implementation.
 - Do not enable hooks, plugins, MCP, issue tracker writes, or CI changes without explicit user confirmation.

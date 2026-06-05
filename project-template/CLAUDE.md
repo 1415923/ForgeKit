@@ -42,6 +42,7 @@ Keep this file short. Put stable workflows in skills, stack-specific rules in `.
 - Do not read all `docs/` by default; use `docs/代码库地图.md` to choose what matters.
 - Do not install tools or start services just because `docs/本地工具链检查.md` has unknown values; ask first.
 - `scripts/detect-local-toolchain.ps1` and `scripts/run-harness-check.ps1` are read-only helpers.
+- For Lite projects, keep governance lightweight and ask before expanding to Enterprise-level documents.
 - Use `.codex/automation-decision.md` to decide whether repeated work belongs in a skill, command, hook, script, plugin, MCP, or documentation.
 - Load only the selected stack folder under `.codex/stacks/`.
 - If suitability is Conditional or Custom, fill `docs/项目适用性评估.md` before broad coding.
@@ -49,12 +50,16 @@ Keep this file short. Put stable workflows in skills, stack-specific rules in `.
 - For existing projects, read existing docs and extract answers before asking broad handover questions.
 - When backfilling `docs/` from existing project documents, process one source document at a time and update target docs before reading the next source document.
 - After manual doc fixes or release-note changes, optionally run `scripts/check-doc-sync.ps1` to look for related docs, stale descriptions, and Changed entries without reasons.
+- For implementation tasks, apply `.codex/rules.md`: think before coding, keep changes simple, edit surgically, and verify against explicit goals.
 - For large or cross-module changes, search first, summarize findings, then propose a plan before editing.
 - Do not enable hooks, plugins, MCP, issue tracker writes, or CI changes without explicit user confirmation.
+- Treat installed plugins as distribution inputs; review their skills, scripts, permissions, and maintenance owner before relying on them for project decisions.
 
 ## Gates
 
 - Do not start broad coding without a first-pass project plan and version scope.
 - For new projects, product and architecture discussion is a required phase. Do not treat a few engineering parameter answers as approval to implement.
 - Before business code, dependency install, Git init, commit, push, deployment, or other external action, show an execution summary and wait for explicit user confirmation.
+- Do not start large cross-module implementation before exploration and implementation plan are complete.
+- Do not start the next major version before the review/refactor gate is complete, unless the user explicitly accepts the risk.
 - Do not deploy, push, tag, run migrations, or start long-running services without explicit user confirmation.
