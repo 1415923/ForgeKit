@@ -105,8 +105,7 @@ function Test-GovernanceFiles {
         "project-template\governance\agent-harness.md",
         "project-template\governance\large-change-execution.md",
         "project-template\governance\team-agent-rollout.md",
-        "project-template\governance\agent-suitability.md",
-        "project-template\governance\v0.3-agent-harness-roadmap.md"
+        "project-template\governance\agent-suitability.md"
     )
     foreach ($item in $required) {
         Test-RequiredPath $item
@@ -421,6 +420,32 @@ function Test-StaleText {
     Test-RequiredPattern "project-template\.codex\scope.md" "Execution Confirmation" "Scope execution confirmation gate"
 }
 
+function Test-NoForgeKitHistoryInTemplate {
+    $templateMaturity = ([char]0x6A21).ToString() + ([char]0x677F).ToString() + ([char]0x6210).ToString() + ([char]0x719F).ToString() + ([char]0x5EA6).ToString() + ([char]0x6539).ToString() + ([char]0x8FDB).ToString() + ([char]0x6E05).ToString() + ([char]0x5355).ToString()
+    $governanceRoadmap = ([char]0x6CBB).ToString() + ([char]0x7406).ToString() + ([char]0x6539).ToString() + ([char]0x8FDB).ToString() + ([char]0x8DEF).ToString() + ([char]0x7EBF).ToString() + ([char]0x56FE).ToString()
+    $usageHtml = ([char]0x4F7F).ToString() + ([char]0x7528).ToString() + ([char]0x8BF4).ToString() + ([char]0x660E).ToString() + ".html"
+    $patterns = @(
+        "FEAT-HARNESS",
+        "TASK-HARNESS",
+        "DEBT-HARNESS",
+        "MAT-",
+        "v0.3-agent-harness-roadmap",
+        $templateMaturity,
+        $governanceRoadmap,
+        $usageHtml
+    )
+    $files = Get-ChildItem -LiteralPath $projectTemplate -Recurse -File -Include *.md,*.ps1,*.sh
+    foreach ($file in $files) {
+        $relativePath = $file.FullName.Substring($repoRoot.Length + 1)
+        foreach ($pattern in $patterns) {
+            $matches = Select-String -Path $file.FullName -Pattern $pattern -SimpleMatch
+            foreach ($match in $matches) {
+                Add-Error "ForgeKit internal history leaked into generated template: ${relativePath}:$($match.LineNumber) contains $pattern"
+            }
+        }
+    }
+}
+
 function Test-HarnessEntryConsistency {
     $codebaseMapRef = Get-CodebaseMapRef
     Test-RequiredPattern "README.md" "Plugin Distribution" "Root README unified plugin surface"
@@ -428,12 +453,12 @@ function Test-HarnessEntryConsistency {
     Test-RequiredPattern "README.md" ".claude-plugin/plugin.json" "Root README Claude root manifest"
     Test-RequiredPattern "README.md" "./skills/" "Root README shared skills reference"
     Test-RequiredPattern "README.md" $codebaseMapRef "Root README codebase map reference"
-    Test-RequiredPattern "project-template\README.md" "v0.12.0" "Template README unified plugin note"
+    Test-RequiredPattern "project-template\README.md" ".codex-plugin" "Template README unified plugin note"
     Test-RequiredPattern "project-template\README.md" "CLAUDE.md" "Template README Claude entry"
     Test-RequiredPattern "project-template\README.md" ".agents/skills/<skill>/SKILL.md" "Template README project-local skill resolution"
     Test-RequiredPattern "project-template\README.md" $codebaseMapRef "Template README codebase map reference"
-    Test-RequiredPattern "project-template\.codex\skills.md" "v0.12.0" "Skills unified plugin note"
-    Test-RequiredPattern "project-template\.agents\skills\README.md" "v0.12.0" "Skill README unified plugin note"
+    Test-RequiredPattern "project-template\.codex\skills.md" ".codex-plugin" "Skills unified plugin note"
+    Test-RequiredPattern "project-template\.agents\skills\README.md" ".codex-plugin" "Skill README unified plugin note"
     Test-RequiredPattern "scripts\init-project-template.ps1" "CLAUDE.md" "Init script Claude startup guidance"
     Test-RequiredPattern "scripts\init-project-template.ps1" ".agents/skills/project-init/SKILL.md" "PowerShell init project-local startup skill"
     Test-RequiredPattern "scripts\init-project-template.ps1" "[ValidateSet(""Lite"", ""Standard"", ""Enterprise"")]" "Init script mode parameter"
@@ -560,6 +585,7 @@ Test-ClaudePluginDistribution
 Test-SkillAscii
 Test-SkillFrontmatter
 Test-StaleText
+Test-NoForgeKitHistoryInTemplate
 
 if (-not $SkipSkillValidation) {
     $validator = Join-Path $env:USERPROFILE ".codex-b\skills\.system\skill-creator\scripts\quick_validate.py"

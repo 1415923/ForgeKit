@@ -25,4 +25,4 @@
 - 是否新增 skill、command、hook、script、plugin 或 MCP，先参考 `.codex/automation-decision.md` 和 `governance/team-agent-rollout.md`。
 - 第三方 skill 视为供应链输入，引入前检查权限、网络、凭据、写入范围和上下文污染风险。
 
-ForgeKit v0.12.0 起采用根级统一 plugin 分发：`.codex-plugin/`、`.claude-plugin/` 和共享 `skills/` 位于模板仓库根。生成项目只保留实际运行需要的项目 skills。
+ForgeKit 采用根级统一 plugin 分发：`.codex-plugin/`、`.claude-plugin/` 和共享 `skills/` 位于模板仓库根。生成项目只保留实际运行需要的项目 skills。

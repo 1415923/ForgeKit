@@ -51,7 +51,7 @@
 
 ## 维护规则
 
-- 高频重复流程先记录到 `project-template/.codex/commands-catalog.md`。
+- 高频重复流程先记录到 `.codex/commands-catalog.md`。
 - 自动化动作先写成手动 command，再考虑 hook。
 - 跨项目复用且稳定后，才考虑 plugin。
 - plugin 用于分发稳定 skills、模板资产和只读脚本；不要把个人 `user-rules/`、本机路径、凭据或外部开发记录打包进去。

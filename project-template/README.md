@@ -71,7 +71,7 @@
 
 团队工具链优先级：先沉淀 command，再考虑 hook；跨项目稳定后再考虑 plugin；MCP 默认只读优先，写操作必须人工确认。文档同步类 hook 建议从 `scripts/check-doc-sync.ps1` 或 `scripts/check-doc-sync.sh` 的只提示模式开始，确认噪音可接受后再使用 strict 模式。
 
-ForgeKit v0.12.0 改为 ECC 式根级统一 plugin 表面：`.codex-plugin/`、`.claude-plugin/` 和共享 `skills/` 位于仓库根，不再维护 Codex/Claude 两个 plugin 子目录。生成项目仍应按本文件、`AGENTS.md` 和 `CLAUDE.md` 的边界执行，不因安装 plugin 而默认启用 hook、MCP 或外部写操作。
+ForgeKit 采用根级统一 plugin 表面：`.codex-plugin/`、`.claude-plugin/` 和共享 `skills/` 位于模板仓库根。生成项目仍应按本文件、`AGENTS.md` 和 `CLAUDE.md` 的边界执行，不因安装 plugin 而默认启用 hook、MCP 或外部写操作。
 
 Claude Code 入口是薄入口：`CLAUDE.md` 和 `.claude/skills/forgekit-project-workflow/` 只负责路由和门禁；共享项目事实仍写入 `.codex/`、`docs/` 和 `governance/`，避免为不同 AI 工具维护多套项目事实。
 
