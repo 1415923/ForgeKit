@@ -54,15 +54,15 @@ powershell -ExecutionPolicy Bypass -File .\scripts\init-project-template.ps1 `
 | `TargetPath` | 是 | 目标项目目录 |
 | `ProjectName` | 否 | 写入 `.codex/project.md` 的项目名 |
 | `Stacks` | 否 | 技术栈模板列表，支持 `java-springboot,vue` 形式 |
-| `Upgrade` | 否 | 安全升级已有项目；补缺失文件并生成 `.codex/upgrade-report.md` |
-| `ExportUpgradeTemplates` | 否 | 升级时把新版模板副本导出到 `.codex/upgrade-templates/` 供 diff/合并 |
+| `Upgrade` | 否 | report-only 升级已有项目；生成 `.forgekit/upgrade-report.md` 和候选模板，不覆盖项目文件 |
+| `ExportUpgradeTemplates` | 否 | 保留兼容参数；v0.17 默认按目标路径导出候选模板到 `.forgekit/upgrade-export/<version>/` |
 | `Force` | 否 | 覆盖已有文件；默认不覆盖 |
 
 ### 安全策略
 
 - 默认不覆盖已有文件。
 - 升级旧项目时使用 `-Upgrade`，不要使用 `-Force`。
-- 已有文件如果和新版模板不同，会进入 `.codex/upgrade-report.md`，不会自动覆盖。
+- 升级分类会进入 `.forgekit/upgrade-report.md`，不会自动覆盖、合并、迁移、写 lock 或提交。
 - 需要查看新版模板内容时，加 `-ExportUpgradeTemplates`。
 - `.codex/init.generated.md` 和 `.claude/init.generated.md` 已存在时默认跳过，避免覆盖旧项目初始化记录。
 - 问答表复制到 `.codex/questionnaires/init-questionnaire.md`。

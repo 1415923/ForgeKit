@@ -33,6 +33,7 @@ REQUIRED_REPO_PATHS = [
     "usage.html",
     "project-template/.forgekit/project-boundary.yml",
     "project-template/.forgekit/docs/document-responsibility.md",
+    "project-template/.forgekit/template-manifest.json",
     "project-template/governance/ai-engineering-loop.md",
     "project-template/changes/README.md",
     "project-template/changes/_template/proposal.md",
@@ -52,6 +53,7 @@ REQUIRED_GENERATED_PATHS = [
     "AGENTS.md",
     "CLAUDE.md",
     ".forgekit/project-boundary.yml",
+    ".forgekit/template-lock.json",
     ".forgekit/docs/document-responsibility.md",
     ".forgekit/docs/codebase-map.md",
     ".forgekit/docs/local-toolchain.md",
@@ -171,6 +173,108 @@ def assert_json(path):
         fail(f"Invalid JSON: {path}: {exc}")
 
 
+def assert_manifest_lock(target):
+    lock_path = target / ".forgekit" / "template-lock.json"
+    lock = json.loads(lock_path.read_text(encoding="utf-8"))
+    if lock.get("installed_version") != "0.17.0":
+        fail("template-lock installed_version must be 0.17.0")
+    if lock.get("managed_docs_root") != ".forgekit/docs":
+        fail("template-lock managed_docs_root must match boundary")
+    if lock.get("change_root") != ".forgekit/changes":
+        fail("template-lock change_root must match boundary")
+    text = lock_path.read_text(encoding="utf-8")
+    if "current_checksum" in text or "local_modified" in text:
+        fail("template-lock must not store current_checksum or local_modified")
+    for item in lock.get("files", []):
+        target_path = item.get("target_path", "")
+        if target_path.startswith("docs/") or target_path.startswith("changes/"):
+            fail(f"template-lock contains unmanaged root target: {target_path}")
+
+
+def assert_upgrade_report(repo, target):
+    before_lock = (target / ".forgekit" / "template-lock.json").read_bytes()
+    doc_path = target / ".forgekit" / "docs" / "project-plan.md"
+    before_doc = doc_path.read_bytes()
+    if os.name == "nt":
+        run([
+            "powershell",
+            "-ExecutionPolicy",
+            "Bypass",
+            "-File",
+            str(repo / "scripts" / "init-project-template.ps1"),
+            "-TargetPath",
+            str(target),
+            "-ProjectName",
+            "forgekit-smoke",
+            "-Mode",
+            "Standard",
+            "-Upgrade",
+            "-ExportUpgradeTemplates",
+        ], cwd=repo)
+    else:
+        run([
+            "bash",
+            str(repo / "scripts" / "init-project-template.sh"),
+            "--target-path",
+            str(target),
+            "--project-name",
+            "forgekit-smoke",
+            "--mode",
+            "Standard",
+            "--upgrade",
+            "--export-upgrade-templates",
+        ], cwd=repo)
+    if before_lock != (target / ".forgekit" / "template-lock.json").read_bytes():
+        fail("upgrade must not update template-lock.json")
+    if before_doc != doc_path.read_bytes():
+        fail("upgrade must not overwrite managed docs")
+    assert_paths(target, [
+        ".forgekit/upgrade-report.md",
+        ".forgekit/upgrade-export/0.17.0/.forgekit/docs/project-plan.md",
+    ])
+
+
+def assert_legacy_upgrade_no_lock(repo, target):
+    target.mkdir(parents=True, exist_ok=True)
+    (target / ".forgekit").mkdir(parents=True, exist_ok=True)
+    if os.name == "nt":
+        run([
+            "powershell",
+            "-ExecutionPolicy",
+            "Bypass",
+            "-File",
+            str(repo / "scripts" / "init-project-template.ps1"),
+            "-TargetPath",
+            str(target),
+            "-ProjectName",
+            "forgekit-legacy",
+            "-Mode",
+            "Standard",
+            "-Upgrade",
+            "-ExportUpgradeTemplates",
+        ], cwd=repo)
+    else:
+        run([
+            "bash",
+            str(repo / "scripts" / "init-project-template.sh"),
+            "--target-path",
+            str(target),
+            "--project-name",
+            "forgekit-legacy",
+            "--mode",
+            "Standard",
+            "--upgrade",
+            "--export-upgrade-templates",
+        ], cwd=repo)
+    report = target / ".forgekit" / "upgrade-report.md"
+    if not report.is_file():
+        fail("legacy upgrade must write .forgekit/upgrade-report.md")
+    if (target / ".forgekit" / "template-lock.json").exists():
+        fail("legacy upgrade must not create template-lock.json")
+    if "legacy_no_lock" not in report.read_text(encoding="utf-8"):
+        fail("legacy upgrade report must mention legacy_no_lock")
+
+
 def assert_skill_frontmatter(root):
     skill_files = list(root.rglob("SKILL.md"))
     if not skill_files:
@@ -238,6 +342,8 @@ def main():
     assert_no_forbidden_text(repo / "templates", FORBIDDEN_PRIVATE_PATHS, "Private machine paths found in templates")
     assert_json(repo / ".codex-plugin" / "plugin.json")
     assert_json(repo / ".claude-plugin" / "plugin.json")
+    assert_json(repo / "project-template" / ".forgekit" / "template-manifest.json")
+    run([sys.executable, str(repo / "scripts" / "update-template-manifest.py"), "--check"], cwd=repo)
     assert_skill_frontmatter(repo / "skills")
     assert_skill_frontmatter(repo / "project-template" / ".agents" / "skills")
 
@@ -251,15 +357,18 @@ def main():
             "docs/local-toolchain.md",
             "docs/changelog.md",
             "changes/README.md",
-            ".forgekit/template-lock.json",
             ".forgekit/template-manifest.json",
             ".forgekit/archive",
             "archive",
         ])
         assert_boundary_config(target / ".forgekit" / "project-boundary.yml")
+        assert_manifest_lock(target)
         assert_no_escaped_filenames(target)
         assert_no_forbidden_text(target, FORBIDDEN_LEGACY_REFS, "Forbidden legacy path text found in generated project")
         run_generated_checks(target)
+        assert_upgrade_report(repo, target)
+        run_generated_checks(target)
+        assert_legacy_upgrade_no_lock(repo, temp_parent / "legacy")
     finally:
         if args.keep_temp:
             print(f"[info] temp kept: {temp_parent}")

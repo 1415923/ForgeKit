@@ -34,9 +34,9 @@ ForgeKit 在生成项目内提供轻量 AI Engineering Loop：澄清目标、判
 
 ## 升级兼容
 
-从旧版本 ForgeKit 升级到新版本时，使用模板仓库里的初始化脚本加升级模式，不要使用 `-Force` / `--force`。升级模式只补缺失的新模板文件，不覆盖已有项目事实、项目文档、入口文件和初始化元数据。已有文件如果和新版模板不同，会进入 `.codex/upgrade-report.md`。
+从旧版本 ForgeKit 升级到新版本时，使用模板仓库里的初始化脚本加升级模式，不要使用 `-Force` / `--force`。升级模式是 report-only：只生成 `.forgekit/upgrade-report.md` 和 `.forgekit/upgrade-export/<version>/` 候选模板，不覆盖项目文件、不更新 `.forgekit/template-lock.json`、不写 business `docs/`。
 
-升级后先查看 `.codex/upgrade-report.md`、新复制的 `.codex/automation-decision.md`、`.codex/hooks.md`、`.agents/skills/README.md` 和脚本目录，再人工或让 AI 判断是否需要合并到当前项目流程。需要 side-by-side diff 时，在模板仓库运行升级命令并加 `-ExportUpgradeTemplates` / `--export-upgrade-templates`。
+升级后先查看 `.forgekit/upgrade-report.md` 和 `.forgekit/upgrade-export/<version>/`，再人工或让 AI 判断是否需要合并到当前项目流程。不要把 `.forgekit/upgrade-export/**` 当作当前态文档、活跃 change、发布证据或 changelog 内容。
 
 ## 可选增强
 

@@ -103,15 +103,16 @@ powershell -ExecutionPolicy Bypass -File .\scripts\init-project-template.ps1 -Ta
 
 Upgrade mode:
 
-- Copies missing files from the newer template.
-- Preserves existing project facts and docs instead of overwriting `docs/`, `.codex/`, `AGENTS.md`, or `CLAUDE.md`.
-- Writes changed existing files to `.codex/upgrade-report.md`.
-- Optionally exports newer template copies to `.codex/upgrade-templates/` for human or AI-assisted diff and merge.
+- Generates reports and candidate templates only; it does not overwrite project files.
+- Preserves project facts, `.forgekit/template-lock.json`, business `docs/`, `.codex/`, `AGENTS.md`, and `CLAUDE.md`.
+- Writes skip / can_replace / needs_merge_report / can_restore / ask / readonly classifications to `.forgekit/upgrade-report.md`.
+- Exports newer candidate templates by expanded target path under `.forgekit/upgrade-export/<version>/`.
+- If an old project has no `.forgekit/template-lock.json`, ForgeKit writes a `legacy_no_lock` report and does not create a lock automatically.
 
 After upgrading, ask the assistant:
 
 ```text
-Review .codex/upgrade-report.md and compare .codex/upgrade-templates/. Merge useful new ForgeKit template sections into existing project files without overwriting project facts.
+Review .forgekit/upgrade-report.md and compare .forgekit/upgrade-export/. Merge useful new ForgeKit template sections into existing project files without overwriting project facts, and do not treat upgrade-export as current-state docs.
 ```
 
 ## Existing Projects And Old Docs
@@ -213,6 +214,7 @@ ForgeKit can coexist with ECC: ECC enhances the AI tool; ForgeKit constrains the
 
 | Version | User-facing change |
 | --- | --- |
+| `0.17.0` | Template Versioning: adds template manifest / lock and report-only upgrade classifications with candidate template export, without automatic overwrites. |
 | `0.16.0` | Boundary First: adds `.forgekit/project-boundary.yml`, writes ForgeKit managed docs to `.forgekit/docs`, and writes change artifacts to `.forgekit/changes` by default. |
 | `0.15.0` | Repositioned ForgeKit as a lightweight AI engineering delivery toolkit with an AI Engineering Loop and risk-based change templates. |
 | `0.14.0` | Release-usability fixes: English template file names, mode semantics, upgrade misuse guard, cross-platform smoke test, and generic template path isolation. |

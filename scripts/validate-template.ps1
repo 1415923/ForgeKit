@@ -284,6 +284,41 @@ function Test-AIEngineeringLoop {
     Test-RequiredPattern "project-template\.codex\rules.md" "Boundary First" "Codex boundary-first rule"
 }
 
+function Test-TemplateManifest {
+    Test-RequiredPath "project-template\.forgekit\template-manifest.json"
+    Test-RequiredPath "scripts\update-template-manifest.py"
+    $manifestPath = Join-Path $repoRoot "project-template\.forgekit\template-manifest.json"
+    if (Test-Path -LiteralPath $manifestPath) {
+        $manifest = Get-Content -LiteralPath $manifestPath -Raw | ConvertFrom-Json
+        if ($manifest.template_version -ne "0.17.0") {
+            Add-Error "Unexpected template manifest version: $($manifest.template_version)"
+        }
+        $sources = @($manifest.files | ForEach-Object { $_.source_path })
+        if ($sources -contains ".forgekit/template-manifest.json") {
+            Add-Error "template-manifest.json must not list itself"
+        }
+        foreach ($item in $manifest.files) {
+            if ($item.update_policy -notin @("replace", "merge", "ask", "readonly")) {
+                Add-Error "Invalid update_policy in template manifest: $($item.source_path)"
+            }
+            if ($item.render_mode -notin @("copy", "render")) {
+                Add-Error "Invalid render_mode in template manifest: $($item.source_path)"
+            }
+            if ($item.source_path -like "docs/*" -and $item.target_path -notlike '`${managed_docs_root}/*') {
+                Add-Error "docs source must target managed_docs_root in manifest: $($item.source_path)"
+            }
+            if ($item.source_path -like "changes/*" -and $item.target_path -notlike '`${change_root}/*') {
+                Add-Error "changes source must target change_root in manifest: $($item.source_path)"
+            }
+        }
+    }
+
+    $result = & python (Join-Path $repoRoot "scripts\update-template-manifest.py") --check 2>&1
+    if ($LASTEXITCODE -ne 0) {
+        Add-Error "Template manifest checksum check failed: $result"
+    }
+}
+
 function Test-StackTemplates {
     $requiredStacks = Get-RequiredStacks
     foreach ($stack in $requiredStacks) {
@@ -538,7 +573,7 @@ function Test-PluginDistribution {
     if ($codexPluginJson.name -ne "forgekit") {
         Add-Error "Unexpected Codex plugin name in root plugin.json: $($codexPluginJson.name)"
     }
-    if ($codexPluginJson.version -ne "0.16.0") {
+    if ($codexPluginJson.version -ne "0.17.0") {
         Add-Error "Unexpected Codex plugin version in root plugin.json: $($codexPluginJson.version)"
     }
     if ($codexPluginJson.skills -ne "./skills/") {
@@ -549,7 +584,7 @@ function Test-PluginDistribution {
     if ($claudePluginJson.name -ne "forgekit") {
         Add-Error "Unexpected Claude plugin name in root plugin.json: $($claudePluginJson.name)"
     }
-    if ($claudePluginJson.version -ne "0.16.0") {
+    if ($claudePluginJson.version -ne "0.17.0") {
         Add-Error "Unexpected Claude plugin version in root plugin.json: $($claudePluginJson.version)"
     }
     $claudeSkills = @($claudePluginJson.skills)
@@ -595,6 +630,7 @@ Test-RequiredPath "project-template\governance\project-bootstrap-fill.md"
 
 Test-GovernanceFiles
 Test-AIEngineeringLoop
+Test-TemplateManifest
 Test-StackTemplates
 Test-PromptTemplates
 Test-AgentsHarness

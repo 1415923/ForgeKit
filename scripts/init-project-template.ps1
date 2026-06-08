@@ -34,6 +34,16 @@ function Get-MappedTemplatePath {
     return $RelativePath
 }
 
+function Test-SkipTemplatePath {
+    param([string]$RelativePath)
+    $normalized = $RelativePath.Replace('\', '/')
+    if ($normalized -eq ".forgekit/template-manifest.json") { return $true }
+    if ($normalized -eq ".forgekit/template-lock.json") { return $true }
+    if ($normalized -eq ".forgekit/upgrade-report.md") { return $true }
+    if ($normalized -like ".forgekit/upgrade-export/*") { return $true }
+    return $false
+}
+
 function Get-RelativePathCompat {
     param(
         [string]$FromPath,
@@ -86,6 +96,9 @@ function Copy-DirectoryContent {
 
     Get-ChildItem -LiteralPath $SourceDir -Recurse -File | ForEach-Object {
         $relativePath = $_.FullName.Substring($SourceDir.Length).TrimStart('\', '/')
+        if (Test-SkipTemplatePath $relativePath) {
+            return
+        }
         $destinationRelativePath = Get-MappedTemplatePath $relativePath
         $destinationFile = Join-Path $DestinationDir $destinationRelativePath
         $destinationParent = Split-Path -Parent $destinationFile
@@ -102,184 +115,6 @@ function Copy-DirectoryContent {
         Copy-Item -LiteralPath $_.FullName -Destination $destinationFile -Force:$Overwrite
         Write-Host "[copy] $destinationRelativePath"
     }
-}
-
-function New-UpgradeState {
-    return [PSCustomObject]@{
-        Copied = New-Object System.Collections.Generic.List[string]
-        SkippedSame = New-Object System.Collections.Generic.List[string]
-        SkippedDifferent = New-Object System.Collections.Generic.List[string]
-        ExportedTemplates = New-Object System.Collections.Generic.List[string]
-    }
-}
-
-function Test-FileSame {
-    param(
-        [string]$LeftPath,
-        [string]$RightPath
-    )
-    if (-not (Test-Path -LiteralPath $LeftPath) -or -not (Test-Path -LiteralPath $RightPath)) {
-        return $false
-    }
-    $leftHash = Get-FileHash -LiteralPath $LeftPath -Algorithm SHA256
-    $rightHash = Get-FileHash -LiteralPath $RightPath -Algorithm SHA256
-    return $leftHash.Hash -eq $rightHash.Hash
-}
-
-function Copy-DirectoryContentForUpgrade {
-    param(
-        [Parameter(Mandatory = $true)]
-        [string]$SourceDir,
-
-        [Parameter(Mandatory = $true)]
-        [string]$DestinationDir,
-
-        [Parameter(Mandatory = $true)]
-        [string]$ExportDir,
-
-        [Parameter(Mandatory = $true)]
-        $State,
-
-        [switch]$ExportTemplates
-    )
-
-    if (-not (Test-Path -LiteralPath $SourceDir)) {
-        throw "Source directory not found: $SourceDir"
-    }
-
-    New-Item -ItemType Directory -Force -Path $DestinationDir | Out-Null
-
-    Get-ChildItem -LiteralPath $SourceDir -Recurse -File | ForEach-Object {
-        $relativePath = $_.FullName.Substring($SourceDir.Length).TrimStart('\', '/')
-        $destinationRelativePath = Get-MappedTemplatePath $relativePath
-        $destinationFile = Join-Path $DestinationDir $destinationRelativePath
-        $destinationParent = Split-Path -Parent $destinationFile
-
-        if (-not (Test-Path -LiteralPath $destinationParent)) {
-            New-Item -ItemType Directory -Force -Path $destinationParent | Out-Null
-        }
-
-        if (-not (Test-Path -LiteralPath $destinationFile)) {
-            Copy-Item -LiteralPath $_.FullName -Destination $destinationFile
-            $State.Copied.Add($destinationRelativePath) | Out-Null
-            Write-Host "[copy] $destinationRelativePath"
-            return
-        }
-
-        if (Test-FileSame -LeftPath $_.FullName -RightPath $destinationFile) {
-            $State.SkippedSame.Add($destinationRelativePath) | Out-Null
-            Write-Host "[same] $destinationRelativePath"
-            return
-        }
-
-        $State.SkippedDifferent.Add($destinationRelativePath) | Out-Null
-        Write-Host "[review] $destinationRelativePath differs; existing file preserved"
-
-        if ($ExportTemplates) {
-            $exportFile = Join-Path $ExportDir $destinationRelativePath
-            $exportParent = Split-Path -Parent $exportFile
-            if (-not (Test-Path -LiteralPath $exportParent)) {
-                New-Item -ItemType Directory -Force -Path $exportParent | Out-Null
-            }
-            Copy-Item -LiteralPath $_.FullName -Destination $exportFile -Force
-            $State.ExportedTemplates.Add($destinationRelativePath) | Out-Null
-        }
-    }
-}
-
-function New-Text {
-    param([int[]]$CodePoints)
-    $builder = New-Object System.Text.StringBuilder
-    foreach ($codePoint in $CodePoints) {
-        [void]$builder.Append([char]$codePoint)
-    }
-    return $builder.ToString()
-}
-
-function Write-UpgradeReport {
-    param(
-        [string]$DestinationDir,
-        [string]$ExportDir,
-        $State,
-        [switch]$ExportTemplates
-    )
-
-    $reportPath = Join-Path $DestinationDir ".codex\upgrade-report.md"
-    $reportParent = Split-Path -Parent $reportPath
-    if (-not (Test-Path -LiteralPath $reportParent)) {
-        New-Item -ItemType Directory -Force -Path $reportParent | Out-Null
-    }
-
-    $lines = New-Object System.Collections.Generic.List[string]
-    $lines.Add("# ForgeKit Upgrade Report") | Out-Null
-    $lines.Add("") | Out-Null
-    $lines.Add("Generated by scripts/init-project-template.ps1 -Upgrade.") | Out-Null
-    $lines.Add("") | Out-Null
-    $lines.Add("Existing project files were preserved. Files listed under review differ from the newer ForgeKit template and should be merged manually or with AI assistance.") | Out-Null
-    $lines.Add("") | Out-Null
-    $lines.Add("## Copied Missing Files") | Out-Null
-    if ($State.Copied.Count -eq 0) { $lines.Add("- None") | Out-Null } else { $State.Copied | ForEach-Object { $lines.Add("- $_") | Out-Null } }
-    $lines.Add("") | Out-Null
-    $lines.Add("## Review Existing Files") | Out-Null
-    if ($State.SkippedDifferent.Count -eq 0) { $lines.Add("- None") | Out-Null } else { $State.SkippedDifferent | ForEach-Object { $lines.Add("- $_") | Out-Null } }
-    $lines.Add("") | Out-Null
-    $lines.Add("## Same Files") | Out-Null
-    if ($State.SkippedSame.Count -eq 0) { $lines.Add("- None") | Out-Null } else { $State.SkippedSame | ForEach-Object { $lines.Add("- $_") | Out-Null } }
-    $lines.Add("") | Out-Null
-    $lines.Add("## Merge Guidance") | Out-Null
-    $lines.Add("- Do not overwrite project facts with template text.") | Out-Null
-    $lines.Add("- Prefer merging new sections, safety rules, scripts, and routing hints into existing files.") | Out-Null
-    $lines.Add("- Ask the AI assistant to compare this report with current project files before applying changes.") | Out-Null
-    if ($ExportTemplates) {
-        $lines.Add("- New template copies were exported under: $ExportDir") | Out-Null
-    } else {
-        $lines.Add("- Re-run with -ExportUpgradeTemplates to export newer template copies for side-by-side diff.") | Out-Null
-    }
-    $lines.Add("") | Out-Null
-    $lines.Add("Legacy filename migration:") | Out-Null
-    $lines.Add("- Upgrade mode does not automatically rename existing Chinese document names or `#Uxxxx` escaped file names.") | Out-Null
-    $lines.Add("- Review the detected list below and migrate paths manually after checking project-specific references.") | Out-Null
-    $legacyPatterns = @(
-        "#U",
-        (New-Text @(0x4EE3,0x7801,0x5E93,0x5730,0x56FE)),
-        (New-Text @(0x672C,0x5730,0x5DE5,0x5177,0x94FE,0x68C0,0x67E5)),
-        (New-Text @(0x7248,0x672C,0x8DEF,0x7EBF,0x56FE)),
-        (New-Text @(0x7248,0x672C,0x66F4,0x65B0,0x8BB0,0x5F55)),
-        (New-Text @(0x9879,0x76EE,0x5F00,0x53D1,0x65B9,0x6848)),
-        (New-Text @(0x9879,0x76EE,0x4EFB,0x52A1,0x770B,0x677F)),
-        (New-Text @(0x6280,0x672F,0x9009,0x578B)),
-        (New-Text @(0x4F7F,0x7528,0x8BF4,0x660E))
-    )
-    $legacyMatches = New-Object System.Collections.Generic.List[string]
-    Get-ChildItem -LiteralPath $DestinationDir -Recurse -File | ForEach-Object {
-        $relative = $_.FullName.Substring($DestinationDir.Length + 1)
-        foreach ($pattern in $legacyPatterns) {
-            if ($relative -like "*$pattern*") {
-                $legacyMatches.Add($relative) | Out-Null
-                break
-            }
-        }
-    }
-    $lines.Add("") | Out-Null
-    $lines.Add("Boundary migration:") | Out-Null
-    $lines.Add("- v0.16.0 adds .forgekit/project-boundary.yml for ForgeKitRoot, ProjectRoot, managed_docs_root, and change_root.") | Out-Null
-    $lines.Add("- Existing projects may still use docs/ or changes/ for ForgeKit-managed files; upgrade mode does not move them automatically.") | Out-Null
-    $lines.Add("- New projects use .forgekit/docs and .forgekit/changes by default.") | Out-Null
-    $lines.Add("- Treat business docs roots such as docs/ as read-mostly evidence unless the user explicitly confirms target files and reasons for writing.") | Out-Null
-    if ($legacyMatches.Count -eq 0) {
-        $lines.Add("- Detected: none.") | Out-Null
-    } else {
-        $lines.Add("- Detected legacy paths:") | Out-Null
-        foreach ($item in $legacyMatches) {
-            $lines.Add("  - $item") | Out-Null
-        }
-    }
-    $lines.Add("") | Out-Null
-    $lines.Add("Suggested prompt:") | Out-Null
-    $lines.Add("Review .codex/upgrade-report.md and merge useful new ForgeKit template sections into the existing project files without overwriting project facts.") | Out-Null
-
-    Set-Content -LiteralPath $reportPath -Value $lines -Encoding UTF8
-    Write-Host "[copy] .codex\upgrade-report.md"
 }
 
 function Write-BoundaryConfig {
@@ -303,7 +138,7 @@ function Write-BoundaryConfig {
 
     $lines = @(
         'forgekit:',
-        '  version: "0.16.0"',
+        '  version: "0.17.0"',
         "  mode: `"$SelectedMode`"",
         '',
         'roots:',
@@ -345,6 +180,33 @@ function Write-BoundaryConfig {
     )
     Set-Content -LiteralPath $boundaryFile -Value $lines -Encoding UTF8
     Write-Host "[copy] .forgekit\project-boundary.yml"
+}
+
+function Invoke-TemplateVersioning {
+    param(
+        [string]$Command,
+        [string]$DestinationDir
+    )
+
+    $script = Join-Path $templateRoot "scripts\update-template-manifest.py"
+    $python = Get-Command python -ErrorAction SilentlyContinue
+    if (-not $python) {
+        $python = Get-Command py -ErrorAction SilentlyContinue
+    }
+    if (-not $python) {
+        throw "Python is required for ForgeKit template versioning. Install Python or run scripts/update-template-manifest.py manually."
+    }
+
+    if ($Command -eq "install-lock") {
+        & $python.Source $script install-lock --repo-root $templateRoot --project-root $DestinationDir
+    } elseif ($Command -eq "upgrade-report") {
+        & $python.Source $script upgrade-report --repo-root $templateRoot --project-root $DestinationDir
+    } else {
+        throw "Unknown template versioning command: $Command"
+    }
+    if ($LASTEXITCODE -ne 0) {
+        throw "Template versioning command failed: $Command"
+    }
 }
 
 function Write-InitMetadata {
@@ -482,9 +344,9 @@ if ($Upgrade) {
     if ($Force) {
         throw "-Upgrade cannot be combined with -Force. Upgrade mode must preserve existing project facts; run a non-upgrade initialization separately if you intentionally want overwrites."
     }
-    Write-Step "mode: upgrade existing project; existing files are preserved"
+    Write-Step "mode: report-only upgrade; existing files, lock, and business docs are preserved"
     if ($ExportUpgradeTemplates) {
-        Write-Step "export newer templates for review under .codex\upgrade-templates"
+        Write-Step "export newer templates for review under .forgekit\upgrade-export"
     }
 }
 
@@ -492,53 +354,35 @@ if (-not (Test-Path -LiteralPath $resolvedTarget)) {
     New-Item -ItemType Directory -Force -Path $resolvedTarget | Out-Null
 }
 
-$upgradeState = $null
-$upgradeExportDir = Join-Path $resolvedTarget ".codex\upgrade-templates"
 if ($Upgrade -and -not $Force) {
-    $upgradeState = New-UpgradeState
-    Copy-DirectoryContentForUpgrade -SourceDir $projectTemplateDir -DestinationDir $resolvedTarget -ExportDir $upgradeExportDir -State $upgradeState -ExportTemplates:$ExportUpgradeTemplates
+    Invoke-TemplateVersioning -Command "upgrade-report" -DestinationDir $resolvedTarget
 } else {
     Copy-DirectoryContent -SourceDir $projectTemplateDir -DestinationDir $resolvedTarget -Overwrite:$Force
-}
 
-if (Test-Path -LiteralPath $questionnairesDir) {
-    $targetQuestionnaireDir = Join-Path $resolvedTarget ".codex\questionnaires"
-    if ($Upgrade -and -not $Force) {
-        Copy-DirectoryContentForUpgrade -SourceDir $questionnairesDir -DestinationDir $targetQuestionnaireDir -ExportDir (Join-Path $upgradeExportDir ".codex\questionnaires") -State $upgradeState -ExportTemplates:$ExportUpgradeTemplates
-    } else {
+    if (Test-Path -LiteralPath $questionnairesDir) {
+        $targetQuestionnaireDir = Join-Path $resolvedTarget ".codex\questionnaires"
         Copy-DirectoryContent -SourceDir $questionnairesDir -DestinationDir $targetQuestionnaireDir -Overwrite:$Force
     }
-}
 
-foreach ($stack in $normalizedStacks) {
-    if ([string]::IsNullOrWhiteSpace($stack)) {
-        continue
-    }
+    foreach ($stack in $normalizedStacks) {
+        if ([string]::IsNullOrWhiteSpace($stack)) {
+            continue
+        }
 
-    $stackDir = Join-Path $templatesDir $stack
-    if (-not (Test-Path -LiteralPath $stackDir)) {
-        throw "Unknown stack template: $stack"
-    }
+        $stackDir = Join-Path $templatesDir $stack
+        if (-not (Test-Path -LiteralPath $stackDir)) {
+            throw "Unknown stack template: $stack"
+        }
 
-    $destinationStackDir = Join-Path $resolvedTarget ".codex\stacks\$stack"
-    Write-Step "stack template: $stack"
-    if ($Upgrade -and -not $Force) {
-        Copy-DirectoryContentForUpgrade -SourceDir $stackDir -DestinationDir $destinationStackDir -ExportDir (Join-Path $upgradeExportDir ".codex\stacks\$stack") -State $upgradeState -ExportTemplates:$ExportUpgradeTemplates
-    } else {
+        $destinationStackDir = Join-Path $resolvedTarget ".codex\stacks\$stack"
+        Write-Step "stack template: $stack"
         Copy-DirectoryContent -SourceDir $stackDir -DestinationDir $destinationStackDir -Overwrite:$Force
     }
-}
 
-Write-InitMetadata -DestinationDir $resolvedTarget -Name $ProjectName -SelectedMode $Mode -SelectedStacks $normalizedStacks -Overwrite:$Force
-Write-ClaudeInitMetadata -DestinationDir $resolvedTarget -Name $ProjectName -SelectedMode $Mode -SelectedStacks $normalizedStacks -Overwrite:$Force
-if ($Upgrade -and -not $Force) {
-    Write-BoundaryConfig -DestinationDir $resolvedTarget -ForgeKitRoot $templateRoot -SelectedMode $Mode
-} else {
+    Write-InitMetadata -DestinationDir $resolvedTarget -Name $ProjectName -SelectedMode $Mode -SelectedStacks $normalizedStacks -Overwrite:$Force
+    Write-ClaudeInitMetadata -DestinationDir $resolvedTarget -Name $ProjectName -SelectedMode $Mode -SelectedStacks $normalizedStacks -Overwrite:$Force
     Write-BoundaryConfig -DestinationDir $resolvedTarget -ForgeKitRoot $templateRoot -SelectedMode $Mode -Overwrite
-}
-
-if ($Upgrade -and -not $Force) {
-    Write-UpgradeReport -DestinationDir $resolvedTarget -ExportDir $upgradeExportDir -State $upgradeState -ExportTemplates:$ExportUpgradeTemplates
+    Invoke-TemplateVersioning -Command "install-lock" -DestinationDir $resolvedTarget
 }
 
 Write-Step "done"
@@ -562,5 +406,5 @@ Write-Host "- Do not copy ForgeKit itself into ProjectRoot or commit ForgeKitRoo
 Write-Host ""
 Write-Host "Do not choose a tech stack here. ForgeKit will confirm or infer it during the discovery interview."
 if ($Upgrade) {
-    Write-Host "Upgrade note: existing files were preserved. Review .codex/upgrade-report.md and merge useful template updates manually."
+    Write-Host "Upgrade note: report-only mode preserved existing files and lock. Review .forgekit/upgrade-report.md and candidate templates under .forgekit/upgrade-export manually."
 }

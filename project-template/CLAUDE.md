@@ -48,6 +48,8 @@ When a task names a ForgeKit skill, read the project-local `.agents/skills/<skil
 - Use `.forgekit/docs` as the default ForgeKit-managed docs root and `.forgekit/changes` as the default change root.
 - Treat business `docs/` as read-mostly evidence. Read and cite it, but do not write ForgeKit governance templates there unless the user confirms target files and reasons.
 - Do not read all business `docs/` by default; use `.forgekit/docs/codebase-map.md` to choose what matters.
+- Treat `.forgekit/template-lock.json` as an installation baseline. Do not edit it during report-only upgrade checks.
+- Treat `.forgekit/upgrade-export/**` as candidate comparison material, not current-state docs, active changes, release evidence, or changelog content.
 - Do not install tools or start services just because `.forgekit/docs/local-toolchain.md` has unknown values; ask first.
 - `scripts/detect-local-toolchain.ps1` and `scripts/run-harness-check.ps1` are read-only helpers.
 - For Lite projects, keep governance lightweight and ask before expanding to Enterprise-level documents.

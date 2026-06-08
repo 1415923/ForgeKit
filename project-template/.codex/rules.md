@@ -24,6 +24,8 @@
 - ForgeKit 治理文档默认写入 `.forgekit/docs`。
 - 中高风险 change 工件默认写入 `.forgekit/changes`。
 - 业务 `docs/` 默认是 read-mostly 证据源：允许读取、引用和抽取事实，不写 ForgeKit 治理模板。
+- `.forgekit/template-lock.json` 是安装基线；report-only upgrade 期间不要写回 lock。
+- `.forgekit/upgrade-export/**` 是候选模板对比材料，不是当前态文档、活跃 change、发布证据或 changelog 内容。
 - 如果用户要求把 ForgeKit 事实合并进业务 `docs/`，先列出目标文件、写入原因、与现有内容的关系和覆盖风险，等用户确认后再写。
 - `src/**`、`tests/**`、`scripts/**` 属于 task_scoped：任务开始前确认范围，确认后可在本任务范围内修改。
 

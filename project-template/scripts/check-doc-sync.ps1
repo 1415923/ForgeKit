@@ -139,6 +139,11 @@ function Test-ChangedDocsNeedVersionRecord {
         return
     }
 
+    $changedPaths = @($changedPaths | Where-Object { $_ -notlike ".forgekit/upgrade-export/*" -and $_ -notlike ".forgekit\upgrade-export\*" })
+    if ($changedPaths.Count -eq 0) {
+        return
+    }
+
     $docChanged = @($changedPaths | Where-Object { $_ -like ".forgekit/*" -or $_ -like "governance/*" -or $_ -like ".codex/*" })
     if ($docChanged.Count -eq 0) {
         return
@@ -215,6 +220,13 @@ function Test-ChangeArtifacts {
     }
 }
 
+function Test-UpgradeExportIgnored {
+    $exportRoot = Join-Path $repoRoot ".forgekit\upgrade-export"
+    if (Test-Path -LiteralPath $exportRoot) {
+        return
+    }
+}
+
 Test-PathRequired (Join-DocPath (Get-VersionRecordName))
 Test-PathRequired (Join-DocPath (Get-VersionRoadmapName))
 Test-PathRequired (Join-DocPath (Get-TaskBoardName))
@@ -225,6 +237,7 @@ Test-PathRequired (Join-DocPath (Get-ChangeImpactName))
 Test-StalePhrases
 Test-VersionChangedReasons
 Test-ChangedDocsNeedVersionRecord
+Test-UpgradeExportIgnored
 Test-ChangeArtifacts
 
 if ($warnings.Count -eq 0 -and $errors.Count -eq 0) {

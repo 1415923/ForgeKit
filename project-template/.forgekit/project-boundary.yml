@@ -1,5 +1,5 @@
 forgekit:
-  version: "0.16.0"
+  version: "0.17.0"
   mode: "Standard"
 
 roots:
@@ -38,4 +38,3 @@ write_policy:
     - "target/**"
     - "dist/**"
     - "build/**"
-

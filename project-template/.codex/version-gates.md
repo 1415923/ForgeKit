@@ -41,6 +41,7 @@
 2. `.forgekit/docs/changelog.md`
 3. 当前 `git diff` / `git status`
 4. 上一个中版本 review/refactor 是否完成
+5. `.forgekit/upgrade-export/**` 未被当作当前态文档、活跃 change、发布证据或 changelog 内容
 
 如果缺少 review/refactor 结论，回复应包括：
 

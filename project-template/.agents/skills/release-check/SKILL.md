@@ -35,6 +35,7 @@ description: Check release readiness and version-gate compliance for a project. 
 - Current version tasks, features, and bugs are closed, deferred, blocked, or explicitly dropped.
 - Large changes have exploration report, implementation plan, staged validation, and review notes.
 - Medium/high risk changes have required `.forgekit/changes/<id>/` artifacts for the declared risk level; high risk changes include ship notes.
+- `.forgekit/upgrade-export/**` is ignored for release readiness; it is candidate template comparison material, not current-state docs, active changes, release evidence, or changelog content.
 - SEV-1 / SEV-2 incidents and repeated defects have reviews and action items.
 - S2/S3 security risks are closed or explicitly accepted.
 - New or upgraded dependencies have dependency security review where needed.

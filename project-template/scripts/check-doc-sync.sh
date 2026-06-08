@@ -35,7 +35,7 @@ changed_paths() {
   {
     git -C "$repo_root" diff --name-only HEAD -- .forgekit .codex governance 2>/dev/null || true
     git -C "$repo_root" diff --cached --name-only -- .forgekit .codex governance 2>/dev/null || true
-  } | awk 'NF' | sort -u
+  } | awk 'NF' | grep -v '^.forgekit/upgrade-export/' | sort -u
 }
 
 test_stale_phrases() {
