@@ -28,27 +28,27 @@ function Join-DocPath {
 }
 
 function Get-VersionRecordName {
-    return New-Text @(0x7248,0x672C,0x66F4,0x65B0,0x8BB0,0x5F55)
+    return "changelog"
 }
 
 function Get-VersionRoadmapName {
-    return New-Text @(0x7248,0x672C,0x8DEF,0x7EBF,0x56FE)
+    return "version-roadmap"
 }
 
 function Get-TaskBoardName {
-    return New-Text @(0x9879,0x76EE,0x4EFB,0x52A1,0x770B,0x677F)
+    return "task-board"
 }
 
 function Get-TestDocName {
-    return New-Text @(0x6D4B,0x8BD5,0x6587,0x6863)
+    return "testing"
 }
 
 function Get-RiskRegisterName {
-    return New-Text @(0x98CE,0x9669,0x767B,0x8BB0,0x518C)
+    return "risk-register"
 }
 
 function Get-ChangeImpactName {
-    return New-Text @(0x53D8,0x66F4,0x5F71,0x54CD,0x8BC4,0x4F30)
+    return "change-impact"
 }
 
 function Test-PathRequired {
@@ -116,7 +116,6 @@ function Test-VersionChangedReasons {
         return
     }
 
-    $reasonText = New-Text @(0x539F,0x56E0)
     $lines = Get-Content -LiteralPath $versionDoc
     $insideChanged = $false
     for ($i = 0; $i -lt $lines.Count; $i++) {
@@ -128,7 +127,7 @@ function Test-VersionChangedReasons {
         if ($line -match "^###\s+" -and $insideChanged) {
             $insideChanged = $false
         }
-        if ($insideChanged -and $line -match "^\s*-\s+" -and $line -notmatch "$reasonText|Reason|Because|because") {
+        if ($insideChanged -and $line -match "^\s*-\s+" -and $line -notmatch "Reason:|Because:|because:") {
             Add-Warning "Changed entry should include a reason in version update record:$($i + 1)"
         }
     }
@@ -152,17 +151,18 @@ function Test-ChangedDocsNeedVersionRecord {
     }
 
     $riskTerms = @(
-        (New-Text @(0x7F3A,0x9677)),
-        (New-Text @(0x98CE,0x9669)),
-        (New-Text @(0x4E8B,0x6545)),
-        (New-Text @(0x5B89,0x5168)),
-        (New-Text @(0x4F9D,0x8D56)),
-        (New-Text @(0x90E8,0x7F72)),
-        (New-Text @(0x73AF,0x5883)),
-        (New-Text @(0x63A5,0x53E3)),
-        (New-Text @(0x6570,0x636E,0x5E93)),
-        (New-Text @(0x5B9E,0x65BD,0x8BA1,0x5212)),
-        (New-Text @(0x63A2,0x7D22,0x62A5,0x544A))
+        "defect",
+        "risk",
+        "incident",
+        "security",
+        "dependency",
+        "deployment",
+        "environment",
+        "api",
+        "database",
+        "implementation-plan",
+        "exploration-report",
+        "change-impact"
     )
 
     foreach ($path in $changedPaths) {

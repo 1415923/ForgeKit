@@ -40,9 +40,9 @@
 
 | 能力 | 候选做法 | 默认 |
 | --- | --- | --- |
-| Issue 创建 | 从 `docs/项目任务看板.md` 映射到 GitHub Issues | 手动确认 |
+| Issue 创建 | 从 `docs/task-board.md` 映射到 GitHub Issues | 手动确认 |
 | PR 检查 | code-review prompt + CI 结果 | 可选 |
-| CODEOWNERS | 从 `docs/代码所有权.md` 生成 | 手动确认 |
+| CODEOWNERS | 从 `docs/code-ownership.md` 生成 | 手动确认 |
 | Actions | lint/test/build/security scan | 项目成熟后 |
 | Dependabot | 依赖更新和安全提醒 | 生产项目建议 |
 | Secret scanning | GitHub 或 gitleaks | 高风险项目建议 |

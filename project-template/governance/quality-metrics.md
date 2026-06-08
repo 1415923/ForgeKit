@@ -32,8 +32,8 @@
 
 ## 记录位置
 
-- 质量指标记录在 `docs/质量指标记录.md`。
-- 技术债记录在 `docs/技术债记录.md`。
-- 高风险技术债应同步到 `docs/风险登记册.md`。
-- 版本 review/refactor 结论应同步到 `docs/版本路线图.md`。
-- 严重事故和重复缺陷应同步到 `docs/事故复盘.md` 或 `docs/缺陷复盘.md`。
+- 质量指标记录在 `docs/quality-metrics.md`。
+- 技术债记录在 `docs/technical-debt.md`。
+- 高风险技术债应同步到 `docs/risk-register.md`。
+- 版本 review/refactor 结论应同步到 `docs/version-roadmap.md`。
+- 严重事故和重复缺陷应同步到 `docs/incident-review.md` 或 `docs/defect-review.md`。

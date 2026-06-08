@@ -6,9 +6,9 @@
 
 | 文档 | 用途 |
 | --- | --- |
-| `docs/代码所有权.md` | 记录模块、负责人、评审人、风险等级和替补人 |
+| `docs/code-ownership.md` | 记录模块、负责人、评审人、风险等级和替补人 |
 | `.codex/git.md` | 记录分支、提交和合并前要求 |
-| `docs/变更影响评估.md` | 记录跨模块或高风险改动的影响 |
+| `docs/change-impact.md` | 记录跨模块或高风险改动的影响 |
 
 ## 所有权等级
 
@@ -21,7 +21,7 @@
 
 ## CODEOWNERS 风格规则
 
-项目可以在 `docs/代码所有权.md` 中用类似格式记录：
+项目可以在 `docs/code-ownership.md` 中用类似格式记录：
 
 ```text
 # path pattern                 owner              reviewer            risk
@@ -47,9 +47,9 @@
 
 ## Codex 行为
 
-- 修改前先识别影响路径，并对照 `docs/代码所有权.md`。
+- 修改前先识别影响路径，并对照 `docs/code-ownership.md`。
 - 如果命中 Critical 或 Unknown 区域，应提醒用户需要负责人或人工确认。
-- 如果缺少 `docs/代码所有权.md`，接手项目先建立初版所有权矩阵，不把未知区域当作可自由重构区域。
+- 如果缺少 `docs/code-ownership.md`，接手项目先建立初版所有权矩阵，不把未知区域当作可自由重构区域。
 - 代码审查时检查是否遗漏必要评审人、影响范围或变更影响评估。
 - 发布前检查 Critical 区域变更是否已有评审结论。
 

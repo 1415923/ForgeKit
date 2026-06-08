@@ -1,6 +1,6 @@
 # 版本更新记录
 
-版本推进必须同时参考 `docs/版本路线图.md`。每个大版本结束后，应先完成对应 review/refactor 中版本，再进入下一个大版本。
+版本推进必须同时参考 `docs/version-roadmap.md`。每个大版本结束后，应先完成对应 review/refactor 中版本，再进入下一个大版本。
 
 ## Unreleased
 

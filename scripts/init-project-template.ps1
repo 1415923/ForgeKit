@@ -141,6 +141,15 @@ function Copy-DirectoryContentForUpgrade {
     }
 }
 
+function New-Text {
+    param([int[]]$CodePoints)
+    $builder = New-Object System.Text.StringBuilder
+    foreach ($codePoint in $CodePoints) {
+        [void]$builder.Append([char]$codePoint)
+    }
+    return $builder.ToString()
+}
+
 function Write-UpgradeReport {
     param(
         [string]$DestinationDir,
@@ -181,6 +190,39 @@ function Write-UpgradeReport {
         $lines.Add("- Re-run with -ExportUpgradeTemplates to export newer template copies for side-by-side diff.") | Out-Null
     }
     $lines.Add("") | Out-Null
+    $lines.Add("Legacy filename migration:") | Out-Null
+    $lines.Add("- Upgrade mode does not automatically rename existing Chinese document names or `#Uxxxx` escaped file names.") | Out-Null
+    $lines.Add("- Review the detected list below and migrate paths manually after checking project-specific references.") | Out-Null
+    $legacyPatterns = @(
+        "#U",
+        (New-Text @(0x4EE3,0x7801,0x5E93,0x5730,0x56FE)),
+        (New-Text @(0x672C,0x5730,0x5DE5,0x5177,0x94FE,0x68C0,0x67E5)),
+        (New-Text @(0x7248,0x672C,0x8DEF,0x7EBF,0x56FE)),
+        (New-Text @(0x7248,0x672C,0x66F4,0x65B0,0x8BB0,0x5F55)),
+        (New-Text @(0x9879,0x76EE,0x5F00,0x53D1,0x65B9,0x6848)),
+        (New-Text @(0x9879,0x76EE,0x4EFB,0x52A1,0x770B,0x677F)),
+        (New-Text @(0x6280,0x672F,0x9009,0x578B)),
+        (New-Text @(0x4F7F,0x7528,0x8BF4,0x660E))
+    )
+    $legacyMatches = New-Object System.Collections.Generic.List[string]
+    Get-ChildItem -LiteralPath $DestinationDir -Recurse -File | ForEach-Object {
+        $relative = $_.FullName.Substring($DestinationDir.Length + 1)
+        foreach ($pattern in $legacyPatterns) {
+            if ($relative -like "*$pattern*") {
+                $legacyMatches.Add($relative) | Out-Null
+                break
+            }
+        }
+    }
+    if ($legacyMatches.Count -eq 0) {
+        $lines.Add("- Detected: none.") | Out-Null
+    } else {
+        $lines.Add("- Detected legacy paths:") | Out-Null
+        foreach ($item in $legacyMatches) {
+            $lines.Add("  - $item") | Out-Null
+        }
+    }
+    $lines.Add("") | Out-Null
     $lines.Add("Suggested prompt:") | Out-Null
     $lines.Add("Review .codex/upgrade-report.md and merge useful new ForgeKit template sections into the existing project files without overwriting project facts.") | Out-Null
 
@@ -216,7 +258,7 @@ function Write-InitMetadata {
         "- Stacks: $stackText",
         "- StackSelection: deferred means no stack was chosen during initialization. This is normal.",
         "",
-        "Use this file as initialization metadata. Merge real project facts into .codex/project.md, .codex/scope.md, the docs codebase map, the local toolchain check document, and docs/技术选型.md manually or with Codex.",
+        "Use this file as initialization metadata. Merge real project facts into .codex/project.md, .codex/scope.md, the docs codebase map, the local toolchain check document, and docs/tech-decisions.md manually or with Codex.",
         "",
         "Stack guidance:",
         "- New projects: confirm product shape, users, constraints, risks, and the v0.1.0 closed loop before choosing a stack.",
@@ -224,9 +266,10 @@ function Write-InitMetadata {
         "- Feature, fix, and refactor work defaults to the existing stack unless the user explicitly asks for migration or architecture change.",
         "",
         "Mode guidance:",
-        "- Lite: keep only essential docs and commands for small scripts, tools, and prototypes.",
-        "- Standard: default for normal applications, APIs, internal systems, and data projects.",
-        "- Enterprise: use full governance for team delivery, production, inherited, regulated, hardware, or high-risk projects.",
+        "- Lite: metadata hint for lightweight AI filling and governance discussion.",
+        "- Standard: metadata hint for normal AI filling and governance discussion.",
+        "- Enterprise: metadata hint for stricter AI filling and governance discussion.",
+        "- The initializer copies the same template files for every mode; mode does not crop files in v0.14.0.",
         "",
         "Recommended Codex startup order:",
         "1. AGENTS.md",
@@ -273,7 +316,7 @@ function Write-ClaudeInitMetadata {
         "- Stacks: $stackText",
         "- StackSelection: deferred means no stack was chosen during initialization. This is normal.",
         "",
-        "Use this file as Claude Code initialization metadata. Merge real project facts into .codex/project.md, .codex/scope.md, the docs codebase map, the local toolchain check document, and docs/技术选型.md manually or with Claude Code.",
+        "Use this file as Claude Code initialization metadata. Merge real project facts into .codex/project.md, .codex/scope.md, the docs codebase map, the local toolchain check document, and docs/tech-decisions.md manually or with Claude Code.",
         "",
         "Recommended Claude Code startup order:",
         "1. CLAUDE.md",
@@ -317,7 +360,10 @@ $resolvedTarget = $ExecutionContext.SessionState.Path.GetUnresolvedProviderPathF
 Write-Step "target: $resolvedTarget"
 Write-Step "base template: $projectTemplateDir"
 if ($Upgrade) {
-    Write-Step "mode: upgrade existing project; existing files are preserved unless -Force is used"
+    if ($Force) {
+        throw "-Upgrade cannot be combined with -Force. Upgrade mode must preserve existing project facts; run a non-upgrade initialization separately if you intentionally want overwrites."
+    }
+    Write-Step "mode: upgrade existing project; existing files are preserved"
     if ($ExportUpgradeTemplates) {
         Write-Step "export newer templates for review under .codex\upgrade-templates"
     }

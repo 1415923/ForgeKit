@@ -5,8 +5,8 @@
 细化安全治理流程见：
 
 - `governance/security-governance.md`
-- `docs/安全威胁建模.md`
-- `docs/依赖安全审查.md`
+- `docs/threat-model.md`
+- `docs/dependency-review.md`
 
 ## 基本原则
 

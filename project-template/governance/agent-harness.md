@@ -5,7 +5,7 @@
 ## 目标
 
 - 让 `AGENTS.md` 成为短入口，只负责路由和边界。
-- 让 `docs/代码库地图.md` 成为代码搜索起点。
+- 让 `docs/codebase-map.md` 成为代码搜索起点。
 - 让 `.codex/stacks/` 只按技术栈加载，不跨栈污染。
 - 让治理文档按任务读取，不默认全量加载。
 - 让大任务先探索、计划、确认，再编码。
@@ -13,7 +13,7 @@
 ## 上下文加载顺序
 
 1. 读取 `AGENTS.md`，判断任务类型和禁止动作。
-2. 读取 `docs/代码库地图.md`，定位相关模块、入口文件和验证命令。
+2. 读取 `docs/codebase-map.md`，定位相关模块、入口文件和验证命令。
 3. 读取 `.codex/project.md`、`.codex/scope.md`、`.codex/commands.md` 中与任务相关的部分。
 4. 只读取相关 `.codex/stacks/<stack>/`。
 5. 只读取当前任务需要的治理文件。

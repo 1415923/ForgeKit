@@ -20,11 +20,11 @@
 
 | 产物 | 作用 |
 | --- | --- |
-| `docs/安全威胁建模.md` | 识别资产、入口、威胁和缓解措施 |
-| `docs/依赖安全审查.md` | 审查新增或升级依赖 |
-| `docs/变更影响评估.md` | 记录安全相关高影响变更 |
-| `docs/风险登记册.md` | 记录未关闭安全风险 |
-| `docs/事故复盘.md` | 记录安全事故 |
+| `docs/threat-model.md` | 识别资产、入口、威胁和缓解措施 |
+| `docs/dependency-review.md` | 审查新增或升级依赖 |
+| `docs/change-impact.md` | 记录安全相关高影响变更 |
+| `docs/risk-register.md` | 记录未关闭安全风险 |
+| `docs/incident-review.md` | 记录安全事故 |
 
 ## 安全检查层级
 

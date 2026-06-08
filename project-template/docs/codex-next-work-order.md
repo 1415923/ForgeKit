@@ -24,14 +24,14 @@
 
 ## Codex 应执行的下一步
 
-1. 读取 `AGENTS.md`、`docs/项目适用性评估.md`、`docs/代码库地图.md`、`docs/本地工具链检查.md` 和 `.codex/init.generated.md`。
+1. 读取 `AGENTS.md`、`docs/project-suitability.md`、`docs/codebase-map.md`、`docs/local-toolchain.md` 和 `.codex/init.generated.md`。
 2. 如需确认本机工具链，先运行 `scripts/detect-local-toolchain.ps1`，只记录结果，不自动安装。
 3. 输出 3 到 5 个最关键问题，优先确认 MVP 范围、落地环境、验证方式和依赖裁剪。
 4. 如果用户答不上来，不要反复追问同一个问题；应给出 2 到 4 个可选方案、取舍、推荐默认值和验证办法。
 5. 如果当前上下文不足，应提出查阅路径：本地已有文档、官方文档、同类开源项目、技术选型对比资料或小型验证原型。需要联网时先说明目的并请求确认。
 6. 把每个关键项标记为：已确认、暂定假设、需要调研、延期不做。
-7. 根据用户回答更新 `docs/项目开发方案.md`、`docs/技术选型.md`、`docs/版本路线图.md`、`docs/项目任务看板.md` 和 `docs/风险登记册.md`。
-8. 如果涉及跨模块、高风险或既有项目整改，先更新 `docs/探索报告.md` 和 `docs/实施计划.md`，不要直接编码。
+7. 根据用户回答更新 `docs/project-plan.md`、`docs/tech-decisions.md`、`docs/version-roadmap.md`、`docs/task-board.md` 和 `docs/risk-register.md`。
+8. 如果涉及跨模块、高风险或既有项目整改，先更新 `docs/exploration-report.md` 和 `docs/implementation-plan.md`，不要直接编码。
 
 ## 方案访谈要求
 
@@ -43,7 +43,7 @@
 - 对不确定问题给出推荐默认值，但必须标记为“暂定假设”，不能写成已确认事实。
 - 方案未确认前，不要开始大规模编码；可以建议小型验证原型或资料查阅任务。
 - 如果公开资料有帮助，应询问用户是否允许联网查阅官方文档、公开项目、同类产品或技术选型对比。未调研时必须明确说明“尚未调研”。
-- 如果 `docs/版本路线图.md` 或 `docs/项目任务看板.md` 仍包含模板示例内容，应先替换为真实项目的 v0.1.0 / v0.1.1 计划，不要保留 ForgeKit 自身历史任务。
+- 如果 `docs/version-roadmap.md` 或 `docs/task-board.md` 仍包含模板示例内容，应先替换为真实项目的 v0.1.0 / v0.1.1 计划，不要保留 ForgeKit 自身历史任务。
 
 ## Execution Confirmation / 执行前确认摘要
 

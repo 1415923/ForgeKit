@@ -5,9 +5,9 @@
 ## 只读检查
 
 ```powershell
-Get-ChildItem D:\Xilinx\Vivado\2023.2
-Get-ChildItem D:\Xilinx\Vitis\2023.2
-Get-ChildItem D:\Xilinx\Vitis_HLS\2023.2
+Get-ChildItem $env:XILINX_VIVADO
+Get-ChildItem $env:XILINX_VITIS
+Get-ChildItem $env:XILINX_HLS
 ```
 
 ## HLS

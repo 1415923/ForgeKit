@@ -7,7 +7,7 @@ This repository maintains a reusable Codex CLI workflow template.
 - Read `README.md` for the user-facing workflow.
 - Read `project-template/AGENTS.md` when changing the generated project template.
 - Read `project-template/governance/agent-harness.md` when changing context strategy, AGENTS routing, codebase-map behavior, or Codex startup flow.
-- Read `project-template/docs/代码库地图.md` when changing generated project onboarding or startup guidance.
+- Read `project-template/docs/codebase-map.md` when changing generated project onboarding or startup guidance.
 - Read only the governance file related to the task. Do not load all governance docs by default.
 - Use `scripts/validate-template.ps1` after changing template structure, skills, prompts, scripts, or HTML.
 
@@ -18,7 +18,7 @@ This repository maintains a reusable Codex CLI workflow template.
 - Do not put machine-specific local paths into `project-template/`; keep them in `user-rules/`.
 - When adding a new template capability, update all relevant entry points:
   - `README.md`
-  - `使用说明.html`
+  - `usage.html`
   - `project-template/README.md`
   - `project-template/AGENTS.md`
   - `project-template/.codex/skills.md`

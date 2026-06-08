@@ -10,9 +10,9 @@ Use this skill as the Claude Code bridge into a ForgeKit-generated project.
 ## Start Here
 
 1. Read `CLAUDE.md` first.
-2. Use `docs/代码库地图.md` to choose code and document entry points.
-3. Use `docs/本地工具链检查.md` when local validation commands matter.
-4. Use `docs/Codex下一步工作单.md` when project direction is unclear.
+2. Use `docs/codebase-map.md` to choose code and document entry points.
+3. Use `docs/local-toolchain.md` when local validation commands matter.
+4. Use `docs/codex-next-work-order.md` when project direction is unclear.
 5. Read `.codex/project.md`, `.codex/scope.md`, `.codex/commands.md`, and selected `.codex/stacks/` only as needed.
 
 ## Discovery State

@@ -25,10 +25,8 @@
 - 修改配置：运行最小启动或配置加载测试；长期服务启动前确认。
 - 修改依赖：先确认网络和权限，再运行依赖解析或模块构建。
 
-本机环境参考：
+环境参考：
 
-- JDK：`D:\JAVA\jdk-17`
-- Maven：`D:\JetBrains\IntelliJ IDEA 2025.2\plugins\maven\lib\maven3\bin\mvn.cmd`
-- Gradle：`D:\gradle\gradle-9.5.1\bin\gradle.bat`
-- Java 全栈启动经验：`D:\JAVA-code\simple-auth\项目环境启动指南.md`
-- 本地 Ollama / DeepSeek：`D:\Ollama\ollama.exe`，模型 `deepseek-r1:7b`
+- JDK：使用 `JAVA_HOME` 或项目文档中记录的 JDK 路径。
+- Maven / Gradle：优先使用项目 wrapper，例如 `mvnw`、`gradlew`；没有 wrapper 时再使用本机安装。
+- 本机私有路径、服务地址和模型路径应写入 `user-rules/` 或项目私有文档，不写入通用模板。

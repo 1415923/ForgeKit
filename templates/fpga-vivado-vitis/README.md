@@ -25,9 +25,9 @@
 - 板卡相关操作、bitstream 下载、GUI 和长耗时流程必须先确认。
 - 生成物体积大，验证结果优先记录日志摘要，不把大型文件读入上下文。
 
-本机环境参考：
+环境参考：
 
-- Xilinx 根目录：`D:\Xilinx`
-- Vivado：`D:\Xilinx\Vivado\2023.2`
-- Vitis：`D:\Xilinx\Vitis\2023.2`
-- Vitis HLS：`D:\Xilinx\Vitis_HLS\2023.2`
+- Xilinx 根目录：使用 `$XILINX_ROOT`、`$XILINX_VIVADO`、`$XILINX_VITIS` 或项目文档记录的安装路径。
+- Windows 示例：`C:\path\to\Xilinx\Vivado\<version>`。
+- Linux 示例：`/opt/Xilinx/Vivado/<version>`。
+- 本机私有安装路径应写入 `user-rules/` 或项目私有文档，不写入通用模板。

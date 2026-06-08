@@ -4,7 +4,7 @@
 
 ## 强制规则
 
-- 项目进入大规模开发前，必须先完成 `docs/项目开发方案.md` 和 `docs/版本路线图.md` 的第一版。
+- 项目进入大规模开发前，必须先完成 `docs/project-plan.md` 和 `docs/version-roadmap.md` 的第一版。
 - 每个大版本结束后，必须安排一个 review/refactor 中版本。
 - review/refactor 中版本未完成时，不允许直接进入下一个大版本。
 - 如果用户要求跳过中版本，Codex 必须提醒风险，并要求人工明确确认。
@@ -37,8 +37,8 @@
 
 当用户要求开始下一个大版本时，先检查：
 
-1. `docs/版本路线图.md`
-2. `docs/版本更新记录.md`
+1. `docs/version-roadmap.md`
+2. `docs/changelog.md`
 3. 当前 `git diff` / `git status`
 4. 上一个中版本 review/refactor 是否完成
 

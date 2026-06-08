@@ -24,7 +24,7 @@ Java 后端：
 
 ```powershell
 powershell -ExecutionPolicy Bypass -File .\scripts\init-project-template.ps1 `
-  -TargetPath "D:\JAVA-code\demo-api" `
+  -TargetPath "D:\projects\demo-api" `
   -ProjectName "demo-api" `
   -Stacks java-springboot
 ```
@@ -33,7 +33,7 @@ Java + Vue：
 
 ```powershell
 powershell -ExecutionPolicy Bypass -File .\scripts\init-project-template.ps1 `
-  -TargetPath "D:\JAVA-code\demo-fullstack" `
+  -TargetPath "D:\projects\demo-fullstack" `
   -ProjectName "demo-fullstack" `
   -Stacks java-springboot,vue
 ```
@@ -42,7 +42,7 @@ FPGA：
 
 ```powershell
 powershell -ExecutionPolicy Bypass -File .\scripts\init-project-template.ps1 `
-  -TargetPath "D:\JAVA-code\fpga-demo" `
+  -TargetPath "D:\projects\fpga-demo" `
   -ProjectName "fpga-demo" `
   -Stacks fpga-vivado-vitis
 ```
@@ -65,6 +65,6 @@ powershell -ExecutionPolicy Bypass -File .\scripts\init-project-template.ps1 `
 - 已有文件如果和新版模板不同，会进入 `.codex/upgrade-report.md`，不会自动覆盖。
 - 需要查看新版模板内容时，加 `-ExportUpgradeTemplates`。
 - `.codex/init.generated.md` 和 `.claude/init.generated.md` 已存在时默认跳过，避免覆盖旧项目初始化记录。
-- 问答表复制到 `.codex/questionnaires/项目初始化问答.md`。
+- 问答表复制到 `.codex/questionnaires/init-questionnaire.md`。
 - 技术栈模板复制到 `.codex/stacks/<stack>/`，不会自动混入全局规则。
 - 复制后需要人工或 Codex 根据项目情况把必要内容合并到 `.codex/commands.md`、`.codex/style.md` 等文件。

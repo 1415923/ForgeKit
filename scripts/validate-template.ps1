@@ -113,88 +113,71 @@ function Test-GovernanceFiles {
 }
 
 function Get-CodebaseMapPath {
-    $name = ([char]0x4EE3).ToString() + ([char]0x7801).ToString() + ([char]0x5E93).ToString() + ([char]0x5730).ToString() + ([char]0x56FE).ToString()
-    return "project-template\docs\$name.md"
+    return "project-template\docs\codebase-map.md"
 }
 
 function Get-CodebaseMapRef {
-    $name = ([char]0x4EE3).ToString() + ([char]0x7801).ToString() + ([char]0x5E93).ToString() + ([char]0x5730).ToString() + ([char]0x56FE).ToString()
-    return "docs/$name.md"
+    return "docs/codebase-map.md"
 }
 
 function Get-LocalToolchainPath {
-    $name = ([char]0x672C).ToString() + ([char]0x5730).ToString() + ([char]0x5DE5).ToString() + ([char]0x5177).ToString() + ([char]0x94FE).ToString() + ([char]0x68C0).ToString() + ([char]0x67E5).ToString()
-    return "project-template\docs\$name.md"
+    return "project-template\docs\local-toolchain.md"
 }
 
 function Get-LocalToolchainRef {
-    $name = ([char]0x672C).ToString() + ([char]0x5730).ToString() + ([char]0x5DE5).ToString() + ([char]0x5177).ToString() + ([char]0x94FE).ToString() + ([char]0x68C0).ToString() + ([char]0x67E5).ToString()
-    return "docs/$name.md"
+    return "docs/local-toolchain.md"
 }
 
 function Get-ExplorationReportPath {
-    $name = ([char]0x63A2).ToString() + ([char]0x7D22).ToString() + ([char]0x62A5).ToString() + ([char]0x544A).ToString()
-    return "project-template\docs\$name.md"
+    return "project-template\docs\exploration-report.md"
 }
 
 function Get-ImplementationPlanPath {
-    $name = ([char]0x5B9E).ToString() + ([char]0x65BD).ToString() + ([char]0x8BA1).ToString() + ([char]0x5212).ToString()
-    return "project-template\docs\$name.md"
+    return "project-template\docs\implementation-plan.md"
 }
 
 function Get-ExplorationReportRef {
-    $name = ([char]0x63A2).ToString() + ([char]0x7D22).ToString() + ([char]0x62A5).ToString() + ([char]0x544A).ToString()
-    return "docs/$name.md"
+    return "docs/exploration-report.md"
 }
 
 function Get-ImplementationPlanRef {
-    $name = ([char]0x5B9E).ToString() + ([char]0x65BD).ToString() + ([char]0x8BA1).ToString() + ([char]0x5212).ToString()
-    return "docs/$name.md"
+    return "docs/implementation-plan.md"
 }
 
 function Get-SuitabilityPath {
-    $name = ([char]0x9879).ToString() + ([char]0x76EE).ToString() + ([char]0x9002).ToString() + ([char]0x7528).ToString() + ([char]0x6027).ToString() + ([char]0x8BC4).ToString() + ([char]0x4F30).ToString()
-    return "project-template\docs\$name.md"
+    return "project-template\docs\project-suitability.md"
 }
 
 function Get-SuitabilityRef {
-    $name = ([char]0x9879).ToString() + ([char]0x76EE).ToString() + ([char]0x9002).ToString() + ([char]0x7528).ToString() + ([char]0x6027).ToString() + ([char]0x8BC4).ToString() + ([char]0x4F30).ToString()
-    return "docs/$name.md"
+    return "docs/project-suitability.md"
 }
 
 function Get-TrialRecordPath {
-    $name = ([char]0x771F).ToString() + ([char]0x5B9E).ToString() + ([char]0x9879).ToString() + ([char]0x76EE).ToString() + ([char]0x8BD5).ToString() + ([char]0x7528).ToString() + ([char]0x8BB0).ToString() + ([char]0x5F55).ToString()
-    return "project-template\docs\$name.md"
+    return "project-template\docs\project-trial-record.md"
 }
 
 function Get-TrialRecordRef {
-    $name = ([char]0x771F).ToString() + ([char]0x5B9E).ToString() + ([char]0x9879).ToString() + ([char]0x76EE).ToString() + ([char]0x8BD5).ToString() + ([char]0x7528).ToString() + ([char]0x8BB0).ToString() + ([char]0x5F55).ToString()
-    return "docs/$name.md"
+    return "docs/project-trial-record.md"
 }
 
 function Get-CodexNextWorkOrderPath {
-    $name = "Codex" + ([char]0x4E0B).ToString() + ([char]0x4E00).ToString() + ([char]0x6B65).ToString() + ([char]0x5DE5).ToString() + ([char]0x4F5C).ToString() + ([char]0x5355).ToString()
-    return "project-template\docs\$name.md"
+    return "project-template\docs\codex-next-work-order.md"
 }
 
 function Get-CodexNextWorkOrderRef {
-    $name = "Codex" + ([char]0x4E0B).ToString() + ([char]0x4E00).ToString() + ([char]0x6B65).ToString() + ([char]0x5DE5).ToString() + ([char]0x4F5C).ToString() + ([char]0x5355).ToString()
-    return "docs/$name.md"
+    return "docs/codex-next-work-order.md"
 }
 
 function Get-VersionRoadmapPath {
-    $name = ([char]0x7248).ToString() + ([char]0x672C).ToString() + ([char]0x8DEF).ToString() + ([char]0x7EBF).ToString() + ([char]0x56FE).ToString()
-    return "project-template\docs\$name.md"
+    return "project-template\docs\version-roadmap.md"
 }
 
 function Get-ProjectTaskBoardPath {
-    $name = ([char]0x9879).ToString() + ([char]0x76EE).ToString() + ([char]0x4EFB).ToString() + ([char]0x52A1).ToString() + ([char]0x770B).ToString() + ([char]0x677F).ToString()
-    return "project-template\docs\$name.md"
+    return "project-template\docs\task-board.md"
 }
 
 function Get-ProjectPlanPath {
-    $name = ([char]0x9879).ToString() + ([char]0x76EE).ToString() + ([char]0x5F00).ToString() + ([char]0x53D1).ToString() + ([char]0x65B9).ToString() + ([char]0x6848).ToString()
-    return "project-template\docs\$name.md"
+    return "project-template\docs\project-plan.md"
 }
 
 function Get-RequiredStacks {
@@ -314,7 +297,7 @@ function Test-LargeChangeProtocol {
     Test-RequiredPattern "project-template\.agents\skills\project-init\SKILL.md" "large-change protocol" "Project init large-change gate"
     Test-RequiredPattern "project-template\.agents\skills\code-review\SKILL.md" "large-change protocol" "Code review large-change gate"
     Test-RequiredPattern "project-template\.agents\skills\release-check\SKILL.md" "large-change protocol" "Release check large-change gate"
-    Test-RequiredPattern "使用说明.html" "data-prompt=""large""" "HTML large-change tab"
+    Test-RequiredPattern "usage.html" "data-prompt=""large""" "HTML large-change tab"
 
     $largeChangeFiles = @(
         "project-template\governance\large-change-execution.md",
@@ -371,8 +354,8 @@ function Test-AgentSuitability {
     Test-RequiredPattern "project-template\.agents\skills\project-suitability\SKILL.md" "Suitable, Conditional, or Custom" "Project suitability skill outcome"
     Test-RequiredPattern "project-template\AGENTS.md" "project-suitability" "AGENTS suitability skill routing"
     Test-RequiredPattern "project-template\CLAUDE.md" "project-suitability" "CLAUDE suitability skill routing"
-    Test-RequiredPattern "使用说明.html" "suitabilityList" "HTML suitability checklist"
-    Test-RequiredPattern "使用说明.html" "适用性已确认" "HTML suitability brief"
+    Test-RequiredPattern "usage.html" "suitabilityList" "HTML suitability checklist"
+    Test-RequiredPattern "usage.html" "selectedSuitability()" "HTML suitability brief"
 }
 
 function Test-ExecutableHarness {
@@ -476,9 +459,9 @@ function Test-HarnessEntryConsistency {
     Test-RequiredPattern "README.en.md" "-Upgrade" "English README upgrade guidance"
     Test-RequiredPattern "README.en.md" "upgrade-report.md" "English README upgrade report guidance"
     Test-RequiredPattern "README.en.md" ".agents/skills/project-init/SKILL.md" "English README project-local startup skill"
-    Test-RequiredPattern "使用说明.html" "startupOutput" "HTML startup output"
-    Test-RequiredPattern "使用说明.html" ".agents/skills/project-init/SKILL.md" "HTML project-local startup skill"
-    Test-RequiredPattern "使用说明.html" "governance/agent-harness.md" "HTML harness prompt reference"
+    Test-RequiredPattern "usage.html" "startupOutput" "HTML startup output"
+    Test-RequiredPattern "usage.html" ".agents/skills/project-init/SKILL.md" "HTML project-local startup skill"
+    Test-RequiredPattern "usage.html" "governance/agent-harness.md" "HTML harness prompt reference"
 }
 
 function Test-PluginDistribution {
@@ -515,7 +498,7 @@ function Test-PluginDistribution {
     if ($codexPluginJson.name -ne "forgekit") {
         Add-Error "Unexpected Codex plugin name in root plugin.json: $($codexPluginJson.name)"
     }
-    if ($codexPluginJson.version -ne "0.13.0") {
+    if ($codexPluginJson.version -ne "0.14.0") {
         Add-Error "Unexpected Codex plugin version in root plugin.json: $($codexPluginJson.version)"
     }
     if ($codexPluginJson.skills -ne "./skills/") {
@@ -526,7 +509,7 @@ function Test-PluginDistribution {
     if ($claudePluginJson.name -ne "forgekit") {
         Add-Error "Unexpected Claude plugin name in root plugin.json: $($claudePluginJson.name)"
     }
-    if ($claudePluginJson.version -ne "0.13.0") {
+    if ($claudePluginJson.version -ne "0.14.0") {
         Add-Error "Unexpected Claude plugin version in root plugin.json: $($claudePluginJson.version)"
     }
     $claudeSkills = @($claudePluginJson.skills)

@@ -68,10 +68,10 @@
 - [ ] 检查接口、数据库、部署、测试文档是否同步。
 - [ ] 检查测试是否覆盖核心路径。
 - [ ] 检查配置、密钥、权限、安全边界。
-- [ ] 更新 `docs/技术债记录.md`。
-- [ ] 更新 `docs/质量指标记录.md`。
-- [ ] 高影响变更已更新 `docs/变更影响评估.md`。
-- [ ] 更新 `docs/架构设计.md`、`docs/版本更新记录.md`。
+- [ ] 更新 `docs/technical-debt.md`。
+- [ ] 更新 `docs/quality-metrics.md`。
+- [ ] 高影响变更已更新 `docs/change-impact.md`。
+- [ ] 更新 `docs/architecture.md`、`docs/changelog.md`。
 - [ ] 给出是否允许进入下一个大版本的结论。
 
 ## 推进闸门

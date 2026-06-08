@@ -56,7 +56,7 @@
 
 ```powershell
 powershell -ExecutionPolicy Bypass -File .\scripts\init-project-template.ps1 `
-  -TargetPath "D:\JAVA-code\demo" `
+  -TargetPath "D:\projects\demo" `
   -ProjectName "demo" `
   -Mode Standard
 ```

@@ -6,9 +6,9 @@
 
 | 产物 | 作用 |
 | --- | --- |
-| `docs/项目开发方案.md` | 定义问题、约束、落地条件、技术路线 |
-| `docs/架构设计.md` | 定义模块、数据流、接口边界、风险 |
-| `docs/技术选型.md` | 定义技术栈选择和替代方案 |
+| `docs/project-plan.md` | 定义问题、约束、落地条件、技术路线 |
+| `docs/architecture.md` | 定义模块、数据流、接口边界、风险 |
+| `docs/tech-decisions.md` | 定义技术栈选择和替代方案 |
 | `docs/rfc/` | 记录决策前的方案讨论 |
 | `docs/adr/` | 记录重要架构决策 |
 
@@ -27,16 +27,16 @@
 
 | arc42 关注点 | 本模板落点 |
 | --- | --- |
-| Introduction and Goals | `docs/项目开发方案.md` |
-| Constraints | `docs/项目开发方案.md`、`.codex/scope.md` |
-| Context and Scope | `docs/架构设计.md` |
-| Solution Strategy | `docs/项目开发方案.md` |
-| Building Block View | `docs/架构设计.md` |
-| Runtime View | `docs/架构设计.md` |
-| Deployment View | `docs/部署文档.md` |
+| Introduction and Goals | `docs/project-plan.md` |
+| Constraints | `docs/project-plan.md`、`.codex/scope.md` |
+| Context and Scope | `docs/architecture.md` |
+| Solution Strategy | `docs/project-plan.md` |
+| Building Block View | `docs/architecture.md` |
+| Runtime View | `docs/architecture.md` |
+| Deployment View | `docs/deployment.md` |
 | Architecture Decisions | `docs/adr/` |
 | Quality Requirements | `governance/quality-metrics.md` |
-| Risks and Technical Debt | `docs/项目开发方案.md`、`docs/版本路线图.md` |
+| Risks and Technical Debt | `docs/project-plan.md`、`docs/version-roadmap.md` |
 
 ## 架构 Review 问题
 

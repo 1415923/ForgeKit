@@ -8,7 +8,7 @@
 # 待补充
 ```
 
-环境地址、依赖服务、配置来源和权限边界记录在 `docs/环境矩阵.md`。
+环境地址、依赖服务、配置来源和权限边界记录在 `docs/environment-matrix.md`。
 
 ## 安装依赖
 
@@ -123,4 +123,4 @@ powershell -ExecutionPolicy Bypass -File .\scripts\install-hooks.ps1 -Uninstall
 ```
 
 部署命令默认需要用户确认后再执行。
-发布流水线、制品、验证和回滚步骤记录在 `docs/发布流水线.md`。
+发布流水线、制品、验证和回滚步骤记录在 `docs/release-pipeline.md`。

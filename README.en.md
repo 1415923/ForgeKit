@@ -32,7 +32,7 @@ Modes:
 | `Standard` | Normal apps, APIs, internal systems, data projects |
 | `Enterprise` | Team delivery, production, high-risk or inherited projects |
 
-If unsure, use `Standard`. Do not rush stack selection here. New projects should choose a stack after discovery; existing projects should infer the stack from real files first.
+If unsure, use `Standard`. `Mode` is written to initialization metadata for later AI filling priority and governance-strength discussion; v0.14.0 does not crop copied files by mode. Do not rush stack selection here. New projects should choose a stack after discovery; existing projects should infer the stack from real files first.
 
 ### 2. Start your AI tool from the generated project
 
@@ -78,8 +78,8 @@ After generation, Codex starts from `AGENTS.md`; Claude Code starts from `CLAUDE
 
 Key generated files:
 
-- `docs/代码库地图.md`: code entry points, module map, and local validation commands.
-- `docs/本地工具链检查.md`: local lint, test, build, LSP, and toolchain capability.
+- `docs/codebase-map.md`: code entry points, module map, and local validation commands.
+- `docs/local-toolchain.md`: local lint, test, build, LSP, and toolchain capability.
 - `.codex/commands.md`: project-specific commands.
 - `.agents/skills/`: self-contained project skills.
 
@@ -207,6 +207,7 @@ ForgeKit can coexist with ECC: ECC enhances the AI tool; ForgeKit constrains the
 
 | Version | User-facing change |
 | --- | --- |
+| `0.14.0` | Release-usability fixes: English template file names, mode semantics, upgrade misuse guard, cross-platform smoke test, and generic template path isolation. |
 | `0.13.0` | Project suitability, large-change planning, document-sync checks, optional Git hooks, upgrade reports, and template diff support. |
 | `0.12.x` | Unified root-level plugin distribution for Codex and Claude Code, with both `AGENTS.md` and `CLAUDE.md` generated. |
 | `0.11.x` | Improved Claude Code entry and shared project facts across tools. |

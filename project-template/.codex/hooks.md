@@ -21,7 +21,7 @@
 | 提交前 | 运行模板自检或项目 lint | 防止明显漂移 | 耗时、误阻断 |
 | 会话开始 | 运行 `scripts/run-harness-check.ps1` | 提前发现入口文件缺失 | 小项目可能觉得多余 |
 | 初始化后 | 运行 `scripts/detect-local-toolchain.ps1` | 辅助填写本地工具链检查 | 结果可能不完整 |
-| 大任务开始前 | 检查 `docs/探索报告.md` 和 `docs/实施计划.md` 是否存在 | 阻止直接大改 | 小任务误判 |
+| 大任务开始前 | 检查 `docs/exploration-report.md` 和 `docs/implementation-plan.md` 是否存在 | 阻止直接大改 | 小任务误判 |
 | 发布前 | 检查版本记录、任务状态、测试记录 | 强化 release gate | 规则过严 |
 | 安全敏感变更 | 提醒安全审查和依赖审查 | 减少遗漏 | 需要准确识别 |
 | 文档修改后 / 提交前 | 运行 `scripts/check-doc-sync.ps1` 或 `scripts/check-doc-sync.sh` | 提醒相关文档、过期描述和版本记录原因 | 可能有噪音，默认只提示 |

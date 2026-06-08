@@ -1,6 +1,6 @@
 # 架构设计
 
-架构设计应服务于 `docs/项目开发方案.md` 和 `docs/版本路线图.md`，不要只围绕当前小功能临时堆结构。
+架构设计应服务于 `docs/project-plan.md` 和 `docs/version-roadmap.md`，不要只围绕当前小功能临时堆结构。
 
 ## 架构目标
 

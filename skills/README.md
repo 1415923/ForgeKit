@@ -52,7 +52,7 @@ skill-name/
 - `scripts/detect-local-toolchain.ps1`：检测本地工具链和 LSP 候选。
 - `scripts/run-harness-check.ps1`：检查 AGENTS、治理入口、commands 和 hooks 是否完整。
 
-初始化后如果项目方向仍不清楚，先读取 `docs/Codex下一步工作单.md`，继续确认 MVP、落地环境、验证方式和依赖裁剪。
+初始化后如果项目方向仍不清楚，先读取 `docs/codex-next-work-order.md`，继续确认 MVP、落地环境、验证方式和依赖裁剪。
 
 ForgeKit v0.12.0 起通过根级统一 plugin 分发稳定 skills 和模板资产：`.codex-plugin/`、`.claude-plugin/` 和共享 `skills/` 位于仓库根。plugin 只是分发入口；引入第三方或团队 plugin 前仍需审查权限、网络、凭据、写入范围和上下文污染风险。
 

@@ -58,15 +58,15 @@
 新项目：
 
 1. `governance/sdlc.md`
-2. `docs/项目开发方案.md`
-3. `docs/版本路线图.md`
+2. `docs/project-plan.md`
+3. `docs/version-roadmap.md`
 4. `governance/architecture-governance.md`
 5. 相关 `templates/<stack>/`
 
 接手既有项目：
 
 1. `.codex/handover.md`
-2. `docs/既有项目接手审计.md`
-3. `docs/缺陷修复计划.md`
-4. `docs/版本路线图.md`
+2. `docs/handover-audit.md`
+3. `docs/defect-fix-plan.md`
+4. `docs/version-roadmap.md`
 5. `governance/version-governance.md`

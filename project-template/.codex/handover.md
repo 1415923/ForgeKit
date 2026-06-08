@@ -48,4 +48,4 @@
 
 版本规划和版本推进闸门仍然适用。
 
-接手项目中的高影响变更还必须参考 `governance/change-management.md`，并填写 `docs/变更影响评估.md`。
+接手项目中的高影响变更还必须参考 `governance/change-management.md`，并填写 `docs/change-impact.md`。

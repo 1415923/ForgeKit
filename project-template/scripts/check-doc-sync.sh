@@ -65,14 +65,14 @@ test_stale_phrases() {
 }
 
 test_version_changed_reasons() {
-  local version_doc="$repo_root/docs/版本更新记录.md"
+  local version_doc="$repo_root/docs/changelog.md"
   [[ -f "$version_doc" ]] || return 0
 
   awk '
     /^### Changed[[:space:]]*$/ { inside=1; next }
     /^### / && inside { inside=0 }
     inside && /^[[:space:]]*-[[:space:]]+/ {
-      if ($0 !~ /原因|Reason|Because|because/) {
+      if ($0 !~ /Reason:|Because:|because:/) {
         print FNR
       }
     }
@@ -87,21 +87,21 @@ test_changed_docs_need_version_record() {
   paths="$(changed_paths)"
   [[ -n "$paths" ]] || return 0
 
-  if ! printf '%s\n' "$paths" | grep -Fxq "docs/版本更新记录.md"; then
+  if ! printf '%s\n' "$paths" | grep -Fxq "docs/changelog.md"; then
     add_warning "Docs or governance changed, but the version update record is not changed. Confirm whether it needs an entry with reason."
   fi
 
-  if printf '%s\n' "$paths" | grep -Eq '缺陷|风险|事故|安全|依赖|部署|环境|接口|数据库|实施计划|探索报告'; then
+  if printf '%s\n' "$paths" | grep -Eq 'defect|risk|incident|security|dependency|deployment|environment|api|database|implementation-plan|exploration-report|change-impact'; then
     add_warning "Risk-sensitive docs changed. Check related docs such as risk register, change impact, testing, release pipeline, and version update record."
   fi
 }
 
-path_required "docs/版本更新记录.md"
-path_required "docs/版本路线图.md"
-path_required "docs/项目任务看板.md"
-path_required "docs/测试文档.md"
-path_required "docs/风险登记册.md"
-path_required "docs/变更影响评估.md"
+path_required "docs/changelog.md"
+path_required "docs/version-roadmap.md"
+path_required "docs/task-board.md"
+path_required "docs/testing.md"
+path_required "docs/risk-register.md"
+path_required "docs/change-impact.md"
 
 test_stale_phrases
 

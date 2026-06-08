@@ -22,8 +22,8 @@
 - 修改 TypeScript 类型：运行 typecheck、lint、test。
 - 启动 dev server 前确认，因为它是长期运行服务。
 
-本机环境参考：
+环境参考：
 
-- Node.js：`D:\nodejs\node.exe`
-- npm：`D:\nodejs\npm.ps1`
-- pnpm：`C:\Users\32390\AppData\Roaming\npm\pnpm.ps1`
+- Node.js：使用项目声明的 Node 版本、`.nvmrc`、`.node-version` 或 `$NODE_HOME`。
+- npm / pnpm：优先使用项目 lockfile 和 package manager 字段。
+- 本机私有安装路径应写入 `user-rules/` 或项目私有文档，不写入通用模板。
