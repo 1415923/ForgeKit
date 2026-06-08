@@ -11,6 +11,8 @@ description: Review code changes for bugs, regressions, security risks, compatib
 2. Inspect `git status` and `git diff` unless the user provided a specific diff.
 3. If changes touch API, database, configuration, deployment, permissions, security, external services, hardware interfaces, Critical ownership areas, or Unknown ownership areas, check whether change impact assessment and owner review exist.
 4. If changes are large, cross-module, migration, refactor, or high-risk work, check whether the large-change protocol was followed:
+   - `governance/ai-engineering-loop.md`
+   - required `changes/<id>/` artifacts for the declared risk level
    - `governance/large-change-execution.md`
    - exploration report in `docs/`
    - implementation plan in `docs/`
@@ -38,6 +40,7 @@ description: Review code changes for bugs, regressions, security risks, compatib
 - Code ownership and required reviewer coverage for Critical or Unknown areas.
 - Task, Feature, Bug, and version state consistency.
 - Large-change exploration, implementation plan, staged validation, and session boundaries.
+- Medium/high risk change artifacts: proposal, tasks, verification, review, and design/ship when high risk.
 - Async, concurrency, lifecycle, resource cleanup.
 - Tests that should exist for changed behavior.
 - Repeated defects that should trigger defect review.

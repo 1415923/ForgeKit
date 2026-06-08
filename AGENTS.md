@@ -6,6 +6,7 @@ This repository maintains a reusable Codex CLI workflow template.
 
 - Read `README.md` for the user-facing workflow.
 - Read `project-template/AGENTS.md` when changing the generated project template.
+- Read `project-template/governance/ai-engineering-loop.md` when changing risk-based workflow, change artifacts, verification, review, ship, or retro behavior.
 - Read `project-template/governance/agent-harness.md` when changing context strategy, AGENTS routing, codebase-map behavior, or Codex startup flow.
 - Read `project-template/docs/codebase-map.md` when changing generated project onboarding or startup guidance.
 - Read only the governance file related to the task. Do not load all governance docs by default.

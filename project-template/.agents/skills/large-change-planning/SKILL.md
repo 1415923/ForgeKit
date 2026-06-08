@@ -23,6 +23,7 @@ Use this skill before coding when any condition is true:
    - affected users or workflows
    - expected version or milestone
    - safety constraints and actions that require user confirmation
+   - risk level from `governance/ai-engineering-loop.md`
 2. Explore before editing:
    - read `AGENTS.md` or `CLAUDE.md`
    - read the codebase map doc
@@ -41,11 +42,15 @@ Use this skill before coding when any condition is true:
    - rollback or recovery notes
    - user decisions still needed
    - session boundary for each stage
-5. Ask for confirmation before broad implementation:
+5. For medium or high risk work, prepare the required `changes/<id>/` artifacts:
+   - medium: proposal, tasks, verification, review
+   - high: proposal, design, tasks, verification, review, ship
+   - retro is recommended only for high-risk, major, surprising, or user-requested changes
+6. Ask for confirmation before broad implementation:
    - summarize planned edits and validation
    - name unresolved risks
    - wait for explicit approval when the task involves broad code changes, dependency install, migrations, external services, push, tag, deploy, or long-running services
-6. Implement one stage at a time after confirmation:
+7. Implement one stage at a time after confirmation:
    - stay inside the approved scope
    - update docs and task state as work proceeds
    - run agreed validation or record why it could not run

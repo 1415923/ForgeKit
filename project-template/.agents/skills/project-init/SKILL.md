@@ -8,6 +8,8 @@ description: Initialize or repair a project's Codex workflow, discover product r
 ## Workflow
 
 1. Read `AGENTS.md` first if present, then read the governance overview, `.codex/init.generated.md`, `.codex/questionnaires/`, existing `.codex/`, existing `docs/`, and project root files.
+   - If `governance/ai-engineering-loop.md` exists, use it to classify later implementation work as low, medium, or high risk before coding starts.
+   - Do not force a `changes/<id>/` folder for low-risk work. Medium-risk work needs proposal, tasks, verification, and review. High-risk work also needs design and ship notes.
 2. Identify whether this is a new project idea, an existing project handover, or a feature/change request inside an existing project.
 3. Inspect local evidence before asking stack questions:
    - For existing projects, scan README files, usage docs, setup docs, test docs, deployment docs, build files, dependency manifests, scripts, tests, source roots, and config files to infer the current stack and constraints.
@@ -73,6 +75,7 @@ description: Initialize or repair a project's Codex workflow, discover product r
    - When the user asks to fill ForgeKit docs from existing project documents, use a document backfill pass: list candidate source docs, process one source document at a time, update target docs immediately, record source paths for imported facts when practical, and only then move to the next source document.
    - Do not read all old documents into one large summary before writing. Preserve detailed test plans, usage steps, setup assumptions, deployment notes, known issues, and acceptance evidence.
 12. For large, cross-module, migration, refactor, or high-risk work, require the large-change protocol before implementation:
+   - read `governance/ai-engineering-loop.md`
    - read `governance/large-change-execution.md`
    - create or update the exploration report in `docs/`
    - create or update the implementation plan in `docs/`

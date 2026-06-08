@@ -13,6 +13,7 @@
 - 版本推进必须参考 `.codex/version-gates.md` 和 `docs/version-roadmap.md`。
 - 接手既有项目必须先参考 `.codex/handover.md`，先审计和修复明确问题，再规划后续开发。
 - 复杂任务优先拆分为计划、实现、验证、审查四个阶段。
+- 中高风险任务必须参考 `governance/ai-engineering-loop.md`，并按 `changes/<change-id>/` 的风险工件推进。
 - commands、hooks、plugin、MCP、CI、issue/PR 集成必须先参考 `governance/team-agent-rollout.md`。
 
 ## AI Coding 四条基本规则
@@ -75,6 +76,13 @@
 - 启用或修改 MCP、agent、skill、hook、插件。
 - 启用会联网、读取凭据、写外部系统或自动阻断流程的 command / hook / MCP。
 - 跳过 review/refactor 中版本，直接推进下一个大版本。
+
+## 风险分级工作流
+
+- low：单文件、小文案、局部测试或无公共行为影响的修复；可轻流程推进，但仍需说明验证结果。
+- medium：多文件、小功能、脚本、模板或用户可见流程变化；先准备 `proposal.md`、`tasks.md`、`verification.md`、`review.md`。
+- high：架构、迁移、安全、权限、部署、跨平台脚本或兼容性风险；先准备 `proposal.md`、`design.md`、`tasks.md`、`verification.md`、`review.md`、`ship.md`。
+- `retro.md` 只在高风险、重大变更或用户要求时推荐，不强制所有变更都有。
 
 ## 可选增强规则
 

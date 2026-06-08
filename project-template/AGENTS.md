@@ -18,9 +18,10 @@ When a task names a ForgeKit skill, read the project-local `.agents/skills/<skil
 6. Read only the selected stack folder under `.codex/stacks/`.
 7. Read `governance/agent-harness.md` when the task involves context strategy, large code search, AGENTS maintenance, or unclear entry points.
 8. Read `governance/large-change-execution.md` for large, cross-module, high-risk, migration, or refactor work.
-9. Read `governance/team-agent-rollout.md` only when the task involves commands, hooks, plugins, MCP, CI, issue trackers, or team rollout.
-10. Read `governance/agent-suitability.md` for project initialization, existing project handover, or when the project may not fit an AI agent workflow.
-11. Read `.codex/automation-decision.md` before turning a repeated workflow into a skill, command, hook, script, plugin, or MCP.
+9. Read `governance/ai-engineering-loop.md` when risk level, change artifacts, verification, review, ship, or retro expectations are unclear.
+10. Read `governance/team-agent-rollout.md` only when the task involves commands, hooks, plugins, MCP, CI, issue trackers, or team rollout.
+11. Read `governance/agent-suitability.md` for project initialization, existing project handover, or when the project may not fit an AI agent workflow.
+12. Read `.codex/automation-decision.md` before turning a repeated workflow into a skill, command, hook, script, plugin, or MCP.
 
 ## Task Routing
 
@@ -33,7 +34,8 @@ When a task names a ForgeKit skill, read the project-local `.agents/skills/<skil
 | Existing project handover | existing README/usage/setup/test/deploy docs first, then `docs/codebase-map.md`, `.codex/handover.md`, `docs/handover-audit.md` | `handover-review` |
 | Backfill ForgeKit docs from existing docs | source docs one at a time, then target files under `docs/` | `document-backfill` |
 | Feature implementation | `.codex/rules.md`, `.codex/scope.md`, `.codex/commands.md`, relevant `.codex/stacks/` only | relevant stack rules |
-| Large or cross-module change | `governance/large-change-execution.md`, `docs/exploration-report.md`, `docs/implementation-plan.md`, relevant stack rules | `large-change-planning` |
+| Medium or high risk change | `governance/ai-engineering-loop.md`, `changes/README.md`, relevant `changes/<id>/` files | relevant existing skill |
+| Large or cross-module change | `governance/large-change-execution.md`, `governance/ai-engineering-loop.md`, `docs/exploration-report.md`, `docs/implementation-plan.md`, relevant stack rules | `large-change-planning` |
 | Commands, hooks, plugin, MCP, CI integration | `governance/team-agent-rollout.md`, `.codex/commands-catalog.md`, `.codex/hooks.md`, `.codex/config.example.toml` | release-check or security-review |
 | Automation boundary decision | `.codex/automation-decision.md`, `governance/team-agent-rollout.md` | relevant existing skill |
 | Document synchronization check | `.codex/hooks.md`, `.codex/commands.md`, `docs/changelog.md`, related docs | `release-check` |
@@ -56,6 +58,7 @@ When a task names a ForgeKit skill, read the project-local `.agents/skills/<skil
 - When backfilling `docs/` from existing project documents, process one source document at a time and update target docs before reading the next source document.
 - After manual doc fixes or release-note changes, optionally run `scripts/check-doc-sync.ps1` to look for related docs, stale descriptions, and Changed entries without reasons.
 - For implementation tasks, apply `.codex/rules.md`: think before coding, keep changes simple, edit surgically, and verify against explicit goals.
+- Classify task risk before broad edits: low keeps a light flow; medium requires `proposal.md`, `tasks.md`, `verification.md`, and `review.md`; high also requires `design.md` and `ship.md`.
 - For large or cross-module changes, search first, summarize findings, then propose a plan before editing.
 - For large changes, create or update `docs/exploration-report.md` and `docs/implementation-plan.md` before broad implementation.
 - Do not enable hooks, plugins, MCP, issue tracker writes, or CI changes without explicit user confirmation.
@@ -71,6 +74,7 @@ When a task names a ForgeKit skill, read the project-local `.agents/skills/<skil
 ## Gates
 
 - Do not start broad coding without a first-pass project plan and version scope.
+- Do not start medium or high risk implementation until the required `changes/<id>/` artifacts exist and the plan is confirmed.
 - For new projects, product and architecture discussion is a required phase. Do not treat a few engineering parameter answers as approval to implement.
 - Before business code, dependency install, Git init, commit, push, deployment, or other external action, show an execution summary and wait for explicit user confirmation.
 - Do not start large cross-module implementation before exploration and implementation plan are complete.

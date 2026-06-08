@@ -96,6 +96,45 @@ test_changed_docs_need_version_record() {
   fi
 }
 
+test_change_artifacts() {
+  local changes_root="$repo_root/changes"
+  [[ -d "$changes_root" ]] || return 0
+
+  local dir proposal risk required name relative
+  for dir in "$changes_root"/*; do
+    [[ -d "$dir" ]] || continue
+    [[ "$(basename "$dir")" != "_template" ]] || continue
+    relative="${dir#$repo_root/}"
+    proposal="$dir/proposal.md"
+    if [[ ! -f "$proposal" ]]; then
+      add_warning "Change is missing proposal.md: $relative"
+      continue
+    fi
+
+    risk="$(awk -F': *' 'tolower($1) == "risk" { print tolower($2); exit }' "$proposal")"
+    if [[ -z "$risk" ]]; then
+      add_warning "Change proposal is missing Risk: metadata: $relative/proposal.md"
+      continue
+    fi
+
+    required=""
+    if [[ "$risk" == "medium" ]]; then
+      required="proposal.md tasks.md verification.md review.md"
+    elif [[ "$risk" == "high" ]]; then
+      required="proposal.md design.md tasks.md verification.md review.md ship.md"
+    elif [[ "$risk" != "low" ]]; then
+      add_warning "Change proposal has unknown Risk value '$risk': $relative/proposal.md"
+      continue
+    fi
+
+    for name in $required; do
+      if [[ ! -f "$dir/$name" ]]; then
+        add_warning "Change with Risk: $risk is missing required artifact: $relative/$name"
+      fi
+    done
+  done
+}
+
 path_required "docs/changelog.md"
 path_required "docs/version-roadmap.md"
 path_required "docs/task-board.md"
@@ -111,6 +150,7 @@ while IFS= read -r warning; do
 done < <(test_version_changed_reasons)
 
 test_changed_docs_need_version_record
+test_change_artifacts
 
 if [[ ${#warnings[@]} -eq 0 ]]; then
   echo "[ok] Document sync check passed"

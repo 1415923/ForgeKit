@@ -2,6 +2,8 @@
 
 把本目录内容复制到具体项目根目录后使用。
 
+ForgeKit 在生成项目内提供轻量 AI Engineering Loop：澄清目标、判断风险、准备必要 change 工件、实施、验证、审查、发布记录和复盘。低风险改动保持轻流程；中高风险改动使用 `changes/<id>/` 留下可审查工件。
+
 ## 初始化顺序
 
 1. Codex 读取 `AGENTS.md`；Claude Code 读取 `CLAUDE.md`，确认任务路由和禁止动作。
@@ -10,23 +12,25 @@
 4. 读取 `docs/codex-next-work-order.md`，把初始化摘要推进为方案访谈和任务拆分。
 5. 可选运行 `scripts/detect-local-toolchain.ps1` 和 `scripts/run-harness-check.ps1`，只记录事实，不自动安装或改配置。
 6. 读取 `governance/overview.md`，判断项目入口。
-7. 填写 `.codex/project.md`，明确项目基本信息。
-8. 填写 `.codex/scope.md`，明确当前版本范围。
-9. 填写 `.codex/commands.md`，记录本项目常用命令。
-10. 如果已有问答内容，优先使用 `project-bootstrap-fill` 根据 `.codex/questionnaires/init-questionnaire.md` 补齐第一版文档。
-11. 新项目填写 `docs/project-plan.md` 和 `docs/version-roadmap.md`。
-12. 接手项目填写 `docs/handover-audit.md` 和 `docs/defect-fix-plan.md`。
-13. 重要方案讨论写入 `docs/rfc/`，重要架构决策写入 `docs/adr/`。
-14. 需求、RFC、ADR、任务、测试、缺陷关系写入 `docs/traceability.md`。
-15. 高风险写入 `docs/risk-register.md`。
-16. 高影响变更写入 `docs/change-impact.md`。
-17. 严重事故或重复缺陷写入 `docs/incident-review.md` 或 `docs/defect-review.md`。
-18. 安全敏感变更写入 `docs/threat-model.md`，依赖变更写入 `docs/dependency-review.md`。
-19. 环境和发布链路写入 `docs/environment-matrix.md` 和 `docs/release-pipeline.md`。
-20. 模块负责人和评审责任写入 `docs/code-ownership.md`。
-21. Epic、Feature、Task、Bug 写入 `docs/task-board.md`。
-22. 技术债写入 `docs/technical-debt.md`，版本质量写入 `docs/quality-metrics.md`。
-23. 开始编码前，确认 Definition of Ready；完成时确认 Definition of Done。
+7. 读取 `governance/ai-engineering-loop.md`，判断当前任务是 low、medium 还是 high risk。
+8. 中风险变更准备 `changes/<id>/proposal.md`、`tasks.md`、`verification.md`、`review.md`；高风险变更再补 `design.md` 和 `ship.md`。
+9. 填写 `.codex/project.md`，明确项目基本信息。
+10. 填写 `.codex/scope.md`，明确当前版本范围。
+11. 填写 `.codex/commands.md`，记录本项目常用命令。
+12. 如果已有问答内容，优先使用 `project-bootstrap-fill` 根据 `.codex/questionnaires/init-questionnaire.md` 补齐第一版文档。
+13. 新项目填写 `docs/project-plan.md` 和 `docs/version-roadmap.md`。
+14. 接手项目填写 `docs/handover-audit.md` 和 `docs/defect-fix-plan.md`。
+15. 重要方案讨论写入 `docs/rfc/`，重要架构决策写入 `docs/adr/`。
+16. 需求、RFC、ADR、任务、测试、缺陷关系写入 `docs/traceability.md`。
+17. 高风险写入 `docs/risk-register.md`。
+18. 高影响变更写入 `docs/change-impact.md`。
+19. 严重事故或重复缺陷写入 `docs/incident-review.md` 或 `docs/defect-review.md`。
+20. 安全敏感变更写入 `docs/threat-model.md`，依赖变更写入 `docs/dependency-review.md`。
+21. 环境和发布链路写入 `docs/environment-matrix.md` 和 `docs/release-pipeline.md`。
+22. 模块负责人和评审责任写入 `docs/code-ownership.md`。
+23. Epic、Feature、Task、Bug 写入 `docs/task-board.md`。
+24. 技术债写入 `docs/technical-debt.md`，版本质量写入 `docs/quality-metrics.md`。
+25. 开始编码前，确认 Definition of Ready；完成时确认 Definition of Done。
 
 ## 升级兼容
 
@@ -52,6 +56,7 @@
 - `docs/codebase-map.md`：代码搜索起点，记录模块、入口文件、常用关键词和局部验证命令。
 - `docs/local-toolchain.md`：记录各技术栈 LSP、lint、test、build 和局部验证能力。
 - `governance/agent-harness.md`：说明 AGENTS 分层、agentic search、停止编码条件和输出要求。
+- `governance/ai-engineering-loop.md`：说明 low / medium / high 风险分级、change 工件和交付闭环。
 - `governance/large-change-execution.md`：说明大任务探索、计划、分会话执行和 review 闸门。
 - `governance/team-agent-rollout.md`：说明 commands、hooks、plugin、MCP、CI 和团队推广的启用顺序。
 - `governance/agent-suitability.md`：说明项目是否适合直接套用 Codex agent 工作流。
@@ -60,6 +65,7 @@
 - `docs/codex-next-work-order.md`：初始化后继续访谈、确认 MVP、落地条件和验证方式。
 - `.codex/commands-catalog.md`、`.codex/hooks.md`：可选命令和 hook 候选，默认不自动启用。
 - `.codex/automation-decision.md`：判断重复流程应该做成 skill、command、hook、script、plugin、MCP 还是保留文档。
+- `changes/_template/`：proposal、design、tasks、verification、review、ship、retro 模板。
 - `scripts/detect-local-toolchain.ps1`、`scripts/run-harness-check.ps1`、`scripts/check-doc-sync.ps1`、`scripts/check-doc-sync.sh`：只读检测脚本，用于把 harness 从文档推进到可执行检查。
 - `scripts/install-hooks.ps1`、`scripts/install-hooks.sh`：opt-in 安装、查看、卸载 Git hook，不默认启用。
 

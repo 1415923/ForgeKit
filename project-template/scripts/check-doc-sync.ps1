@@ -175,6 +175,46 @@ function Test-ChangedDocsNeedVersionRecord {
     }
 }
 
+function Test-ChangeArtifacts {
+    $changesRoot = Join-Path $repoRoot "changes"
+    if (-not (Test-Path -LiteralPath $changesRoot)) {
+        return
+    }
+
+    $changeDirs = Get-ChildItem -LiteralPath $changesRoot -Directory | Where-Object { $_.Name -ne "_template" }
+    foreach ($dir in $changeDirs) {
+        $relativeDir = [System.IO.Path]::GetRelativePath($repoRoot, $dir.FullName)
+        $proposal = Join-Path $dir.FullName "proposal.md"
+        if (-not (Test-Path -LiteralPath $proposal)) {
+            Add-Warning "Change is missing proposal.md: $relativeDir"
+            continue
+        }
+
+        $riskLine = Get-Content -LiteralPath $proposal | Where-Object { $_ -match "^Risk:\s*(\S+)" } | Select-Object -First 1
+        if (-not $riskLine) {
+            Add-Warning "Change proposal is missing Risk: metadata: $relativeDir/proposal.md"
+            continue
+        }
+
+        $risk = ([regex]::Match($riskLine, "^Risk:\s*(\S+)").Groups[1].Value).ToLowerInvariant()
+        $required = @()
+        if ($risk -eq "medium") {
+            $required = @("proposal.md", "tasks.md", "verification.md", "review.md")
+        } elseif ($risk -eq "high") {
+            $required = @("proposal.md", "design.md", "tasks.md", "verification.md", "review.md", "ship.md")
+        } elseif ($risk -ne "low") {
+            Add-Warning "Change proposal has unknown Risk value '$risk': $relativeDir/proposal.md"
+            continue
+        }
+
+        foreach ($name in $required) {
+            if (-not (Test-Path -LiteralPath (Join-Path $dir.FullName $name))) {
+                Add-Warning "Change with Risk: $risk is missing required artifact: $relativeDir/$name"
+            }
+        }
+    }
+}
+
 Test-PathRequired (Join-DocPath (Get-VersionRecordName))
 Test-PathRequired (Join-DocPath (Get-VersionRoadmapName))
 Test-PathRequired (Join-DocPath (Get-TaskBoardName))
@@ -185,6 +225,7 @@ Test-PathRequired (Join-DocPath (Get-ChangeImpactName))
 Test-StalePhrases
 Test-VersionChangedReasons
 Test-ChangedDocsNeedVersionRecord
+Test-ChangeArtifacts
 
 if ($warnings.Count -eq 0 -and $errors.Count -eq 0) {
     Write-Host "[ok] Document sync check passed"

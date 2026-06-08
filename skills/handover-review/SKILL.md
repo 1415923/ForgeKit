@@ -37,7 +37,8 @@ description: Audit and stabilize an inherited or existing project before further
    - P3: major architecture or technology change
 8. Fix P0/P1 first with minimal compatible changes.
 9. Put P2/P3 into roadmap or review/refactor gate. Do not make large architecture changes during handover unless the user explicitly confirms.
-10. For high-impact changes, require change impact assessment before implementation.
+10. For medium or high risk follow-up work, use `governance/ai-engineering-loop.md` to decide the required `changes/<id>/` artifacts before implementation.
+11. For high-impact changes, require change impact assessment before implementation.
 
 ## Compatibility Boundaries
 

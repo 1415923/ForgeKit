@@ -105,7 +105,8 @@ function Test-GovernanceFiles {
         "project-template\governance\agent-harness.md",
         "project-template\governance\large-change-execution.md",
         "project-template\governance\team-agent-rollout.md",
-        "project-template\governance\agent-suitability.md"
+        "project-template\governance\agent-suitability.md",
+        "project-template\governance\ai-engineering-loop.md"
     )
     foreach ($item in $required) {
         Test-RequiredPath $item
@@ -226,6 +227,7 @@ function Test-AgentsHarness {
     Test-RequiredPath (Get-TrialRecordPath)
     Test-RequiredPath (Get-CodexNextWorkOrderPath)
     Test-RequiredPath "project-template\governance\agent-harness.md"
+    Test-RequiredPath "project-template\governance\ai-engineering-loop.md"
     Test-RequiredPath "project-template\governance\large-change-execution.md"
     Test-RequiredPath "project-template\governance\team-agent-rollout.md"
     Test-RequiredPath "project-template\.codex\commands-catalog.md"
@@ -234,6 +236,7 @@ function Test-AgentsHarness {
     Test-RequiredPattern "project-template\AGENTS.md" (Get-CodebaseMapRef) "Codebase map routing"
     Test-RequiredPattern "project-template\AGENTS.md" (Get-LocalToolchainRef) "Local toolchain routing"
     Test-RequiredPattern "project-template\AGENTS.md" "governance/agent-harness.md" "Agent harness routing"
+    Test-RequiredPattern "project-template\AGENTS.md" "governance/ai-engineering-loop.md" "AI engineering loop routing"
     Test-RequiredPattern "project-template\AGENTS.md" "governance/large-change-execution.md" "Large-change routing"
     Test-RequiredPattern "project-template\AGENTS.md" "governance/team-agent-rollout.md" "Team rollout routing"
     Test-RequiredPattern "project-template\AGENTS.md" "governance/agent-suitability.md" "Agent suitability routing"
@@ -242,6 +245,34 @@ function Test-AgentsHarness {
     Test-RequiredPattern "project-template\AGENTS.md" (Get-ExplorationReportRef) "Exploration report routing"
     Test-RequiredPattern "project-template\AGENTS.md" (Get-ImplementationPlanRef) "Implementation plan routing"
     Test-RequiredPattern "project-template\AGENTS.md" ".agents/skills/<skill>/SKILL.md" "AGENTS project-local skill resolution"
+}
+
+function Test-AIEngineeringLoop {
+    $changeTemplates = @(
+        "project-template\changes\README.md",
+        "project-template\changes\_template\proposal.md",
+        "project-template\changes\_template\design.md",
+        "project-template\changes\_template\tasks.md",
+        "project-template\changes\_template\verification.md",
+        "project-template\changes\_template\review.md",
+        "project-template\changes\_template\ship.md",
+        "project-template\changes\_template\retro.md"
+    )
+    foreach ($item in $changeTemplates) {
+        Test-RequiredPath $item
+    }
+
+    Test-RequiredPattern "project-template\changes\_template\proposal.md" "Status:" "Change proposal status metadata"
+    Test-RequiredPattern "project-template\changes\_template\proposal.md" "Risk:" "Change proposal risk metadata"
+    Test-RequiredPattern "project-template\changes\_template\proposal.md" "Created:" "Change proposal created metadata"
+    Test-RequiredPattern "project-template\changes\_template\proposal.md" "Owner:" "Change proposal owner metadata"
+    Test-RequiredPattern "project-template\changes\_template\proposal.md" "Reason:" "Change proposal reason metadata"
+    Test-RequiredPattern "project-template\governance\ai-engineering-loop.md" "AI Engineering Loop" "AI engineering loop title"
+    Test-RequiredPattern "project-template\governance\ai-engineering-loop.md" "low" "AI engineering loop low risk"
+    Test-RequiredPattern "project-template\governance\ai-engineering-loop.md" "medium" "AI engineering loop medium risk"
+    Test-RequiredPattern "project-template\governance\ai-engineering-loop.md" "high" "AI engineering loop high risk"
+    Test-RequiredPattern "project-template\CLAUDE.md" "governance/ai-engineering-loop.md" "CLAUDE AI engineering loop routing"
+    Test-RequiredPattern "project-template\.codex\rules.md" "governance/ai-engineering-loop.md" "Codex risk workflow rule"
 }
 
 function Test-StackTemplates {
@@ -498,7 +529,7 @@ function Test-PluginDistribution {
     if ($codexPluginJson.name -ne "forgekit") {
         Add-Error "Unexpected Codex plugin name in root plugin.json: $($codexPluginJson.name)"
     }
-    if ($codexPluginJson.version -ne "0.14.0") {
+    if ($codexPluginJson.version -ne "0.15.0") {
         Add-Error "Unexpected Codex plugin version in root plugin.json: $($codexPluginJson.version)"
     }
     if ($codexPluginJson.skills -ne "./skills/") {
@@ -509,7 +540,7 @@ function Test-PluginDistribution {
     if ($claudePluginJson.name -ne "forgekit") {
         Add-Error "Unexpected Claude plugin name in root plugin.json: $($claudePluginJson.name)"
     }
-    if ($claudePluginJson.version -ne "0.14.0") {
+    if ($claudePluginJson.version -ne "0.15.0") {
         Add-Error "Unexpected Claude plugin version in root plugin.json: $($claudePluginJson.version)"
     }
     $claudeSkills = @($claudePluginJson.skills)
@@ -554,6 +585,7 @@ Test-RequiredPath "project-template\.agents\skills\security-review\SKILL.md"
 Test-RequiredPath "project-template\governance\project-bootstrap-fill.md"
 
 Test-GovernanceFiles
+Test-AIEngineeringLoop
 Test-StackTemplates
 Test-PromptTemplates
 Test-AgentsHarness

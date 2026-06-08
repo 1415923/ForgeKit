@@ -265,7 +265,7 @@ Mode guidance:
 - Lite: metadata hint for lightweight AI filling and governance discussion.
 - Standard: metadata hint for normal AI filling and governance discussion.
 - Enterprise: metadata hint for stricter AI filling and governance discussion.
-- The initializer copies the same template files for every mode; mode does not crop files in v0.14.0.
+- The initializer copies the same template files for every mode; mode does not crop files in the current version.
 EOF
   echo "[copy] .codex/init.generated.md"
 }
