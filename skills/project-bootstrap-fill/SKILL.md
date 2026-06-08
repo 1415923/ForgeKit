@@ -1,13 +1,13 @@
 ---
 name: project-bootstrap-fill
-description: Fill first-version Codex project documents from initialization questionnaire answers and produce the next planning questions. Use when Codex is asked to convert questionnaire answers, pasted project facts, or `.codex/questionnaires/` content into initial `.codex/` rules and `docs/` files while preparing a project-plan discussion before coding.
+description: Fill first-version Codex project documents from initialization questionnaire answers and produce the next planning questions. Use when Codex is asked to convert questionnaire answers, pasted project facts, or `.codex/questionnaires/` content into initial `.codex/` rules and `.forgekit/docs/` files while preparing a project-plan discussion before coding.
 ---
 
 # Project Bootstrap Fill
 
 ## Workflow
 
-1. Read `AGENTS.md` if present, then read `governance/project-bootstrap-fill.md`, `.codex/init.generated.md`, `.codex/questionnaires/`, `.codex/stacks/`, existing `.codex/`, and existing `docs/`.
+1. Read `AGENTS.md` if present, then read `governance/project-bootstrap-fill.md`, `.codex/init.generated.md`, `.codex/questionnaires/`, `.codex/stacks/`, existing `.codex/`, and existing business `docs/` and `.forgekit/docs/`.
 2. Extract stable facts from the questionnaire or user-provided answers:
    - project identity
    - project goal
@@ -29,16 +29,16 @@ description: Fill first-version Codex project documents from initialization ques
    - `.codex/security.md`
    - `.codex/git.md`
    - `.codex/version-gates.md`
-   - `docs/project plan`
-   - `docs/technology selection`
-   - `docs/version roadmap`
-   - `docs/requirements`
-   - `docs/environment matrix`
-   - `docs/release pipeline`
-   - `docs/code ownership`
-   - `docs/project task board`
-   - `docs/traceability matrix`
-   - `docs/risk register`
+   - `.forgekit/docs/project-plan.md`
+   - `.forgekit/docs/tech-decisions.md`
+   - `.forgekit/docs/version-roadmap.md`
+   - `.forgekit/docs/requirements.md`
+   - `.forgekit/docs/environment-matrix.md`
+   - `.forgekit/docs/release-pipeline.md`
+   - `.forgekit/docs/code-ownership.md`
+   - `.forgekit/docs/task-board.md`
+   - `.forgekit/docs/traceability.md`
+   - `.forgekit/docs/risk-register.md`
 5. Preserve user-edited content. Merge facts into existing documents instead of replacing them wholesale.
 6. After filling documents, start the planning loop: summarize what is known, identify important unknowns, and ask the next 3-5 questions needed to confirm the project plan.
 

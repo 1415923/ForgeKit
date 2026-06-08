@@ -13,10 +13,10 @@
 
 | 文档 | 用途 |
 | --- | --- |
-| `docs/environment-matrix.md` | 记录各环境的用途、地址、依赖、配置来源和权限边界 |
-| `docs/release-pipeline.md` | 记录构建、测试、制品、部署、验证和回滚流程 |
+| `.forgekit/docs/environment-matrix.md` | 记录各环境的用途、地址、依赖、配置来源和权限边界 |
+| `.forgekit/docs/release-pipeline.md` | 记录构建、测试、制品、部署、验证和回滚流程 |
 | `.codex/commands.md` | 记录本项目可执行的安装、测试、构建、部署命令 |
-| `docs/deployment.md` | 记录人工或自动部署步骤、检查项和回滚方案 |
+| `.forgekit/docs/deployment.md` | 记录人工或自动部署步骤、检查项和回滚方案 |
 
 ## 环境分层
 
@@ -28,7 +28,7 @@
 | Staging | 发布前演练 | 用于部署演练、回滚演练和最终验收 |
 | Production | 正式交付 | 任何写入、迁移、部署、回滚都需要明确确认 |
 
-如果项目没有完整环境，必须在 `docs/environment-matrix.md` 中写明缺失环境和对应风险。
+如果项目没有完整环境，必须在 `.forgekit/docs/environment-matrix.md` 中写明缺失环境和对应风险。
 
 ## 流水线阶段
 
@@ -51,8 +51,8 @@
 
 - 当前环境和目标环境明确。
 - `.codex/commands.md` 中存在可执行的测试、构建、部署命令，或明确说明不适用。
-- `docs/environment-matrix.md` 已记录目标环境、依赖服务、配置来源和权限边界。
-- `docs/release-pipeline.md` 已记录构建制品、部署方式、验证方式和回滚方式。
+- `.forgekit/docs/environment-matrix.md` 已记录目标环境、依赖服务、配置来源和权限边界。
+- `.forgekit/docs/release-pipeline.md` 已记录构建制品、部署方式、验证方式和回滚方式。
 - 生产发布、数据库迁移、远程写入、推送镜像、推送 Git tag 等动作已获得人工确认。
 - 敏感配置和密钥不写入仓库。
 - 回滚方案不依赖临时口头说明。
@@ -60,7 +60,7 @@
 ## 环境变量和密钥
 
 - 仓库中只提交 `.env.example` 或配置模板，不提交真实密钥。
-- 密钥来源必须写入 `docs/environment-matrix.md`，但不得写明真实值。
+- 密钥来源必须写入 `.forgekit/docs/environment-matrix.md`，但不得写明真实值。
 - 本地密钥、API Key、数据库密码、云服务凭据不应复制到 Codex 输出中。
 - 如果 Codex 发现真实密钥，应停止扩散并建议轮换。
 
@@ -80,11 +80,11 @@
 - 配置回退方式。
 - 回滚后的验证项。
 
-如果回滚不可行，必须在 `docs/risk-register.md` 和 `docs/release-pipeline.md` 中说明替代恢复方案。
+如果回滚不可行，必须在 `.forgekit/docs/risk-register.md` 和 `.forgekit/docs/release-pipeline.md` 中说明替代恢复方案。
 
 ## Codex 执行规则
 
-- 不根据经验猜测部署命令，优先读取 `.codex/commands.md` 和 `docs/release-pipeline.md`。
+- 不根据经验猜测部署命令，优先读取 `.codex/commands.md` 和 `.forgekit/docs/release-pipeline.md`。
 - 不自动执行生产部署、远程发布、推送镜像、数据库迁移或 Git tag。
 - 发现环境矩阵缺失时，应先补文档或提醒用户确认。
 - 发现发布流水线缺失时，不应宣称项目已具备可重复发布能力。

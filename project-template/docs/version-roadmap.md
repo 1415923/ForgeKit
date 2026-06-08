@@ -68,10 +68,10 @@
 - [ ] 检查接口、数据库、部署、测试文档是否同步。
 - [ ] 检查测试是否覆盖核心路径。
 - [ ] 检查配置、密钥、权限、安全边界。
-- [ ] 更新 `docs/technical-debt.md`。
-- [ ] 更新 `docs/quality-metrics.md`。
-- [ ] 高影响变更已更新 `docs/change-impact.md`。
-- [ ] 更新 `docs/architecture.md`、`docs/changelog.md`。
+- [ ] 更新 `.forgekit/docs/technical-debt.md`。
+- [ ] 更新 `.forgekit/docs/quality-metrics.md`。
+- [ ] 高影响变更已更新 `.forgekit/docs/change-impact.md`。
+- [ ] 更新 `.forgekit/docs/architecture.md`、`.forgekit/docs/changelog.md`。
 - [ ] 给出是否允许进入下一个大版本的结论。
 
 ## 推进闸门

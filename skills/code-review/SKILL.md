@@ -7,15 +7,15 @@ description: Review code changes for bugs, regressions, security risks, compatib
 
 ## Workflow
 
-1. Read project rules: `.codex/rules.md`, `.codex/testing.md`, `.codex/security.md`, `governance/code-ownership-review-governance.md`, `governance/project-management-task-model.md`, code ownership and project task board documents in `docs/` if present, and relevant stack rules only.
+1. Read project rules: `.codex/rules.md`, `.codex/testing.md`, `.codex/security.md`, `governance/code-ownership-review-governance.md`, `governance/project-management-task-model.md`, code ownership and project task board documents in `.forgekit/docs/` if present, and relevant stack rules only.
 2. Inspect `git status` and `git diff` unless the user provided a specific diff.
 3. If changes touch API, database, configuration, deployment, permissions, security, external services, hardware interfaces, Critical ownership areas, or Unknown ownership areas, check whether change impact assessment and owner review exist.
 4. If changes are large, cross-module, migration, refactor, or high-risk work, check whether the large-change protocol was followed:
    - `governance/ai-engineering-loop.md`
-   - required `changes/<id>/` artifacts for the declared risk level
+   - required `.forgekit/changes/<id>/` artifacts for the declared risk level
    - `governance/large-change-execution.md`
-   - exploration report in `docs/`
-   - implementation plan in `docs/`
+   - exploration report in `.forgekit/docs/`
+   - implementation plan in `.forgekit/docs/`
    - staged validation and review notes
 5. Prioritize findings in this order:
    - correctness bugs

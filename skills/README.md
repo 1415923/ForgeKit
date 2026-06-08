@@ -17,10 +17,10 @@ skill-name/
 
 | Skill | 用途 |
 | --- | --- |
-| `project-init` | 初始化或修复项目 `.codex/` 和 `docs/` |
-| `project-bootstrap-fill` | 根据项目初始化问答补齐第一版 `.codex/` 和 `docs/` |
+| `project-init` | 初始化或修复项目 `.codex/` 和 `.forgekit/docs/` |
+| `project-bootstrap-fill` | 根据项目初始化问答补齐第一版 `.codex/` 和 `.forgekit/docs/` |
 | `project-suitability` | 评估新项目或既有项目是否适合直接套用 ForgeKit AI 工作流 |
-| `document-backfill` | 逐篇消化既有项目文档并回填 ForgeKit `docs/` |
+| `document-backfill` | 逐篇消化既有项目文档并回填 ForgeKit managed docs root |
 | `handover-review` | 接手既有项目时做现状审计、兼容边界和缺陷修复计划 |
 | `large-change-planning` | 大范围、跨模块、迁移、重构或高风险任务的探索和分阶段计划 |
 | `code-review` | 审查改动中的 bug、回归、安全风险和测试缺口 |
@@ -52,7 +52,7 @@ skill-name/
 - `scripts/detect-local-toolchain.ps1`：检测本地工具链和 LSP 候选。
 - `scripts/run-harness-check.ps1`：检查 AGENTS、治理入口、commands 和 hooks 是否完整。
 
-初始化后如果项目方向仍不清楚，先读取 `docs/codex-next-work-order.md`，继续确认 MVP、落地环境、验证方式和依赖裁剪。
+初始化后如果项目方向仍不清楚，先读取 `.forgekit/docs/codex-next-work-order.md`，继续确认 MVP、落地环境、验证方式和依赖裁剪。
 
 ForgeKit v0.12.0 起通过根级统一 plugin 分发稳定 skills 和模板资产：`.codex-plugin/`、`.claude-plugin/` 和共享 `skills/` 位于仓库根。plugin 只是分发入口；引入第三方或团队 plugin 前仍需审查权限、网络、凭据、写入范围和上下文污染风险。
 

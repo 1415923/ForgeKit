@@ -24,7 +24,7 @@ function New-Text {
 
 function Join-DocPath {
     param([string]$FileName)
-    return Join-Path "docs" "$FileName.md"
+    return Join-Path ".forgekit\docs" "$FileName.md"
 }
 
 function Get-VersionRecordName {
@@ -74,13 +74,13 @@ function Get-ChangedPaths {
     }
 
     $paths = @()
-    $paths += & git -C $repoRoot diff --name-only HEAD -- docs .codex governance 2>$null
-    $paths += & git -C $repoRoot diff --cached --name-only -- docs .codex governance 2>$null
+    $paths += & git -C $repoRoot diff --name-only HEAD -- .forgekit .codex governance 2>$null
+    $paths += & git -C $repoRoot diff --cached --name-only -- .forgekit .codex governance 2>$null
     return @($paths | Where-Object { $_ } | Sort-Object -Unique)
 }
 
 function Test-StalePhrases {
-    $docsRoot = Join-Path $repoRoot "docs"
+    $docsRoot = Join-Path $repoRoot ".forgekit\docs"
     if (-not (Test-Path -LiteralPath $docsRoot)) {
         return
     }
@@ -139,12 +139,12 @@ function Test-ChangedDocsNeedVersionRecord {
         return
     }
 
-    $docChanged = @($changedPaths | Where-Object { $_ -like "docs/*" -or $_ -like "governance/*" -or $_ -like ".codex/*" })
+    $docChanged = @($changedPaths | Where-Object { $_ -like ".forgekit/*" -or $_ -like "governance/*" -or $_ -like ".codex/*" })
     if ($docChanged.Count -eq 0) {
         return
     }
 
-    $versionRecordPath = "docs/" + (Get-VersionRecordName) + ".md"
+    $versionRecordPath = ".forgekit/docs/" + (Get-VersionRecordName) + ".md"
     $versionChanged = $changedPaths -contains $versionRecordPath
     if (-not $versionChanged) {
         Add-Warning "Docs or governance changed, but the version update record is not changed. Confirm whether it needs an entry with reason."
@@ -176,7 +176,7 @@ function Test-ChangedDocsNeedVersionRecord {
 }
 
 function Test-ChangeArtifacts {
-    $changesRoot = Join-Path $repoRoot "changes"
+    $changesRoot = Join-Path $repoRoot ".forgekit\changes"
     if (-not (Test-Path -LiteralPath $changesRoot)) {
         return
     }

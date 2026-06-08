@@ -5,8 +5,8 @@
 细化安全治理流程见：
 
 - `governance/security-governance.md`
-- `docs/threat-model.md`
-- `docs/dependency-review.md`
+- `.forgekit/docs/threat-model.md`
+- `.forgekit/docs/dependency-review.md`
 
 ## 基本原则
 

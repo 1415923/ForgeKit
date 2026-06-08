@@ -44,7 +44,7 @@
 
 ## 与技术债和质量指标的关系
 
-- 大版本结束后，必须更新 `docs/technical-debt.md` 和 `docs/quality-metrics.md`。
+- 大版本结束后，必须更新 `.forgekit/docs/technical-debt.md` 和 `.forgekit/docs/quality-metrics.md`。
 - 如果高风险技术债未处理，默认不建议进入下一个大版本。
 - 如果质量指标明显恶化，应安排 review/refactor 中版本。
 - 如果存在未关闭 SEV-1 / SEV-2 行动项，默认不建议进入下一个大版本。

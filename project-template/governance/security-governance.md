@@ -20,11 +20,11 @@
 
 | 产物 | 作用 |
 | --- | --- |
-| `docs/threat-model.md` | 识别资产、入口、威胁和缓解措施 |
-| `docs/dependency-review.md` | 审查新增或升级依赖 |
-| `docs/change-impact.md` | 记录安全相关高影响变更 |
-| `docs/risk-register.md` | 记录未关闭安全风险 |
-| `docs/incident-review.md` | 记录安全事故 |
+| `.forgekit/docs/threat-model.md` | 识别资产、入口、威胁和缓解措施 |
+| `.forgekit/docs/dependency-review.md` | 审查新增或升级依赖 |
+| `.forgekit/docs/change-impact.md` | 记录安全相关高影响变更 |
+| `.forgekit/docs/risk-register.md` | 记录未关闭安全风险 |
+| `.forgekit/docs/incident-review.md` | 记录安全事故 |
 
 ## 安全检查层级
 

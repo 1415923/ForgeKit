@@ -14,7 +14,7 @@
 
 | 名称 | 用途 | 输入 | 输出 |
 | --- | --- | --- | --- |
-| project-bootstrap | 初始化项目并访谈 | 项目简报 | `.codex/` 和 `docs/` 第一版 |
+| project-bootstrap | 初始化项目并访谈 | 项目简报 | `.codex/` 和 `.forgekit/docs/` 第一版 |
 | handover-audit | 接手既有项目审计 | 现有代码库 | 审计、兼容边界、缺陷修复计划 |
 | large-change-plan | 大任务拆分 | 大任务描述 | 探索报告和实施计划 |
 | code-review | 审查当前 diff | git diff | findings、questions、test gaps |
@@ -40,9 +40,9 @@
 
 | 能力 | 候选做法 | 默认 |
 | --- | --- | --- |
-| Issue 创建 | 从 `docs/task-board.md` 映射到 GitHub Issues | 手动确认 |
+| Issue 创建 | 从 `.forgekit/docs/task-board.md` 映射到 GitHub Issues | 手动确认 |
 | PR 检查 | code-review prompt + CI 结果 | 可选 |
-| CODEOWNERS | 从 `docs/code-ownership.md` 生成 | 手动确认 |
+| CODEOWNERS | 从 `.forgekit/docs/code-ownership.md` 生成 | 手动确认 |
 | Actions | lint/test/build/security scan | 项目成熟后 |
 | Dependabot | 依赖更新和安全提醒 | 生产项目建议 |
 | Secret scanning | GitHub 或 gitleaks | 高风险项目建议 |

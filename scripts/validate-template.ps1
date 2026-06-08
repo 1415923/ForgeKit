@@ -118,7 +118,7 @@ function Get-CodebaseMapPath {
 }
 
 function Get-CodebaseMapRef {
-    return "docs/codebase-map.md"
+    return ".forgekit/docs/codebase-map.md"
 }
 
 function Get-LocalToolchainPath {
@@ -126,7 +126,7 @@ function Get-LocalToolchainPath {
 }
 
 function Get-LocalToolchainRef {
-    return "docs/local-toolchain.md"
+    return ".forgekit/docs/local-toolchain.md"
 }
 
 function Get-ExplorationReportPath {
@@ -138,11 +138,11 @@ function Get-ImplementationPlanPath {
 }
 
 function Get-ExplorationReportRef {
-    return "docs/exploration-report.md"
+    return ".forgekit/docs/exploration-report.md"
 }
 
 function Get-ImplementationPlanRef {
-    return "docs/implementation-plan.md"
+    return ".forgekit/docs/implementation-plan.md"
 }
 
 function Get-SuitabilityPath {
@@ -150,7 +150,7 @@ function Get-SuitabilityPath {
 }
 
 function Get-SuitabilityRef {
-    return "docs/project-suitability.md"
+    return ".forgekit/docs/project-suitability.md"
 }
 
 function Get-TrialRecordPath {
@@ -158,7 +158,7 @@ function Get-TrialRecordPath {
 }
 
 function Get-TrialRecordRef {
-    return "docs/project-trial-record.md"
+    return ".forgekit/docs/project-trial-record.md"
 }
 
 function Get-CodexNextWorkOrderPath {
@@ -166,7 +166,7 @@ function Get-CodexNextWorkOrderPath {
 }
 
 function Get-CodexNextWorkOrderRef {
-    return "docs/codex-next-work-order.md"
+    return ".forgekit/docs/codex-next-work-order.md"
 }
 
 function Get-VersionRoadmapPath {
@@ -226,6 +226,8 @@ function Test-AgentsHarness {
     Test-RequiredPath (Get-SuitabilityPath)
     Test-RequiredPath (Get-TrialRecordPath)
     Test-RequiredPath (Get-CodexNextWorkOrderPath)
+    Test-RequiredPath "project-template\.forgekit\project-boundary.yml"
+    Test-RequiredPath "project-template\.forgekit\docs\document-responsibility.md"
     Test-RequiredPath "project-template\governance\agent-harness.md"
     Test-RequiredPath "project-template\governance\ai-engineering-loop.md"
     Test-RequiredPath "project-template\governance\large-change-execution.md"
@@ -236,6 +238,7 @@ function Test-AgentsHarness {
     Test-RequiredPattern "project-template\AGENTS.md" (Get-CodebaseMapRef) "Codebase map routing"
     Test-RequiredPattern "project-template\AGENTS.md" (Get-LocalToolchainRef) "Local toolchain routing"
     Test-RequiredPattern "project-template\AGENTS.md" "governance/agent-harness.md" "Agent harness routing"
+    Test-RequiredPattern "project-template\AGENTS.md" ".forgekit/project-boundary.yml" "Boundary routing"
     Test-RequiredPattern "project-template\AGENTS.md" "governance/ai-engineering-loop.md" "AI engineering loop routing"
     Test-RequiredPattern "project-template\AGENTS.md" "governance/large-change-execution.md" "Large-change routing"
     Test-RequiredPattern "project-template\AGENTS.md" "governance/team-agent-rollout.md" "Team rollout routing"
@@ -273,6 +276,12 @@ function Test-AIEngineeringLoop {
     Test-RequiredPattern "project-template\governance\ai-engineering-loop.md" "high" "AI engineering loop high risk"
     Test-RequiredPattern "project-template\CLAUDE.md" "governance/ai-engineering-loop.md" "CLAUDE AI engineering loop routing"
     Test-RequiredPattern "project-template\.codex\rules.md" "governance/ai-engineering-loop.md" "Codex risk workflow rule"
+    Test-RequiredPattern "project-template\.forgekit\project-boundary.yml" 'managed_docs_root: ".forgekit/docs"' "Boundary managed docs root"
+    Test-RequiredPattern "project-template\.forgekit\project-boundary.yml" 'change_root: ".forgekit/changes"' "Boundary change root"
+    Test-RequiredPattern "project-template\.forgekit\project-boundary.yml" "business_docs_roots:" "Boundary business docs roots"
+    Test-RequiredPattern "project-template\.forgekit\project-boundary.yml" "task_scoped:" "Boundary task-scoped policy"
+    Test-RequiredPattern "project-template\.forgekit\project-boundary.yml" "read_mostly:" "Boundary read-mostly policy"
+    Test-RequiredPattern "project-template\.codex\rules.md" "Boundary First" "Codex boundary-first rule"
 }
 
 function Test-StackTemplates {
@@ -529,7 +538,7 @@ function Test-PluginDistribution {
     if ($codexPluginJson.name -ne "forgekit") {
         Add-Error "Unexpected Codex plugin name in root plugin.json: $($codexPluginJson.name)"
     }
-    if ($codexPluginJson.version -ne "0.15.0") {
+    if ($codexPluginJson.version -ne "0.16.0") {
         Add-Error "Unexpected Codex plugin version in root plugin.json: $($codexPluginJson.version)"
     }
     if ($codexPluginJson.skills -ne "./skills/") {
@@ -540,7 +549,7 @@ function Test-PluginDistribution {
     if ($claudePluginJson.name -ne "forgekit") {
         Add-Error "Unexpected Claude plugin name in root plugin.json: $($claudePluginJson.name)"
     }
-    if ($claudePluginJson.version -ne "0.15.0") {
+    if ($claudePluginJson.version -ne "0.16.0") {
         Add-Error "Unexpected Claude plugin version in root plugin.json: $($claudePluginJson.version)"
     }
     $claudeSkills = @($claudePluginJson.skills)

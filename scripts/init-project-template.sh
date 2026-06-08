@@ -89,6 +89,21 @@ templates_dir="$repo_root/templates"
 questionnaires_dir="$repo_root/questionnaires"
 resolved_target="$(mkdir -p "$target_path" && cd "$target_path" && pwd)"
 
+map_template_path() {
+  local relative_path="$1"
+  case "$relative_path" in
+    docs/*)
+      printf '.forgekit/docs/%s' "${relative_path#docs/}"
+      ;;
+    changes/*)
+      printf '.forgekit/changes/%s' "${relative_path#changes/}"
+      ;;
+    *)
+      printf '%s' "$relative_path"
+      ;;
+  esac
+}
+
 copy_tree() {
   local source_dir="$1"
   local destination_dir="$2"
@@ -101,16 +116,18 @@ copy_tree() {
   mkdir -p "$destination_dir"
   while IFS= read -r -d '' source_file; do
     local relative_path="${source_file#"$source_dir"/}"
-    local destination_file="$destination_dir/$relative_path"
+    local destination_relative_path
+    destination_relative_path="$(map_template_path "$relative_path")"
+    local destination_file="$destination_dir/$destination_relative_path"
     mkdir -p "$(dirname "$destination_file")"
 
     if [[ -e "$destination_file" && "$force" -ne 1 ]]; then
-      echo "[skip] $relative_path already exists"
+      echo "[skip] $destination_relative_path already exists"
       continue
     fi
 
     cp -f "$source_file" "$destination_file"
-    echo "[copy] $relative_path"
+    echo "[copy] $destination_relative_path"
   done < <(find "$source_dir" -type f -print0)
 }
 
@@ -139,30 +156,32 @@ copy_tree_upgrade() {
   mkdir -p "$destination_dir"
   while IFS= read -r -d '' source_file; do
     local relative_path="${source_file#"$source_dir"/}"
-    local destination_file="$destination_dir/$relative_path"
+    local destination_relative_path
+    destination_relative_path="$(map_template_path "$relative_path")"
+    local destination_file="$destination_dir/$destination_relative_path"
     mkdir -p "$(dirname "$destination_file")"
 
     if [[ ! -e "$destination_file" ]]; then
       cp -f "$source_file" "$destination_file"
-      upgrade_copied+=("$relative_path")
-      echo "[copy] $relative_path"
+      upgrade_copied+=("$destination_relative_path")
+      echo "[copy] $destination_relative_path"
       continue
     fi
 
     if same_file "$source_file" "$destination_file"; then
-      upgrade_same+=("$relative_path")
-      echo "[same] $relative_path"
+      upgrade_same+=("$destination_relative_path")
+      echo "[same] $destination_relative_path"
       continue
     fi
 
-    upgrade_review+=("$relative_path")
-    echo "[review] $relative_path differs; existing file preserved"
+    upgrade_review+=("$destination_relative_path")
+    echo "[review] $destination_relative_path differs; existing file preserved"
 
     if [[ "$export_upgrade_templates" -eq 1 ]]; then
-      local export_file="$export_dir/$relative_path"
+      local export_file="$export_dir/$destination_relative_path"
       mkdir -p "$(dirname "$export_file")"
       cp -f "$source_file" "$export_file"
-      upgrade_exported+=("$relative_path")
+      upgrade_exported+=("$destination_relative_path")
     fi
   done < <(find "$source_dir" -type f -print0)
 }
@@ -224,11 +243,82 @@ write_upgrade_report() {
       printf '%s\n' "$legacy" | sed 's/^/  - /'
     fi
     echo
+    echo "Boundary migration:"
+    echo "- v0.16.0 adds .forgekit/project-boundary.yml for ForgeKitRoot, ProjectRoot, managed_docs_root, and change_root."
+    echo "- Existing projects may still use docs/ or changes/ for ForgeKit-managed files; upgrade mode does not move them automatically."
+    echo "- New projects use .forgekit/docs and .forgekit/changes by default."
+    echo "- Treat business docs roots such as docs/ as read-mostly evidence unless the user explicitly confirms target files and reasons for writing."
+    echo
     echo "Suggested prompt:"
     echo "Review .codex/upgrade-report.md and merge useful new ForgeKit template sections into the existing project files without overwriting project facts."
   } >> "$report_file"
 
   echo "[copy] .codex/upgrade-report.md"
+}
+
+relative_path_between() {
+  if command -v python3 >/dev/null 2>&1; then
+    python3 -c "import os,sys; print(os.path.relpath(sys.argv[1], sys.argv[2]).replace('\\\\','/'))" "$1" "$2"
+  elif command -v python >/dev/null 2>&1; then
+    python -c "import os,sys; print(os.path.relpath(sys.argv[1], sys.argv[2]).replace('\\\\','/'))" "$1" "$2"
+  else
+    printf '<path-to-forgekit>'
+  fi
+}
+
+write_boundary_config() {
+  local boundary_file="$resolved_target/.forgekit/project-boundary.yml"
+  if [[ -e "$boundary_file" && "$force" -ne 1 && "$upgrade" -eq 1 ]]; then
+    echo "[skip] .forgekit/project-boundary.yml already exists"
+    return 0
+  fi
+
+  local relative_forgekit_root
+  relative_forgekit_root="$(relative_path_between "$repo_root" "$resolved_target")"
+  mkdir -p "$(dirname "$boundary_file")"
+  cat > "$boundary_file" <<EOF
+forgekit:
+  version: "0.16.0"
+  mode: "$mode"
+
+roots:
+  forgekit_root: "$relative_forgekit_root"
+  project_root: "."
+  managed_docs_root: ".forgekit/docs"
+  change_root: ".forgekit/changes"
+  business_docs_roots:
+    - "docs"
+
+write_policy:
+  allow:
+    - ".codex/**"
+    - ".agents/**"
+    - ".claude/**"
+    - ".forgekit/docs/**"
+    - ".forgekit/changes/**"
+  task_scoped:
+    - "src/**"
+    - "tests/**"
+    - "scripts/**"
+  read_mostly:
+    - "docs/**"
+  ask:
+    - "README.md"
+    - "AGENTS.md"
+    - "CLAUDE.md"
+    - ".github/**"
+    - "package.json"
+    - "pom.xml"
+    - "build.gradle"
+  readonly:
+    - "$relative_forgekit_root/**"
+    - ".git/**"
+    - "node_modules/**"
+    - "target/**"
+    - "dist/**"
+    - "build/**"
+EOF
+  echo "[copy] .forgekit/project-boundary.yml"
 }
 
 write_codex_metadata() {
@@ -254,7 +344,7 @@ Generated by scripts/init-project-template.sh.
 - Stacks: $stack_text
 - StackSelection: deferred means no stack was chosen during initialization. This is normal.
 
-Use this file as initialization metadata. Merge real project facts into .codex/project.md, .codex/scope.md, the docs codebase map, the local toolchain check document, and docs/tech-decisions.md manually or with Codex.
+Use this file as initialization metadata. Merge real project facts into .codex/project.md, .codex/scope.md, .forgekit/docs/codebase-map.md, .forgekit/docs/local-toolchain.md, and .forgekit/docs/tech-decisions.md manually or with Codex.
 
 Stack guidance:
 - New projects: confirm product shape, users, constraints, risks, and the v0.1.0 closed loop before choosing a stack.
@@ -293,7 +383,7 @@ Generated by scripts/init-project-template.sh.
 - Stacks: $stack_text
 - StackSelection: deferred means no stack was chosen during initialization. This is normal.
 
-Use this file as Claude Code initialization metadata. Merge real project facts into .codex/project.md, .codex/scope.md, the docs codebase map, the local toolchain check document, and docs/tech-decisions.md manually or with Claude Code.
+Use this file as Claude Code initialization metadata. Merge real project facts into .codex/project.md, .codex/scope.md, .forgekit/docs/codebase-map.md, .forgekit/docs/local-toolchain.md, and .forgekit/docs/tech-decisions.md manually or with Claude Code.
 
 Recommended Claude Code startup order:
 1. CLAUDE.md
@@ -354,6 +444,7 @@ done
 
 write_codex_metadata
 write_claude_metadata
+write_boundary_config
 
 if [[ "$upgrade" -eq 1 && "$force" -ne 1 ]]; then
   write_upgrade_report
@@ -370,6 +461,13 @@ echo "   Claude Code: claude"
 echo "3. Send the startup message:"
 echo "   Codex: Read AGENTS.md, prefer .agents/skills/project-init/SKILL.md, and help me initialize this project with ForgeKit. Do not read a user-level or system-level project-init path."
 echo "   Claude Code: Read CLAUDE.md, prefer .agents/skills/project-init/SKILL.md, and help me initialize this project with ForgeKit. Do not read a user-level or system-level project-init path."
+echo
+echo "Boundary:"
+echo "- ForgeKitRoot is the toolkit/template source: $repo_root"
+echo "- ProjectRoot is the business repository and Git commit location: $resolved_target"
+echo "- Managed ForgeKit docs default to .forgekit/docs; change artifacts default to .forgekit/changes."
+echo "- Existing business docs/ is read-mostly by default; do not write ForgeKit governance templates there unless the user confirms."
+echo "- Do not copy ForgeKit itself into ProjectRoot or commit ForgeKitRoot as part of the business repository."
 echo
 echo "Do not choose a tech stack here. ForgeKit will confirm or infer it during the discovery interview."
 if [[ "$upgrade" -eq 1 ]]; then

@@ -25,13 +25,13 @@
 
 ## Codex 行为
 
-- 发现风险时，建议写入 `docs/risk-register.md`。
+- 发现风险时，建议写入 `.forgekit/docs/risk-register.md`。
 - 高风险未处理时，不应建议直接进入下一阶段。
 - 如果用户接受风险，应记录接受原因和后续补救计划。
 - 发布前检查必须查看高风险项是否关闭或被接受。
-- 高风险变更应同步到 `docs/change-impact.md`。
-- 事故复盘中的未关闭高风险项应同步到 `docs/risk-register.md`。
-- 未关闭 S2/S3 安全风险应同步到 `docs/risk-register.md`。
+- 高风险变更应同步到 `.forgekit/docs/change-impact.md`。
+- 事故复盘中的未关闭高风险项应同步到 `.forgekit/docs/risk-register.md`。
+- 未关闭 S2/S3 安全风险应同步到 `.forgekit/docs/risk-register.md`。
 
 ## 风险分级
 

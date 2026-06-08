@@ -32,8 +32,8 @@
 
 ## 记录位置
 
-- 质量指标记录在 `docs/quality-metrics.md`。
-- 技术债记录在 `docs/technical-debt.md`。
-- 高风险技术债应同步到 `docs/risk-register.md`。
-- 版本 review/refactor 结论应同步到 `docs/version-roadmap.md`。
-- 严重事故和重复缺陷应同步到 `docs/incident-review.md` 或 `docs/defect-review.md`。
+- 质量指标记录在 `.forgekit/docs/quality-metrics.md`。
+- 技术债记录在 `.forgekit/docs/technical-debt.md`。
+- 高风险技术债应同步到 `.forgekit/docs/risk-register.md`。
+- 版本 review/refactor 结论应同步到 `.forgekit/docs/version-roadmap.md`。
+- 严重事故和重复缺陷应同步到 `.forgekit/docs/incident-review.md` 或 `.forgekit/docs/defect-review.md`。

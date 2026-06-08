@@ -43,9 +43,9 @@ DEBT-002
 
 ## Codex 行为
 
-- 发现不能立即处理的问题时，不要隐藏，应记录到 `docs/technical-debt.md`。
+- 发现不能立即处理的问题时，不要隐藏，应记录到 `.forgekit/docs/technical-debt.md`。
 - 大版本结束后的 review/refactor 中版本必须检查技术债。
-- 如果技术债影响版本推进，应在 `docs/version-roadmap.md` 和 `docs/risk-register.md` 中体现。
-- 如果技术债来自高影响变更，应关联 `docs/change-impact.md`。
-- 如果技术债来自事故或缺陷复盘，应关联 `docs/incident-review.md` 或 `docs/defect-review.md`。
+- 如果技术债影响版本推进，应在 `.forgekit/docs/version-roadmap.md` 和 `.forgekit/docs/risk-register.md` 中体现。
+- 如果技术债来自高影响变更，应关联 `.forgekit/docs/change-impact.md`。
+- 如果技术债来自事故或缺陷复盘，应关联 `.forgekit/docs/incident-review.md` 或 `.forgekit/docs/defect-review.md`。
 - 接手项目时先建立技术债基线，再逐步偿还。

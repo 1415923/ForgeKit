@@ -26,7 +26,7 @@ chore: 调整构建、依赖或工具配置
 
 - `git status` 已检查。
 - `git diff` 已检查。
-- 已检查 `docs/code-ownership.md`，Critical 或 Unknown 区域变更已有必要评审或人工确认。
+- 已检查 `.forgekit/docs/code-ownership.md`，Critical 或 Unknown 区域变更已有必要评审或人工确认。
 - 测试或构建已运行，或记录未运行原因。
 - 文档已同步。
 - 不包含密钥、密码、令牌、个人路径等敏感信息。
@@ -35,4 +35,4 @@ chore: 调整构建、依赖或工具配置
 
 - 版本号规则：待补充
 - Tag 规则：待补充
-- 发布说明来源：`docs/changelog.md`
+- 发布说明来源：`.forgekit/docs/changelog.md`

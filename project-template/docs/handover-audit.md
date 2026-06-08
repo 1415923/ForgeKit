@@ -62,4 +62,4 @@
 - 是否允许进入后续功能开发：否 / 是
 - 需要人工确认的兼容风险：待补充
 
-兼容风险和高影响风险应同步到 `docs/risk-register.md`。
+兼容风险和高影响风险应同步到 `.forgekit/docs/risk-register.md`。

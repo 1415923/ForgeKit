@@ -33,13 +33,13 @@ changed_paths() {
   fi
 
   {
-    git -C "$repo_root" diff --name-only HEAD -- docs .codex governance 2>/dev/null || true
-    git -C "$repo_root" diff --cached --name-only -- docs .codex governance 2>/dev/null || true
+    git -C "$repo_root" diff --name-only HEAD -- .forgekit .codex governance 2>/dev/null || true
+    git -C "$repo_root" diff --cached --name-only -- .forgekit .codex governance 2>/dev/null || true
   } | awk 'NF' | sort -u
 }
 
 test_stale_phrases() {
-  local docs_root="$repo_root/docs"
+  local docs_root="$repo_root/.forgekit/docs"
   [[ -d "$docs_root" ]] || return 0
 
   local patterns=(
@@ -65,7 +65,7 @@ test_stale_phrases() {
 }
 
 test_version_changed_reasons() {
-  local version_doc="$repo_root/docs/changelog.md"
+  local version_doc="$repo_root/.forgekit/docs/changelog.md"
   [[ -f "$version_doc" ]] || return 0
 
   awk '
@@ -87,7 +87,7 @@ test_changed_docs_need_version_record() {
   paths="$(changed_paths)"
   [[ -n "$paths" ]] || return 0
 
-  if ! printf '%s\n' "$paths" | grep -Fxq "docs/changelog.md"; then
+  if ! printf '%s\n' "$paths" | grep -Fxq ".forgekit/docs/changelog.md"; then
     add_warning "Docs or governance changed, but the version update record is not changed. Confirm whether it needs an entry with reason."
   fi
 
@@ -97,7 +97,7 @@ test_changed_docs_need_version_record() {
 }
 
 test_change_artifacts() {
-  local changes_root="$repo_root/changes"
+  local changes_root="$repo_root/.forgekit/changes"
   [[ -d "$changes_root" ]] || return 0
 
   local dir proposal risk required name relative
@@ -135,12 +135,12 @@ test_change_artifacts() {
   done
 }
 
-path_required "docs/changelog.md"
-path_required "docs/version-roadmap.md"
-path_required "docs/task-board.md"
-path_required "docs/testing.md"
-path_required "docs/risk-register.md"
-path_required "docs/change-impact.md"
+path_required ".forgekit/docs/changelog.md"
+path_required ".forgekit/docs/version-roadmap.md"
+path_required ".forgekit/docs/task-board.md"
+path_required ".forgekit/docs/testing.md"
+path_required ".forgekit/docs/risk-register.md"
+path_required ".forgekit/docs/change-impact.md"
 
 test_stale_phrases
 

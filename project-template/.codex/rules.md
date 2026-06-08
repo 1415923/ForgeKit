@@ -3,18 +3,29 @@
 ## 总原则
 
 - 先读取 `governance/overview.md`，再按项目入口选择新项目、接手项目、Bug 修复、发布或安全审查流程。
+- 先读取 `.forgekit/project-boundary.yml`，确认 ForgeKitRoot、ProjectRoot、managed docs root、change root、business docs roots 和 write policy。
 - 修改前先阅读相关代码、文档和配置。
 - 优先遵循本项目已有风格。
 - 只修改与当前任务相关的文件。
 - 大范围架构调整前必须先给出方案。
 - 修改后运行 `.codex/commands.md` 中对应的验证命令。
-- 涉及用户可见行为变化时，更新 `docs/changelog.md`。
+- 涉及用户可见行为变化时，更新 `.forgekit/docs/changelog.md`。
 - 安全敏感、权限、外部动作、凭据、部署相关变更必须参考 `.codex/security.md`。
-- 版本推进必须参考 `.codex/version-gates.md` 和 `docs/version-roadmap.md`。
+- 版本推进必须参考 `.codex/version-gates.md` 和 `.forgekit/docs/version-roadmap.md`。
 - 接手既有项目必须先参考 `.codex/handover.md`，先审计和修复明确问题，再规划后续开发。
 - 复杂任务优先拆分为计划、实现、验证、审查四个阶段。
-- 中高风险任务必须参考 `governance/ai-engineering-loop.md`，并按 `changes/<change-id>/` 的风险工件推进。
+- 中高风险任务必须参考 `governance/ai-engineering-loop.md`，并按 `.forgekit/changes/<change-id>/` 的风险工件推进。
 - commands、hooks、plugin、MCP、CI、issue/PR 集成必须先参考 `governance/team-agent-rollout.md`。
+
+## Boundary First
+
+- ForgeKitRoot 是工具包、模板和规则来源；除非当前任务是维护 ForgeKit 本体，否则默认只读。
+- ProjectRoot 是业务仓库和 Git 提交位置。
+- ForgeKit 治理文档默认写入 `.forgekit/docs`。
+- 中高风险 change 工件默认写入 `.forgekit/changes`。
+- 业务 `docs/` 默认是 read-mostly 证据源：允许读取、引用和抽取事实，不写 ForgeKit 治理模板。
+- 如果用户要求把 ForgeKit 事实合并进业务 `docs/`，先列出目标文件、写入原因、与现有内容的关系和覆盖风险，等用户确认后再写。
+- `src/**`、`tests/**`、`scripts/**` 属于 task_scoped：任务开始前确认范围，确认后可在本任务范围内修改。
 
 ## AI Coding 四条基本规则
 
@@ -94,13 +105,13 @@
 ## 开发方案与版本路线图
 
 - SDLC、架构治理、版本治理、质量指标统一记录在 `governance/`。
-- 项目初期必须先讨论并形成 `docs/project-plan.md`。
-- 大版本规划必须写入 `docs/version-roadmap.md`。
-- 重要架构决策必须写入 `docs/adr/`。
-- 重要方案讨论必须先写入 `docs/rfc/`。
-- 需求、RFC、ADR、任务、测试、缺陷应维护在 `docs/traceability.md`。
-- 高风险必须写入 `docs/risk-register.md`。
-- 高影响变更必须写入 `docs/change-impact.md`，并参考 `governance/change-management.md`。
+- 项目初期必须先讨论并形成 `.forgekit/docs/project-plan.md`。
+- 大版本规划必须写入 `.forgekit/docs/version-roadmap.md`。
+- 重要架构决策必须写入 `.forgekit/docs/adr/`。
+- 重要方案讨论必须先写入 `.forgekit/docs/rfc/`。
+- 需求、RFC、ADR、任务、测试、缺陷应维护在 `.forgekit/docs/traceability.md`。
+- 高风险必须写入 `.forgekit/docs/risk-register.md`。
+- 高影响变更必须写入 `.forgekit/docs/change-impact.md`，并参考 `governance/change-management.md`。
 - 开发前检查 `governance/definition-of-ready.md`，完成时检查 `governance/definition-of-done.md`。
 - 如果项目开发方案、技术选型、软硬件落地条件没有明确结论，不应直接进入大规模编码。
 - 每个大版本结束后，必须先完成 review/refactor 中版本，再推进下一个大版本。

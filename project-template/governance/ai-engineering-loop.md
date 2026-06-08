@@ -14,13 +14,13 @@ ForgeKit does not replace the framework, CI, issue tracker, or architecture proc
 
 | Risk | Typical work | Required workflow |
 | --- | --- | --- |
-| low | Single-file fix, copy edit, local test adjustment, no public behavior or data impact | Clarify if needed, edit surgically, run relevant validation, summarize result. A `changes/<id>/` folder is optional. |
-| medium | Multi-file change, small feature, template/script change, user-visible flow, documentation structure change | Create `changes/<id>/proposal.md`, `tasks.md`, `verification.md`, and `review.md`; confirm the plan before implementation. |
+| low | Single-file fix, copy edit, local test adjustment, no public behavior or data impact | Clarify if needed, edit surgically, run relevant validation, summarize result. A `.forgekit/changes/<id>/` folder is optional. |
+| medium | Multi-file change, small feature, template/script change, user-visible flow, documentation structure change | Create `.forgekit/changes/<id>/proposal.md`, `tasks.md`, `verification.md`, and `review.md`; confirm the plan before implementation. |
 | high | Architecture change, migration, security/permission change, cross-platform script, public template contract, deployment or compatibility risk | Create `proposal.md`, `design.md`, `tasks.md`, `verification.md`, `review.md`, and `ship.md`; confirm the design before implementation. `retro.md` is recommended after completion. |
 
 ## Change Metadata
 
-Each `changes/<id>/proposal.md` should start with ASCII metadata:
+Each `.forgekit/changes/<id>/proposal.md` should start with ASCII metadata:
 
 ```text
 Status: draft

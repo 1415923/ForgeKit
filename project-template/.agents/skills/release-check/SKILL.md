@@ -7,7 +7,7 @@ description: Check release readiness and version-gate compliance for a project. 
 
 ## Workflow
 
-1. Read `governance/version-governance.md`, `governance/quality-metrics.md`, `governance/technical-debt-management.md`, `governance/change-management.md`, `governance/incident-process.md`, `governance/security-governance.md`, `governance/cicd-environment-governance.md`, `governance/code-ownership-review-governance.md`, `governance/project-management-task-model.md`, `.codex/git.md`, `.codex/commands.md`, `.codex/testing.md`, `.codex/security.md`, `.codex/version-gates.md`, the version roadmap in `docs/`, quality metrics in `docs/`, technical debt records in `docs/`, change impact assessment in `docs/`, incident or defect reviews in `docs/`, security threat model and dependency review documents in `docs/`, environment matrix and release pipeline documents in `docs/`, code ownership and project task board documents in `docs/`, deployment docs in `docs/`, and the project changelog or version record in `docs/`.
+1. Read `governance/version-governance.md`, `governance/quality-metrics.md`, `governance/technical-debt-management.md`, `governance/change-management.md`, `governance/incident-process.md`, `governance/security-governance.md`, `governance/cicd-environment-governance.md`, `governance/code-ownership-review-governance.md`, `governance/project-management-task-model.md`, `.codex/git.md`, `.codex/commands.md`, `.codex/testing.md`, `.codex/security.md`, `.codex/version-gates.md`, the version roadmap in `.forgekit/docs/`, quality metrics in `.forgekit/docs/`, technical debt records in `.forgekit/docs/`, change impact assessment in `.forgekit/docs/`, incident or defect reviews in `.forgekit/docs/`, security threat model and dependency review documents in `.forgekit/docs/`, environment matrix and release pipeline documents in `.forgekit/docs/`, code ownership and project task board documents in `.forgekit/docs/`, deployment docs in `.forgekit/docs/`, and the project changelog or version record in `.forgekit/docs/`.
 2. Inspect `git status` and relevant diffs.
 3. Verify that docs match visible behavior, APIs, database changes, config, and deployment changes.
 4. Check whether the current release is a major feature version or a review/refactor gate version.
@@ -34,7 +34,7 @@ description: Check release readiness and version-gate compliance for a project. 
 - Critical or Unknown ownership areas have owner or reviewer confirmation.
 - Current version tasks, features, and bugs are closed, deferred, blocked, or explicitly dropped.
 - Large changes have exploration report, implementation plan, staged validation, and review notes.
-- Medium/high risk changes have required `changes/<id>/` artifacts for the declared risk level; high risk changes include ship notes.
+- Medium/high risk changes have required `.forgekit/changes/<id>/` artifacts for the declared risk level; high risk changes include ship notes.
 - SEV-1 / SEV-2 incidents and repeated defects have reviews and action items.
 - S2/S3 security risks are closed or explicitly accepted.
 - New or upgraded dependencies have dependency security review where needed.

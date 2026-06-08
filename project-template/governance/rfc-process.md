@@ -23,8 +23,8 @@ ADR: 记录最终决策、后果、状态
 ## 编号规则
 
 ```text
-docs/rfc/0001-project-architecture-options.md
-docs/rfc/0002-auth-model-redesign.md
+.forgekit/docs/rfc/0001-project-architecture-options.md
+.forgekit/docs/rfc/0002-auth-model-redesign.md
 ```
 
 ## 状态

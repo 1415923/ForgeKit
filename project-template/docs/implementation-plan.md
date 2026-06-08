@@ -1,6 +1,6 @@
 # 实施计划
 
-用于把大任务拆成可验证、可回滚、可分会话执行的阶段。完成 `docs/exploration-report.md` 后再填写本文件。
+用于把大任务拆成可验证、可回滚、可分会话执行的阶段。完成 `.forgekit/docs/exploration-report.md` 后再填写本文件。
 
 ## 基本信息
 
@@ -8,7 +8,7 @@
 | --- | --- |
 | 任务 / 版本 | 待补充 |
 | 计划日期 | 待补充 |
-| 关联探索报告 | `docs/exploration-report.md` |
+| 关联探索报告 | `.forgekit/docs/exploration-report.md` |
 | 当前阶段 | 待补充 |
 | 是否允许进入编码 | 否 |
 
@@ -40,10 +40,10 @@
 
 | 文档 | 是否需要更新 | 备注 |
 | --- | --- | --- |
-| `docs/task-board.md` | 是 | 待补充 |
-| `docs/changelog.md` | 是 | 待补充 |
-| `docs/codebase-map.md` | 待确认 | 待补充 |
-| `docs/local-toolchain.md` | 待确认 | 待补充 |
+| `.forgekit/docs/task-board.md` | 是 | 待补充 |
+| `.forgekit/docs/changelog.md` | 是 | 待补充 |
+| `.forgekit/docs/codebase-map.md` | 待确认 | 待补充 |
+| `.forgekit/docs/local-toolchain.md` | 待确认 | 待补充 |
 
 ## 会话边界
 
@@ -53,7 +53,7 @@
 
 ## 待用户确认
 
-只保留进入当前阶段编码前必须确认的问题；探索背景和证据保留在 `docs/exploration-report.md`。
+只保留进入当前阶段编码前必须确认的问题；探索背景和证据保留在 `.forgekit/docs/exploration-report.md`。
 
 - 待补充
 

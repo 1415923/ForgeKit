@@ -7,9 +7,9 @@
 | Skill | 场景 |
 | --- | --- |
 | `project-init` | 新项目初始化、方案访谈、补齐项目入口 |
-| `project-bootstrap-fill` | 根据初始化问答生成第一版 `.codex/` 和 `docs/` |
+| `project-bootstrap-fill` | 根据初始化问答生成第一版 `.codex/` 和 `.forgekit/docs/` |
 | `project-suitability` | 判断项目适合 Lite / Standard / Enterprise 还是 Custom |
-| `document-backfill` | 逐篇阅读既有文档并回填 ForgeKit `docs/` |
+| `document-backfill` | 逐篇阅读既有文档并回填 ForgeKit managed docs root |
 | `handover-review` | 接手既有项目时审计现状、兼容边界和修复计划 |
 | `large-change-planning` | 大范围、迁移、重构或高风险任务前的探索和实施计划 |
 | `code-review` | 审查 diff、回归、安全风险和测试缺口 |

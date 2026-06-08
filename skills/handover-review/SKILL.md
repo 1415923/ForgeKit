@@ -13,8 +13,8 @@ description: Audit and stabilize an inherited or existing project before further
    - Extract answers from those files first. Do not ask the user for facts already present in inspected docs unless the docs are contradictory, stale, unsafe, or incomplete.
    - Report the evidence summary before questions: files read, stack facts, startup commands, test commands, deployment notes, environment variables, known limitations, contradictions, and remaining unknowns.
    - Ask only targeted questions about contradictions, missing evidence, or decisions that local files cannot answer.
-3. Document backfill pass when the user asks to complete ForgeKit `docs/` from existing project documents:
-   - First list candidate source documents and target ForgeKit docs. Do not read every source document into one large summary.
+3. Document backfill pass when the user asks to complete ForgeKit managed docs from existing project documents:
+   - First list candidate source documents and target ForgeKit managed docs. Do not read every source document into one large summary.
    - Process one source document at a time. For each source document: read it, extract transferable facts, identify the target docs to update, write those target docs immediately, then summarize what was migrated and what remains unknown.
    - Keep source traceability in target docs by recording source file paths for imported facts when practical.
    - Preserve details such as test scenarios, startup steps, environment assumptions, deployment paths, known defects, API behavior, hardware/software prerequisites, and acceptance evidence. Do not collapse them into a generic project summary.
@@ -37,7 +37,7 @@ description: Audit and stabilize an inherited or existing project before further
    - P3: major architecture or technology change
 8. Fix P0/P1 first with minimal compatible changes.
 9. Put P2/P3 into roadmap or review/refactor gate. Do not make large architecture changes during handover unless the user explicitly confirms.
-10. For medium or high risk follow-up work, use `governance/ai-engineering-loop.md` to decide the required `changes/<id>/` artifacts before implementation.
+10. For medium or high risk follow-up work, use `governance/ai-engineering-loop.md` to decide the required `.forgekit/changes/<id>/` artifacts before implementation.
 11. For high-impact changes, require change impact assessment before implementation.
 
 ## Compatibility Boundaries
@@ -58,20 +58,20 @@ Do not change these by default:
 
 Update or create:
 
-- inherited project audit document in `docs/`
-- defect repair plan in `docs/`
-- version roadmap in `docs/`
-- risk register in `docs/`
-- traceability matrix in `docs/`
-- technical debt record in `docs/`
-- quality metrics baseline in `docs/`
-- environment matrix and release pipeline facts in `docs/`
-- code ownership matrix in `docs/`
-- project task board in `docs/`
-- incident or defect review in `docs/` for severe or repeated historical issues
-- change impact assessment in `docs/` when high-impact changes are proposed
+- inherited project audit document in `.forgekit/docs/`
+- defect repair plan in `.forgekit/docs/`
+- version roadmap in `.forgekit/docs/`
+- risk register in `.forgekit/docs/`
+- traceability matrix in `.forgekit/docs/`
+- technical debt record in `.forgekit/docs/`
+- quality metrics baseline in `.forgekit/docs/`
+- environment matrix and release pipeline facts in `.forgekit/docs/`
+- code ownership matrix in `.forgekit/docs/`
+- project task board in `.forgekit/docs/`
+- incident or defect review in `.forgekit/docs/` for severe or repeated historical issues
+- change impact assessment in `.forgekit/docs/` when high-impact changes are proposed
 - governance notes in `governance/` when version or architecture policy changes
-- changelog or version record in `docs/`
+- changelog or version record in `.forgekit/docs/`
 
 ## Output
 

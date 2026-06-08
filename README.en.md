@@ -68,23 +68,26 @@ Read CLAUDE.md, prefer the project-local .agents/skills/project-init/SKILL.md, a
 
 - `project-init`: discovery interview and project entry setup.
 - `project-suitability`: decide whether Lite, Standard, Enterprise, or Custom flow fits.
-- `document-backfill`: read existing docs one by one and migrate facts into ForgeKit `docs/`.
+- `document-backfill`: read existing business docs one by one and migrate facts into the ForgeKit managed docs root.
 - `handover-review`: audit inherited projects and identify risks.
 - `large-change-planning`: explore and plan broad, cross-module, migration, or refactor work before implementation.
 - `code-review`, `release-check`, `security-review`: code review, release gate, and security review.
 - AI Engineering Loop: low risk keeps a light flow; medium risk needs proposal / tasks / verification / review; high risk adds design / ship; retro is recommended only after major changes.
 - Optional document-sync checks and Git hooks for related-doc drift, stale descriptions, and version-record reasons.
 
-After generation, Codex starts from `AGENTS.md`; Claude Code starts from `CLAUDE.md`. Both share `.codex/`, `docs/`, `governance/`, and `.agents/skills/`.
+After generation, Codex starts from `AGENTS.md`; Claude Code starts from `CLAUDE.md`. Both share `.codex/`, `.forgekit/`, `governance/`, and `.agents/skills/`.
 
 Key generated files:
 
-- `docs/codebase-map.md`: code entry points, module map, and local validation commands.
-- `docs/local-toolchain.md`: local lint, test, build, LSP, and toolchain capability.
+- `.forgekit/docs/codebase-map.md`: code entry points, module map, and local validation commands.
+- `.forgekit/docs/local-toolchain.md`: local lint, test, build, LSP, and toolchain capability.
+- `.forgekit/project-boundary.yml`: ForgeKitRoot, ProjectRoot, managed docs root, change root, and write policy.
 - `governance/ai-engineering-loop.md`: risk levels, change artifacts, and delivery loop.
-- `changes/_template/`: proposal, design, tasks, verification, review, ship, and retro templates.
+- `.forgekit/changes/_template/`: proposal, design, tasks, verification, review, ship, and retro templates.
 - `.codex/commands.md`: project-specific commands.
 - `.agents/skills/`: self-contained project skills.
+
+By default, ForgeKit governance docs are written under `.forgekit/docs/`, and medium/high risk change artifacts are written under `.forgekit/changes/`. Existing business `docs/` is read-mostly evidence: AI may read and cite it, but should not write ForgeKit governance templates there by default.
 
 ## Upgrade An Existing Project
 
@@ -118,7 +121,7 @@ For inherited projects, the assistant should not ask for the stack first. It sho
 If there are many old docs, use:
 
 ```text
-Use document-backfill to read documents under <old-docs-dir> one source document at a time and complete ForgeKit docs as you go. Do not read every document into one large summary.
+Use document-backfill to read documents under <old-docs-dir> one source document at a time and complete the ForgeKit managed docs root as you go. Do not read every document into one large summary.
 ```
 
 ## Optional Hooks
@@ -210,6 +213,7 @@ ForgeKit can coexist with ECC: ECC enhances the AI tool; ForgeKit constrains the
 
 | Version | User-facing change |
 | --- | --- |
+| `0.16.0` | Boundary First: adds `.forgekit/project-boundary.yml`, writes ForgeKit managed docs to `.forgekit/docs`, and writes change artifacts to `.forgekit/changes` by default. |
 | `0.15.0` | Repositioned ForgeKit as a lightweight AI engineering delivery toolkit with an AI Engineering Loop and risk-based change templates. |
 | `0.14.0` | Release-usability fixes: English template file names, mode semantics, upgrade misuse guard, cross-platform smoke test, and generic template path isolation. |
 | `0.13.0` | Project suitability, large-change planning, document-sync checks, optional Git hooks, upgrade reports, and template diff support. |

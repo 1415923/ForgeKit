@@ -2,34 +2,34 @@
 
 把本目录内容复制到具体项目根目录后使用。
 
-ForgeKit 在生成项目内提供轻量 AI Engineering Loop：澄清目标、判断风险、准备必要 change 工件、实施、验证、审查、发布记录和复盘。低风险改动保持轻流程；中高风险改动使用 `changes/<id>/` 留下可审查工件。
+ForgeKit 在生成项目内提供轻量 AI Engineering Loop：澄清目标、判断风险、准备必要 change 工件、实施、验证、审查、发布记录和复盘。低风险改动保持轻流程；中高风险改动使用 `.forgekit/changes/<id>/` 留下可审查工件。
 
 ## 初始化顺序
 
 1. Codex 读取 `AGENTS.md`；Claude Code 读取 `CLAUDE.md`，确认任务路由和禁止动作。
-2. 读取 `docs/codebase-map.md`，找到代码搜索起点、推荐启动目录和局部验证命令。
-3. 读取 `docs/local-toolchain.md`，确认 LSP、lint、test、build 和局部验证能力。
-4. 读取 `docs/codex-next-work-order.md`，把初始化摘要推进为方案访谈和任务拆分。
+2. 读取 `.forgekit/docs/codebase-map.md`，找到代码搜索起点、推荐启动目录和局部验证命令。
+3. 读取 `.forgekit/docs/local-toolchain.md`，确认 LSP、lint、test、build 和局部验证能力。
+4. 读取 `.forgekit/docs/codex-next-work-order.md`，把初始化摘要推进为方案访谈和任务拆分。
 5. 可选运行 `scripts/detect-local-toolchain.ps1` 和 `scripts/run-harness-check.ps1`，只记录事实，不自动安装或改配置。
 6. 读取 `governance/overview.md`，判断项目入口。
 7. 读取 `governance/ai-engineering-loop.md`，判断当前任务是 low、medium 还是 high risk。
-8. 中风险变更准备 `changes/<id>/proposal.md`、`tasks.md`、`verification.md`、`review.md`；高风险变更再补 `design.md` 和 `ship.md`。
+8. 中风险变更准备 `.forgekit/changes/<id>/proposal.md`、`tasks.md`、`verification.md`、`review.md`；高风险变更再补 `design.md` 和 `ship.md`。
 9. 填写 `.codex/project.md`，明确项目基本信息。
 10. 填写 `.codex/scope.md`，明确当前版本范围。
 11. 填写 `.codex/commands.md`，记录本项目常用命令。
 12. 如果已有问答内容，优先使用 `project-bootstrap-fill` 根据 `.codex/questionnaires/init-questionnaire.md` 补齐第一版文档。
-13. 新项目填写 `docs/project-plan.md` 和 `docs/version-roadmap.md`。
-14. 接手项目填写 `docs/handover-audit.md` 和 `docs/defect-fix-plan.md`。
-15. 重要方案讨论写入 `docs/rfc/`，重要架构决策写入 `docs/adr/`。
-16. 需求、RFC、ADR、任务、测试、缺陷关系写入 `docs/traceability.md`。
-17. 高风险写入 `docs/risk-register.md`。
-18. 高影响变更写入 `docs/change-impact.md`。
-19. 严重事故或重复缺陷写入 `docs/incident-review.md` 或 `docs/defect-review.md`。
-20. 安全敏感变更写入 `docs/threat-model.md`，依赖变更写入 `docs/dependency-review.md`。
-21. 环境和发布链路写入 `docs/environment-matrix.md` 和 `docs/release-pipeline.md`。
-22. 模块负责人和评审责任写入 `docs/code-ownership.md`。
-23. Epic、Feature、Task、Bug 写入 `docs/task-board.md`。
-24. 技术债写入 `docs/technical-debt.md`，版本质量写入 `docs/quality-metrics.md`。
+13. 新项目填写 `.forgekit/docs/project-plan.md` 和 `.forgekit/docs/version-roadmap.md`。
+14. 接手项目填写 `.forgekit/docs/handover-audit.md` 和 `.forgekit/docs/defect-fix-plan.md`。
+15. 重要方案讨论写入 `.forgekit/docs/rfc/`，重要架构决策写入 `.forgekit/docs/adr/`。
+16. 需求、RFC、ADR、任务、测试、缺陷关系写入 `.forgekit/docs/traceability.md`。
+17. 高风险写入 `.forgekit/docs/risk-register.md`。
+18. 高影响变更写入 `.forgekit/docs/change-impact.md`。
+19. 严重事故或重复缺陷写入 `.forgekit/docs/incident-review.md` 或 `.forgekit/docs/defect-review.md`。
+20. 安全敏感变更写入 `.forgekit/docs/threat-model.md`，依赖变更写入 `.forgekit/docs/dependency-review.md`。
+21. 环境和发布链路写入 `.forgekit/docs/environment-matrix.md` 和 `.forgekit/docs/release-pipeline.md`。
+22. 模块负责人和评审责任写入 `.forgekit/docs/code-ownership.md`。
+23. Epic、Feature、Task、Bug 写入 `.forgekit/docs/task-board.md`。
+24. 技术债写入 `.forgekit/docs/technical-debt.md`，版本质量写入 `.forgekit/docs/quality-metrics.md`。
 25. 开始编码前，确认 Definition of Ready；完成时确认 Definition of Done。
 
 ## 升级兼容
@@ -53,33 +53,33 @@ ForgeKit 在生成项目内提供轻量 AI Engineering Loop：澄清目标、判
 
 - `AGENTS.md`：Codex 第一入口，只放任务路由、上下文规则和禁止动作。
 - `CLAUDE.md`：Claude Code 第一入口，只放任务路由、上下文规则和禁止动作。
-- `docs/codebase-map.md`：代码搜索起点，记录模块、入口文件、常用关键词和局部验证命令。
-- `docs/local-toolchain.md`：记录各技术栈 LSP、lint、test、build 和局部验证能力。
+- `.forgekit/docs/codebase-map.md`：代码搜索起点，记录模块、入口文件、常用关键词和局部验证命令。
+- `.forgekit/docs/local-toolchain.md`：记录各技术栈 LSP、lint、test、build 和局部验证能力。
 - `governance/agent-harness.md`：说明 AGENTS 分层、agentic search、停止编码条件和输出要求。
 - `governance/ai-engineering-loop.md`：说明 low / medium / high 风险分级、change 工件和交付闭环。
 - `governance/large-change-execution.md`：说明大任务探索、计划、分会话执行和 review 闸门。
 - `governance/team-agent-rollout.md`：说明 commands、hooks、plugin、MCP、CI 和团队推广的启用顺序。
 - `governance/agent-suitability.md`：说明项目是否适合直接套用 Codex agent 工作流。
-- `docs/exploration-report.md`、`docs/implementation-plan.md`：跨模块或高风险改动前的执行产物。
-- `docs/project-suitability.md`、`docs/project-trial-record.md`：初始化前判断适用性，并把真实项目经验回灌。
-- `docs/codex-next-work-order.md`：初始化后继续访谈、确认 MVP、落地条件和验证方式。
+- `.forgekit/docs/exploration-report.md`、`.forgekit/docs/implementation-plan.md`：跨模块或高风险改动前的执行产物。
+- `.forgekit/docs/project-suitability.md`、`.forgekit/docs/project-trial-record.md`：初始化前判断适用性，并把真实项目经验回灌。
+- `.forgekit/docs/codex-next-work-order.md`：初始化后继续访谈、确认 MVP、落地条件和验证方式。
 - `.codex/commands-catalog.md`、`.codex/hooks.md`：可选命令和 hook 候选，默认不自动启用。
 - `.codex/automation-decision.md`：判断重复流程应该做成 skill、command、hook、script、plugin、MCP 还是保留文档。
-- `changes/_template/`：proposal、design、tasks、verification、review、ship、retro 模板。
+- `.forgekit/changes/_template/`：proposal、design、tasks、verification、review、ship、retro 模板。
 - `scripts/detect-local-toolchain.ps1`、`scripts/run-harness-check.ps1`、`scripts/check-doc-sync.ps1`、`scripts/check-doc-sync.sh`：只读检测脚本，用于把 harness 从文档推进到可执行检查。
 - `scripts/install-hooks.ps1`、`scripts/install-hooks.sh`：opt-in 安装、查看、卸载 Git hook，不默认启用。
 
-使用优先级：Codex 从 `AGENTS.md` 开始，Claude Code 从 `CLAUDE.md` 开始；如果任务命中 ForgeKit skill，优先读取项目内 `.agents/skills/<skill>/SKILL.md`，不要假设用户级或系统级 skill 路径存在；然后进入 `docs/codebase-map.md` -> `docs/local-toolchain.md` -> `docs/codex-next-work-order.md` -> `.codex/` -> 相关 `.codex/stacks/<stack>/` -> 任务相关治理文件。不要默认读取全部治理文档。
+使用优先级：Codex 从 `AGENTS.md` 开始，Claude Code 从 `CLAUDE.md` 开始；如果任务命中 ForgeKit skill，优先读取项目内 `.agents/skills/<skill>/SKILL.md`，不要假设用户级或系统级 skill 路径存在；然后进入 `.forgekit/docs/codebase-map.md` -> `.forgekit/docs/local-toolchain.md` -> `.forgekit/docs/codex-next-work-order.md` -> `.codex/` -> 相关 `.codex/stacks/<stack>/` -> 任务相关治理文件。不要默认读取全部治理文档。
 
 常见 stack 名称：`java-springboot`、`vue`、`react`、`python-fastapi`、`node-express`、`csharp-dotnet`、`go-service`、`php-laravel`、`rust-cli-service`、`flutter-dart`、`cpp-cmake`、`kotlin-spring`、`swift-ios`、`ruby-rails`、`r-data-analysis`、`fpga-vivado-vitis`。只读取当前项目实际选择的 stack，避免把无关语言规则混入上下文。
 
-大任务优先级：先完成 `docs/exploration-report.md`，再完成 `docs/implementation-plan.md`，确认后才进入分阶段编码。
+大任务优先级：先完成 `.forgekit/docs/exploration-report.md`，再完成 `.forgekit/docs/implementation-plan.md`，确认后才进入分阶段编码。
 
 团队工具链优先级：先沉淀 command，再考虑 hook；跨项目稳定后再考虑 plugin；MCP 默认只读优先，写操作必须人工确认。文档同步类 hook 建议从 `scripts/check-doc-sync.ps1` 或 `scripts/check-doc-sync.sh` 的只提示模式开始，确认噪音可接受后再使用 strict 模式。
 
 ForgeKit 采用根级统一 plugin 表面：`.codex-plugin/`、`.claude-plugin/` 和共享 `skills/` 位于模板仓库根。生成项目仍应按本文件、`AGENTS.md` 和 `CLAUDE.md` 的边界执行，不因安装 plugin 而默认启用 hook、MCP 或外部写操作。
 
-Claude Code 入口是薄入口：`CLAUDE.md` 和 `.claude/skills/forgekit-project-workflow/` 只负责路由和门禁；共享项目事实仍写入 `.codex/`、`docs/` 和 `governance/`，避免为不同 AI 工具维护多套项目事实。
+Claude Code 入口是薄入口：`CLAUDE.md` 和 `.claude/skills/forgekit-project-workflow/` 只负责路由和门禁；共享项目事实仍写入 `.codex/`、`.forgekit/docs/` 和 `governance/`，避免为不同 AI 工具维护多套项目事实。
 
 适用性优先级：无 Git、目录混乱、无法验证、大量二进制或非工程师主导的项目，不应直接套用 Standard / Enterprise，应先补工程条件或走 Custom。
 
@@ -87,8 +87,8 @@ Claude Code 入口是薄入口：`CLAUDE.md` 和 `.claude/skills/forgekit-projec
 
 如果不是新项目，而是接手已有项目，应先使用 `.agents/skills/handover-review/`：
 
-1. 完成 `docs/handover-audit.md`。
-2. 完成 `docs/defect-fix-plan.md`。
+1. 完成 `.forgekit/docs/handover-audit.md`。
+2. 完成 `.forgekit/docs/defect-fix-plan.md`。
 3. 先修复 P0/P1 问题，不默认改变大架构。
 4. 记录兼容边界。
 5. 再基于当前技术栈、实际需求和版本闸门规划后续开发。

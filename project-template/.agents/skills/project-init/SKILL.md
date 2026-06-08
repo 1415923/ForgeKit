@@ -1,22 +1,22 @@
 ---
 name: project-init
-description: Initialize or repair a project's Codex workflow, discover product requirements, inspect existing projects before asking stack questions, and fill first-version `.codex/` and `docs/` files from confirmed facts. Use when Codex is asked to set up a project, clarify a vague idea, process initialization answers, discuss architecture before implementation, or decide whether coding may start.
+description: Initialize or repair a project's Codex workflow, discover product requirements, inspect existing projects before asking stack questions, and fill first-version `.codex/` and `.forgekit/docs/` files from confirmed facts. Use when Codex is asked to set up a project, clarify a vague idea, process initialization answers, discuss architecture before implementation, or decide whether coding may start.
 ---
 
 # Project Init
 
 ## Workflow
 
-1. Read `AGENTS.md` first if present, then read the governance overview, `.codex/init.generated.md`, `.codex/questionnaires/`, existing `.codex/`, existing `docs/`, and project root files.
+1. Read `AGENTS.md` first if present, then read the governance overview, `.codex/init.generated.md`, `.codex/questionnaires/`, existing `.codex/`, existing business `docs/`, `.forgekit/docs/`, and project root files.
    - If `governance/ai-engineering-loop.md` exists, use it to classify later implementation work as low, medium, or high risk before coding starts.
-   - Do not force a `changes/<id>/` folder for low-risk work. Medium-risk work needs proposal, tasks, verification, and review. High-risk work also needs design and ship notes.
+   - Do not force a `.forgekit/changes/<id>/` folder for low-risk work. Medium-risk work needs proposal, tasks, verification, and review. High-risk work also needs design and ship notes.
 2. Identify whether this is a new project idea, an existing project handover, or a feature/change request inside an existing project.
 3. Inspect local evidence before asking stack questions:
    - For existing projects, scan README files, usage docs, setup docs, test docs, deployment docs, build files, dependency manifests, scripts, tests, source roots, and config files to infer the current stack and constraints.
    - Treat existing project documentation as evidence, not as a note to review later. Read the docs and extract answers before asking the user.
    - For new empty projects, treat missing `.codex/stacks/` or empty stacks as a normal planning state, not an error.
    - Read `.codex/stacks/<stack>/` only when the stack is already present, selected in metadata, or clearly inferred from local evidence.
-4. If questionnaire answers exist, use `governance/project-bootstrap-fill.md` to convert them into first-version `.codex/` rules and `docs/`.
+4. If questionnaire answers exist, use `governance/project-bootstrap-fill.md` to convert them into first-version `.codex/` rules and `.forgekit/docs/`.
 5. Interview the user before large-scale coding when key facts are unclear. Do not start with a fixed list of technical questions. Choose the next question from the current uncertainty:
    - product goal and target users
    - current workflow or pain point
@@ -72,13 +72,13 @@ description: Initialize or repair a project's Codex workflow, discover product r
    - New features and fixes should default to the existing stack and architecture.
    - Ask about stack migration, database replacement, framework changes, or major refactors only when the user explicitly requests them or local evidence shows a blocking conflict.
    - If local evidence is missing or contradictory, summarize what was found and ask targeted questions about the contradiction.
-   - When the user asks to fill ForgeKit docs from existing project documents, use a document backfill pass: list candidate source docs, process one source document at a time, update target docs immediately, record source paths for imported facts when practical, and only then move to the next source document.
+   - When the user asks to fill ForgeKit managed docs from existing project documents, use a document backfill pass: list candidate source docs, process one source document at a time, update target `.forgekit/docs` immediately, record source paths for imported facts when practical, and only then move to the next source document.
    - Do not read all old documents into one large summary before writing. Preserve detailed test plans, usage steps, setup assumptions, deployment notes, known issues, and acceptance evidence.
 12. For large, cross-module, migration, refactor, or high-risk work, require the large-change protocol before implementation:
    - read `governance/ai-engineering-loop.md`
    - read `governance/large-change-execution.md`
-   - create or update the exploration report in `docs/`
-   - create or update the implementation plan in `docs/`
+   - create or update the exploration report in `.forgekit/docs/`
+   - create or update the implementation plan in `.forgekit/docs/`
    - do not start broad coding until the implementation plan says coding is allowed
 13. Fill or update:
    - `.codex/project.md`
@@ -89,14 +89,14 @@ description: Initialize or repair a project's Codex workflow, discover product r
    - `.codex/security.md`
    - `.codex/git.md`
    - `.codex/version-gates.md`
-   - `docs/project plan`
-   - version roadmap document in `docs/`
-   - `docs/requirements`
-   - `docs/architecture`
-   - `docs/technology selection`
-   - `docs/environment matrix`
-   - `docs/release pipeline`
-   - `docs/project task board`
+   - `.forgekit/docs/project-plan.md`
+   - version roadmap document in `.forgekit/docs/`
+   - `.forgekit/docs/requirements.md`
+   - `.forgekit/docs/architecture.md`
+   - `.forgekit/docs/tech-decisions.md`
+   - `.forgekit/docs/environment-matrix.md`
+   - `.forgekit/docs/release-pipeline.md`
+   - `.forgekit/docs/task-board.md`
 14. Preserve existing project-specific facts. Do not overwrite real information with template text.
 15. Remove or replace template history that belongs to ForgeKit itself. Generated projects must not keep ForgeKit Agent Harness roadmap tasks as if they were project tasks.
 16. Do not modify business code unless the user explicitly asks.

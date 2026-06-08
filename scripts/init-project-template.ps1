@@ -23,6 +23,50 @@ function Write-Step {
     Write-Host "[init] $Message"
 }
 
+function Get-MappedTemplatePath {
+    param([string]$RelativePath)
+    if ($RelativePath -like "docs\*" -or $RelativePath -like "docs/*") {
+        return Join-Path ".forgekit\docs" ($RelativePath.Substring(5))
+    }
+    if ($RelativePath -like "changes\*" -or $RelativePath -like "changes/*") {
+        return Join-Path ".forgekit\changes" ($RelativePath.Substring(8))
+    }
+    return $RelativePath
+}
+
+function Get-RelativePathCompat {
+    param(
+        [string]$FromPath,
+        [string]$ToPath
+    )
+
+    try {
+        if ([System.IO.Path].GetMethod("GetRelativePath", [type[]]@([string], [string]))) {
+            return [System.IO.Path]::GetRelativePath($FromPath, $ToPath)
+        }
+    } catch {
+        # Windows PowerShell 5.1 does not expose Path.GetRelativePath.
+    }
+
+    try {
+        $fromFull = [System.IO.Path]::GetFullPath($FromPath)
+        $toFull = [System.IO.Path]::GetFullPath($ToPath)
+        if (-not $fromFull.EndsWith([System.IO.Path]::DirectorySeparatorChar)) {
+            $fromFull = $fromFull + [System.IO.Path]::DirectorySeparatorChar
+        }
+        $fromUri = New-Object System.Uri($fromFull)
+        $toUri = New-Object System.Uri($toFull)
+        if ($fromUri.Scheme -ne $toUri.Scheme) {
+            return "<path-to-forgekit>"
+        }
+        $relativeUri = $fromUri.MakeRelativeUri($toUri)
+        $relative = [System.Uri]::UnescapeDataString($relativeUri.ToString())
+        return $relative.Replace('/', [System.IO.Path]::DirectorySeparatorChar)
+    } catch {
+        return "<path-to-forgekit>"
+    }
+}
+
 function Copy-DirectoryContent {
     param(
         [Parameter(Mandatory = $true)]
@@ -42,7 +86,8 @@ function Copy-DirectoryContent {
 
     Get-ChildItem -LiteralPath $SourceDir -Recurse -File | ForEach-Object {
         $relativePath = $_.FullName.Substring($SourceDir.Length).TrimStart('\', '/')
-        $destinationFile = Join-Path $DestinationDir $relativePath
+        $destinationRelativePath = Get-MappedTemplatePath $relativePath
+        $destinationFile = Join-Path $DestinationDir $destinationRelativePath
         $destinationParent = Split-Path -Parent $destinationFile
 
         if (-not (Test-Path -LiteralPath $destinationParent)) {
@@ -55,7 +100,7 @@ function Copy-DirectoryContent {
         }
 
         Copy-Item -LiteralPath $_.FullName -Destination $destinationFile -Force:$Overwrite
-        Write-Host "[copy] $relativePath"
+        Write-Host "[copy] $destinationRelativePath"
     }
 }
 
@@ -106,7 +151,8 @@ function Copy-DirectoryContentForUpgrade {
 
     Get-ChildItem -LiteralPath $SourceDir -Recurse -File | ForEach-Object {
         $relativePath = $_.FullName.Substring($SourceDir.Length).TrimStart('\', '/')
-        $destinationFile = Join-Path $DestinationDir $relativePath
+        $destinationRelativePath = Get-MappedTemplatePath $relativePath
+        $destinationFile = Join-Path $DestinationDir $destinationRelativePath
         $destinationParent = Split-Path -Parent $destinationFile
 
         if (-not (Test-Path -LiteralPath $destinationParent)) {
@@ -115,28 +161,28 @@ function Copy-DirectoryContentForUpgrade {
 
         if (-not (Test-Path -LiteralPath $destinationFile)) {
             Copy-Item -LiteralPath $_.FullName -Destination $destinationFile
-            $State.Copied.Add($relativePath) | Out-Null
-            Write-Host "[copy] $relativePath"
+            $State.Copied.Add($destinationRelativePath) | Out-Null
+            Write-Host "[copy] $destinationRelativePath"
             return
         }
 
         if (Test-FileSame -LeftPath $_.FullName -RightPath $destinationFile) {
-            $State.SkippedSame.Add($relativePath) | Out-Null
-            Write-Host "[same] $relativePath"
+            $State.SkippedSame.Add($destinationRelativePath) | Out-Null
+            Write-Host "[same] $destinationRelativePath"
             return
         }
 
-        $State.SkippedDifferent.Add($relativePath) | Out-Null
-        Write-Host "[review] $relativePath differs; existing file preserved"
+        $State.SkippedDifferent.Add($destinationRelativePath) | Out-Null
+        Write-Host "[review] $destinationRelativePath differs; existing file preserved"
 
         if ($ExportTemplates) {
-            $exportFile = Join-Path $ExportDir $relativePath
+            $exportFile = Join-Path $ExportDir $destinationRelativePath
             $exportParent = Split-Path -Parent $exportFile
             if (-not (Test-Path -LiteralPath $exportParent)) {
                 New-Item -ItemType Directory -Force -Path $exportParent | Out-Null
             }
             Copy-Item -LiteralPath $_.FullName -Destination $exportFile -Force
-            $State.ExportedTemplates.Add($relativePath) | Out-Null
+            $State.ExportedTemplates.Add($destinationRelativePath) | Out-Null
         }
     }
 }
@@ -214,6 +260,12 @@ function Write-UpgradeReport {
             }
         }
     }
+    $lines.Add("") | Out-Null
+    $lines.Add("Boundary migration:") | Out-Null
+    $lines.Add("- v0.16.0 adds .forgekit/project-boundary.yml for ForgeKitRoot, ProjectRoot, managed_docs_root, and change_root.") | Out-Null
+    $lines.Add("- Existing projects may still use docs/ or changes/ for ForgeKit-managed files; upgrade mode does not move them automatically.") | Out-Null
+    $lines.Add("- New projects use .forgekit/docs and .forgekit/changes by default.") | Out-Null
+    $lines.Add("- Treat business docs roots such as docs/ as read-mostly evidence unless the user explicitly confirms target files and reasons for writing.") | Out-Null
     if ($legacyMatches.Count -eq 0) {
         $lines.Add("- Detected: none.") | Out-Null
     } else {
@@ -228,6 +280,71 @@ function Write-UpgradeReport {
 
     Set-Content -LiteralPath $reportPath -Value $lines -Encoding UTF8
     Write-Host "[copy] .codex\upgrade-report.md"
+}
+
+function Write-BoundaryConfig {
+    param(
+        [string]$DestinationDir,
+        [string]$ForgeKitRoot,
+        [string]$SelectedMode,
+        [switch]$Overwrite
+    )
+
+    $boundaryFile = Join-Path $DestinationDir ".forgekit\project-boundary.yml"
+    if ((Test-Path -LiteralPath $boundaryFile) -and -not $Overwrite) {
+        Write-Host "[skip] .forgekit\project-boundary.yml already exists"
+        return
+    }
+
+    $relativeForgeKitRoot = Get-RelativePathCompat -FromPath $DestinationDir -ToPath $ForgeKitRoot
+    if ([string]::IsNullOrWhiteSpace($relativeForgeKitRoot)) {
+        $relativeForgeKitRoot = "<path-to-forgekit>"
+    }
+
+    $lines = @(
+        'forgekit:',
+        '  version: "0.16.0"',
+        "  mode: `"$SelectedMode`"",
+        '',
+        'roots:',
+        "  forgekit_root: `"$relativeForgeKitRoot`"",
+        '  project_root: "."',
+        '  managed_docs_root: ".forgekit/docs"',
+        '  change_root: ".forgekit/changes"',
+        '  business_docs_roots:',
+        '    - "docs"',
+        '',
+        'write_policy:',
+        '  allow:',
+        '    - ".codex/**"',
+        '    - ".agents/**"',
+        '    - ".claude/**"',
+        '    - ".forgekit/docs/**"',
+        '    - ".forgekit/changes/**"',
+        '  task_scoped:',
+        '    - "src/**"',
+        '    - "tests/**"',
+        '    - "scripts/**"',
+        '  read_mostly:',
+        '    - "docs/**"',
+        '  ask:',
+        '    - "README.md"',
+        '    - "AGENTS.md"',
+        '    - "CLAUDE.md"',
+        '    - ".github/**"',
+        '    - "package.json"',
+        '    - "pom.xml"',
+        '    - "build.gradle"',
+        '  readonly:',
+        "    - `"$relativeForgeKitRoot/**`"",
+        '    - ".git/**"',
+        '    - "node_modules/**"',
+        '    - "target/**"',
+        '    - "dist/**"',
+        '    - "build/**"'
+    )
+    Set-Content -LiteralPath $boundaryFile -Value $lines -Encoding UTF8
+    Write-Host "[copy] .forgekit\project-boundary.yml"
 }
 
 function Write-InitMetadata {
@@ -258,7 +375,7 @@ function Write-InitMetadata {
         "- Stacks: $stackText",
         "- StackSelection: deferred means no stack was chosen during initialization. This is normal.",
         "",
-        "Use this file as initialization metadata. Merge real project facts into .codex/project.md, .codex/scope.md, the docs codebase map, the local toolchain check document, and docs/tech-decisions.md manually or with Codex.",
+        "Use this file as initialization metadata. Merge real project facts into .codex/project.md, .codex/scope.md, .forgekit/docs/codebase-map.md, .forgekit/docs/local-toolchain.md, and .forgekit/docs/tech-decisions.md manually or with Codex.",
         "",
         "Stack guidance:",
         "- New projects: confirm product shape, users, constraints, risks, and the v0.1.0 closed loop before choosing a stack.",
@@ -273,15 +390,16 @@ function Write-InitMetadata {
         "",
         "Recommended Codex startup order:",
         "1. AGENTS.md",
-        "2. project suitability assessment under docs",
-        "3. docs codebase map",
-        "4. local toolchain check document under docs",
-        "5. Codex next-step work order under docs",
-        "6. .codex/project.md, .codex/scope.md, .codex/commands.md",
-        "7. .codex/stacks/README.md, then related .codex/stacks/<stack>/ only when a stack is confirmed",
-        "8. Task-specific governance files",
-        "9. For large changes, use governance/large-change-execution.md first",
-        "10. For commands, hooks, plugins, or MCP, use governance/team-agent-rollout.md first"
+        "2. .forgekit/project-boundary.yml",
+        "3. project suitability assessment under .forgekit/docs",
+        "4. .forgekit/docs/codebase-map.md",
+        "5. .forgekit/docs/local-toolchain.md",
+        "6. .forgekit/docs/codex-next-work-order.md",
+        "7. .codex/project.md, .codex/scope.md, .codex/commands.md",
+        "8. .codex/stacks/README.md, then related .codex/stacks/<stack> only when a stack is confirmed",
+        "9. Task-specific governance files",
+        "10. For large changes, use governance/large-change-execution.md first",
+        "11. For commands, hooks, plugins, or MCP, use governance/team-agent-rollout.md first"
     )
 
     Set-Content -LiteralPath $metadataFile -Value $lines -Encoding UTF8
@@ -316,17 +434,18 @@ function Write-ClaudeInitMetadata {
         "- Stacks: $stackText",
         "- StackSelection: deferred means no stack was chosen during initialization. This is normal.",
         "",
-        "Use this file as Claude Code initialization metadata. Merge real project facts into .codex/project.md, .codex/scope.md, the docs codebase map, the local toolchain check document, and docs/tech-decisions.md manually or with Claude Code.",
+        "Use this file as Claude Code initialization metadata. Merge real project facts into .codex/project.md, .codex/scope.md, .forgekit/docs/codebase-map.md, .forgekit/docs/local-toolchain.md, and .forgekit/docs/tech-decisions.md manually or with Claude Code.",
         "",
         "Recommended Claude Code startup order:",
         "1. CLAUDE.md",
         "2. .claude/skills/forgekit-project-workflow/SKILL.md",
-        "3. docs codebase map",
-        "4. local toolchain check document under docs",
-        "5. Codex next-step work order under docs",
-        "6. .codex/project.md, .codex/scope.md, .codex/commands.md",
-        "7. .codex/stacks/README.md, then related .codex/stacks/<stack>/ only when a stack is confirmed",
-        "8. Task-specific governance files"
+        "3. .forgekit/project-boundary.yml",
+        "4. .forgekit/docs/codebase-map.md",
+        "5. .forgekit/docs/local-toolchain.md",
+        "6. .forgekit/docs/codex-next-work-order.md",
+        "7. .codex/project.md, .codex/scope.md, .codex/commands.md",
+        "8. .codex/stacks/README.md, then related .codex/stacks/<stack> only when a stack is confirmed",
+        "9. Task-specific governance files"
     )
 
     $metadataParent = Split-Path -Parent $metadataFile
@@ -412,6 +531,11 @@ foreach ($stack in $normalizedStacks) {
 
 Write-InitMetadata -DestinationDir $resolvedTarget -Name $ProjectName -SelectedMode $Mode -SelectedStacks $normalizedStacks -Overwrite:$Force
 Write-ClaudeInitMetadata -DestinationDir $resolvedTarget -Name $ProjectName -SelectedMode $Mode -SelectedStacks $normalizedStacks -Overwrite:$Force
+if ($Upgrade -and -not $Force) {
+    Write-BoundaryConfig -DestinationDir $resolvedTarget -ForgeKitRoot $templateRoot -SelectedMode $Mode
+} else {
+    Write-BoundaryConfig -DestinationDir $resolvedTarget -ForgeKitRoot $templateRoot -SelectedMode $Mode -Overwrite
+}
 
 if ($Upgrade -and -not $Force) {
     Write-UpgradeReport -DestinationDir $resolvedTarget -ExportDir $upgradeExportDir -State $upgradeState -ExportTemplates:$ExportUpgradeTemplates
@@ -428,6 +552,13 @@ Write-Host "   Claude Code: claude"
 Write-Host "3. Send the startup message:"
 Write-Host "   Codex: Read AGENTS.md, prefer .agents/skills/project-init/SKILL.md, and help me initialize this project with ForgeKit. Do not read a user-level or system-level project-init path."
 Write-Host "   Claude Code: Read CLAUDE.md, prefer .agents/skills/project-init/SKILL.md, and help me initialize this project with ForgeKit. Do not read a user-level or system-level project-init path."
+Write-Host ""
+Write-Host "Boundary:"
+Write-Host "- ForgeKitRoot is the toolkit/template source: $templateRoot"
+Write-Host "- ProjectRoot is the business repository and Git commit location: $resolvedTarget"
+Write-Host "- Managed ForgeKit docs default to .forgekit/docs; change artifacts default to .forgekit/changes."
+Write-Host "- Existing business docs/ is read-mostly by default; do not write ForgeKit governance templates there unless the user confirms."
+Write-Host "- Do not copy ForgeKit itself into ProjectRoot or commit ForgeKitRoot as part of the business repository."
 Write-Host ""
 Write-Host "Do not choose a tech stack here. ForgeKit will confirm or infer it during the discovery interview."
 if ($Upgrade) {

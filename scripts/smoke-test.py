@@ -31,6 +31,8 @@ FORBIDDEN_PRIVATE_PATHS = [
 ]
 REQUIRED_REPO_PATHS = [
     "usage.html",
+    "project-template/.forgekit/project-boundary.yml",
+    "project-template/.forgekit/docs/document-responsibility.md",
     "project-template/governance/ai-engineering-loop.md",
     "project-template/changes/README.md",
     "project-template/changes/_template/proposal.md",
@@ -49,19 +51,21 @@ REQUIRED_REPO_PATHS = [
 REQUIRED_GENERATED_PATHS = [
     "AGENTS.md",
     "CLAUDE.md",
-    "docs/codebase-map.md",
-    "docs/local-toolchain.md",
-    "docs/version-roadmap.md",
-    "docs/changelog.md",
+    ".forgekit/project-boundary.yml",
+    ".forgekit/docs/document-responsibility.md",
+    ".forgekit/docs/codebase-map.md",
+    ".forgekit/docs/local-toolchain.md",
+    ".forgekit/docs/version-roadmap.md",
+    ".forgekit/docs/changelog.md",
     "governance/ai-engineering-loop.md",
-    "changes/README.md",
-    "changes/_template/proposal.md",
-    "changes/_template/design.md",
-    "changes/_template/tasks.md",
-    "changes/_template/verification.md",
-    "changes/_template/review.md",
-    "changes/_template/ship.md",
-    "changes/_template/retro.md",
+    ".forgekit/changes/README.md",
+    ".forgekit/changes/_template/proposal.md",
+    ".forgekit/changes/_template/design.md",
+    ".forgekit/changes/_template/tasks.md",
+    ".forgekit/changes/_template/verification.md",
+    ".forgekit/changes/_template/review.md",
+    ".forgekit/changes/_template/ship.md",
+    ".forgekit/changes/_template/retro.md",
     "scripts/run-harness-check.ps1",
     "scripts/check-doc-sync.ps1",
 ]
@@ -137,6 +141,27 @@ def assert_paths(root, paths):
     missing = [p for p in paths if not (root / p).exists()]
     if missing:
         fail("Missing required paths:\n" + "\n".join(missing))
+
+
+def assert_absent_paths(root, paths):
+    present = [p for p in paths if (root / p).exists()]
+    if present:
+        fail("Unexpected paths found:\n" + "\n".join(present))
+
+
+def assert_boundary_config(path):
+    text = path.read_text(encoding="utf-8")
+    required = [
+        'managed_docs_root: ".forgekit/docs"',
+        'change_root: ".forgekit/changes"',
+        "business_docs_roots:",
+        '    - "docs"',
+        "task_scoped:",
+        "read_mostly:",
+    ]
+    missing = [item for item in required if item not in text]
+    if missing:
+        fail("Boundary config is missing required entries:\n" + "\n".join(missing))
 
 
 def assert_json(path):
@@ -221,6 +246,17 @@ def main():
     try:
         init_project(repo, target)
         assert_paths(target, REQUIRED_GENERATED_PATHS)
+        assert_absent_paths(target, [
+            "docs/codebase-map.md",
+            "docs/local-toolchain.md",
+            "docs/changelog.md",
+            "changes/README.md",
+            ".forgekit/template-lock.json",
+            ".forgekit/template-manifest.json",
+            ".forgekit/archive",
+            "archive",
+        ])
+        assert_boundary_config(target / ".forgekit" / "project-boundary.yml")
         assert_no_escaped_filenames(target)
         assert_no_forbidden_text(target, FORBIDDEN_LEGACY_REFS, "Forbidden legacy path text found in generated project")
         run_generated_checks(target)

@@ -2,7 +2,7 @@
 
 ## 选型结论
 
-技术选型的最终结论应与 `docs/project-plan.md` 保持一致。
+技术选型的最终结论应与 `.forgekit/docs/project-plan.md` 保持一致。
 
 | 层级 | 技术 | 版本 | 原因 |
 | --- | --- | --- | --- |

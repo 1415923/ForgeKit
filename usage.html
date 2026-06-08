@@ -568,12 +568,12 @@
     function modeDocs() {
       const mode = selectedMode();
       if (mode === 'Lite') {
-        return '.codex/project.md、.codex/scope.md、.codex/commands.md、docs/project-plan.md、docs/changelog.md';
+        return '.codex/project.md、.codex/scope.md、.codex/commands.md、.forgekit/docs/project-plan.md、.forgekit/docs/changelog.md';
       }
       if (mode === 'Enterprise') {
         return 'Standard 文档，加 ADR/RFC、风险登记、变更影响评估、环境矩阵、发布流水线、代码所有权、安全治理、质量指标';
       }
-      return 'docs/project-plan.md、docs/tech-decisions.md、docs/version-roadmap.md、docs/requirements.md、docs/task-board.md、docs/testing.md';
+      return '.forgekit/docs/project-plan.md、.forgekit/docs/tech-decisions.md、.forgekit/docs/version-roadmap.md、.forgekit/docs/requirements.md、.forgekit/docs/task-board.md、.forgekit/docs/testing.md';
     }
 
     function stackStartupHints() {
@@ -596,7 +596,7 @@
         'fpga-vivado-vitis': 'FPGA Vivado/Vitis：从硬件工程根目录启动，优先找 Vivado/Vitis 工程、HLS 工程和仿真脚本。'
       };
       const selected = selectedStacks();
-      if (selected.length === 0) return ['未选择技术栈：先从 AGENTS.md 和 docs/codebase-map.md 判断入口。'];
+      if (selected.length === 0) return ['未选择技术栈：先从 AGENTS.md 和 .forgekit/docs/codebase-map.md 判断入口。'];
       return selected.map(stack => map[stack] || (stack + '：先补充推荐启动目录。'));
     }
 
@@ -607,10 +607,11 @@
         '',
         '2. Codex 先读：',
         '   AGENTS.md',
-        '   docs/project-suitability.md',
-        '   docs/codebase-map.md',
-        '   docs/local-toolchain.md',
-        '   docs/codex-next-work-order.md',
+        '   .forgekit/project-boundary.yml',
+        '   .forgekit/docs/project-suitability.md',
+        '   .forgekit/docs/codebase-map.md',
+        '   .forgekit/docs/local-toolchain.md',
+        '   .forgekit/docs/codex-next-work-order.md',
         '   .codex/project.md、.codex/scope.md、.codex/commands.md',
         '',
         '3. 只按需读取技术栈：',
@@ -644,7 +645,7 @@
         '- 项目入口：' + getValue('entryMode', '待补充'),
         '- 项目类型：' + getValue('projectType', '待补充'),
         '- 技术栈模板：' + (selectedStacks().join(', ') || '待补充'),
-        '- 推荐启动入口：AGENTS.md -> docs/codebase-map.md -> docs/local-toolchain.md -> docs/codex-next-work-order.md -> 相关 .codex/stacks/<stack>/',
+        '- 推荐启动入口：AGENTS.md -> .forgekit/docs/codebase-map.md -> .forgekit/docs/local-toolchain.md -> .forgekit/docs/codex-next-work-order.md -> 相关 .codex/stacks/<stack>/',
         '- 适用性已确认：' + (selectedSuitability().join(', ') || '待评估'),
         '',
         '## 项目目标',
@@ -671,18 +672,18 @@
       const name = projectName.value.trim() || '当前项目';
       const entry = getValue('entryMode', '新项目');
       if (entry === '接手既有项目') {
-        return '使用项目内 .agents/skills/handover-review/SKILL.md 接手这个既有项目，不要读取用户级或系统级 handover-review 路径，并根据下面的项目简报开始访谈。\n\n' + buildBrief() + '\n\n请先读取 AGENTS.md、docs/project-suitability.md、governance/agent-suitability.md、docs/codebase-map.md、docs/local-toolchain.md、docs/codex-next-work-order.md、governance/overview.md、.codex/handover.md、README、启动文档、构建配置、.codex/project.md、.codex/scope.md、.codex/commands.md、.codex/stacks/ 中相关技术栈模板。必要时可以先运行 scripts/detect-local-toolchain.ps1 和 scripts/run-harness-check.ps1，但只能作为只读事实检查，不要自动安装工具或启动服务。不要默认读取全部 governance/ 或 docs/。不要默认改变大架构、对外 API、数据库语义或部署方式。先输出适用性结论、当前项目状态、兼容边界、P0/P1 风险、需要我确认的 3-5 个关键问题；确认前不要开始编码。';
+        return '使用项目内 .agents/skills/handover-review/SKILL.md 接手这个既有项目，不要读取用户级或系统级 handover-review 路径，并根据下面的项目简报开始访谈。\n\n' + buildBrief() + '\n\n请先读取 AGENTS.md、.forgekit/docs/project-suitability.md、governance/agent-suitability.md、.forgekit/docs/codebase-map.md、.forgekit/docs/local-toolchain.md、.forgekit/docs/codex-next-work-order.md、governance/overview.md、.codex/handover.md、README、启动文档、构建配置、.codex/project.md、.codex/scope.md、.codex/commands.md、.codex/stacks/ 中相关技术栈模板。必要时可以先运行 scripts/detect-local-toolchain.ps1 和 scripts/run-harness-check.ps1，但只能作为只读事实检查，不要自动安装工具或启动服务。不要默认读取全部 governance/ 或 docs/。不要默认改变大架构、对外 API、数据库语义或部署方式。先输出适用性结论、当前项目状态、兼容边界、P0/P1 风险、需要我确认的 3-5 个关键问题；确认前不要开始编码。';
       }
-      return '使用项目内 .agents/skills/project-init/SKILL.md 初始化这个项目，不要读取用户级或系统级 project-init 路径，并根据下面的项目简报开始方案访谈。\n\n' + buildBrief() + '\n\n要求：\n1. 先读取 AGENTS.md、docs/project-suitability.md、governance/agent-suitability.md、docs/codebase-map.md、docs/local-toolchain.md、docs/codex-next-work-order.md、governance/overview.md、governance/agent-harness.md、governance/ai-engineering-loop.md、governance/project-bootstrap-fill.md、.codex/init.generated.md、.codex/questionnaires/、.codex/stacks/ 中相关技术栈模板。\n2. ' + mode + ' 模式只作为 AI 填充优先级和治理强度提示；初始化脚本不会按模式裁剪复制文件。不要把所有治理文件都读进上下文。\n3. 必要时可以运行 scripts/detect-local-toolchain.ps1 和 scripts/run-harness-check.ps1，但只能作为只读事实检查；不要自动安装工具、启动服务或修改系统配置。\n4. 先判断项目适用性：如果不是 Suitable，请先说明缺失条件和最小补齐步骤，不要直接编码。\n5. 新项目要把“产品方案商讨”作为独立阶段：先讨论目标用户、核心痛点、最终产品形态、长期版本路线、非目标和风险，再讨论数据库、登录、目录、框架等工程参数。\n6. 如果需求还模糊，请给出 2-4 个产品形态候选，比较范围、复杂度、部署成本、长期扩展和明确不做，并给出推荐方案让我确认。\n7. 如果公开资料有帮助，请先询问是否允许联网查阅官方文档、公开项目、同类产品或技术选型资料；未调研时必须明确说明“尚未调研”。\n8. 将稳定事实合并到第一版 .codex/ 和 docs/；未知项保留为待确认，不要编造。关键项要区分已确认、暂定假设、需要调研、延期不做。\n9. 输出适用性结论、方案状态、已写入文件、关键风险、初始 EPIC/FEAT/TASK、是否允许进入编码。\n10. 重点是继续和我确认项目方案：每轮最多提出 3-5 个最关键问题；如果我答不上来，要给候选方案、取舍、推荐默认值和验证办法。\n11. 进入编码前先按 low / medium / high 判断风险：low 可轻流程；medium 需要 changes/<id>/proposal.md、tasks.md、verification.md、review.md；high 还需要 design.md 和 ship.md，retro.md 只在重大变更后推荐。\n12. 没有项目适用性、项目开发方案、技术选型、落地条件、v0.1.0/v0.2.0/v0.3.0/v1.0.0 版本路线和 v0.1.1 review/refactor gate 的第一版结论前，不要开始编码。\n13. 在生成业务代码、安装依赖、初始化 Git、commit、push、启动服务、部署或外部写操作前，必须先在会话中输出“Execution Confirmation / 执行前确认摘要”，列出最终目标、选定产品形态、版本路线、本次做与不做、技术取舍、参考资料状态、风险、文件范围、命令和外部动作；等我明确确认完整执行方案后才能执行。';
+      return '使用项目内 .agents/skills/project-init/SKILL.md 初始化这个项目，不要读取用户级或系统级 project-init 路径，并根据下面的项目简报开始方案访谈。\n\n' + buildBrief() + '\n\n要求：\n1. 先读取 AGENTS.md、.forgekit/project-boundary.yml、.forgekit/docs/project-suitability.md、governance/agent-suitability.md、.forgekit/docs/codebase-map.md、.forgekit/docs/local-toolchain.md、.forgekit/docs/codex-next-work-order.md、governance/overview.md、governance/agent-harness.md、governance/ai-engineering-loop.md、governance/project-bootstrap-fill.md、.codex/init.generated.md、.codex/questionnaires/、.codex/stacks/ 中相关技术栈模板。\n2. 先确认 ForgeKitRoot 是工具来源、ProjectRoot 是业务仓库；.forgekit/docs 是默认 managed docs root，业务 docs/ 默认 read-mostly，不要把 ForgeKit 治理模板写进去。\n3. ' + mode + ' 模式只作为 AI 填充优先级和治理强度提示；初始化脚本不会按模式裁剪复制文件。不要把所有治理文件都读进上下文。\n4. 必要时可以运行 scripts/detect-local-toolchain.ps1 和 scripts/run-harness-check.ps1，但只能作为只读事实检查；不要自动安装工具、启动服务或修改系统配置。\n5. 先判断项目适用性：如果不是 Suitable，请先说明缺失条件和最小补齐步骤，不要直接编码。\n6. 新项目要把“产品方案商讨”作为独立阶段：先讨论目标用户、核心痛点、最终产品形态、长期版本路线、非目标和风险，再讨论数据库、登录、目录、框架等工程参数。\n7. 如果需求还模糊，请给出 2-4 个产品形态候选，比较范围、复杂度、部署成本、长期扩展和明确不做，并给出推荐方案让我确认。\n8. 如果公开资料有帮助，请先询问是否允许联网查阅官方文档、公开项目、同类产品或技术选型资料；未调研时必须明确说明“尚未调研”。\n9. 将稳定事实合并到第一版 .codex/ 和 .forgekit/docs/；未知项保留为待确认，不要编造。关键项要区分已确认、暂定假设、需要调研、延期不做。\n10. 输出适用性结论、方案状态、已写入文件、关键风险、初始 EPIC/FEAT/TASK、是否允许进入编码。\n11. 重点是继续和我确认项目方案：每轮最多提出 3-5 个最关键问题；如果我答不上来，要给候选方案、取舍、推荐默认值和验证办法。\n12. 进入编码前先按 low / medium / high 判断风险：low 可轻流程；medium 需要 .forgekit/changes/<id>/proposal.md、tasks.md、verification.md、review.md；high 还需要 design.md 和 ship.md，retro.md 只在重大变更后推荐。\n13. 没有项目适用性、项目开发方案、技术选型、落地条件、v0.1.0/v0.2.0/v0.3.0/v1.0.0 版本路线和 v0.1.1 review/refactor gate 的第一版结论前，不要开始编码。\n14. 在生成业务代码、安装依赖、初始化 Git、commit、push、启动服务、部署或外部写操作前，必须先在会话中输出“Execution Confirmation / 执行前确认摘要”，列出最终目标、选定产品形态、版本路线、本次做与不做、技术取舍、参考资料状态、风险、文件范围、命令和外部动作；等我明确确认完整执行方案后才能执行。';
     }
 
     function buildPrompt(type) {
       const prompts = {
         init: buildInitPrompt(),
-        dev: '请开始实现我接下来描述的功能。\n先读取 AGENTS.md、.codex/rules.md、.codex/scope.md、.codex/commands.md、docs/task-board.md，以及 .codex/stacks/ 中相关技术栈规则。\n先确认本次工作对应的 EPIC / FEAT / TASK / BUG 编号；没有编号时先帮我拆分并补到任务看板。\n实现时不要做无关重构；完成后运行必要验证，并更新相关文档、docs/task-board.md 和 docs/changelog.md。',
-        large: '请按大任务多会话执行协议处理我接下来描述的任务。\n先读取 AGENTS.md、docs/codebase-map.md、docs/local-toolchain.md、governance/large-change-execution.md、docs/exploration-report.md、docs/implementation-plan.md，以及相关 .codex/stacks/<stack>/。\n不要直接开始编码。请先只读探索，更新或创建 docs/exploration-report.md，说明目标、非目标、相关模块、调用链、验证能力、风险和待确认问题。\n然后更新或创建 docs/implementation-plan.md，把任务拆成阶段、文件候选、验证命令、回滚方式、文档同步项和会话边界。\n最后给出是否允许进入第一阶段编码；如果范围、风险、验证或用户确认不足，请明确拒绝进入编码并列出需要我确认的问题。',
-        review: '使用项目内 .agents/skills/code-review/SKILL.md 审查当前改动，不要读取用户级或系统级 code-review 路径。\n请先查看 git status 和 git diff，并读取 AGENTS.md、docs/code-ownership.md、docs/task-board.md。\n重点检查 bug、行为回归、安全风险、兼容性问题、代码所有权缺口、必要评审人缺口、任务状态不一致和测试缺口。\n按 Findings、Open Questions、Test Gaps、Summary 输出。',
-        release: '使用项目内 .agents/skills/release-check/SKILL.md 做发布前检查，不要读取用户级或系统级 release-check 路径。\n先读取 AGENTS.md、docs/version-roadmap.md、docs/changelog.md、docs/task-board.md、.codex/version-gates.md、.codex/git.md、.codex/commands.md。\n按需要读取环境矩阵、发布流水线、代码所有权、安全、质量指标和事故复盘文档。\n不要 commit、tag、push 或部署。若 review/refactor gate、任务状态、S2/S3 安全风险、CI/CD 回滚、Critical/Unknown 评审结论不完整，请拒绝推进并列出需要人工确认的问题。',
+        dev: '请开始实现我接下来描述的功能。\n先读取 AGENTS.md、.codex/rules.md、.codex/scope.md、.codex/commands.md、.forgekit/docs/task-board.md，以及 .codex/stacks/ 中相关技术栈规则。\n先确认本次工作对应的 EPIC / FEAT / TASK / BUG 编号；没有编号时先帮我拆分并补到任务看板。\n实现时不要做无关重构；完成后运行必要验证，并更新相关文档、.forgekit/docs/task-board.md 和 .forgekit/docs/changelog.md。',
+        large: '请按大任务多会话执行协议处理我接下来描述的任务。\n先读取 AGENTS.md、.forgekit/docs/codebase-map.md、.forgekit/docs/local-toolchain.md、governance/large-change-execution.md、.forgekit/docs/exploration-report.md、.forgekit/docs/implementation-plan.md，以及相关 .codex/stacks/<stack>/。\n不要直接开始编码。请先只读探索，更新或创建 .forgekit/docs/exploration-report.md，说明目标、非目标、相关模块、调用链、验证能力、风险和待确认问题。\n然后更新或创建 .forgekit/docs/implementation-plan.md，把任务拆成阶段、文件候选、验证命令、回滚方式、文档同步项和会话边界。\n最后给出是否允许进入第一阶段编码；如果范围、风险、验证或用户确认不足，请明确拒绝进入编码并列出需要我确认的问题。',
+        review: '使用项目内 .agents/skills/code-review/SKILL.md 审查当前改动，不要读取用户级或系统级 code-review 路径。\n请先查看 git status 和 git diff，并读取 AGENTS.md、.forgekit/docs/code-ownership.md、.forgekit/docs/task-board.md。\n重点检查 bug、行为回归、安全风险、兼容性问题、代码所有权缺口、必要评审人缺口、任务状态不一致和测试缺口。\n按 Findings、Open Questions、Test Gaps、Summary 输出。',
+        release: '使用项目内 .agents/skills/release-check/SKILL.md 做发布前检查，不要读取用户级或系统级 release-check 路径。\n先读取 AGENTS.md、.forgekit/docs/version-roadmap.md、.forgekit/docs/changelog.md、.forgekit/docs/task-board.md、.codex/version-gates.md、.codex/git.md、.codex/commands.md。\n按需要读取环境矩阵、发布流水线、代码所有权、安全、质量指标和事故复盘文档。\n不要 commit、tag、push 或部署。若 review/refactor gate、任务状态、S2/S3 安全风险、CI/CD 回滚、Critical/Unknown 评审结论不完整，请拒绝推进并列出需要人工确认的问题。',
         security: '使用项目内 .agents/skills/security-review/SKILL.md 审查当前改动，不要读取用户级或系统级 security-review 路径。\n先读取 AGENTS.md 和 .codex/security.md。重点看密钥、鉴权、权限、外部输入、数据库查询、文件上传、第三方 API、MCP 和外部动作风险。不要输出完整密钥值。'
       };
       return prompts[type] || prompts.init;

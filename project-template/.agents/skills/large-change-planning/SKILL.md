@@ -42,7 +42,7 @@ Use this skill before coding when any condition is true:
    - rollback or recovery notes
    - user decisions still needed
    - session boundary for each stage
-5. For medium or high risk work, prepare the required `changes/<id>/` artifacts:
+5. For medium or high risk work, prepare the required `.forgekit/changes/<id>/` artifacts:
    - medium: proposal, tasks, verification, review
    - high: proposal, design, tasks, verification, review, ship
    - retro is recommended only for high-risk, major, surprising, or user-requested changes
