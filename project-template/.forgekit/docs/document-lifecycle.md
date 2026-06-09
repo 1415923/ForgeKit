@@ -83,3 +83,13 @@ The archive plan lists candidates, blocked changes, and skipped changes. `Status
 `Current docs sync: not verified by script` means a human still needs to confirm that stable conclusions were copied back into current state docs before any future archive apply step.
 
 v0.18 and v0.19 do not move files automatically. If old material becomes true again, sync the stable conclusion back into current docs instead of only linking to archive.
+
+## Archive Apply
+
+`scripts/archive-changes.py --apply --plan .forgekit/archive-plan.md --confirm` can move reviewed candidates from `.forgekit/changes/<change-id>/` to `.forgekit/archive/changes/YYYY/<change-id>/`.
+
+Apply requires an explicit `--confirm` flag and a clean Git working tree except for the selected `.forgekit/archive-plan.md`. It only reads `Archive-Status: candidate` entries from the dry-run plan.
+
+Apply does not move blocked or skipped entries. It does not rewrite links, update current docs, write business docs, update template-lock, commit, tag, or push.
+
+After moving a candidate, apply may update only the archived copy of `proposal.md` from `Status: done` to `Status: archived`. If the archived proposal status is not `done`, the apply report records a warning instead of guessing.

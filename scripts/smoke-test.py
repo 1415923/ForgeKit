@@ -185,8 +185,8 @@ def assert_json(path):
 def assert_manifest_lock(target):
     lock_path = target / ".forgekit" / "template-lock.json"
     lock = json.loads(lock_path.read_text(encoding="utf-8"))
-    if lock.get("installed_version") != "0.19.0":
-        fail("template-lock installed_version must be 0.19.0")
+    if lock.get("installed_version") != "0.20.0":
+        fail("template-lock installed_version must be 0.20.0")
     if lock.get("managed_docs_root") != ".forgekit/docs":
         fail("template-lock managed_docs_root must match boundary")
     if lock.get("change_root") != ".forgekit/changes":
@@ -239,7 +239,7 @@ def assert_upgrade_report(repo, target):
         fail("upgrade must not overwrite managed docs")
     assert_paths(target, [
         ".forgekit/upgrade-report.md",
-        ".forgekit/upgrade-export/0.19.0/.forgekit/docs/project-plan.md",
+        ".forgekit/upgrade-export/0.20.0/.forgekit/docs/project-plan.md",
     ])
 
 
@@ -252,8 +252,12 @@ def write_change(root, change_id, metadata, files):
         (change_dir / name).write_text(f"# {name}\n", encoding="utf-8")
 
 
-def assert_archive_dry_run(target):
+def assert_archive_flow(target):
     before_lock = (target / ".forgekit" / "template-lock.json").read_bytes()
+    before_readme = (target / "README.md").read_bytes()
+    before_agents = (target / "AGENTS.md").read_bytes()
+    before_claude = (target / "CLAUDE.md").read_bytes()
+    docs_hashes = {path.relative_to(target).as_posix(): path.read_bytes() for path in (target / ".forgekit" / "docs").rglob("*") if path.is_file()}
     business_docs = target / "docs"
     business_docs.mkdir(exist_ok=True)
     business_note = business_docs / "business.md"
@@ -284,6 +288,18 @@ def assert_archive_dry_run(target):
         "Status: archived\nRisk: medium\nOwner: smoke\nReason: smoke archived\n\n# Proposal\n",
         ["tasks.md", "verification.md", "review.md"],
     )
+    write_change(
+        target,
+        "20260105-done-high",
+        "Status: done\nRisk: high\nCreated: 2026-01-05\nOwner: smoke\nReason: smoke high\n\n# Proposal\n",
+        ["design.md", "tasks.md", "verification.md", "review.md", "ship.md"],
+    )
+
+    run(["git", "init"], cwd=target)
+    run(["git", "config", "user.email", "smoke@example.invalid"], cwd=target)
+    run(["git", "config", "user.name", "ForgeKit Smoke"], cwd=target)
+    run(["git", "add", "."], cwd=target)
+    run(["git", "commit", "-m", "baseline"], cwd=target)
 
     run([sys.executable, "scripts/archive-changes.py", "--dry-run"], cwd=target)
     plan_path = target / ".forgekit" / "archive-plan.md"
@@ -294,10 +310,14 @@ def assert_archive_dry_run(target):
         "Mode: dry-run",
         "This dry-run only creates or overwrites `.forgekit/archive-plan.md`.",
         "It does not move files",
+        "Archive-Status: candidate",
+        "From: .forgekit/changes/20260101-done-medium",
+        "To: .forgekit/archive/changes/2026/20260101-done-medium",
         "## Candidates",
         "### 20260101-done-medium",
         "Target archive path: `.forgekit/archive/changes/2026/20260101-done-medium`",
         "Required file check: ok",
+        "### 20260105-done-high",
         "Current docs sync: not verified by script",
         "## Blocked",
         "### 20260102-blocked-high",
@@ -319,6 +339,62 @@ def assert_archive_dry_run(target):
         fail("archive dry-run must not update template-lock.json")
     if before_business != business_note.read_bytes():
         fail("archive dry-run must not write business docs")
+
+    no_confirm = run([sys.executable, "scripts/archive-changes.py", "--apply", "--plan", ".forgekit/archive-plan.md"], cwd=target, check=False)
+    if no_confirm.returncode == 0 or "requires --confirm" not in (no_confirm.stdout + no_confirm.stderr):
+        fail("archive apply without --confirm must refuse")
+    if not (target / ".forgekit" / "changes" / "20260101-done-medium").is_dir():
+        fail("archive apply without confirm must not move candidates")
+
+    (target / "README.md").write_bytes(before_readme + b"\n")
+    dirty = run([sys.executable, "scripts/archive-changes.py", "--apply", "--plan", ".forgekit/archive-plan.md", "--confirm"], cwd=target, check=False)
+    if dirty.returncode == 0 or "working tree must be clean" not in (dirty.stdout + dirty.stderr):
+        fail("archive apply with dirty git status must refuse")
+    (target / "README.md").write_bytes(before_readme)
+    if not (target / ".forgekit" / "changes" / "20260105-done-high").is_dir():
+        fail("dirty archive apply must not move candidates")
+
+    run([sys.executable, "scripts/archive-changes.py", "--apply", "--plan", ".forgekit/archive-plan.md", "--confirm"], cwd=target)
+    moved_medium = target / ".forgekit" / "archive" / "changes" / "2026" / "20260101-done-medium"
+    moved_high = target / ".forgekit" / "archive" / "changes" / "2026" / "20260105-done-high"
+    if not moved_medium.is_dir() or not moved_high.is_dir():
+        fail("archive apply must move candidate changes")
+    if (target / ".forgekit" / "changes" / "20260101-done-medium").exists() or (target / ".forgekit" / "changes" / "20260105-done-high").exists():
+        fail("archive apply must remove candidate source directories")
+    for still_active in ["20260102-blocked-high", "20260103-active", "20260104-archived"]:
+        if not (target / ".forgekit" / "changes" / still_active).is_dir():
+            fail(f"archive apply must not move blocked/skipped change: {still_active}")
+    if "Status: archived" not in (moved_medium / "proposal.md").read_text(encoding="utf-8"):
+        fail("archive apply must update moved proposal status to archived")
+    report_path = target / ".forgekit" / "archive-apply-report.md"
+    if not report_path.is_file():
+        fail("archive apply must write .forgekit/archive-apply-report.md")
+    report = report_path.read_text(encoding="utf-8")
+    for text in [
+        "Status: applied",
+        "No current docs modified.",
+        "No business docs modified.",
+        "No lock updated.",
+        "No commit created.",
+        "20260101-done-medium",
+        "20260105-done-high",
+    ]:
+        if text not in report:
+            fail(f"archive apply report missing expected text: {text}")
+
+    if before_lock != (target / ".forgekit" / "template-lock.json").read_bytes():
+        fail("archive apply must not update template-lock.json")
+    if before_readme != (target / "README.md").read_bytes():
+        fail("archive apply must not update README.md")
+    if before_agents != (target / "AGENTS.md").read_bytes():
+        fail("archive apply must not update AGENTS.md")
+    if before_claude != (target / "CLAUDE.md").read_bytes():
+        fail("archive apply must not update CLAUDE.md")
+    if before_business != business_note.read_bytes():
+        fail("archive apply must not write business docs")
+    for relative, content in docs_hashes.items():
+        if content != (target / relative).read_bytes():
+            fail(f"archive apply must not modify current docs: {relative}")
 
 
 def assert_legacy_upgrade_no_lock(repo, target):
@@ -452,7 +528,7 @@ def main():
         assert_no_escaped_filenames(target)
         assert_no_forbidden_text(target, FORBIDDEN_LEGACY_REFS, "Forbidden legacy path text found in generated project")
         run_generated_checks(target)
-        assert_archive_dry_run(target)
+        assert_archive_flow(target)
         assert_upgrade_report(repo, target)
         run_generated_checks(target)
         assert_legacy_upgrade_no_lock(repo, temp_parent / "legacy")

@@ -19,3 +19,11 @@ python scripts/archive-changes.py --dry-run
 ```
 
 Review `.forgekit/archive-plan.md` first. The script does not move files in v0.19.
+
+To apply reviewed candidates in v0.20:
+
+```bash
+python scripts/archive-changes.py --apply --plan .forgekit/archive-plan.md --confirm
+```
+
+Apply only moves candidates from the plan. It does not move blocked, skipped, draft, active, or business docs.

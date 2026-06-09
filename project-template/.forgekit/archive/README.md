@@ -11,3 +11,11 @@ v0.19 adds an archive dry-run plan at `.forgekit/archive-plan.md`.
 The plan is a candidate report, not an archive result. Each run recreates the plan instead of appending old content.
 
 The dry-run only creates or overwrites `.forgekit/archive-plan.md`. It does not move files, change proposal status, rewrite links, update current docs, write business docs, update template-lock, commit, or push.
+
+Archive apply is opt-in:
+
+```bash
+python scripts/archive-changes.py --apply --plan .forgekit/archive-plan.md --confirm
+```
+
+Apply requires a reviewed dry-run plan, explicit confirmation, and a clean Git working tree except for the plan file itself. It writes `.forgekit/archive-apply-report.md` after moving candidates.

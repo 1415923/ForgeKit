@@ -88,6 +88,16 @@ python .\scripts\archive-changes.py --dry-run
 python3 ./scripts/archive-changes.py --dry-run
 ```
 
+Apply 需要先人工 review plan，并且必须显式确认。工作区除 `.forgekit/archive-plan.md` 外不干净时会拒绝执行。
+
+```powershell
+python .\scripts\archive-changes.py --apply --plan .forgekit/archive-plan.md --confirm
+```
+
+```bash
+python3 ./scripts/archive-changes.py --apply --plan .forgekit/archive-plan.md --confirm
+```
+
 ## 安装可选 Hooks
 
 Windows PowerShell：

@@ -620,11 +620,15 @@
         '4. 需要策略或上下文分层时再读：',
         '   governance/agent-harness.md',
         '',
-        '5. 可选只读检查：',
+        '5. 可选检查：',
         '   powershell -ExecutionPolicy Bypass -File .\\scripts\\detect-local-toolchain.ps1',
         '   powershell -ExecutionPolicy Bypass -File .\\scripts\\run-harness-check.ps1',
+        '   python .\\scripts\\archive-changes.py --dry-run',
         '',
-        '6. 不要默认读取全部 governance/ 或 docs/；工具链未知时先询问，不要默认安装或启动服务。'
+        '6. 归档 apply 不是只读操作，仅在 review plan 且 git clean 后执行：',
+        '   python .\\scripts\\archive-changes.py --apply --plan .forgekit/archive-plan.md --confirm',
+        '',
+        '7. 不要默认读取全部 governance/ 或 docs/；工具链未知时先询问，不要默认安装或启动服务。'
       ].join('\n');
     }
 

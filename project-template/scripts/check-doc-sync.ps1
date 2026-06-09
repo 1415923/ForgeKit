@@ -168,6 +168,8 @@ function Test-ChangedDocsNeedVersionRecord {
         $_ -notlike ".forgekit\upgrade-export\*" -and
         $_ -ne ".forgekit/archive-plan.md" -and
         $_ -ne ".forgekit\archive-plan.md" -and
+        $_ -ne ".forgekit/archive-apply-report.md" -and
+        $_ -ne ".forgekit\archive-apply-report.md" -and
         $_ -notlike ".forgekit/archive/*" -and
         $_ -notlike ".forgekit\archive\*"
     })
