@@ -214,6 +214,7 @@ ForgeKit can coexist with ECC: ECC enhances the AI tool; ForgeKit constrains the
 
 | Version | User-facing change |
 | --- | --- |
+| `0.21.0` | Archive Reference Check: generates a reference report from archive plan candidates and checks string references in current docs, active changes, and entry docs. |
 | `0.20.0` | Archive Apply: moves candidate changes from a reviewed dry-run plan only after Git is clean and the user passes `--confirm`, then writes an apply report. |
 | `0.19.0` | Archive Plan: adds a dry-run archive plan that only creates or overwrites `.forgekit/archive-plan.md` without moving files. |
 | `0.18.0` | Document Lifecycle: adds current docs / changes / archive layers, keeps archive out of default context, and warns when done changes may be archived. |

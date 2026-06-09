@@ -93,3 +93,13 @@ Apply requires an explicit `--confirm` flag and a clean Git working tree except 
 Apply does not move blocked or skipped entries. It does not rewrite links, update current docs, write business docs, update template-lock, commit, tag, or push.
 
 After moving a candidate, apply may update only the archived copy of `proposal.md` from `Status: done` to `Status: archived`. If the archived proposal status is not `done`, the apply report records a warning instead of guessing.
+
+## Archive Reference Check
+
+`scripts/archive-changes.py --reference-check --plan .forgekit/archive-plan.md` can generate `.forgekit/archive-reference-report.md`.
+
+The reference check reads only `Archive-Status: candidate` entries from `.forgekit/archive-plan.md`. It does string matching only and does not decide whether a reference is harmful.
+
+It checks `.forgekit/docs/**`, draft/active/missing/unknown changes, and entry docs (`README.md`, `AGENTS.md`, `CLAUDE.md`). It skips archive, upgrade-export, report files, templates, and the candidate source directory itself.
+
+The report is generated fresh on every run. It does not move files, rewrite links, update current docs, write business docs, update template-lock, commit, tag, or push.

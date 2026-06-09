@@ -308,7 +308,7 @@ function Test-TemplateManifest {
     $manifestPath = Join-Path $repoRoot "project-template\.forgekit\template-manifest.json"
     if (Test-Path -LiteralPath $manifestPath) {
         $manifest = Get-Content -LiteralPath $manifestPath -Raw | ConvertFrom-Json
-        if ($manifest.template_version -ne "0.20.0") {
+        if ($manifest.template_version -ne "0.21.0") {
             Add-Error "Unexpected template manifest version: $($manifest.template_version)"
         }
         $sources = @($manifest.files | ForEach-Object { $_.source_path })
@@ -320,6 +320,9 @@ function Test-TemplateManifest {
         }
         if ($sources -contains ".forgekit/archive-apply-report.md") {
             Add-Error "archive-apply-report.md must not be listed in template manifest"
+        }
+        if ($sources -contains ".forgekit/archive-reference-report.md") {
+            Add-Error "archive-reference-report.md must not be listed in template manifest"
         }
         foreach ($item in $manifest.files) {
             if ($item.update_policy -notin @("replace", "merge", "ask", "readonly")) {
@@ -476,6 +479,7 @@ function Test-ExecutableHarness {
     Test-RequiredPattern "project-template\.codex\commands.md" "check-doc-sync.ps1" "Commands document sync check"
     Test-RequiredPattern "project-template\.codex\commands.md" "check-doc-sync.sh" "Commands document sync check bash"
     Test-RequiredPattern "project-template\.codex\commands.md" "archive-changes.py --dry-run" "Commands archive dry-run"
+    Test-RequiredPattern "project-template\.codex\commands.md" "archive-changes.py --reference-check" "Commands archive reference check"
     Test-RequiredPattern "project-template\.codex\commands.md" "install-hooks.ps1" "Commands hook installer"
     Test-RequiredPattern "project-template\.codex\commands.md" "install-hooks.sh" "Commands hook installer bash"
     Test-RequiredPattern "project-template\.codex\commands-catalog.md" "detect-local-toolchain" "Commands catalog toolchain detector"
@@ -488,12 +492,17 @@ function Test-ExecutableHarness {
     Test-RequiredPattern "project-template\scripts\archive-changes.py" "Git working tree must be clean except the selected archive plan" "Archive script clean git guard"
     Test-RequiredPattern "project-template\scripts\archive-changes.py" "Archive-Status" "Archive script machine-readable plan"
     Test-RequiredPattern "project-template\scripts\archive-changes.py" "archive-apply-report.md" "Archive script apply report"
+    Test-RequiredPattern "project-template\scripts\archive-changes.py" "--reference-check" "Archive script reference check"
+    Test-RequiredPattern "project-template\scripts\archive-changes.py" "Reference-Status" "Archive reference report machine-readable field"
+    Test-RequiredPattern "project-template\scripts\archive-changes.py" "string-match only" "Archive reference report string-match disclaimer"
     Test-RequiredPattern "project-template\scripts\archive-changes.py" "archive-plan.md" "Archive script plan output"
     Test-RequiredPattern "project-template\scripts\archive-changes.py" "change_root:" "Archive script boundary change_root"
     Test-RequiredPattern "project-template\scripts\check-doc-sync.ps1" ".forgekit/archive-plan.md" "PowerShell archive plan exclusion"
     Test-RequiredPattern "project-template\scripts\check-doc-sync.ps1" ".forgekit/archive-apply-report.md" "PowerShell archive apply report exclusion"
+    Test-RequiredPattern "project-template\scripts\check-doc-sync.ps1" ".forgekit/archive-reference-report.md" "PowerShell archive reference report exclusion"
     Test-RequiredPattern "project-template\scripts\check-doc-sync.sh" ".forgekit/archive-plan.md" "Bash archive plan exclusion"
     Test-RequiredPattern "project-template\scripts\check-doc-sync.sh" ".forgekit/archive-apply-report.md" "Bash archive apply report exclusion"
+    Test-RequiredPattern "project-template\scripts\check-doc-sync.sh" ".forgekit/archive-reference-report.md" "Bash archive reference report exclusion"
 }
 
 function Test-StaleText {
@@ -612,7 +621,7 @@ function Test-PluginDistribution {
     if ($codexPluginJson.name -ne "forgekit") {
         Add-Error "Unexpected Codex plugin name in root plugin.json: $($codexPluginJson.name)"
     }
-    if ($codexPluginJson.version -ne "0.20.0") {
+    if ($codexPluginJson.version -ne "0.21.0") {
         Add-Error "Unexpected Codex plugin version in root plugin.json: $($codexPluginJson.version)"
     }
     if ($codexPluginJson.skills -ne "./skills/") {
@@ -623,7 +632,7 @@ function Test-PluginDistribution {
     if ($claudePluginJson.name -ne "forgekit") {
         Add-Error "Unexpected Claude plugin name in root plugin.json: $($claudePluginJson.name)"
     }
-    if ($claudePluginJson.version -ne "0.20.0") {
+    if ($claudePluginJson.version -ne "0.21.0") {
         Add-Error "Unexpected Claude plugin version in root plugin.json: $($claudePluginJson.version)"
     }
     $claudeSkills = @($claudePluginJson.skills)

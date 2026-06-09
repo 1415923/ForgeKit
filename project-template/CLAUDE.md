@@ -58,6 +58,7 @@ When a task names a ForgeKit skill, read the project-local `.agents/skills/<skil
 - Treat `.forgekit/archive/**` as historical material, not current truth. Do not read archive by default; read it only when the user asks for history, audit, regression analysis, retro, incident review, historical decision explanation, or old-version comparison.
 - Treat `.forgekit/archive-plan.md` as generated dry-run output. It is not current-state docs or an active change, and each dry-run may overwrite it.
 - Treat `.forgekit/archive-apply-report.md` as generated apply output. It is not current-state docs, an active change, or release evidence.
+- Treat `.forgekit/archive-reference-report.md` as generated report-only output. It is not current-state docs, an active change, or release evidence.
 - Do not install tools or start services just because `.forgekit/docs/local-toolchain.md` has unknown values; ask first.
 - `scripts/detect-local-toolchain.ps1` and `scripts/run-harness-check.ps1` are read-only helpers.
 - For Lite projects, keep governance lightweight and ask before expanding to Enterprise-level documents.

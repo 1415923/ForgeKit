@@ -29,6 +29,8 @@ FORBIDDEN_EXACT_PATHS = {
     ".forgekit/upgrade-report.md",
 }
 
+REFERENCE_REPORT = ".forgekit/archive-reference-report.md"
+
 
 def fail(message):
     raise SystemExit(f"[fail] {message}")
@@ -268,6 +270,166 @@ def parse_plan(plan_path):
     return [item for item in entries if item.get("Archive-Status") == "candidate"]
 
 
+def reference_patterns(entry):
+    change_id = entry.get("change_id", "")
+    candidate_path = entry.get("From", "")
+    patterns = [change_id]
+    if candidate_path:
+        normalized = candidate_path.replace("\\", "/")
+        patterns.extend([normalized, normalized.replace("/", "\\")])
+    return [item for item in dict.fromkeys(patterns) if item]
+
+
+def read_change_status(change_dir):
+    proposal = change_dir / "proposal.md"
+    if not proposal.is_file():
+        return "missing"
+    return parse_metadata(proposal).get("status", "missing").lower() or "missing"
+
+
+def iter_reference_files(project_root, candidate_source):
+    excluded_prefixes = (
+        ".forgekit/archive/",
+        ".forgekit/upgrade-export/",
+        ".forgekit/changes/_template/",
+    )
+    excluded_exact = {
+        ".forgekit/archive-plan.md",
+        ".forgekit/archive-apply-report.md",
+        REFERENCE_REPORT,
+    }
+    candidate_prefix = candidate_source.rstrip("/") + "/"
+
+    files = []
+    docs_root = project_root / ".forgekit" / "docs"
+    if docs_root.is_dir():
+        files.extend(("current_docs", path) for path in docs_root.rglob("*.md") if path.is_file())
+
+    changes_root = project_root / ".forgekit" / "changes"
+    if changes_root.is_dir():
+        for change_dir in sorted(changes_root.iterdir(), key=lambda item: item.name):
+            if not change_dir.is_dir() or change_dir.name == "_template":
+                continue
+            status = read_change_status(change_dir)
+            if status in {"done", "archived"}:
+                continue
+            files.extend(("active_change", path) for path in change_dir.rglob("*.md") if path.is_file())
+
+    for name in ("README.md", "AGENTS.md", "CLAUDE.md"):
+        path = project_root / name
+        if path.is_file():
+            files.append(("entry_doc", path))
+
+    for kind, path in files:
+        relative = path.relative_to(project_root).as_posix()
+        if relative in excluded_exact:
+            continue
+        if any(relative.startswith(prefix) for prefix in excluded_prefixes):
+            continue
+        if relative == candidate_source or relative.startswith(candidate_prefix):
+            continue
+        yield kind, path, relative
+
+
+def find_references(project_root, entry):
+    patterns = reference_patterns(entry)
+    references = []
+    candidate_source = entry.get("From", "")
+    for kind, path, relative in iter_reference_files(project_root, candidate_source):
+        lines = path.read_text(encoding="utf-8", errors="replace").splitlines()
+        for line_number, line in enumerate(lines, start=1):
+            if any(pattern in line for pattern in patterns):
+                references.append({"kind": kind, "path": relative, "line": line_number})
+    return references
+
+
+def classify_reference(entry, references):
+    required = {"change_id", "From", "To", "Risk", "Status"}
+    if required - set(entry):
+        return "manual_review_needed"
+    if any(item["kind"] == "active_change" for item in references):
+        return "referenced_by_active_change"
+    if any(item["kind"] == "current_docs" for item in references):
+        return "referenced_by_current_docs"
+    if any(item["kind"] == "entry_doc" for item in references):
+        return "manual_review_needed"
+    return "safe_no_references"
+
+
+def reference_section(record):
+    lines = [
+        f"### {record['change_id']}",
+        "",
+        f"Reference-Status: {record['category']}",
+        f"Change: {record['change_id']}",
+        f"Candidate-Path: {record.get('from') or 'missing'}",
+        f"Target-Archive-Path: {record.get('to') or 'missing'}",
+        "References:",
+    ]
+    if record["references"]:
+        lines.extend(f"- {item['path']}:{item['line']}" for item in record["references"])
+    else:
+        lines.append("none")
+    if record.get("missing_fields"):
+        lines.append(f"Missing-Fields: {', '.join(record['missing_fields'])}")
+    return "\n".join(lines)
+
+
+def write_reference_report(project_root, plan_rel, records):
+    categories = [
+        "safe_no_references",
+        "referenced_by_current_docs",
+        "referenced_by_active_change",
+        "manual_review_needed",
+    ]
+    grouped = {category: [item for item in records if item["category"] == category] for category in categories}
+    lines = [
+        "# Archive Reference Report",
+        "",
+        "Status: report-only",
+        "Mode: reference-check",
+        f"Plan path: {plan_rel.as_posix()}",
+        f"Generated: {utc_now()}",
+        "",
+        "This report is string-match only. It does not decide whether a reference is harmful.",
+        "",
+        "## Summary",
+        "",
+        "| category | count |",
+        "| --- | ---: |",
+    ]
+    lines.extend(f"| {category} | {len(grouped[category])} |" for category in categories)
+    for category in categories:
+        lines.extend(["", f"## {category}", ""])
+        lines.extend([reference_section(item) + "\n" for item in grouped[category]] or ["None.\n"])
+
+    report_path = project_root / REFERENCE_REPORT
+    report_path.write_text("\n".join(lines).rstrip() + "\n", encoding="utf-8")
+    return report_path
+
+
+def run_reference_check(project_root, plan_value):
+    plan_rel = safe_relative_path(plan_value, "plan")
+    if plan_rel.as_posix() != ".forgekit/archive-plan.md":
+        fail("v0.21 only supports --plan .forgekit/archive-plan.md")
+    candidates = parse_plan(project_root / plan_rel)
+    records = []
+    for entry in candidates:
+        missing_fields = sorted({"change_id", "From", "To", "Risk", "Status"} - set(entry))
+        references = [] if missing_fields else find_references(project_root, entry)
+        category = "manual_review_needed" if missing_fields else classify_reference(entry, references)
+        records.append({
+            "change_id": entry.get("change_id", "<missing-change>"),
+            "from": entry.get("From", ""),
+            "to": entry.get("To", ""),
+            "category": category,
+            "references": references,
+            "missing_fields": missing_fields,
+        })
+    report_path = write_reference_report(project_root, plan_rel, records)
+    print(f"[ok] Archive reference report written: {report_path}")
+
+
 def git_status_allowing_plan(project_root, plan_rel):
     result = subprocess.run(
         ["git", "status", "--short"],
@@ -431,14 +593,17 @@ def main():
     mode = parser.add_mutually_exclusive_group(required=True)
     mode.add_argument("--dry-run", action="store_true", help="Generate .forgekit/archive-plan.md without moving or changing project files.")
     mode.add_argument("--apply", action="store_true", help="Apply candidates from a reviewed archive plan.")
-    parser.add_argument("--plan", default=".forgekit/archive-plan.md", help="Archive plan path for --apply. v0.20 supports .forgekit/archive-plan.md.")
+    mode.add_argument("--reference-check", action="store_true", help="Generate .forgekit/archive-reference-report.md from archive-plan candidates.")
+    parser.add_argument("--plan", default=".forgekit/archive-plan.md", help="Archive plan path. v0.21 supports .forgekit/archive-plan.md.")
     parser.add_argument("--confirm", action="store_true", help="Required with --apply to move candidates.")
     args = parser.parse_args()
     project_root = Path.cwd().resolve()
     if args.dry_run:
         run_dry_run(project_root)
-    else:
+    elif args.apply:
         run_apply(project_root, args.plan, args.confirm)
+    else:
+        run_reference_check(project_root, args.plan)
 
 
 if __name__ == "__main__":

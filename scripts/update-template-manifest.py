@@ -29,6 +29,7 @@ EXCLUDED_SOURCE_PATHS = {
     ".forgekit/upgrade-report.md",
     ".forgekit/archive-plan.md",
     ".forgekit/archive-apply-report.md",
+    ".forgekit/archive-reference-report.md",
 }
 EXCLUDED_SOURCE_PREFIXES = (
     ".forgekit/upgrade-export/",

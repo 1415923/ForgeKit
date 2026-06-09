@@ -42,6 +42,7 @@ function Test-SkipTemplatePath {
     if ($normalized -eq ".forgekit/upgrade-report.md") { return $true }
     if ($normalized -eq ".forgekit/archive-plan.md") { return $true }
     if ($normalized -eq ".forgekit/archive-apply-report.md") { return $true }
+    if ($normalized -eq ".forgekit/archive-reference-report.md") { return $true }
     if ($normalized -like ".forgekit/upgrade-export/*") { return $true }
     return $false
 }
@@ -140,7 +141,7 @@ function Write-BoundaryConfig {
 
     $lines = @(
         'forgekit:',
-        '  version: "0.20.0"',
+        '  version: "0.21.0"',
         "  mode: `"$SelectedMode`"",
         '',
         'roots:',

@@ -185,8 +185,8 @@ def assert_json(path):
 def assert_manifest_lock(target):
     lock_path = target / ".forgekit" / "template-lock.json"
     lock = json.loads(lock_path.read_text(encoding="utf-8"))
-    if lock.get("installed_version") != "0.20.0":
-        fail("template-lock installed_version must be 0.20.0")
+    if lock.get("installed_version") != "0.21.0":
+        fail("template-lock installed_version must be 0.21.0")
     if lock.get("managed_docs_root") != ".forgekit/docs":
         fail("template-lock managed_docs_root must match boundary")
     if lock.get("change_root") != ".forgekit/changes":
@@ -239,7 +239,7 @@ def assert_upgrade_report(repo, target):
         fail("upgrade must not overwrite managed docs")
     assert_paths(target, [
         ".forgekit/upgrade-report.md",
-        ".forgekit/upgrade-export/0.20.0/.forgekit/docs/project-plan.md",
+        ".forgekit/upgrade-export/0.21.0/.forgekit/docs/project-plan.md",
     ])
 
 
@@ -257,7 +257,6 @@ def assert_archive_flow(target):
     before_readme = (target / "README.md").read_bytes()
     before_agents = (target / "AGENTS.md").read_bytes()
     before_claude = (target / "CLAUDE.md").read_bytes()
-    docs_hashes = {path.relative_to(target).as_posix(): path.read_bytes() for path in (target / ".forgekit" / "docs").rglob("*") if path.is_file()}
     business_docs = target / "docs"
     business_docs.mkdir(exist_ok=True)
     business_note = business_docs / "business.md"
@@ -279,7 +278,7 @@ def assert_archive_flow(target):
     write_change(
         target,
         "20260103-active",
-        "Status: active\nRisk: medium\nCreated: 2026-01-03\nOwner: smoke\nReason: smoke active\n\n# Proposal\n",
+        "Status: active\nRisk: medium\nCreated: 2026-01-03\nOwner: smoke\nReason: smoke active\n\n# Proposal\n\nReferences 20260105-done-high.\n",
         ["tasks.md", "verification.md", "review.md"],
     )
     write_change(
@@ -294,6 +293,27 @@ def assert_archive_flow(target):
         "Status: done\nRisk: high\nCreated: 2026-01-05\nOwner: smoke\nReason: smoke high\n\n# Proposal\n",
         ["design.md", "tasks.md", "verification.md", "review.md", "ship.md"],
     )
+    write_change(
+        target,
+        "20260106-current-ref",
+        "Status: done\nRisk: medium\nCreated: 2026-01-06\nOwner: smoke\nReason: smoke current ref\n\n# Proposal\n",
+        ["tasks.md", "verification.md", "review.md"],
+    )
+    write_change(
+        target,
+        "20260107-manual-ref",
+        "Status: done\nRisk: medium\nCreated: 2026-01-07\nOwner: smoke\nReason: smoke manual ref\n\n# Proposal\n",
+        ["tasks.md", "verification.md", "review.md"],
+    )
+    with (target / ".forgekit" / "docs" / "project-plan.md").open("a", encoding="utf-8") as handle:
+        handle.write("\nReference check smoke mentions 20260106-current-ref.\n")
+    with (target / "README.md").open("a", encoding="utf-8") as handle:
+        handle.write("\nReference check smoke mentions 20260107-manual-ref.\n")
+
+    before_readme = (target / "README.md").read_bytes()
+    before_agents = (target / "AGENTS.md").read_bytes()
+    before_claude = (target / "CLAUDE.md").read_bytes()
+    docs_hashes = {path.relative_to(target).as_posix(): path.read_bytes() for path in (target / ".forgekit" / "docs").rglob("*") if path.is_file()}
 
     run(["git", "init"], cwd=target)
     run(["git", "config", "user.email", "smoke@example.invalid"], cwd=target)
@@ -339,6 +359,36 @@ def assert_archive_flow(target):
         fail("archive dry-run must not update template-lock.json")
     if before_business != business_note.read_bytes():
         fail("archive dry-run must not write business docs")
+
+    with plan_path.open("a", encoding="utf-8") as handle:
+        handle.write("\n## Missing Field Smoke\n\n### 20260108-missing-field\n\nArchive-Status: candidate\nRisk: medium\nStatus: done\n")
+    run([sys.executable, "scripts/archive-changes.py", "--reference-check", "--plan", ".forgekit/archive-plan.md"], cwd=target)
+    reference_report_path = target / ".forgekit" / "archive-reference-report.md"
+    if not reference_report_path.is_file():
+        fail("archive reference check must create .forgekit/archive-reference-report.md")
+    reference_report = reference_report_path.read_text(encoding="utf-8")
+    reference_required = [
+        "Reference-Status: safe_no_references",
+        "Change: 20260101-done-medium",
+        "Reference-Status: referenced_by_current_docs",
+        "Change: 20260106-current-ref",
+        ".forgekit/docs/project-plan.md",
+        "Reference-Status: referenced_by_active_change",
+        "Change: 20260105-done-high",
+        ".forgekit/changes/20260103-active/proposal.md",
+        "Reference-Status: manual_review_needed",
+        "Change: 20260107-manual-ref",
+        "README.md",
+        "Change: 20260108-missing-field",
+        "Missing-Fields:",
+    ]
+    missing_reference_text = [item for item in reference_required if item not in reference_report]
+    if missing_reference_text:
+        fail("archive reference report missing expected text:\n" + "\n".join(missing_reference_text))
+    if not (target / ".forgekit" / "changes" / "20260101-done-medium").is_dir():
+        fail("archive reference check must not move candidates")
+    reference_report_path.unlink()
+    run([sys.executable, "scripts/archive-changes.py", "--dry-run"], cwd=target)
 
     no_confirm = run([sys.executable, "scripts/archive-changes.py", "--apply", "--plan", ".forgekit/archive-plan.md"], cwd=target, check=False)
     if no_confirm.returncode == 0 or "requires --confirm" not in (no_confirm.stdout + no_confirm.stderr):

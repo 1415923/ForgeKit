@@ -88,6 +88,16 @@ python .\scripts\archive-changes.py --dry-run
 python3 ./scripts/archive-changes.py --dry-run
 ```
 
+Reference check 只读取 dry-run plan 中的候选项，生成 `.forgekit/archive-reference-report.md`，不移动、不改链接。
+
+```powershell
+python .\scripts\archive-changes.py --reference-check --plan .forgekit/archive-plan.md
+```
+
+```bash
+python3 ./scripts/archive-changes.py --reference-check --plan .forgekit/archive-plan.md
+```
+
 Apply 需要先人工 review plan，并且必须显式确认。工作区除 `.forgekit/archive-plan.md` 外不干净时会拒绝执行。
 
 ```powershell

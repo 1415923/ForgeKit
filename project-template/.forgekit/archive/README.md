@@ -19,3 +19,11 @@ python scripts/archive-changes.py --apply --plan .forgekit/archive-plan.md --con
 ```
 
 Apply requires a reviewed dry-run plan, explicit confirmation, and a clean Git working tree except for the plan file itself. It writes `.forgekit/archive-apply-report.md` after moving candidates.
+
+Before applying, run the reference check when you need to know whether candidates are still mentioned by current docs, active changes, or entry docs:
+
+```bash
+python scripts/archive-changes.py --reference-check --plan .forgekit/archive-plan.md
+```
+
+The reference report is report-only and uses string matching. It does not rewrite links or decide whether a reference is harmful.
