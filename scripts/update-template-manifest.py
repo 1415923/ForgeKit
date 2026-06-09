@@ -298,7 +298,7 @@ def upgrade_report(args):
             "",
             "- legacy_no_lock: 1",
             "",
-            "This project does not have `.forgekit/template-lock.json`, so v0.17.0 does not infer a baseline or create one automatically.",
+            f"This project does not have `.forgekit/template-lock.json`, so v{version} does not infer a baseline or create one automatically.",
         ]
         report_path.write_text("\n".join(lines) + "\n", encoding="utf-8")
         print("[copy] .forgekit/upgrade-report.md")

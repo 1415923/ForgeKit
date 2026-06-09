@@ -35,7 +35,7 @@ changed_paths() {
   {
     git -C "$repo_root" diff --name-only HEAD -- .forgekit .codex governance 2>/dev/null || true
     git -C "$repo_root" diff --cached --name-only -- .forgekit .codex governance 2>/dev/null || true
-  } | awk 'NF' | grep -v '^.forgekit/upgrade-export/' | sort -u
+  } | awk 'NF' | grep -v '^.forgekit/upgrade-export/' | grep -v '^.forgekit/archive/' | sort -u
 }
 
 test_stale_phrases() {
@@ -111,6 +111,19 @@ test_change_artifacts() {
       continue
     fi
 
+    local status
+    status="$(awk -F': *' 'tolower($1) == "status" { print tolower($2); exit }' "$proposal")"
+    if [[ -z "$status" ]]; then
+      add_warning "Change proposal is missing Status: metadata: $relative/proposal.md"
+    elif [[ "$status" == "archived" ]]; then
+      continue
+    elif [[ "$status" == "done" ]]; then
+      add_warning "Change is done and may be archived: $relative"
+      continue
+    elif [[ "$status" != "draft" && "$status" != "active" ]]; then
+      add_warning "Change proposal has unknown Status value '$status': $relative/proposal.md"
+    fi
+
     risk="$(awk -F': *' 'tolower($1) == "risk" { print tolower($2); exit }' "$proposal")"
     if [[ -z "$risk" ]]; then
       add_warning "Change proposal is missing Risk: metadata: $relative/proposal.md"
@@ -135,6 +148,21 @@ test_change_artifacts() {
   done
 }
 
+test_current_docs_length() {
+  local docs_root="$repo_root/.forgekit/docs"
+  [[ -d "$docs_root" ]] || return 0
+
+  while IFS= read -r file; do
+    [[ -n "$file" ]] || continue
+    local line_count relative
+    line_count="$(wc -l < "$file" | tr -d ' ')"
+    if [[ "$line_count" -gt 600 ]]; then
+      relative="${file#$repo_root/}"
+      add_warning "Current state doc is long ($line_count lines). Consider moving historical process details to a change or archive: $relative"
+    fi
+  done < <(find "$docs_root" -type f -name '*.md' 2>/dev/null)
+}
+
 path_required ".forgekit/docs/changelog.md"
 path_required ".forgekit/docs/version-roadmap.md"
 path_required ".forgekit/docs/task-board.md"
@@ -151,6 +179,7 @@ done < <(test_version_changed_reasons)
 
 test_changed_docs_need_version_record
 test_change_artifacts
+test_current_docs_length
 
 if [[ ${#warnings[@]} -eq 0 ]]; then
   echo "[ok] Document sync check passed"

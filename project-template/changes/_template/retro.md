@@ -12,3 +12,6 @@
 
 - Process, docs, tests, or architecture improvements.
 
+## Archive Recommendation
+
+- Should this change remain under `.forgekit/changes/` for short-term review, or can it be manually archived later?

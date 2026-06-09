@@ -139,7 +139,12 @@ function Test-ChangedDocsNeedVersionRecord {
         return
     }
 
-    $changedPaths = @($changedPaths | Where-Object { $_ -notlike ".forgekit/upgrade-export/*" -and $_ -notlike ".forgekit\upgrade-export\*" })
+    $changedPaths = @($changedPaths | Where-Object {
+        $_ -notlike ".forgekit/upgrade-export/*" -and
+        $_ -notlike ".forgekit\upgrade-export\*" -and
+        $_ -notlike ".forgekit/archive/*" -and
+        $_ -notlike ".forgekit\archive\*"
+    })
     if ($changedPaths.Count -eq 0) {
         return
     }
@@ -195,6 +200,23 @@ function Test-ChangeArtifacts {
             continue
         }
 
+        $statusLine = Get-Content -LiteralPath $proposal | Where-Object { $_ -match "^Status:\s*(\S+)" } | Select-Object -First 1
+        if (-not $statusLine) {
+            Add-Warning "Change proposal is missing Status: metadata: $relativeDir/proposal.md"
+        } else {
+            $status = ([regex]::Match($statusLine, "^Status:\s*(\S+)").Groups[1].Value).ToLowerInvariant()
+            if ($status -eq "archived") {
+                continue
+            }
+            if ($status -eq "done") {
+                Add-Warning "Change is done and may be archived: $relativeDir"
+                continue
+            }
+            if ($status -notin @("draft", "active")) {
+                Add-Warning "Change proposal has unknown Status value '$status': $relativeDir/proposal.md"
+            }
+        }
+
         $riskLine = Get-Content -LiteralPath $proposal | Where-Object { $_ -match "^Risk:\s*(\S+)" } | Select-Object -First 1
         if (-not $riskLine) {
             Add-Warning "Change proposal is missing Risk: metadata: $relativeDir/proposal.md"
@@ -227,6 +249,22 @@ function Test-UpgradeExportIgnored {
     }
 }
 
+function Test-CurrentDocsLength {
+    $docsRoot = Join-Path $repoRoot ".forgekit\docs"
+    if (-not (Test-Path -LiteralPath $docsRoot)) {
+        return
+    }
+
+    $files = Get-ChildItem -LiteralPath $docsRoot -Recurse -File -Include *.md
+    foreach ($file in $files) {
+        $lineCount = (Get-Content -LiteralPath $file.FullName).Count
+        if ($lineCount -gt 600) {
+            $relative = [System.IO.Path]::GetRelativePath($repoRoot, $file.FullName)
+            Add-Warning "Current state doc is long ($lineCount lines). Consider moving historical process details to a change or archive: $relative"
+        }
+    }
+}
+
 Test-PathRequired (Join-DocPath (Get-VersionRecordName))
 Test-PathRequired (Join-DocPath (Get-VersionRoadmapName))
 Test-PathRequired (Join-DocPath (Get-TaskBoardName))
@@ -239,6 +277,7 @@ Test-VersionChangedReasons
 Test-ChangedDocsNeedVersionRecord
 Test-UpgradeExportIgnored
 Test-ChangeArtifacts
+Test-CurrentDocsLength
 
 if ($warnings.Count -eq 0 -and $errors.Count -eq 0) {
     Write-Host "[ok] Document sync check passed"

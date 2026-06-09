@@ -33,6 +33,10 @@ REQUIRED_REPO_PATHS = [
     "usage.html",
     "project-template/.forgekit/project-boundary.yml",
     "project-template/.forgekit/docs/document-responsibility.md",
+    "project-template/.forgekit/docs/document-lifecycle.md",
+    "project-template/.forgekit/archive/README.md",
+    "project-template/.forgekit/archive/changes/README.md",
+    "project-template/.forgekit/archive/releases/README.md",
     "project-template/.forgekit/template-manifest.json",
     "project-template/governance/ai-engineering-loop.md",
     "project-template/changes/README.md",
@@ -55,6 +59,10 @@ REQUIRED_GENERATED_PATHS = [
     ".forgekit/project-boundary.yml",
     ".forgekit/template-lock.json",
     ".forgekit/docs/document-responsibility.md",
+    ".forgekit/docs/document-lifecycle.md",
+    ".forgekit/archive/README.md",
+    ".forgekit/archive/changes/README.md",
+    ".forgekit/archive/releases/README.md",
     ".forgekit/docs/codebase-map.md",
     ".forgekit/docs/local-toolchain.md",
     ".forgekit/docs/version-roadmap.md",
@@ -176,8 +184,8 @@ def assert_json(path):
 def assert_manifest_lock(target):
     lock_path = target / ".forgekit" / "template-lock.json"
     lock = json.loads(lock_path.read_text(encoding="utf-8"))
-    if lock.get("installed_version") != "0.17.0":
-        fail("template-lock installed_version must be 0.17.0")
+    if lock.get("installed_version") != "0.18.0":
+        fail("template-lock installed_version must be 0.18.0")
     if lock.get("managed_docs_root") != ".forgekit/docs":
         fail("template-lock managed_docs_root must match boundary")
     if lock.get("change_root") != ".forgekit/changes":
@@ -230,7 +238,7 @@ def assert_upgrade_report(repo, target):
         fail("upgrade must not overwrite managed docs")
     assert_paths(target, [
         ".forgekit/upgrade-report.md",
-        ".forgekit/upgrade-export/0.17.0/.forgekit/docs/project-plan.md",
+        ".forgekit/upgrade-export/0.18.0/.forgekit/docs/project-plan.md",
     ])
 
 
@@ -358,7 +366,6 @@ def main():
             "docs/changelog.md",
             "changes/README.md",
             ".forgekit/template-manifest.json",
-            ".forgekit/archive",
             "archive",
         ])
         assert_boundary_config(target / ".forgekit" / "project-boundary.yml")

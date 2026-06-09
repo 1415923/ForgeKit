@@ -20,9 +20,10 @@ When a task names a ForgeKit skill, read the project-local `.agents/skills/<skil
 8. Read `governance/agent-harness.md` when the task involves context strategy, large code search, AGENTS maintenance, or unclear entry points.
 9. Read `governance/large-change-execution.md` for large, cross-module, high-risk, migration, or refactor work.
 10. Read `governance/ai-engineering-loop.md` when risk level, change artifacts, verification, review, ship, or retro expectations are unclear.
-11. Read `governance/team-agent-rollout.md` only when the task involves commands, hooks, plugins, MCP, CI, issue trackers, or team rollout.
-12. Read `governance/agent-suitability.md` for project initialization, existing project handover, or when the project may not fit an AI agent workflow.
-13. Read `.codex/automation-decision.md` before turning a repeated workflow into a skill, command, hook, script, plugin, or MCP.
+11. Read `.forgekit/docs/document-lifecycle.md` when deciding whether material belongs in current docs, change process docs, or archive.
+12. Read `governance/team-agent-rollout.md` only when the task involves commands, hooks, plugins, MCP, CI, issue trackers, or team rollout.
+13. Read `governance/agent-suitability.md` for project initialization, existing project handover, or when the project may not fit an AI agent workflow.
+14. Read `.codex/automation-decision.md` before turning a repeated workflow into a skill, command, hook, script, plugin, or MCP.
 
 ## Task Routing
 
@@ -34,6 +35,7 @@ When a task names a ForgeKit skill, read the project-local `.agents/skills/<skil
 | Fill docs from answers | `governance/project-bootstrap-fill.md`, `.codex/questionnaires/` | `project-init` or `project-bootstrap-fill` |
 | Existing project handover | existing README/usage/setup/test/deploy docs first, then `.forgekit/docs/codebase-map.md`, `.codex/handover.md`, `.forgekit/docs/handover-audit.md` | `handover-review` |
 | Backfill ForgeKit managed docs from business docs | source docs one at a time, then target files under `.forgekit/docs/` | `document-backfill` |
+| Document lifecycle or archive decision | `.forgekit/docs/document-lifecycle.md`, `.forgekit/docs/document-responsibility.md` | `release-check` |
 | Feature implementation | `.codex/rules.md`, `.codex/scope.md`, `.codex/commands.md`, relevant `.codex/stacks/` only | relevant stack rules |
 | Medium or high risk change | `governance/ai-engineering-loop.md`, `.forgekit/changes/README.md`, relevant `.forgekit/changes/<id>/` files | relevant existing skill |
 | Large or cross-module change | `governance/large-change-execution.md`, `governance/ai-engineering-loop.md`, `.forgekit/docs/exploration-report.md`, `.forgekit/docs/implementation-plan.md`, relevant stack rules | `large-change-planning` |
@@ -53,6 +55,9 @@ When a task names a ForgeKit skill, read the project-local `.agents/skills/<skil
 - Do not read all business `docs/` by default; use `.forgekit/docs/codebase-map.md` to choose what matters.
 - Treat `.forgekit/template-lock.json` as an installation baseline. Do not edit it during report-only upgrade checks.
 - Treat `.forgekit/upgrade-export/**` as candidate comparison material, not current-state docs, active changes, release evidence, or changelog content.
+- Treat `.forgekit/docs/**` as current state docs: keep stable facts, not long process history.
+- Treat `.forgekit/changes/<change-id>/**` as one-change process records: proposal, design, tasks, verification, review, ship, and retro.
+- Treat `.forgekit/archive/**` as historical material, not current truth. Do not read archive by default; read it only when the user asks for history, audit, regression analysis, retro, incident review, historical decision explanation, or old-version comparison.
 - Do not install tools or start services just because `.forgekit/docs/local-toolchain.md` has unknown values; ask first.
 - `scripts/detect-local-toolchain.ps1` and `scripts/run-harness-check.ps1` are read-only helpers; do not treat their output as permission to install or change anything.
 - Use `.codex/automation-decision.md` to decide whether repeated work belongs in a skill, command, hook, script, plugin, MCP, or documentation.

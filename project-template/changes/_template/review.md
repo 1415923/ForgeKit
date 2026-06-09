@@ -11,5 +11,5 @@
 
 ## Docs Updated
 
-- Project docs, changelog, task board, or change artifacts updated.
-
+- Current state docs, changelog, task board, or change artifacts updated.
+- Stable conclusions that belong in `.forgekit/docs/` are not left only in this change folder.

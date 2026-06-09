@@ -26,3 +26,9 @@ Reason: <short reason>
 
 - What needs user or maintainer confirmation before implementation?
 
+## Lifecycle Notes
+
+- Use `draft` while discussing.
+- Use `active` during implementation.
+- Use `done` only after verification is complete and stable conclusions are synced to current state docs.
+- Use `archived` only when the change is historical and should not be treated as active context.

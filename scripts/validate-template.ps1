@@ -228,6 +228,10 @@ function Test-AgentsHarness {
     Test-RequiredPath (Get-CodexNextWorkOrderPath)
     Test-RequiredPath "project-template\.forgekit\project-boundary.yml"
     Test-RequiredPath "project-template\.forgekit\docs\document-responsibility.md"
+    Test-RequiredPath "project-template\.forgekit\docs\document-lifecycle.md"
+    Test-RequiredPath "project-template\.forgekit\archive\README.md"
+    Test-RequiredPath "project-template\.forgekit\archive\changes\README.md"
+    Test-RequiredPath "project-template\.forgekit\archive\releases\README.md"
     Test-RequiredPath "project-template\governance\agent-harness.md"
     Test-RequiredPath "project-template\governance\ai-engineering-loop.md"
     Test-RequiredPath "project-template\governance\large-change-execution.md"
@@ -282,6 +286,20 @@ function Test-AIEngineeringLoop {
     Test-RequiredPattern "project-template\.forgekit\project-boundary.yml" "task_scoped:" "Boundary task-scoped policy"
     Test-RequiredPattern "project-template\.forgekit\project-boundary.yml" "read_mostly:" "Boundary read-mostly policy"
     Test-RequiredPattern "project-template\.codex\rules.md" "Boundary First" "Codex boundary-first rule"
+    Test-RequiredPattern "project-template\.forgekit\docs\document-lifecycle.md" "current docs say what is true now" "Document lifecycle core rule"
+    Test-RequiredPattern "project-template\.forgekit\docs\document-lifecycle.md" "current state docs" "Document lifecycle current docs"
+    Test-RequiredPattern "project-template\.forgekit\docs\document-lifecycle.md" "change process docs" "Document lifecycle change docs"
+    Test-RequiredPattern "project-template\.forgekit\docs\document-lifecycle.md" "archive docs" "Document lifecycle archive docs"
+    Test-RequiredPattern "project-template\.forgekit\docs\document-responsibility.md" "document-lifecycle.md" "Document responsibility lifecycle reference"
+    Test-RequiredPattern "project-template\changes\README.md" "Status" "Change README status lifecycle"
+    Test-RequiredPattern "project-template\changes\README.md" "done" "Change README done status"
+    Test-RequiredPattern "project-template\changes\README.md" "archived" "Change README archived status"
+    Test-RequiredPattern "project-template\AGENTS.md" ".forgekit/archive/**" "AGENTS archive default-read rule"
+    Test-RequiredPattern "project-template\CLAUDE.md" ".forgekit/archive/**" "CLAUDE archive default-read rule"
+    Test-RequiredPattern "project-template\.codex\rules.md" ".forgekit/archive/**" "Rules archive default-read rule"
+    Test-RequiredPattern "project-template\scripts\check-doc-sync.ps1" "Status: metadata" "PowerShell change status check"
+    Test-RequiredPattern "project-template\scripts\check-doc-sync.ps1" "Change is done and may be archived" "PowerShell done archive warning"
+    Test-RequiredPattern "project-template\scripts\check-doc-sync.sh" "Change is done and may be archived" "Bash done archive warning"
 }
 
 function Test-TemplateManifest {
@@ -290,7 +308,7 @@ function Test-TemplateManifest {
     $manifestPath = Join-Path $repoRoot "project-template\.forgekit\template-manifest.json"
     if (Test-Path -LiteralPath $manifestPath) {
         $manifest = Get-Content -LiteralPath $manifestPath -Raw | ConvertFrom-Json
-        if ($manifest.template_version -ne "0.17.0") {
+        if ($manifest.template_version -ne "0.18.0") {
             Add-Error "Unexpected template manifest version: $($manifest.template_version)"
         }
         $sources = @($manifest.files | ForEach-Object { $_.source_path })
@@ -309,6 +327,9 @@ function Test-TemplateManifest {
             }
             if ($item.source_path -like "changes/*" -and $item.target_path -notlike '`${change_root}/*') {
                 Add-Error "changes source must target change_root in manifest: $($item.source_path)"
+            }
+            if ($item.source_path -like ".forgekit/archive/changes/*/*" -or $item.source_path -like ".forgekit/archive/releases/*/*") {
+                Add-Error "User archive history must not be listed in template manifest: $($item.source_path)"
             }
         }
     }
@@ -573,7 +594,7 @@ function Test-PluginDistribution {
     if ($codexPluginJson.name -ne "forgekit") {
         Add-Error "Unexpected Codex plugin name in root plugin.json: $($codexPluginJson.name)"
     }
-    if ($codexPluginJson.version -ne "0.17.0") {
+    if ($codexPluginJson.version -ne "0.18.0") {
         Add-Error "Unexpected Codex plugin version in root plugin.json: $($codexPluginJson.version)"
     }
     if ($codexPluginJson.skills -ne "./skills/") {
@@ -584,7 +605,7 @@ function Test-PluginDistribution {
     if ($claudePluginJson.name -ne "forgekit") {
         Add-Error "Unexpected Claude plugin name in root plugin.json: $($claudePluginJson.name)"
     }
-    if ($claudePluginJson.version -ne "0.17.0") {
+    if ($claudePluginJson.version -ne "0.18.0") {
         Add-Error "Unexpected Claude plugin version in root plugin.json: $($claudePluginJson.version)"
     }
     $claudeSkills = @($claudePluginJson.skills)

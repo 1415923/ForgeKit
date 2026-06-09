@@ -214,6 +214,7 @@ ForgeKit can coexist with ECC: ECC enhances the AI tool; ForgeKit constrains the
 
 | Version | User-facing change |
 | --- | --- |
+| `0.18.0` | Document Lifecycle: adds current docs / changes / archive layers, keeps archive out of default context, and warns when done changes may be archived. |
 | `0.17.0` | Template Versioning: adds template manifest / lock and report-only upgrade classifications with candidate template export, without automatic overwrites. |
 | `0.16.0` | Boundary First: adds `.forgekit/project-boundary.yml`, writes ForgeKit managed docs to `.forgekit/docs`, and writes change artifacts to `.forgekit/changes` by default. |
 | `0.15.0` | Repositioned ForgeKit as a lightweight AI engineering delivery toolkit with an AI Engineering Loop and risk-based change templates. |
