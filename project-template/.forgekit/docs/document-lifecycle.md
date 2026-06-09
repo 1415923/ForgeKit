@@ -72,4 +72,14 @@ Archive docs live under `.forgekit/archive/`.
 
 Archive is not a current-state source. Do not read it by default. Read archive only when the user asks for history, audit, regression analysis, incident review, historical decision explanation, or old-version comparison.
 
-v0.18 does not move files automatically. If old material becomes true again, sync the stable conclusion back into current docs instead of only linking to archive.
+## Archive Plan Dry Run
+
+`scripts/archive-changes.py --dry-run` can generate `.forgekit/archive-plan.md` for completed changes.
+
+The dry-run only creates or overwrites `.forgekit/archive-plan.md`. It does not move files, change proposal status, rewrite links, update current docs, write business docs, update template-lock, commit, or push.
+
+The archive plan lists candidates, blocked changes, and skipped changes. `Status: archived` changes are listed as skipped with `already archived by status`.
+
+`Current docs sync: not verified by script` means a human still needs to confirm that stable conclusions were copied back into current state docs before any future archive apply step.
+
+v0.18 and v0.19 do not move files automatically. If old material becomes true again, sync the stable conclusion back into current docs instead of only linking to archive.

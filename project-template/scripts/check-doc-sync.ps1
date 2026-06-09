@@ -22,6 +22,30 @@ function New-Text {
     return $builder.ToString()
 }
 
+function Get-RelativePathCompat {
+    param(
+        [string]$FromPath,
+        [string]$ToPath
+    )
+
+    try {
+        if ([System.IO.Path].GetMethod("GetRelativePath", [type[]]@([string], [string]))) {
+            return [System.IO.Path]::GetRelativePath($FromPath, $ToPath)
+        }
+    } catch {
+    }
+
+    $fromFull = [System.IO.Path]::GetFullPath($FromPath)
+    $toFull = [System.IO.Path]::GetFullPath($ToPath)
+    if (-not $fromFull.EndsWith([System.IO.Path]::DirectorySeparatorChar)) {
+        $fromFull = $fromFull + [System.IO.Path]::DirectorySeparatorChar
+    }
+    $fromUri = New-Object System.Uri($fromFull)
+    $toUri = New-Object System.Uri($toFull)
+    $relativeUri = $fromUri.MakeRelativeUri($toUri)
+    return [System.Uri]::UnescapeDataString($relativeUri.ToString()).Replace('/', [System.IO.Path]::DirectorySeparatorChar)
+}
+
 function Join-DocPath {
     param([string]$FileName)
     return Join-Path ".forgekit\docs" "$FileName.md"
@@ -103,7 +127,7 @@ function Test-StalePhrases {
         foreach ($pattern in $patterns) {
             $matches = Select-String -LiteralPath $file.FullName -Pattern $pattern -SimpleMatch
             foreach ($match in $matches) {
-                $relative = [System.IO.Path]::GetRelativePath($repoRoot, $file.FullName)
+                $relative = Get-RelativePathCompat -FromPath $repoRoot -ToPath $file.FullName
                 Add-Warning "Possible stale doc phrase in ${relative}:$($match.LineNumber): $pattern"
             }
         }
@@ -142,6 +166,8 @@ function Test-ChangedDocsNeedVersionRecord {
     $changedPaths = @($changedPaths | Where-Object {
         $_ -notlike ".forgekit/upgrade-export/*" -and
         $_ -notlike ".forgekit\upgrade-export\*" -and
+        $_ -ne ".forgekit/archive-plan.md" -and
+        $_ -ne ".forgekit\archive-plan.md" -and
         $_ -notlike ".forgekit/archive/*" -and
         $_ -notlike ".forgekit\archive\*"
     })
@@ -193,7 +219,7 @@ function Test-ChangeArtifacts {
 
     $changeDirs = Get-ChildItem -LiteralPath $changesRoot -Directory | Where-Object { $_.Name -ne "_template" }
     foreach ($dir in $changeDirs) {
-        $relativeDir = [System.IO.Path]::GetRelativePath($repoRoot, $dir.FullName)
+        $relativeDir = Get-RelativePathCompat -FromPath $repoRoot -ToPath $dir.FullName
         $proposal = Join-Path $dir.FullName "proposal.md"
         if (-not (Test-Path -LiteralPath $proposal)) {
             Add-Warning "Change is missing proposal.md: $relativeDir"
@@ -259,7 +285,7 @@ function Test-CurrentDocsLength {
     foreach ($file in $files) {
         $lineCount = (Get-Content -LiteralPath $file.FullName).Count
         if ($lineCount -gt 600) {
-            $relative = [System.IO.Path]::GetRelativePath($repoRoot, $file.FullName)
+            $relative = Get-RelativePathCompat -FromPath $repoRoot -ToPath $file.FullName
             Add-Warning "Current state doc is long ($lineCount lines). Consider moving historical process details to a change or archive: $relative"
         }
     }

@@ -6,4 +6,8 @@ Default agents should not read archive content unless the task is about history,
 
 Archive material is read-only historical context by default. If an archived conclusion becomes current again, copy the stable conclusion into `.forgekit/docs/` and cite the archive as background.
 
-v0.18 only defines the archive location and rules. It does not move files automatically.
+v0.19 adds an archive dry-run plan at `.forgekit/archive-plan.md`.
+
+The plan is a candidate report, not an archive result. Each run recreates the plan instead of appending old content.
+
+The dry-run only creates or overwrites `.forgekit/archive-plan.md`. It does not move files, change proposal status, rewrite links, update current docs, write business docs, update template-lock, commit, or push.

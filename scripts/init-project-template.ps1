@@ -40,6 +40,7 @@ function Test-SkipTemplatePath {
     if ($normalized -eq ".forgekit/template-manifest.json") { return $true }
     if ($normalized -eq ".forgekit/template-lock.json") { return $true }
     if ($normalized -eq ".forgekit/upgrade-report.md") { return $true }
+    if ($normalized -eq ".forgekit/archive-plan.md") { return $true }
     if ($normalized -like ".forgekit/upgrade-export/*") { return $true }
     return $false
 }
@@ -138,7 +139,7 @@ function Write-BoundaryConfig {
 
     $lines = @(
         'forgekit:',
-        '  version: "0.18.0"',
+        '  version: "0.19.0"',
         "  mode: `"$SelectedMode`"",
         '',
         'roots:',

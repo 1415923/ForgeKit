@@ -78,6 +78,7 @@ REQUIRED_GENERATED_PATHS = [
     ".forgekit/changes/_template/retro.md",
     "scripts/run-harness-check.ps1",
     "scripts/check-doc-sync.ps1",
+    "scripts/archive-changes.py",
 ]
 
 
@@ -184,8 +185,8 @@ def assert_json(path):
 def assert_manifest_lock(target):
     lock_path = target / ".forgekit" / "template-lock.json"
     lock = json.loads(lock_path.read_text(encoding="utf-8"))
-    if lock.get("installed_version") != "0.18.0":
-        fail("template-lock installed_version must be 0.18.0")
+    if lock.get("installed_version") != "0.19.0":
+        fail("template-lock installed_version must be 0.19.0")
     if lock.get("managed_docs_root") != ".forgekit/docs":
         fail("template-lock managed_docs_root must match boundary")
     if lock.get("change_root") != ".forgekit/changes":
@@ -238,8 +239,86 @@ def assert_upgrade_report(repo, target):
         fail("upgrade must not overwrite managed docs")
     assert_paths(target, [
         ".forgekit/upgrade-report.md",
-        ".forgekit/upgrade-export/0.18.0/.forgekit/docs/project-plan.md",
+        ".forgekit/upgrade-export/0.19.0/.forgekit/docs/project-plan.md",
     ])
+
+
+def write_change(root, change_id, metadata, files):
+    change_dir = root / ".forgekit" / "changes" / change_id
+    change_dir.mkdir(parents=True, exist_ok=True)
+    if metadata is not None:
+        (change_dir / "proposal.md").write_text(metadata, encoding="utf-8")
+    for name in files:
+        (change_dir / name).write_text(f"# {name}\n", encoding="utf-8")
+
+
+def assert_archive_dry_run(target):
+    before_lock = (target / ".forgekit" / "template-lock.json").read_bytes()
+    business_docs = target / "docs"
+    business_docs.mkdir(exist_ok=True)
+    business_note = business_docs / "business.md"
+    business_note.write_text("# Business Docs\n", encoding="utf-8")
+    before_business = business_note.read_bytes()
+
+    write_change(
+        target,
+        "20260101-done-medium",
+        "Status: done\nRisk: medium\nCreated: 2026-01-01\nOwner: smoke\nReason: smoke candidate\n\n# Proposal\n",
+        ["tasks.md", "verification.md", "review.md"],
+    )
+    write_change(
+        target,
+        "20260102-blocked-high",
+        "Status: done\nRisk: high\nCreated: 2026-01-02\nOwner: smoke\nReason: smoke blocked\n\n# Proposal\n",
+        ["tasks.md", "verification.md", "review.md"],
+    )
+    write_change(
+        target,
+        "20260103-active",
+        "Status: active\nRisk: medium\nCreated: 2026-01-03\nOwner: smoke\nReason: smoke active\n\n# Proposal\n",
+        ["tasks.md", "verification.md", "review.md"],
+    )
+    write_change(
+        target,
+        "20260104-archived",
+        "Status: archived\nRisk: medium\nOwner: smoke\nReason: smoke archived\n\n# Proposal\n",
+        ["tasks.md", "verification.md", "review.md"],
+    )
+
+    run([sys.executable, "scripts/archive-changes.py", "--dry-run"], cwd=target)
+    plan_path = target / ".forgekit" / "archive-plan.md"
+    if not plan_path.is_file():
+        fail("archive dry-run must create .forgekit/archive-plan.md")
+    plan = plan_path.read_text(encoding="utf-8")
+    required_text = [
+        "Mode: dry-run",
+        "This dry-run only creates or overwrites `.forgekit/archive-plan.md`.",
+        "It does not move files",
+        "## Candidates",
+        "### 20260101-done-medium",
+        "Target archive path: `.forgekit/archive/changes/2026/20260101-done-medium`",
+        "Required file check: ok",
+        "Current docs sync: not verified by script",
+        "## Blocked",
+        "### 20260102-blocked-high",
+        "missing design.md, ship.md",
+        "## Skipped",
+        "### 20260103-active",
+        "Skip reason: status is active",
+        "### 20260104-archived",
+        "Skip reason: already archived by status",
+        "Created: missing and fallback year used",
+    ]
+    missing = [item for item in required_text if item not in plan]
+    if missing:
+        fail("archive plan missing expected text:\n" + "\n".join(missing))
+
+    if not (target / ".forgekit" / "changes" / "20260101-done-medium").is_dir():
+        fail("archive dry-run must not move change directories")
+    if before_lock != (target / ".forgekit" / "template-lock.json").read_bytes():
+        fail("archive dry-run must not update template-lock.json")
+    if before_business != business_note.read_bytes():
+        fail("archive dry-run must not write business docs")
 
 
 def assert_legacy_upgrade_no_lock(repo, target):
@@ -373,6 +452,7 @@ def main():
         assert_no_escaped_filenames(target)
         assert_no_forbidden_text(target, FORBIDDEN_LEGACY_REFS, "Forbidden legacy path text found in generated project")
         run_generated_checks(target)
+        assert_archive_dry_run(target)
         assert_upgrade_report(repo, target)
         run_generated_checks(target)
         assert_legacy_upgrade_no_lock(repo, temp_parent / "legacy")

@@ -308,12 +308,15 @@ function Test-TemplateManifest {
     $manifestPath = Join-Path $repoRoot "project-template\.forgekit\template-manifest.json"
     if (Test-Path -LiteralPath $manifestPath) {
         $manifest = Get-Content -LiteralPath $manifestPath -Raw | ConvertFrom-Json
-        if ($manifest.template_version -ne "0.18.0") {
+        if ($manifest.template_version -ne "0.19.0") {
             Add-Error "Unexpected template manifest version: $($manifest.template_version)"
         }
         $sources = @($manifest.files | ForEach-Object { $_.source_path })
         if ($sources -contains ".forgekit/template-manifest.json") {
             Add-Error "template-manifest.json must not list itself"
+        }
+        if ($sources -contains ".forgekit/archive-plan.md") {
+            Add-Error "archive-plan.md must not be listed in template manifest"
         }
         foreach ($item in $manifest.files) {
             if ($item.update_policy -notin @("replace", "merge", "ask", "readonly")) {
@@ -459,6 +462,7 @@ function Test-ExecutableHarness {
     Test-RequiredPath "project-template\scripts\run-harness-check.ps1"
     Test-RequiredPath "project-template\scripts\check-doc-sync.ps1"
     Test-RequiredPath "project-template\scripts\check-doc-sync.sh"
+    Test-RequiredPath "project-template\scripts\archive-changes.py"
     Test-RequiredPath "project-template\scripts\install-hooks.ps1"
     Test-RequiredPath "project-template\scripts\install-hooks.sh"
     Test-RequiredPath (Get-CodexNextWorkOrderPath)
@@ -468,6 +472,7 @@ function Test-ExecutableHarness {
     Test-RequiredPattern "project-template\.codex\commands.md" "run-harness-check.ps1" "Commands harness check"
     Test-RequiredPattern "project-template\.codex\commands.md" "check-doc-sync.ps1" "Commands document sync check"
     Test-RequiredPattern "project-template\.codex\commands.md" "check-doc-sync.sh" "Commands document sync check bash"
+    Test-RequiredPattern "project-template\.codex\commands.md" "archive-changes.py --dry-run" "Commands archive dry-run"
     Test-RequiredPattern "project-template\.codex\commands.md" "install-hooks.ps1" "Commands hook installer"
     Test-RequiredPattern "project-template\.codex\commands.md" "install-hooks.sh" "Commands hook installer bash"
     Test-RequiredPattern "project-template\.codex\commands-catalog.md" "detect-local-toolchain" "Commands catalog toolchain detector"
@@ -476,6 +481,11 @@ function Test-ExecutableHarness {
     Test-RequiredPattern "project-template\.codex\hooks.md" "check-doc-sync.sh" "Hooks document sync check bash"
     Test-RequiredPattern "project-template\.codex\hooks.md" "install-hooks.sh" "Hooks installer bash"
     Test-RequiredPattern (Get-LocalToolchainPath) "detect-local-toolchain.ps1" "Local toolchain executable detector reference"
+    Test-RequiredPattern "project-template\scripts\archive-changes.py" "Only --dry-run is supported in v0.19.0" "Archive script dry-run only"
+    Test-RequiredPattern "project-template\scripts\archive-changes.py" "archive-plan.md" "Archive script plan output"
+    Test-RequiredPattern "project-template\scripts\archive-changes.py" "change_root:" "Archive script boundary change_root"
+    Test-RequiredPattern "project-template\scripts\check-doc-sync.ps1" ".forgekit/archive-plan.md" "PowerShell archive plan exclusion"
+    Test-RequiredPattern "project-template\scripts\check-doc-sync.sh" ".forgekit/archive-plan.md" "Bash archive plan exclusion"
 }
 
 function Test-StaleText {
@@ -594,7 +604,7 @@ function Test-PluginDistribution {
     if ($codexPluginJson.name -ne "forgekit") {
         Add-Error "Unexpected Codex plugin name in root plugin.json: $($codexPluginJson.name)"
     }
-    if ($codexPluginJson.version -ne "0.18.0") {
+    if ($codexPluginJson.version -ne "0.19.0") {
         Add-Error "Unexpected Codex plugin version in root plugin.json: $($codexPluginJson.version)"
     }
     if ($codexPluginJson.skills -ne "./skills/") {
@@ -605,7 +615,7 @@ function Test-PluginDistribution {
     if ($claudePluginJson.name -ne "forgekit") {
         Add-Error "Unexpected Claude plugin name in root plugin.json: $($claudePluginJson.name)"
     }
-    if ($claudePluginJson.version -ne "0.18.0") {
+    if ($claudePluginJson.version -ne "0.19.0") {
         Add-Error "Unexpected Claude plugin version in root plugin.json: $($claudePluginJson.version)"
     }
     $claudeSkills = @($claudePluginJson.skills)
@@ -628,6 +638,7 @@ Test-RequiredPath "README.md"
 Test-RequiredPath "AGENTS.md"
 Test-RequiredPath "scripts\init-project-template.ps1"
 Test-RequiredPath "scripts\init-project-template.sh"
+Test-RequiredPath "scripts\archive-changes.py"
 Test-RequiredPath "scripts\validate-plugin-assets.ps1"
 Test-RequiredPath "project-template\README.md"
 Test-RequiredPath "project-template\AGENTS.md"
@@ -648,6 +659,16 @@ Test-RequiredPath "project-template\.agents\skills\code-review\SKILL.md"
 Test-RequiredPath "project-template\.agents\skills\release-check\SKILL.md"
 Test-RequiredPath "project-template\.agents\skills\security-review\SKILL.md"
 Test-RequiredPath "project-template\governance\project-bootstrap-fill.md"
+
+$rootArchiveScript = Join-Path $repoRoot "scripts\archive-changes.py"
+$templateArchiveScript = Join-Path $repoRoot "project-template\scripts\archive-changes.py"
+if ((Test-Path -LiteralPath $rootArchiveScript) -and (Test-Path -LiteralPath $templateArchiveScript)) {
+    $rootArchiveText = Get-Content -LiteralPath $rootArchiveScript -Raw
+    $templateArchiveText = Get-Content -LiteralPath $templateArchiveScript -Raw
+    if ($rootArchiveText -ne $templateArchiveText) {
+        Add-Error "Root and project-template archive-changes.py must stay identical"
+    }
+}
 
 Test-GovernanceFiles
 Test-AIEngineeringLoop

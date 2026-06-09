@@ -76,6 +76,18 @@ powershell -ExecutionPolicy Bypass -File .\scripts\check-doc-sync.ps1 -Strict
 ./scripts/check-doc-sync.sh --strict
 ```
 
+## 归档计划 Dry Run
+
+只生成或覆盖 `.forgekit/archive-plan.md`，不移动文件、不改状态、不改链接、不写 current docs、不写 business docs、不改 lock、不提交。
+
+```powershell
+python .\scripts\archive-changes.py --dry-run
+```
+
+```bash
+python3 ./scripts/archive-changes.py --dry-run
+```
+
 ## 安装可选 Hooks
 
 Windows PowerShell：

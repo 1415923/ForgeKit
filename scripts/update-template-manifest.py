@@ -27,6 +27,7 @@ EXCLUDED_SOURCE_PATHS = {
     ".forgekit/template-manifest.json",
     ".forgekit/template-lock.json",
     ".forgekit/upgrade-report.md",
+    ".forgekit/archive-plan.md",
 }
 EXCLUDED_SOURCE_PREFIXES = (
     ".forgekit/upgrade-export/",
