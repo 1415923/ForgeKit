@@ -30,6 +30,7 @@ FORBIDDEN_EXACT_PATHS = {
 }
 
 REFERENCE_REPORT = ".forgekit/archive-reference-report.md"
+SYNC_REPORT = ".forgekit/current-docs-sync-report.md"
 
 
 def fail(message):
@@ -297,6 +298,7 @@ def iter_reference_files(project_root, candidate_source):
         ".forgekit/archive-plan.md",
         ".forgekit/archive-apply-report.md",
         REFERENCE_REPORT,
+        SYNC_REPORT,
     }
     candidate_prefix = candidate_source.rstrip("/") + "/"
 
@@ -428,6 +430,168 @@ def run_reference_check(project_root, plan_value):
         })
     report_path = write_reference_report(project_root, plan_rel, records)
     print(f"[ok] Archive reference report written: {report_path}")
+
+
+def normalize_field_value(value):
+    normalized = value.strip().lower().replace("_", "-")
+    normalized = " ".join(normalized.split())
+    if normalized == "not needed":
+        return "not-needed"
+    return normalized
+
+
+def parse_review_fields(review_path):
+    fields = {}
+    wanted = {
+        "currentdocssync": "CurrentDocsSync",
+        "changelogupdated": "ChangelogUpdated",
+        "architectureupdated": "ArchitectureUpdated",
+        "testingupdated": "TestingUpdated",
+        "requirementsupdated": "RequirementsUpdated",
+    }
+    for raw_line in review_path.read_text(encoding="utf-8", errors="replace").splitlines():
+        if ":" not in raw_line:
+            continue
+        key, value = raw_line.split(":", 1)
+        normalized_key = key.strip().replace(" ", "").replace("-", "").lower()
+        if normalized_key in wanted:
+            fields[wanted[normalized_key]] = normalize_field_value(value)
+    return fields
+
+
+def classify_sync(entry, project_root):
+    required = {"change_id", "From", "To", "Risk", "Status"}
+    missing_fields = sorted(required - set(entry))
+    if missing_fields:
+        return {
+            "category": "manual_review_needed",
+            "review_path": "missing",
+            "fields": {},
+            "warnings": [f"missing plan fields: {', '.join(missing_fields)}"],
+        }
+
+    candidate_rel = safe_relative_path(entry["From"], "Candidate-Path")
+    candidate_path = project_root / candidate_rel
+    if not candidate_path.is_dir():
+        return {
+            "category": "manual_review_needed",
+            "review_path": (candidate_rel / "review.md").as_posix(),
+            "fields": {},
+            "warnings": ["candidate path is missing or not a directory"],
+        }
+
+    review_rel = candidate_rel / "review.md"
+    review_path = project_root / review_rel
+    if not review_path.is_file():
+        return {
+            "category": "manual_review_needed",
+            "review_path": review_rel.as_posix(),
+            "fields": {},
+            "warnings": ["review.md missing"],
+        }
+
+    fields = parse_review_fields(review_path)
+    current_docs_sync = fields.get("CurrentDocsSync", "unknown")
+    changelog_updated = fields.get("ChangelogUpdated", "unknown")
+    warnings = []
+    if changelog_updated in {"no", "unknown"}:
+        warnings.append(f"ChangelogUpdated is {changelog_updated}")
+    if "ChangelogUpdated" not in fields:
+        warnings.append("ChangelogUpdated missing")
+
+    if current_docs_sync == "confirmed":
+        category = "sync_confirmed"
+    elif current_docs_sync == "not-needed":
+        category = "sync_not_needed"
+    elif current_docs_sync == "missing":
+        category = "missing_required_docs"
+    else:
+        category = "missing_sync_metadata"
+
+    return {
+        "category": category,
+        "review_path": review_rel.as_posix(),
+        "fields": fields,
+        "warnings": warnings,
+    }
+
+
+def sync_section(record):
+    fields = record["fields"]
+    warnings = record["warnings"]
+    lines = [
+        f"### {record['change_id']}",
+        "",
+        f"Sync-Status: {record['category']}",
+        f"Change: {record['change_id']}",
+        f"Candidate-Path: {record.get('from') or 'missing'}",
+        f"Review-Path: {record['review_path']}",
+        f"CurrentDocsSync: {fields.get('CurrentDocsSync', 'missing')}",
+        f"ChangelogUpdated: {fields.get('ChangelogUpdated', 'missing')}",
+        f"ArchitectureUpdated: {fields.get('ArchitectureUpdated', 'missing')}",
+        f"TestingUpdated: {fields.get('TestingUpdated', 'missing')}",
+        f"RequirementsUpdated: {fields.get('RequirementsUpdated', 'missing')}",
+        "Warnings:",
+    ]
+    if warnings:
+        lines.extend(f"- {warning}" for warning in warnings)
+    else:
+        lines.append("none")
+    return "\n".join(lines)
+
+
+def write_sync_report(project_root, plan_rel, records):
+    categories = [
+        "sync_confirmed",
+        "sync_not_needed",
+        "missing_sync_metadata",
+        "missing_required_docs",
+        "manual_review_needed",
+    ]
+    grouped = {category: [item for item in records if item["category"] == category] for category in categories}
+    lines = [
+        "# Current Docs Sync Report",
+        "",
+        "Status: report-only",
+        "Mode: sync-check",
+        f"Plan path: {plan_rel.as_posix()}",
+        f"Generated: {utc_now()}",
+        "",
+        "This report checks structured review metadata only. It does not semantically verify current docs content.",
+        "",
+        "## Summary",
+        "",
+        "| category | count |",
+        "| --- | ---: |",
+    ]
+    lines.extend(f"| {category} | {len(grouped[category])} |" for category in categories)
+    for category in categories:
+        lines.extend(["", f"## {category}", ""])
+        lines.extend([sync_section(item) + "\n" for item in grouped[category]] or ["None.\n"])
+
+    report_path = project_root / SYNC_REPORT
+    report_path.write_text("\n".join(lines).rstrip() + "\n", encoding="utf-8")
+    return report_path
+
+
+def run_sync_check(project_root, plan_value):
+    plan_rel = safe_relative_path(plan_value, "plan")
+    if plan_rel.as_posix() != ".forgekit/archive-plan.md":
+        fail("v0.22 only supports --plan .forgekit/archive-plan.md")
+    candidates = parse_plan(project_root / plan_rel)
+    records = []
+    for entry in candidates:
+        result = classify_sync(entry, project_root)
+        records.append({
+            "change_id": entry.get("change_id", "<missing-change>"),
+            "from": entry.get("From", ""),
+            "category": result["category"],
+            "review_path": result["review_path"],
+            "fields": result["fields"],
+            "warnings": result["warnings"],
+        })
+    report_path = write_sync_report(project_root, plan_rel, records)
+    print(f"[ok] Current docs sync report written: {report_path}")
 
 
 def git_status_allowing_plan(project_root, plan_rel):
@@ -594,7 +758,8 @@ def main():
     mode.add_argument("--dry-run", action="store_true", help="Generate .forgekit/archive-plan.md without moving or changing project files.")
     mode.add_argument("--apply", action="store_true", help="Apply candidates from a reviewed archive plan.")
     mode.add_argument("--reference-check", action="store_true", help="Generate .forgekit/archive-reference-report.md from archive-plan candidates.")
-    parser.add_argument("--plan", default=".forgekit/archive-plan.md", help="Archive plan path. v0.21 supports .forgekit/archive-plan.md.")
+    mode.add_argument("--sync-check", action="store_true", help="Generate .forgekit/current-docs-sync-report.md from archive-plan candidates.")
+    parser.add_argument("--plan", default=".forgekit/archive-plan.md", help="Archive plan path. v0.22 supports .forgekit/archive-plan.md.")
     parser.add_argument("--confirm", action="store_true", help="Required with --apply to move candidates.")
     args = parser.parse_args()
     project_root = Path.cwd().resolve()
@@ -602,8 +767,10 @@ def main():
         run_dry_run(project_root)
     elif args.apply:
         run_apply(project_root, args.plan, args.confirm)
-    else:
+    elif args.reference_check:
         run_reference_check(project_root, args.plan)
+    else:
+        run_sync_check(project_root, args.plan)
 
 
 if __name__ == "__main__":

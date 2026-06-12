@@ -214,6 +214,7 @@ ForgeKit can coexist with ECC: ECC enhances the AI tool; ForgeKit constrains the
 
 | Version | User-facing change |
 | --- | --- |
+| `0.22.0` | Current Docs Sync Check: generates a report-only current-docs sync evidence report from archive plan candidates without modifying project fact files. |
 | `0.21.1` | Work Log Managed Doc Template: adds `.forgekit/docs/work-log.md` for personal work sequence, handoff context, and interrupted session recovery. |
 | `0.21.0` | Archive Reference Check: generates a reference report from archive plan candidates and checks string references in current docs, active changes, and entry docs. |
 | `0.20.0` | Archive Apply: moves candidate changes from a reviewed dry-run plan only after Git is clean and the user passes `--confirm`, then writes an apply report. |

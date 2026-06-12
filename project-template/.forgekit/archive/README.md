@@ -27,3 +27,11 @@ python scripts/archive-changes.py --reference-check --plan .forgekit/archive-pla
 ```
 
 The reference report is report-only and uses string matching. It does not rewrite links or decide whether a reference is harmful.
+
+Before applying, run the sync check when you need structured evidence that stable conclusions were synchronized back into current state docs:
+
+```bash
+python scripts/archive-changes.py --sync-check --plan .forgekit/archive-plan.md
+```
+
+The sync report is report-only. It reads `review.md` metadata for candidates and does not change current docs, business docs, archive-plan, template-lock, links, or files.

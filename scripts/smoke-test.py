@@ -187,8 +187,8 @@ def assert_json(path):
 def assert_manifest_lock(target):
     lock_path = target / ".forgekit" / "template-lock.json"
     lock = json.loads(lock_path.read_text(encoding="utf-8"))
-    if lock.get("installed_version") != "0.21.1":
-        fail("template-lock installed_version must be 0.21.1")
+    if lock.get("installed_version") != "0.22.0":
+        fail("template-lock installed_version must be 0.22.0")
     if lock.get("managed_docs_root") != ".forgekit/docs":
         fail("template-lock managed_docs_root must match boundary")
     if lock.get("change_root") != ".forgekit/changes":
@@ -241,7 +241,7 @@ def assert_upgrade_report(repo, target):
         fail("upgrade must not overwrite managed docs")
     assert_paths(target, [
         ".forgekit/upgrade-report.md",
-        ".forgekit/upgrade-export/0.21.1/.forgekit/docs/project-plan.md",
+        ".forgekit/upgrade-export/0.22.0/.forgekit/docs/project-plan.md",
     ])
 
 
@@ -389,8 +389,88 @@ def assert_archive_flow(target):
         fail("archive reference report missing expected text:\n" + "\n".join(missing_reference_text))
     if not (target / ".forgekit" / "changes" / "20260101-done-medium").is_dir():
         fail("archive reference check must not move candidates")
+
+    (target / ".forgekit" / "changes" / "20260101-done-medium" / "review.md").write_text(
+        "# review.md\n\nCurrentDocsSync: confirmed\nChangelogUpdated: yes\nArchitectureUpdated: not-needed\nTestingUpdated: yes\nRequirementsUpdated: not-needed\n",
+        encoding="utf-8",
+    )
+    (target / ".forgekit" / "changes" / "20260106-current-ref" / "review.md").write_text(
+        "# review.md\n\nCurrentDocsSync: not needed\nChangelogUpdated: not-needed\nArchitectureUpdated: not-needed\nTestingUpdated: not-needed\nRequirementsUpdated: not-needed\n",
+        encoding="utf-8",
+    )
+    (target / ".forgekit" / "changes" / "20260107-manual-ref" / "review.md").write_text(
+        "# review.md\n\nChangelogUpdated: no\nArchitectureUpdated: unknown\nTestingUpdated: unknown\nRequirementsUpdated: unknown\n",
+        encoding="utf-8",
+    )
+    (target / ".forgekit" / "changes" / "20260105-done-high" / "review.md").write_text(
+        "# review.md\n\nCurrentDocsSync: missing\nChangelogUpdated: unknown\nArchitectureUpdated: yes\nTestingUpdated: yes\nRequirementsUpdated: not-needed\n",
+        encoding="utf-8",
+    )
+    missing_review_dir = target / ".forgekit" / "changes" / "20260109-plan-missing-review"
+    missing_review_dir.mkdir(parents=True, exist_ok=True)
+    (missing_review_dir / "proposal.md").write_text(
+        "Status: done\nRisk: medium\nCreated: 2026-01-09\nOwner: smoke\nReason: sync check missing review smoke\n",
+        encoding="utf-8",
+    )
+    (missing_review_dir / "tasks.md").write_text("# tasks.md\n", encoding="utf-8")
+    (missing_review_dir / "verification.md").write_text("# verification.md\n", encoding="utf-8")
+    with plan_path.open("a", encoding="utf-8") as handle:
+        handle.write(
+            "\n## Sync Missing Review Smoke\n\n"
+            "### 20260109-plan-missing-review\n\n"
+            "Archive-Status: candidate\n"
+            "From: .forgekit/changes/20260109-plan-missing-review\n"
+            "To: .forgekit/archive/changes/2026/20260109-plan-missing-review\n"
+            "Risk: medium\n"
+            "Status: done\n"
+        )
+    before_sync_plan = plan_path.read_bytes()
+    before_sync_lock = (target / ".forgekit" / "template-lock.json").read_bytes()
+    before_sync_business = business_note.read_bytes()
+    before_sync_docs = {path.relative_to(target).as_posix(): path.read_bytes() for path in (target / ".forgekit" / "docs").rglob("*") if path.is_file()}
+    run([sys.executable, "scripts/archive-changes.py", "--sync-check", "--plan", ".forgekit/archive-plan.md"], cwd=target)
+    sync_report_path = target / ".forgekit" / "current-docs-sync-report.md"
+    if not sync_report_path.is_file():
+        fail("current docs sync check must create .forgekit/current-docs-sync-report.md")
+    sync_report = sync_report_path.read_text(encoding="utf-8")
+    sync_required = [
+        "Mode: sync-check",
+        "Status: report-only",
+        "Sync-Status: sync_confirmed",
+        "Change: 20260101-done-medium",
+        "CurrentDocsSync: confirmed",
+        "Sync-Status: sync_not_needed",
+        "Change: 20260106-current-ref",
+        "CurrentDocsSync: not-needed",
+        "Sync-Status: missing_sync_metadata",
+        "Change: 20260107-manual-ref",
+        "ChangelogUpdated is no",
+        "Sync-Status: missing_required_docs",
+        "Change: 20260105-done-high",
+        "CurrentDocsSync: missing",
+        "Sync-Status: manual_review_needed",
+        "Change: 20260109-plan-missing-review",
+        "review.md missing",
+    ]
+    missing_sync_text = [item for item in sync_required if item not in sync_report]
+    if missing_sync_text:
+        fail("current docs sync report missing expected text:\n" + "\n".join(missing_sync_text))
+    if before_sync_plan != plan_path.read_bytes():
+        fail("current docs sync check must not update archive-plan.md")
+    if before_sync_lock != (target / ".forgekit" / "template-lock.json").read_bytes():
+        fail("current docs sync check must not update template-lock.json")
+    if before_sync_business != business_note.read_bytes():
+        fail("current docs sync check must not write business docs")
+    for relative, content in before_sync_docs.items():
+        if content != (target / relative).read_bytes():
+            fail(f"current docs sync check must not modify current docs: {relative}")
+    if not (target / ".forgekit" / "changes" / "20260101-done-medium").is_dir():
+        fail("current docs sync check must not move candidates")
+    sync_report_path.unlink()
     reference_report_path.unlink()
     run([sys.executable, "scripts/archive-changes.py", "--dry-run"], cwd=target)
+    run(["git", "add", "."], cwd=target)
+    run(["git", "commit", "-m", "sync-check-smoke-baseline"], cwd=target)
 
     no_confirm = run([sys.executable, "scripts/archive-changes.py", "--apply", "--plan", ".forgekit/archive-plan.md"], cwd=target, check=False)
     if no_confirm.returncode == 0 or "requires --confirm" not in (no_confirm.stdout + no_confirm.stderr):

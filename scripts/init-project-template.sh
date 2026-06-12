@@ -107,7 +107,7 @@ map_template_path() {
 skip_template_path() {
   local relative_path="${1//\\//}"
   case "$relative_path" in
-    .forgekit/template-manifest.json|.forgekit/template-lock.json|.forgekit/upgrade-report.md|.forgekit/archive-plan.md|.forgekit/archive-apply-report.md|.forgekit/archive-reference-report.md|.forgekit/upgrade-export/*)
+    .forgekit/template-manifest.json|.forgekit/template-lock.json|.forgekit/upgrade-report.md|.forgekit/archive-plan.md|.forgekit/archive-apply-report.md|.forgekit/archive-reference-report.md|.forgekit/current-docs-sync-report.md|.forgekit/upgrade-export/*)
       return 0
       ;;
     *)
@@ -168,7 +168,7 @@ write_boundary_config() {
   mkdir -p "$(dirname "$boundary_file")"
   cat > "$boundary_file" <<EOF
 forgekit:
-  version: "0.21.1"
+  version: "0.22.0"
   mode: "$mode"
 
 roots:

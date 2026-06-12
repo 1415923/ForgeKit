@@ -299,6 +299,11 @@ function Test-AIEngineeringLoop {
     Test-RequiredPattern "project-template\docs\work-log.md" "interrupted session recovery" "Work log recovery purpose"
     Test-RequiredPattern "project-template\docs\work-log.md" "not an MR-ready changelog" "Work log changelog boundary"
     Test-RequiredPattern "project-template\docs\work-log.md" "must not contain sensitive information" "Work log sensitive info boundary"
+    Test-RequiredPattern "project-template\changes\_template\review.md" "CurrentDocsSync: confirmed | not-needed | missing | unknown" "Review current docs sync metadata"
+    Test-RequiredPattern "project-template\changes\_template\review.md" "ChangelogUpdated: yes | no | not-needed | unknown" "Review changelog sync metadata"
+    Test-RequiredPattern "project-template\changes\_template\review.md" "ArchitectureUpdated: yes | no | not-needed | unknown" "Review architecture sync metadata"
+    Test-RequiredPattern "project-template\changes\_template\review.md" "TestingUpdated: yes | no | not-needed | unknown" "Review testing sync metadata"
+    Test-RequiredPattern "project-template\changes\_template\review.md" "RequirementsUpdated: yes | no | not-needed | unknown" "Review requirements sync metadata"
     Test-RequiredPattern "project-template\changes\README.md" "Status" "Change README status lifecycle"
     Test-RequiredPattern "project-template\changes\README.md" "done" "Change README done status"
     Test-RequiredPattern "project-template\changes\README.md" "archived" "Change README archived status"
@@ -316,7 +321,7 @@ function Test-TemplateManifest {
     $manifestPath = Join-Path $repoRoot "project-template\.forgekit\template-manifest.json"
     if (Test-Path -LiteralPath $manifestPath) {
         $manifest = Get-Content -LiteralPath $manifestPath -Raw | ConvertFrom-Json
-        if ($manifest.template_version -ne "0.21.1") {
+        if ($manifest.template_version -ne "0.22.0") {
             Add-Error "Unexpected template manifest version: $($manifest.template_version)"
         }
         $sources = @($manifest.files | ForEach-Object { $_.source_path })
@@ -331,6 +336,9 @@ function Test-TemplateManifest {
         }
         if ($sources -contains ".forgekit/archive-reference-report.md") {
             Add-Error "archive-reference-report.md must not be listed in template manifest"
+        }
+        if ($sources -contains ".forgekit/current-docs-sync-report.md") {
+            Add-Error "current-docs-sync-report.md must not be listed in template manifest"
         }
         foreach ($item in $manifest.files) {
             if ($item.update_policy -notin @("replace", "merge", "ask", "readonly")) {
@@ -488,6 +496,7 @@ function Test-ExecutableHarness {
     Test-RequiredPattern "project-template\.codex\commands.md" "check-doc-sync.sh" "Commands document sync check bash"
     Test-RequiredPattern "project-template\.codex\commands.md" "archive-changes.py --dry-run" "Commands archive dry-run"
     Test-RequiredPattern "project-template\.codex\commands.md" "archive-changes.py --reference-check" "Commands archive reference check"
+    Test-RequiredPattern "project-template\.codex\commands.md" "archive-changes.py --sync-check" "Commands current docs sync check"
     Test-RequiredPattern "project-template\.codex\commands.md" "install-hooks.ps1" "Commands hook installer"
     Test-RequiredPattern "project-template\.codex\commands.md" "install-hooks.sh" "Commands hook installer bash"
     Test-RequiredPattern "project-template\.codex\commands-catalog.md" "detect-local-toolchain" "Commands catalog toolchain detector"
@@ -501,16 +510,21 @@ function Test-ExecutableHarness {
     Test-RequiredPattern "project-template\scripts\archive-changes.py" "Archive-Status" "Archive script machine-readable plan"
     Test-RequiredPattern "project-template\scripts\archive-changes.py" "archive-apply-report.md" "Archive script apply report"
     Test-RequiredPattern "project-template\scripts\archive-changes.py" "--reference-check" "Archive script reference check"
+    Test-RequiredPattern "project-template\scripts\archive-changes.py" "--sync-check" "Archive script sync check"
     Test-RequiredPattern "project-template\scripts\archive-changes.py" "Reference-Status" "Archive reference report machine-readable field"
+    Test-RequiredPattern "project-template\scripts\archive-changes.py" "Sync-Status" "Current docs sync report machine-readable field"
+    Test-RequiredPattern "project-template\scripts\archive-changes.py" "current-docs-sync-report.md" "Current docs sync report output"
     Test-RequiredPattern "project-template\scripts\archive-changes.py" "string-match only" "Archive reference report string-match disclaimer"
     Test-RequiredPattern "project-template\scripts\archive-changes.py" "archive-plan.md" "Archive script plan output"
     Test-RequiredPattern "project-template\scripts\archive-changes.py" "change_root:" "Archive script boundary change_root"
     Test-RequiredPattern "project-template\scripts\check-doc-sync.ps1" ".forgekit/archive-plan.md" "PowerShell archive plan exclusion"
     Test-RequiredPattern "project-template\scripts\check-doc-sync.ps1" ".forgekit/archive-apply-report.md" "PowerShell archive apply report exclusion"
     Test-RequiredPattern "project-template\scripts\check-doc-sync.ps1" ".forgekit/archive-reference-report.md" "PowerShell archive reference report exclusion"
+    Test-RequiredPattern "project-template\scripts\check-doc-sync.ps1" ".forgekit/current-docs-sync-report.md" "PowerShell current docs sync report exclusion"
     Test-RequiredPattern "project-template\scripts\check-doc-sync.sh" ".forgekit/archive-plan.md" "Bash archive plan exclusion"
     Test-RequiredPattern "project-template\scripts\check-doc-sync.sh" ".forgekit/archive-apply-report.md" "Bash archive apply report exclusion"
     Test-RequiredPattern "project-template\scripts\check-doc-sync.sh" ".forgekit/archive-reference-report.md" "Bash archive reference report exclusion"
+    Test-RequiredPattern "project-template\scripts\check-doc-sync.sh" ".forgekit/current-docs-sync-report.md" "Bash current docs sync report exclusion"
 }
 
 function Test-StaleText {
@@ -629,7 +643,7 @@ function Test-PluginDistribution {
     if ($codexPluginJson.name -ne "forgekit") {
         Add-Error "Unexpected Codex plugin name in root plugin.json: $($codexPluginJson.name)"
     }
-    if ($codexPluginJson.version -ne "0.21.1") {
+    if ($codexPluginJson.version -ne "0.22.0") {
         Add-Error "Unexpected Codex plugin version in root plugin.json: $($codexPluginJson.version)"
     }
     if ($codexPluginJson.skills -ne "./skills/") {
@@ -640,7 +654,7 @@ function Test-PluginDistribution {
     if ($claudePluginJson.name -ne "forgekit") {
         Add-Error "Unexpected Claude plugin name in root plugin.json: $($claudePluginJson.name)"
     }
-    if ($claudePluginJson.version -ne "0.21.1") {
+    if ($claudePluginJson.version -ne "0.22.0") {
         Add-Error "Unexpected Claude plugin version in root plugin.json: $($claudePluginJson.version)"
     }
     $claudeSkills = @($claudePluginJson.skills)

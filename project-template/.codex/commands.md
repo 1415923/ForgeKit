@@ -98,6 +98,16 @@ python .\scripts\archive-changes.py --reference-check --plan .forgekit/archive-p
 python3 ./scripts/archive-changes.py --reference-check --plan .forgekit/archive-plan.md
 ```
 
+Sync check 只读取 dry-run plan 中的候选项，检查 `review.md` 中的结构化同步字段，生成 `.forgekit/current-docs-sync-report.md`，不修改 current docs、business docs、archive plan、template-lock，也不移动文件。
+
+```powershell
+python .\scripts\archive-changes.py --sync-check --plan .forgekit/archive-plan.md
+```
+
+```bash
+python3 ./scripts/archive-changes.py --sync-check --plan .forgekit/archive-plan.md
+```
+
 Apply 需要先人工 review plan，并且必须显式确认。工作区除 `.forgekit/archive-plan.md` 外不干净时会拒绝执行。
 
 ```powershell

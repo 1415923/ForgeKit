@@ -100,6 +100,14 @@ After moving a candidate, apply may update only the archived copy of `proposal.m
 
 The reference check reads only `Archive-Status: candidate` entries from `.forgekit/archive-plan.md`. It does string matching only and does not decide whether a reference is harmful.
 
+## Current Docs Sync Check
+
+`scripts/archive-changes.py --sync-check --plan .forgekit/archive-plan.md` can generate `.forgekit/current-docs-sync-report.md`.
+
+The sync check reads only `Archive-Status: candidate` entries from `.forgekit/archive-plan.md` and checks structured metadata in each candidate's `review.md`. It does not semantically verify current docs, modify `.forgekit/docs/**`, write business docs, update template-lock, rewrite archive-plan, or move files.
+
+The primary field is `CurrentDocsSync: confirmed | not-needed | missing | unknown`. `ChangelogUpdated` creates warnings when it is `no`, `unknown`, or missing. `ArchitectureUpdated`, `TestingUpdated`, and `RequirementsUpdated` are supporting evidence only.
+
 It checks `.forgekit/docs/**`, draft/active/missing/unknown changes, and entry docs (`README.md`, `AGENTS.md`, `CLAUDE.md`). It skips archive, upgrade-export, report files, templates, and the candidate source directory itself.
 
 The report is generated fresh on every run. It does not move files, rewrite links, update current docs, write business docs, update template-lock, commit, tag, or push.

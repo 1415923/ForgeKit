@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "template_version": "0.21.1",
+  "template_version": "0.22.0",
   "boundary_aware": true,
   "files": [
     {
@@ -9,7 +9,7 @@
       "role": "agent_entry",
       "update_policy": "ask",
       "render_mode": "copy",
-      "checksum": "sha256:bec78129d56d692026b6c8c9c5f03b3ebc763541afd148472a1fe009ad41084f"
+      "checksum": "sha256:7d4f9e410429ffc7e722ab7f15dae08dbe5a13b24338eaa1fe5bb86c44a65080"
     },
     {
       "source_path": "CLAUDE.md",
@@ -17,7 +17,7 @@
       "role": "agent_entry",
       "update_policy": "ask",
       "render_mode": "copy",
-      "checksum": "sha256:4693fd7817f6764fefbb519b78832c4fd9cb68b11caf0d2660545540baa7e601"
+      "checksum": "sha256:30ad5943de9dc283101ec80023d2b0e70afb43fe7f8b692b858115714c91ab7d"
     },
     {
       "source_path": "README.md",
@@ -49,7 +49,7 @@
       "role": "managed_doc",
       "update_policy": "merge",
       "render_mode": "copy",
-      "checksum": "sha256:9efc4b8a0636e36104a47571a3015a58bf3379b735e64415f34258cd395f70bf"
+      "checksum": "sha256:4d13f536bc487b2aefe6b66436df989d858060b45315cde7fcd253d896c678a9"
     },
     {
       "source_path": ".forgekit/archive/README.md",
@@ -57,7 +57,7 @@
       "role": "managed_doc",
       "update_policy": "readonly",
       "render_mode": "copy",
-      "checksum": "sha256:221c49af47a1139c597042b2d85ad75521a0cee733467779039b9cb45b5f4ad0"
+      "checksum": "sha256:caed91f5fee7f47f9791a09b2557d9c725b080bcd06cbb41127529423c6f31a9"
     },
     {
       "source_path": ".forgekit/archive/changes/README.md",
@@ -81,7 +81,7 @@
       "role": "codex_rule",
       "update_policy": "ask",
       "render_mode": "copy",
-      "checksum": "sha256:107ecf3791cf38b226f4c85d60f3b26e18508f1b868be44291e6325bf821bc81"
+      "checksum": "sha256:03af1b57770b2d5b274954f4710cbdfc7264ffe9f97423019c63fe02978ea028"
     },
     {
       "source_path": ".codex/version-gates.md",
@@ -137,7 +137,7 @@
       "role": "change_template",
       "update_policy": "replace",
       "render_mode": "copy",
-      "checksum": "sha256:a339e638b8494c3b6c2422a45694b14ea4386058c73ce006b4f343f0e888cd11"
+      "checksum": "sha256:a3155e143553aa017baae2d0aed37e1665985ffa00bd60709efb2853346f568f"
     },
     {
       "source_path": "changes/_template/ship.md",
@@ -265,7 +265,7 @@
       "role": "script",
       "update_policy": "replace",
       "render_mode": "copy",
-      "checksum": "sha256:969afeb18367ea9f016818fc1863a00668eb4cd0b95f86ceb746138593883bde"
+      "checksum": "sha256:d96786d9acdab34c46a121665447c854251f17b112ab9dd397df6f98a637887d"
     },
     {
       "source_path": "scripts/check-doc-sync.sh",
@@ -273,7 +273,7 @@
       "role": "script",
       "update_policy": "replace",
       "render_mode": "copy",
-      "checksum": "sha256:3f195ae918bdea638050722732ad608e2b0c33a8a448e0122cd5ba948dd39a53"
+      "checksum": "sha256:ba031e54dff68c86464c54ea964486bc575051b539350c95d462d3684e86a450"
     },
     {
       "source_path": "scripts/archive-changes.py",
@@ -281,7 +281,7 @@
       "role": "script",
       "update_policy": "replace",
       "render_mode": "copy",
-      "checksum": "sha256:eb6eb4132525381fbf68278412fc7304dc709af3887d23ff5fe7dbadf11abdfd"
+      "checksum": "sha256:d71b28dfd596e075f0996a0e64a42d573c65def4f2179f33b1405fc272e108a8"
     },
     {
       "source_path": "scripts/run-harness-check.ps1",
