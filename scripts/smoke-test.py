@@ -48,6 +48,7 @@ REQUIRED_REPO_PATHS = [
     "project-template/changes/_template/ship.md",
     "project-template/changes/_template/retro.md",
     "project-template/docs/codebase-map.md",
+    "project-template/docs/work-log.md",
     "project-template/docs/local-toolchain.md",
     "project-template/docs/version-roadmap.md",
     ".codex-plugin/plugin.json",
@@ -64,6 +65,7 @@ REQUIRED_GENERATED_PATHS = [
     ".forgekit/archive/changes/README.md",
     ".forgekit/archive/releases/README.md",
     ".forgekit/docs/codebase-map.md",
+    ".forgekit/docs/work-log.md",
     ".forgekit/docs/local-toolchain.md",
     ".forgekit/docs/version-roadmap.md",
     ".forgekit/docs/changelog.md",
@@ -185,8 +187,8 @@ def assert_json(path):
 def assert_manifest_lock(target):
     lock_path = target / ".forgekit" / "template-lock.json"
     lock = json.loads(lock_path.read_text(encoding="utf-8"))
-    if lock.get("installed_version") != "0.21.0":
-        fail("template-lock installed_version must be 0.21.0")
+    if lock.get("installed_version") != "0.21.1":
+        fail("template-lock installed_version must be 0.21.1")
     if lock.get("managed_docs_root") != ".forgekit/docs":
         fail("template-lock managed_docs_root must match boundary")
     if lock.get("change_root") != ".forgekit/changes":
@@ -239,7 +241,7 @@ def assert_upgrade_report(repo, target):
         fail("upgrade must not overwrite managed docs")
     assert_paths(target, [
         ".forgekit/upgrade-report.md",
-        ".forgekit/upgrade-export/0.21.0/.forgekit/docs/project-plan.md",
+        ".forgekit/upgrade-export/0.21.1/.forgekit/docs/project-plan.md",
     ])
 
 

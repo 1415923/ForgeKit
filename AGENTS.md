@@ -32,6 +32,7 @@ This repository maintains a reusable Codex CLI workflow template.
 - Keep root and generated `AGENTS.md` short; details belong in skills, stack templates, docs, or governance files.
 - Do not duplicate the same long instruction in HTML, prompts, skills, and AGENTS.
 - When adding startup behavior, make sure Codex can answer: first file to read, search starting point, stack-specific files, and validation command.
+- When adding managed docs, update `project-template/.forgekit/docs/document-responsibility.md`, `project-template/docs/codebase-map.md`, manifest checks, and smoke tests.
 
 ## Validation
 

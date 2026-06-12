@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "template_version": "0.21.0",
+  "template_version": "0.21.1",
   "boundary_aware": true,
   "files": [
     {
@@ -9,7 +9,7 @@
       "role": "agent_entry",
       "update_policy": "ask",
       "render_mode": "copy",
-      "checksum": "sha256:1e796491468cb0f820363c5126edd4184bea10dca160cecc435acc15911c61eb"
+      "checksum": "sha256:bec78129d56d692026b6c8c9c5f03b3ebc763541afd148472a1fe009ad41084f"
     },
     {
       "source_path": "CLAUDE.md",
@@ -17,7 +17,7 @@
       "role": "agent_entry",
       "update_policy": "ask",
       "render_mode": "copy",
-      "checksum": "sha256:9bbac94c5a9053d1bc2654406c12da160ba1ce0ec15da0acb4c87e71d5c4ba80"
+      "checksum": "sha256:4693fd7817f6764fefbb519b78832c4fd9cb68b11caf0d2660545540baa7e601"
     },
     {
       "source_path": "README.md",
@@ -41,7 +41,7 @@
       "role": "managed_doc",
       "update_policy": "merge",
       "render_mode": "copy",
-      "checksum": "sha256:971af13f37127463f8c27511828bb34f9980d9e8ff646e3a314ded3f15a5cc97"
+      "checksum": "sha256:7da35cc5b156469c26dd4e076e23a27b78d13a414aac49bac1f5dda8a1574222"
     },
     {
       "source_path": ".forgekit/docs/document-lifecycle.md",
@@ -81,7 +81,7 @@
       "role": "codex_rule",
       "update_policy": "ask",
       "render_mode": "copy",
-      "checksum": "sha256:ecaeae74b4b5d221ad2c7c8c6012a279190eb6c7165f2f4c7f73ade68af09079"
+      "checksum": "sha256:107ecf3791cf38b226f4c85d60f3b26e18508f1b868be44291e6325bf821bc81"
     },
     {
       "source_path": ".codex/version-gates.md",
@@ -177,7 +177,15 @@
       "role": "managed_doc",
       "update_policy": "merge",
       "render_mode": "copy",
-      "checksum": "sha256:7e261c1ae2c951eacf6129df872bb18915ba3e59ed650575a7fabd761774427a"
+      "checksum": "sha256:15edd21c48f10eca7d9715bac14d9d1b53e518d50df45f09175cc7af5cb50f8a"
+    },
+    {
+      "source_path": "docs/work-log.md",
+      "target_path": "${managed_docs_root}/work-log.md",
+      "role": "managed_doc",
+      "update_policy": "merge",
+      "render_mode": "copy",
+      "checksum": "sha256:aa3216b7617d1d6458b01478c124bc19c841f662dc186b3e5100b4c9887b6b4c"
     },
     {
       "source_path": "docs/local-toolchain.md",

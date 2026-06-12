@@ -229,6 +229,7 @@ function Test-AgentsHarness {
     Test-RequiredPath "project-template\.forgekit\project-boundary.yml"
     Test-RequiredPath "project-template\.forgekit\docs\document-responsibility.md"
     Test-RequiredPath "project-template\.forgekit\docs\document-lifecycle.md"
+    Test-RequiredPath "project-template\docs\work-log.md"
     Test-RequiredPath "project-template\.forgekit\archive\README.md"
     Test-RequiredPath "project-template\.forgekit\archive\changes\README.md"
     Test-RequiredPath "project-template\.forgekit\archive\releases\README.md"
@@ -291,6 +292,13 @@ function Test-AIEngineeringLoop {
     Test-RequiredPattern "project-template\.forgekit\docs\document-lifecycle.md" "change process docs" "Document lifecycle change docs"
     Test-RequiredPattern "project-template\.forgekit\docs\document-lifecycle.md" "archive docs" "Document lifecycle archive docs"
     Test-RequiredPattern "project-template\.forgekit\docs\document-responsibility.md" "document-lifecycle.md" "Document responsibility lifecycle reference"
+    Test-RequiredPattern "project-template\.forgekit\docs\document-responsibility.md" "work-log.md" "Document responsibility work log entry"
+    Test-RequiredPattern "project-template\docs\codebase-map.md" ".forgekit/docs/work-log.md" "Codebase map work log index"
+    Test-RequiredPattern "project-template\docs\work-log.md" "personal work sequence log" "Work log purpose"
+    Test-RequiredPattern "project-template\docs\work-log.md" "handoff context" "Work log handoff purpose"
+    Test-RequiredPattern "project-template\docs\work-log.md" "interrupted session recovery" "Work log recovery purpose"
+    Test-RequiredPattern "project-template\docs\work-log.md" "not an MR-ready changelog" "Work log changelog boundary"
+    Test-RequiredPattern "project-template\docs\work-log.md" "must not contain sensitive information" "Work log sensitive info boundary"
     Test-RequiredPattern "project-template\changes\README.md" "Status" "Change README status lifecycle"
     Test-RequiredPattern "project-template\changes\README.md" "done" "Change README done status"
     Test-RequiredPattern "project-template\changes\README.md" "archived" "Change README archived status"
@@ -308,7 +316,7 @@ function Test-TemplateManifest {
     $manifestPath = Join-Path $repoRoot "project-template\.forgekit\template-manifest.json"
     if (Test-Path -LiteralPath $manifestPath) {
         $manifest = Get-Content -LiteralPath $manifestPath -Raw | ConvertFrom-Json
-        if ($manifest.template_version -ne "0.21.0") {
+        if ($manifest.template_version -ne "0.21.1") {
             Add-Error "Unexpected template manifest version: $($manifest.template_version)"
         }
         $sources = @($manifest.files | ForEach-Object { $_.source_path })
@@ -621,7 +629,7 @@ function Test-PluginDistribution {
     if ($codexPluginJson.name -ne "forgekit") {
         Add-Error "Unexpected Codex plugin name in root plugin.json: $($codexPluginJson.name)"
     }
-    if ($codexPluginJson.version -ne "0.21.0") {
+    if ($codexPluginJson.version -ne "0.21.1") {
         Add-Error "Unexpected Codex plugin version in root plugin.json: $($codexPluginJson.version)"
     }
     if ($codexPluginJson.skills -ne "./skills/") {
@@ -632,7 +640,7 @@ function Test-PluginDistribution {
     if ($claudePluginJson.name -ne "forgekit") {
         Add-Error "Unexpected Claude plugin name in root plugin.json: $($claudePluginJson.name)"
     }
-    if ($claudePluginJson.version -ne "0.21.0") {
+    if ($claudePluginJson.version -ne "0.21.1") {
         Add-Error "Unexpected Claude plugin version in root plugin.json: $($claudePluginJson.version)"
     }
     $claudeSkills = @($claudePluginJson.skills)

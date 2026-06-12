@@ -12,6 +12,7 @@
 | 部署配置 | 待补充 | 环境变量、容器、脚本、发布配置 | 待补充 |
 | 测试 | 待补充 | 单元测试、集成测试、端到端测试 | 待补充 |
 | 文档 | `docs/` | 方案、架构、版本、任务、风险 | 待补充 |
+| ForgeKit 工作日志 | `.forgekit/docs/work-log.md` | 个人工作顺序、交接上下文、中断恢复、验证/提交/阻塞/确认摘要 | 待补充 |
 
 ## 关键模块
 
@@ -51,6 +52,8 @@
 | 构建 | 待补充 | 发布前或跨模块变更后 |
 
 详细工具链状态记录在 `.forgekit/docs/local-toolchain.md`。如果该文档未填写，Codex 应先询问或用只读命令探测，不要默认安装依赖或启动服务。
+
+个人工作顺序记录在 `.forgekit/docs/work-log.md`。它用于阶段收口、验证、提交/推送、阻塞变化、领导/组长确认和中断恢复，不替代 `.forgekit/docs/changelog.md`、`.forgekit/docs/task-board.md`、`.forgekit/docs/testing.md` 或风险/追踪文档。
 
 ## 忽略和谨慎读取
 

@@ -33,6 +33,7 @@
 - `.forgekit/archive-plan.md` 是 dry-run 生成产物，不是 current docs 或 active change；每次 dry-run 可以覆盖它。
 - `.forgekit/archive-apply-report.md` 是 apply 生成产物，不是 current docs、active change 或发布证据。
 - `.forgekit/archive-reference-report.md` 是 reference-check 生成产物，不是 current docs、active change 或发布证据。
+- `.forgekit/docs/work-log.md` 是个人工作顺序记录，用于交接上下文和中断会话恢复；用户要求“更新 ForgeKit 文档”且本轮包含阶段收口、验证、提交/推送、阻塞、领导/组长确认时应同步，用户明确要求“同步工作日志”时必须同步；仅更新稳定技术事实时不强制同步。
 - 如果用户要求把 ForgeKit 事实合并进业务 `docs/`，先列出目标文件、写入原因、与现有内容的关系和覆盖风险，等用户确认后再写。
 - `src/**`、`tests/**`、`scripts/**` 属于 task_scoped：任务开始前确认范围，确认后可在本任务范围内修改。
 
