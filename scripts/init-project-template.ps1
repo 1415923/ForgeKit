@@ -45,6 +45,7 @@ function Test-SkipTemplatePath {
     if ($normalized -eq ".forgekit/archive-reference-report.md") { return $true }
     if ($normalized -eq ".forgekit/current-docs-sync-report.md") { return $true }
     if ($normalized -eq ".forgekit/smart-archive-report.md") { return $true }
+    if ($normalized -eq ".forgekit/smart-archive-apply-report.md") { return $true }
     if ($normalized -like ".forgekit/upgrade-export/*") { return $true }
     return $false
 }
@@ -143,7 +144,7 @@ function Write-BoundaryConfig {
 
     $lines = @(
         'forgekit:',
-        '  version: "0.23.0"',
+        '  version: "0.24.0"',
         "  mode: `"$SelectedMode`"",
         '',
         'roots:',

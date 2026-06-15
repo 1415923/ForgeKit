@@ -214,6 +214,7 @@ ForgeKit can coexist with ECC: ECC enhances the AI tool; ForgeKit constrains the
 
 | Version | User-facing change |
 | --- | --- |
+| `0.24.0` | Smart Archive Apply: with clean Git status and explicit confirmation, archives only changes marked `auto_archive_candidate` by Smart Archive Advisor and writes an apply report. |
 | `0.23.0` | Smart Archive Advisor: combines archive plan, reference report, and sync report into a report-only archive advice report. |
 | `0.22.0` | Current Docs Sync Check: generates a report-only current-docs sync evidence report from archive plan candidates without modifying project fact files. |
 | `0.21.1` | Work Log Managed Doc Template: adds `.forgekit/docs/work-log.md` for personal work sequence, handoff context, and interrupted session recovery. |

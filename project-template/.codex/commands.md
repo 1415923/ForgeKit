@@ -118,6 +118,16 @@ python .\scripts\archive-changes.py --smart-check --plan .forgekit/archive-plan.
 python3 ./scripts/archive-changes.py --smart-check --plan .forgekit/archive-plan.md --reference-report .forgekit/archive-reference-report.md --sync-report .forgekit/current-docs-sync-report.md
 ```
 
+Smart apply 只读取 `.forgekit/smart-archive-report.md` 中 `Smart-Status: auto_archive_candidate` 的条目。必须显式确认，且工作区除 smart report 本身外不干净时会拒绝执行；它只移动 `.forgekit/changes/<change-id>` 到 `.forgekit/archive/changes/YYYY/<change-id>`，并把归档后 `proposal.md` 的 `Status: done` 改为 `Status: archived`。
+
+```powershell
+python .\scripts\archive-changes.py --smart-apply --report .forgekit/smart-archive-report.md --confirm
+```
+
+```bash
+python3 ./scripts/archive-changes.py --smart-apply --report .forgekit/smart-archive-report.md --confirm
+```
+
 Apply 需要先人工 review plan，并且必须显式确认。工作区除 `.forgekit/archive-plan.md` 外不干净时会拒绝执行。
 
 ```powershell

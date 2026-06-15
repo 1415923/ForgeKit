@@ -43,3 +43,11 @@ python scripts/archive-changes.py --smart-check --plan .forgekit/archive-plan.md
 ```
 
 Smart check combines machine-readable fields from the archive plan, reference report, and sync report. It writes `.forgekit/smart-archive-report.md` and remains report-only.
+
+Smart Archive Apply:
+
+```bash
+python scripts/archive-changes.py --smart-apply --report .forgekit/smart-archive-report.md --confirm
+```
+
+Smart apply requires explicit confirmation and a clean Git working tree except for the smart report itself. It only moves entries with `Smart-Status: auto_archive_candidate`, writes `.forgekit/smart-archive-apply-report.md`, and does not modify current docs, business docs, README, AGENTS, CLAUDE, template-lock, reports, commits, or links.

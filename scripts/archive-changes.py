@@ -32,6 +32,7 @@ FORBIDDEN_EXACT_PATHS = {
 REFERENCE_REPORT = ".forgekit/archive-reference-report.md"
 SYNC_REPORT = ".forgekit/current-docs-sync-report.md"
 SMART_REPORT = ".forgekit/smart-archive-report.md"
+SMART_APPLY_REPORT = ".forgekit/smart-archive-apply-report.md"
 
 
 def fail(message):
@@ -789,7 +790,7 @@ def run_smart_check(project_root, plan_value, reference_value, sync_value):
     print(f"[ok] Smart archive report written: {report_path}")
 
 
-def git_status_allowing_plan(project_root, plan_rel):
+def git_status_allowing_path(project_root, allowed_rel, label):
     result = subprocess.run(
         ["git", "status", "--short"],
         cwd=project_root,
@@ -802,7 +803,7 @@ def git_status_allowing_plan(project_root, plan_rel):
     if result.returncode != 0:
         fail("Git status failed; archive apply requires a Git repository with clean status")
 
-    allowed = {plan_rel.as_posix(), plan_rel.as_posix().replace("/", "\\")}
+    allowed = {allowed_rel.as_posix(), allowed_rel.as_posix().replace("/", "\\")}
     dirty = []
     for raw_line in result.stdout.splitlines():
         path_text = raw_line[3:].strip()
@@ -811,7 +812,15 @@ def git_status_allowing_plan(project_root, plan_rel):
         if path_text not in allowed:
             dirty.append(raw_line)
     if dirty:
-        fail("Git working tree must be clean except the selected archive plan:\n" + "\n".join(dirty))
+        fail(f"Git working tree must be clean except the selected {label}:\n" + "\n".join(dirty))
+
+
+def git_status_allowing_plan(project_root, plan_rel):
+    git_status_allowing_path(project_root, plan_rel, "archive plan")
+
+
+def git_status_allowing_report(project_root, report_rel):
+    git_status_allowing_path(project_root, report_rel, "smart archive report")
 
 
 def validate_candidate(entry, project_root, change_root_rel):
@@ -849,7 +858,8 @@ def update_archived_proposal(proposal_path):
     lines = proposal_path.read_text(encoding="utf-8", errors="replace").splitlines()
     for index, line in enumerate(lines):
         if line.lower().startswith("status:"):
-            if line.strip().lower() == "status: done":
+            status_value = line.split(":", 1)[1].strip().lower()
+            if status_value == "done":
                 lines[index] = "Status: archived"
                 proposal_path.write_text("\n".join(lines) + "\n", encoding="utf-8")
                 return "done -> archived"
@@ -894,6 +904,145 @@ def write_apply_report(project_root, plan_rel, moved, skipped_summary):
         f"- Skipped entries from plan were not applied: {skipped_summary['skipped']}",
     ])
     report_path = project_root / ".forgekit" / "archive-apply-report.md"
+    report_path.write_text("\n".join(lines).rstrip() + "\n", encoding="utf-8")
+    return report_path
+
+
+def parse_smart_report(report_path):
+    if not report_path.is_file():
+        fail(f"Smart archive report not found: {report_path}")
+    lines = report_path.read_text(encoding="utf-8", errors="replace").splitlines()
+    if "Mode: smart-check" not in lines or "Status: report-only" not in lines:
+        fail("Smart archive report must contain 'Mode: smart-check' and 'Status: report-only'")
+
+    entries = []
+    current = None
+    for line in lines:
+        if line.startswith("### "):
+            if current:
+                entries.append(current)
+            current = {"change_id": line[4:].strip()}
+            continue
+        if current is None or ":" not in line:
+            continue
+        key, value = line.split(":", 1)
+        key = key.strip()
+        if key in {
+            "Smart-Status",
+            "Change",
+            "Candidate-Path",
+            "Target-Archive-Path",
+            "Reference-Status",
+            "Sync-Status",
+            "Reason",
+        }:
+            current[key] = value.strip()
+    if current:
+        entries.append(current)
+    return [item for item in entries if item.get("Smart-Status") == "auto_archive_candidate"]
+
+
+def count_smart_groups(report_path):
+    text = report_path.read_text(encoding="utf-8", errors="replace")
+    categories = {
+        "manual_review_required": 0,
+        "blocked_by_active_reference": 0,
+        "blocked_by_current_docs_reference": 0,
+        "blocked_by_missing_sync": 0,
+        "blocked_by_missing_report": 0,
+    }
+    for line in text.splitlines():
+        for category in categories:
+            if line.startswith(f"| {category} |"):
+                categories[category] = int(line.split("|")[2].strip())
+    return categories
+
+
+def validate_smart_candidate(entry, project_root):
+    required = {"Smart-Status", "Change", "Candidate-Path", "Target-Archive-Path", "change_id"}
+    missing = sorted(required - set(entry))
+    if missing:
+        fail(f"Smart candidate is missing machine-readable fields: {entry.get('change_id', '<unknown>')}: {', '.join(missing)}")
+
+    change_id = entry["Change"]
+    if entry["change_id"] != change_id:
+        fail(f"Smart candidate heading must match Change field: {entry['change_id']} / {change_id}")
+    from_rel = safe_relative_path(entry["Candidate-Path"], "Candidate-Path")
+    to_rel = safe_relative_path(entry["Target-Archive-Path"], "Target-Archive-Path")
+
+    expected_from = f".forgekit/changes/{change_id}"
+    to_parts = to_rel.parts
+    if from_rel.as_posix() != expected_from:
+        fail(f"Smart candidate source must be .forgekit/changes/<change-id>: {entry['Candidate-Path']}")
+    if len(to_parts) != 5 or to_parts[:3] != (".forgekit", "archive", "changes") or to_parts[4] != change_id:
+        fail(f"Smart candidate target must be .forgekit/archive/changes/YYYY/<change-id>: {entry['Target-Archive-Path']}")
+    if len(to_parts[3]) != 4 or not to_parts[3].isdigit():
+        fail(f"Smart candidate target year must be YYYY: {entry['Target-Archive-Path']}")
+    if entry.get("Reference-Status") != "safe_no_references":
+        fail(f"Smart candidate Reference-Status must be safe_no_references: {change_id}")
+    if entry.get("Sync-Status") not in {"sync_confirmed", "sync_not_needed"}:
+        fail(f"Smart candidate Sync-Status must be sync_confirmed or sync_not_needed: {change_id}")
+    if forbidden_path(from_rel.as_posix()) or forbidden_path(to_rel.as_posix()):
+        fail(f"Smart candidate path violates archive apply policy: {change_id}")
+
+    from_path = project_root / from_rel
+    to_path = project_root / to_rel
+    if not from_path.is_dir():
+        fail(f"Smart candidate source directory not found: {from_rel.as_posix()}")
+    proposal_status = read_change_status(from_path)
+    if proposal_status != "done":
+        fail(f"Smart candidate proposal Status must be done before archive: {change_id}")
+    if to_path.exists():
+        fail(f"Smart candidate target already exists: {to_rel.as_posix()}")
+    return from_rel, to_rel
+
+
+def write_smart_apply_report(project_root, report_rel, moved, skipped_summary):
+    lines = [
+        "# Smart Archive Apply Report",
+        "",
+        "Status: applied",
+        "Mode: smart-apply",
+        f"Smart report path: {report_rel.as_posix()}",
+        f"Applied time: {utc_now()}",
+        "",
+        "## Policy Summary",
+        "",
+        "- Applied Smart-Status: auto_archive_candidate entries only.",
+        "- Manual review and blocked entries were not moved.",
+        "- No current docs modified.",
+        "- No business docs modified.",
+        "- No README, AGENTS, or CLAUDE modified.",
+        "- No template-lock updated.",
+        "- No archive plan, reference report, sync report, or smart report modified.",
+        "- No commit created.",
+        "- No markdown links rewritten.",
+        "",
+        "## Moved Entries",
+        "",
+    ]
+    if moved:
+        for item in moved:
+            lines.extend([
+                f"### {item['change_id']}",
+                "",
+                f"- From: `{item['from']}`",
+                f"- To: `{item['to']}`",
+                f"- Proposal status updated: {item['proposal_status']}",
+                "",
+            ])
+    else:
+        lines.append("None.\n")
+    lines.extend([
+        "## Not Applied",
+        "",
+        f"- manual_review_required: {skipped_summary['manual_review_required']}",
+        f"- blocked_by_active_reference: {skipped_summary['blocked_by_active_reference']}",
+        f"- blocked_by_current_docs_reference: {skipped_summary['blocked_by_current_docs_reference']}",
+        f"- blocked_by_missing_sync: {skipped_summary['blocked_by_missing_sync']}",
+        f"- blocked_by_missing_report: {skipped_summary['blocked_by_missing_report']}",
+    ])
+    report_path = project_root / SMART_APPLY_REPORT
     report_path.write_text("\n".join(lines).rstrip() + "\n", encoding="utf-8")
     return report_path
 
@@ -947,6 +1096,45 @@ def run_apply(project_root, plan_value, confirm):
     print(f"[ok] Archive apply report written: {report_path}")
 
 
+def run_smart_apply(project_root, report_value, confirm):
+    if not confirm:
+        fail(f"Smart archive apply requires --confirm. Review {SMART_REPORT}, then rerun with --smart-apply --report {SMART_REPORT} --confirm.")
+    if not report_value:
+        fail(f"Smart archive apply requires --report {SMART_REPORT}")
+    report_rel = safe_relative_path(report_value, "report")
+    if report_rel.as_posix() != SMART_REPORT:
+        fail(f"v0.24 only supports --report {SMART_REPORT}")
+
+    git_status_allowing_report(project_root, report_rel)
+    report_path = project_root / report_rel
+    candidates = parse_smart_report(report_path)
+    if not candidates:
+        fail("Smart report has no Smart-Status: auto_archive_candidate entries to apply")
+
+    planned = []
+    for entry in candidates:
+        from_rel, to_rel = validate_smart_candidate(entry, project_root)
+        planned.append((entry, from_rel, to_rel))
+
+    moved = []
+    for entry, from_rel, to_rel in planned:
+        from_path = project_root / from_rel
+        to_path = project_root / to_rel
+        to_path.parent.mkdir(parents=True, exist_ok=True)
+        from_path.rename(to_path)
+        proposal_status = update_archived_proposal(to_path / "proposal.md")
+        moved.append({
+            "change_id": entry["Change"],
+            "from": from_rel.as_posix(),
+            "to": to_rel.as_posix(),
+            "proposal_status": proposal_status,
+        })
+
+    report_path = write_smart_apply_report(project_root, report_rel, moved, count_smart_groups(report_path))
+    print(f"[ok] Smart archive apply moved candidates: {len(moved)}")
+    print(f"[ok] Smart archive apply report written: {report_path}")
+
+
 def main():
     parser = argparse.ArgumentParser(description="Generate or apply a ForgeKit archive plan.")
     mode = parser.add_mutually_exclusive_group(required=True)
@@ -955,10 +1143,12 @@ def main():
     mode.add_argument("--reference-check", action="store_true", help="Generate .forgekit/archive-reference-report.md from archive-plan candidates.")
     mode.add_argument("--sync-check", action="store_true", help="Generate .forgekit/current-docs-sync-report.md from archive-plan candidates.")
     mode.add_argument("--smart-check", action="store_true", help="Generate .forgekit/smart-archive-report.md from archive, reference, and sync reports.")
+    mode.add_argument("--smart-apply", action="store_true", help="Apply Smart-Status: auto_archive_candidate entries from a reviewed smart archive report.")
     parser.add_argument("--plan", default=".forgekit/archive-plan.md", help="Archive plan path. v0.23 supports .forgekit/archive-plan.md.")
     parser.add_argument("--reference-report", default=REFERENCE_REPORT, help="Reference report path. v0.23 supports .forgekit/archive-reference-report.md.")
     parser.add_argument("--sync-report", default=SYNC_REPORT, help="Sync report path. v0.23 supports .forgekit/current-docs-sync-report.md.")
-    parser.add_argument("--confirm", action="store_true", help="Required with --apply to move candidates.")
+    parser.add_argument("--report", help="Smart archive report path. Required with --smart-apply; v0.24 supports .forgekit/smart-archive-report.md.")
+    parser.add_argument("--confirm", action="store_true", help="Required with --apply or --smart-apply to move candidates.")
     args = parser.parse_args()
     project_root = Path.cwd().resolve()
     if args.dry_run:
@@ -969,8 +1159,10 @@ def main():
         run_reference_check(project_root, args.plan)
     elif args.sync_check:
         run_sync_check(project_root, args.plan)
-    else:
+    elif args.smart_check:
         run_smart_check(project_root, args.plan, args.reference_report, args.sync_report)
+    else:
+        run_smart_apply(project_root, args.report, args.confirm)
 
 
 if __name__ == "__main__":

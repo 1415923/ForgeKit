@@ -27,3 +27,11 @@ python scripts/archive-changes.py --apply --plan .forgekit/archive-plan.md --con
 ```
 
 Apply only moves candidates from the plan. It does not move blocked, skipped, draft, active, or business docs.
+
+To apply only Smart Archive Advisor auto candidates:
+
+```bash
+python scripts/archive-changes.py --smart-apply --report .forgekit/smart-archive-report.md --confirm
+```
+
+Smart apply only moves `.forgekit/changes/<change-id>` to `.forgekit/archive/changes/YYYY/<change-id>` for `Smart-Status: auto_archive_candidate` entries.

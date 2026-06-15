@@ -187,8 +187,8 @@ def assert_json(path):
 def assert_manifest_lock(target):
     lock_path = target / ".forgekit" / "template-lock.json"
     lock = json.loads(lock_path.read_text(encoding="utf-8"))
-    if lock.get("installed_version") != "0.23.0":
-        fail("template-lock installed_version must be 0.23.0")
+    if lock.get("installed_version") != "0.24.0":
+        fail("template-lock installed_version must be 0.24.0")
     if lock.get("managed_docs_root") != ".forgekit/docs":
         fail("template-lock managed_docs_root must match boundary")
     if lock.get("change_root") != ".forgekit/changes":
@@ -241,7 +241,7 @@ def assert_upgrade_report(repo, target):
         fail("upgrade must not overwrite managed docs")
     assert_paths(target, [
         ".forgekit/upgrade-report.md",
-        ".forgekit/upgrade-export/0.23.0/.forgekit/docs/project-plan.md",
+        ".forgekit/upgrade-export/0.24.0/.forgekit/docs/project-plan.md",
     ])
 
 
@@ -252,6 +252,125 @@ def write_change(root, change_id, metadata, files):
         (change_dir / "proposal.md").write_text(metadata, encoding="utf-8")
     for name in files:
         (change_dir / name).write_text(f"# {name}\n", encoding="utf-8")
+
+
+def assert_smart_apply_flow(source_target):
+    target = source_target.parent / f"{source_target.name}-smart-apply"
+    if target.exists():
+        shutil.rmtree(target)
+    shutil.copytree(source_target, target)
+
+    before_lock = (target / ".forgekit" / "template-lock.json").read_bytes()
+    before_readme = (target / "README.md").read_bytes()
+    before_agents = (target / "AGENTS.md").read_bytes()
+    before_claude = (target / "CLAUDE.md").read_bytes()
+    business_note = target / "docs" / "business.md"
+    before_business = business_note.read_bytes()
+    docs_hashes = {path.relative_to(target).as_posix(): path.read_bytes() for path in (target / ".forgekit" / "docs").rglob("*") if path.is_file()}
+    plan_path = target / ".forgekit" / "archive-plan.md"
+    reference_report_path = target / ".forgekit" / "archive-reference-report.md"
+    sync_report_path = target / ".forgekit" / "current-docs-sync-report.md"
+    smart_report_path = target / ".forgekit" / "smart-archive-report.md"
+    before_plan = plan_path.read_bytes()
+    before_reference = reference_report_path.read_bytes()
+    before_sync = sync_report_path.read_bytes()
+    before_smart = smart_report_path.read_bytes()
+
+    run(["git", "add", "."], cwd=target)
+    run(["git", "commit", "-m", "smart-apply-smoke-baseline"], cwd=target)
+
+    no_report = run([sys.executable, "scripts/archive-changes.py", "--smart-apply", "--confirm"], cwd=target, check=False)
+    if no_report.returncode == 0 or "requires --report" not in (no_report.stdout + no_report.stderr):
+        fail("smart archive apply without --report must refuse")
+
+    no_confirm = run([
+        sys.executable,
+        "scripts/archive-changes.py",
+        "--smart-apply",
+        "--report",
+        ".forgekit/smart-archive-report.md",
+    ], cwd=target, check=False)
+    if no_confirm.returncode == 0 or "requires --confirm" not in (no_confirm.stdout + no_confirm.stderr):
+        fail("smart archive apply without --confirm must refuse")
+    if not (target / ".forgekit" / "changes" / "20260101-done-medium").is_dir():
+        fail("smart archive apply without confirm must not move candidates")
+
+    (target / "README.md").write_bytes(before_readme + b"\n")
+    dirty = run([
+        sys.executable,
+        "scripts/archive-changes.py",
+        "--smart-apply",
+        "--report",
+        ".forgekit/smart-archive-report.md",
+        "--confirm",
+    ], cwd=target, check=False)
+    if dirty.returncode == 0 or "working tree must be clean" not in (dirty.stdout + dirty.stderr):
+        fail("smart archive apply with dirty git status must refuse")
+    (target / "README.md").write_bytes(before_readme)
+    if not (target / ".forgekit" / "changes" / "20260101-done-medium").is_dir():
+        fail("dirty smart archive apply must not move candidates")
+
+    run([
+        sys.executable,
+        "scripts/archive-changes.py",
+        "--smart-apply",
+        "--report",
+        ".forgekit/smart-archive-report.md",
+        "--confirm",
+    ], cwd=target)
+    moved_medium = target / ".forgekit" / "archive" / "changes" / "2026" / "20260101-done-medium"
+    if not moved_medium.is_dir():
+        fail("smart archive apply must move auto_archive_candidate changes")
+    if (target / ".forgekit" / "changes" / "20260101-done-medium").exists():
+        fail("smart archive apply must remove auto_archive_candidate source directory")
+    for not_moved in [
+        "20260105-done-high",
+        "20260106-current-ref",
+        "20260107-manual-ref",
+        "20260110-missing-sync-safe",
+        "20260102-blocked-high",
+    ]:
+        if not (target / ".forgekit" / "changes" / not_moved).is_dir():
+            fail(f"smart archive apply must not move manual/blocked/non-smart change: {not_moved}")
+    if "Status: archived" not in (moved_medium / "proposal.md").read_text(encoding="utf-8"):
+        fail("smart archive apply must update moved proposal status to archived")
+    apply_report_path = target / ".forgekit" / "smart-archive-apply-report.md"
+    if not apply_report_path.is_file():
+        fail("smart archive apply must write .forgekit/smart-archive-apply-report.md")
+    apply_report = apply_report_path.read_text(encoding="utf-8")
+    for text in [
+        "Mode: smart-apply",
+        "Smart report path: .forgekit/smart-archive-report.md",
+        "Applied Smart-Status: auto_archive_candidate entries only.",
+        "20260101-done-medium",
+        "blocked_by_current_docs_reference: 1",
+        "blocked_by_active_reference: 1",
+        "blocked_by_missing_sync: 1",
+    ]:
+        if text not in apply_report:
+            fail(f"smart archive apply report missing expected text: {text}")
+
+    if before_lock != (target / ".forgekit" / "template-lock.json").read_bytes():
+        fail("smart archive apply must not update template-lock.json")
+    if before_readme != (target / "README.md").read_bytes():
+        fail("smart archive apply must not update README.md")
+    if before_agents != (target / "AGENTS.md").read_bytes():
+        fail("smart archive apply must not update AGENTS.md")
+    if before_claude != (target / "CLAUDE.md").read_bytes():
+        fail("smart archive apply must not update CLAUDE.md")
+    if before_business != business_note.read_bytes():
+        fail("smart archive apply must not write business docs")
+    if before_plan != plan_path.read_bytes():
+        fail("smart archive apply must not update archive-plan.md")
+    if before_reference != reference_report_path.read_bytes():
+        fail("smart archive apply must not update archive-reference-report.md")
+    if before_sync != sync_report_path.read_bytes():
+        fail("smart archive apply must not update current-docs-sync-report.md")
+    if before_smart != smart_report_path.read_bytes():
+        fail("smart archive apply must not update smart-archive-report.md")
+    for relative, content in docs_hashes.items():
+        if content != (target / relative).read_bytes():
+            fail(f"smart archive apply must not modify current docs: {relative}")
 
 
 def assert_archive_flow(target):
@@ -533,6 +652,8 @@ def assert_archive_flow(target):
             fail(f"smart archive check must not modify current docs: {relative}")
     if not (target / ".forgekit" / "changes" / "20260101-done-medium").is_dir():
         fail("smart archive check must not move candidates")
+
+    assert_smart_apply_flow(target)
 
     sync_report_path.unlink()
     run([
