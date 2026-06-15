@@ -15,6 +15,7 @@
 | ForgeKit 工作日志 | `.forgekit/docs/work-log.md` | 个人工作顺序、交接上下文、中断恢复、验证/提交/阻塞/确认摘要 | 待补充 |
 | Loop Readiness | `.forgekit/docs/loop-readiness.md` | 判断项目是否具备安全运行 loop 的状态、验证、边界、停止和升级条件 | 待补充 |
 | Loop Blueprint | `.forgekit/docs/loop-blueprint.md` | 定义可审查的 loop 设计图纸，不是自动执行授权 | 待补充 |
+| Maker / Checker Protocol | `.forgekit/docs/maker-checker-protocol.md` | 定义 Maker 写代码、Checker 独立复核的证据和输出协议，不是自动调度器 | 待补充 |
 
 ## 关键模块
 
@@ -58,6 +59,8 @@
 个人工作顺序记录在 `.forgekit/docs/work-log.md`。它用于阶段收口、验证、提交/推送、阻塞变化、领导/组长确认和中断恢复，不替代 `.forgekit/docs/changelog.md`、`.forgekit/docs/task-board.md`、`.forgekit/docs/testing.md` 或风险/追踪文档。
 
 Loop 设计记录在 `.forgekit/docs/loop-readiness.md` 和 `.forgekit/docs/loop-blueprint.md`。它们用于判断项目是否适合安全运行 loop，并定义 Trigger、Input Sources、State File、Allowed Paths、Forbidden Paths、Validation Command、Stop Condition、Human Escalation、Token Budget、Comprehension Check 和 Output / Writeback；它们不是 daemon、cron、MCP、connector、自动 PR、多 agent 调度或 worktree 自动化配置。
+
+Maker / Checker 协议记录在 `.forgekit/docs/maker-checker-protocol.md`。它用于中高风险代码变更的实现证据和复核证据分离；它不是自动 checker runner、子 agent 配置、多 agent 调度器或用户最终批准。
 
 ## 忽略和谨慎读取
 

@@ -63,8 +63,14 @@ When a task names a ForgeKit skill, read the project-local `.agents/skills/<skil
 - Treat `.forgekit/smart-archive-report.md` as generated report-only advice. It is not permission to archive, does not replace user confirmation, and is not current-state truth.
 - Treat `.forgekit/docs/work-log.md` as a personal work sequence log for handoff and interrupted session recovery. If the user asks to update ForgeKit docs and this turn includes phase closure, validation, commit/push, blocking, or leader/team lead confirmation, update it; if the user explicitly asks to sync the work log, update it; stable technical fact updates alone do not force it.
 - Treat `.forgekit/docs/loop-readiness.md` and `.forgekit/docs/loop-blueprint.md` as reviewable loop design docs, not automatic execution authorization.
+- Treat `.forgekit/docs/maker-checker-protocol.md` as a review protocol, not multi-agent scheduling or automatic checker authorization.
 - A loop must have a state file, validation command, stop condition, and human escalation path before it runs.
 - A loop must not modify business docs, secrets, deploy files, or CI by default.
+- Medium or high risk code changes should separate Maker phase and Checker phase.
+- Maker phase may say `ready for check`, but must not declare final pass.
+- Checker phase should review diff, validation, risks, and document sync; it should output `pass`, `needs-fix`, or `manual-review`.
+- Checker should not expand scope or implement new features unless the user explicitly asks.
+- For company or business projects, Checker must check for accidental writes to sensitive information, business docs, secrets, deploy files, and CI.
 - Do not install tools or start services just because `.forgekit/docs/local-toolchain.md` has unknown values; ask first.
 - `scripts/detect-local-toolchain.ps1` and `scripts/run-harness-check.ps1` are read-only helpers.
 - For Lite projects, keep governance lightweight and ask before expanding to Enterprise-level documents.

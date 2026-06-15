@@ -37,8 +37,14 @@
 - `.forgekit/smart-archive-report.md` 是 smart-check 生成的 report-only 建议，不是归档许可，不替代用户确认，也不是 current truth。
 - `.forgekit/docs/work-log.md` 是个人工作顺序记录，用于交接上下文和中断会话恢复；用户要求“更新 ForgeKit 文档”且本轮包含阶段收口、验证、提交/推送、阻塞、领导/组长确认时应同步，用户明确要求“同步工作日志”时必须同步；仅更新稳定技术事实时不强制同步。
 - `.forgekit/docs/loop-readiness.md` 和 `.forgekit/docs/loop-blueprint.md` 是可审查的 loop 设计文档，不是自动执行授权。
+- `.forgekit/docs/maker-checker-protocol.md` 是审查协议，不是多 agent 调度或自动 checker 授权。
 - loop 必须有状态文件、验证命令、停止条件和人工升级入口。
 - loop 不默认修改 business docs、secrets、deploy 或 CI。
+- 中高风险代码变更应区分 Maker phase 和 Checker phase。
+- Maker phase 可以声明 `ready for check`，但不得把自己的实现视为最终通过。
+- Checker phase 应优先复核 diff、验证结果、风险和文档同步，并输出 `pass`、`needs-fix` 或 `manual-review`。
+- Checker 不应扩大需求范围，不应顺手实现新功能，除非用户明确要求。
+- 对公司或业务项目，Checker 必须检查是否误写敏感信息、业务 docs、secrets、deploy 或 CI。
 - 如果用户要求把 ForgeKit 事实合并进业务 `docs/`，先列出目标文件、写入原因、与现有内容的关系和覆盖风险，等用户确认后再写。
 - `src/**`、`tests/**`、`scripts/**` 属于 task_scoped：任务开始前确认范围，确认后可在本任务范围内修改。
 

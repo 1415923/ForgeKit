@@ -52,6 +52,7 @@ REQUIRED_REPO_PATHS = [
     "project-template/docs/local-toolchain.md",
     "project-template/docs/loop-readiness.md",
     "project-template/docs/loop-blueprint.md",
+    "project-template/docs/maker-checker-protocol.md",
     "project-template/docs/version-roadmap.md",
     ".codex-plugin/plugin.json",
     ".claude-plugin/plugin.json",
@@ -71,6 +72,7 @@ REQUIRED_GENERATED_PATHS = [
     ".forgekit/docs/local-toolchain.md",
     ".forgekit/docs/loop-readiness.md",
     ".forgekit/docs/loop-blueprint.md",
+    ".forgekit/docs/maker-checker-protocol.md",
     ".forgekit/docs/version-roadmap.md",
     ".forgekit/docs/changelog.md",
     "governance/ai-engineering-loop.md",
@@ -222,6 +224,71 @@ def assert_loop_docs(root, readiness_path, blueprint_path):
         fail(f"loop-blueprint.md missing expected text:\n" + "\n".join(missing_blueprint))
 
 
+def assert_maker_checker_protocol(root, protocol_path, review_path, agents_path, claude_path, rules_path):
+    protocol = (root / protocol_path).read_text(encoding="utf-8")
+    review = (root / review_path).read_text(encoding="utf-8")
+    agents = (root / agents_path).read_text(encoding="utf-8")
+    claude = (root / claude_path).read_text(encoding="utf-8")
+    rules = (root / rules_path).read_text(encoding="utf-8")
+    protocol_required = [
+        "Maker / Checker Protocol",
+        "This protocol is a review workflow.",
+        "not a multi-agent scheduler",
+        "Maker",
+        "Checker",
+        "ready-for-check",
+        "pass",
+        "needs-fix",
+        "manual-review",
+        "Single Agent Use",
+        "ForgeKit v0.26 does not generate sub-agent configuration, runner code, worktree automation, or automatic review dispatch.",
+    ]
+    review_required = [
+        "## Maker Summary",
+        "MakerStatus: ready-for-check | blocked | partial",
+        "FilesChanged:",
+        "ImplementationSummary:",
+        "ValidationRun:",
+        "KnownRisks:",
+        "NotVerified:",
+        "## Checker Review",
+        "CheckerStatus: pass | needs-fix | manual-review | not-run",
+        "DiffReviewed: yes | no",
+        "ValidationReviewed: yes | no",
+        "DocsReviewed: yes | no",
+        "RisksReviewed: yes | no",
+        "Findings:",
+        "RequiredFixes:",
+        "FinalRecommendation:",
+    ]
+    entry_required = [
+        "Maker phase and Checker phase",
+        "ready for check",
+        "pass",
+        "needs-fix",
+        "manual-review",
+    ]
+    rules_required = [
+        "Maker phase",
+        "Checker phase",
+        "ready for check",
+        "manual-review",
+    ]
+    missing_protocol = [item for item in protocol_required if item not in protocol]
+    if missing_protocol:
+        fail(f"maker-checker-protocol.md missing expected text:\n" + "\n".join(missing_protocol))
+    missing_review = [item for item in review_required if item not in review]
+    if missing_review:
+        fail(f"review.md missing Maker/Checker fields:\n" + "\n".join(missing_review))
+    for label, text in [("AGENTS.md", agents), ("CLAUDE.md", claude)]:
+        missing_entry = [item for item in entry_required if item not in text]
+        if missing_entry:
+            fail(f"{label} missing Maker/Checker entry rules:\n" + "\n".join(missing_entry))
+    missing_rules = [item for item in rules_required if item not in rules]
+    if missing_rules:
+        fail(".codex/rules.md missing Maker/Checker rules:\n" + "\n".join(missing_rules))
+
+
 def assert_json(path):
     try:
         json.loads(path.read_text(encoding="utf-8"))
@@ -232,8 +299,8 @@ def assert_json(path):
 def assert_manifest_lock(target):
     lock_path = target / ".forgekit" / "template-lock.json"
     lock = json.loads(lock_path.read_text(encoding="utf-8"))
-    if lock.get("installed_version") != "0.25.0":
-        fail("template-lock installed_version must be 0.25.0")
+    if lock.get("installed_version") != "0.26.0":
+        fail("template-lock installed_version must be 0.26.0")
     if lock.get("managed_docs_root") != ".forgekit/docs":
         fail("template-lock managed_docs_root must match boundary")
     if lock.get("change_root") != ".forgekit/changes":
@@ -286,7 +353,7 @@ def assert_upgrade_report(repo, target):
         fail("upgrade must not overwrite managed docs")
     assert_paths(target, [
         ".forgekit/upgrade-report.md",
-        ".forgekit/upgrade-export/0.25.0/.forgekit/docs/project-plan.md",
+        ".forgekit/upgrade-export/0.26.0/.forgekit/docs/project-plan.md",
     ])
 
 
@@ -888,6 +955,22 @@ def main():
     assert_json(repo / ".claude-plugin" / "plugin.json")
     assert_json(repo / "project-template" / ".forgekit" / "template-manifest.json")
     assert_loop_docs(repo / "project-template", "docs/loop-readiness.md", "docs/loop-blueprint.md")
+    assert_maker_checker_protocol(
+        repo / "project-template",
+        "docs/maker-checker-protocol.md",
+        "changes/_template/review.md",
+        "AGENTS.md",
+        "CLAUDE.md",
+        ".codex/rules.md",
+    )
+    assert_absent_paths(repo, [
+        "scripts/maker-checker-runner.py",
+        "scripts/checker-runner.py",
+        "project-template/scripts/maker-checker-runner.py",
+        "project-template/scripts/checker-runner.py",
+        "project-template/.codex/agents/maker.md",
+        "project-template/.codex/agents/checker.md",
+    ])
     run([sys.executable, str(repo / "scripts" / "update-template-manifest.py"), "--check"], cwd=repo)
     assert_skill_frontmatter(repo / "skills")
     assert_skill_frontmatter(repo / "project-template" / ".agents" / "skills")
@@ -907,6 +990,20 @@ def main():
         ])
         assert_boundary_config(target / ".forgekit" / "project-boundary.yml")
         assert_loop_docs(target, ".forgekit/docs/loop-readiness.md", ".forgekit/docs/loop-blueprint.md")
+        assert_maker_checker_protocol(
+            target,
+            ".forgekit/docs/maker-checker-protocol.md",
+            ".forgekit/changes/_template/review.md",
+            "AGENTS.md",
+            "CLAUDE.md",
+            ".codex/rules.md",
+        )
+        assert_absent_paths(target, [
+            "scripts/maker-checker-runner.py",
+            "scripts/checker-runner.py",
+            ".codex/agents/maker.md",
+            ".codex/agents/checker.md",
+        ])
         assert_manifest_lock(target)
         assert_no_escaped_filenames(target)
         assert_no_forbidden_text(target, FORBIDDEN_LEGACY_REFS, "Forbidden legacy path text found in generated project")

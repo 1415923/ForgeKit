@@ -123,3 +123,8 @@ Write results to:
 
 Do not leave loop results only in chat when they are needed for handoff, validation, or interruption recovery.
 
+## Maker / Checker Strategy
+
+If the loop involves code changes, define how Maker phase and Checker phase are separated. Use `.forgekit/docs/maker-checker-protocol.md` for responsibilities, evidence fields, and review outputs.
+
+This section is not automatic sub-agent configuration. It does not authorize multi-agent scheduling, worktree automation, or automatic checker execution.

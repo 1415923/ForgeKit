@@ -312,6 +312,7 @@ function Test-AIEngineeringLoop {
     Test-RequiredPattern "project-template\.codex\rules.md" ".forgekit/archive/**" "Rules archive default-read rule"
     Test-RequiredPath "project-template\docs\loop-readiness.md"
     Test-RequiredPath "project-template\docs\loop-blueprint.md"
+    Test-RequiredPath "project-template\docs\maker-checker-protocol.md"
     Test-RequiredPattern "project-template\docs\loop-readiness.md" "Readiness Status: not-ready | partial | ready" "Loop readiness status"
     Test-RequiredPattern "project-template\docs\loop-readiness.md" "ForgeKit Loop Five" "Loop readiness five mapping"
     Test-RequiredPattern "project-template\docs\loop-blueprint.md" "not authorization to execute automatically" "Loop blueprint authorization boundary"
@@ -327,9 +328,53 @@ function Test-AIEngineeringLoop {
     Test-RequiredPattern "project-template\docs\loop-blueprint.md" "## Token Budget" "Loop blueprint token budget"
     Test-RequiredPattern "project-template\docs\loop-blueprint.md" "## Comprehension Check" "Loop blueprint comprehension check"
     Test-RequiredPattern "project-template\docs\loop-blueprint.md" "## Output / Writeback" "Loop blueprint output writeback"
+    Test-RequiredPattern "project-template\docs\loop-blueprint.md" "Maker / Checker Strategy" "Loop blueprint maker checker strategy"
+    Test-RequiredPattern "project-template\docs\maker-checker-protocol.md" "This protocol is a review workflow." "Maker checker protocol boundary"
+    Test-RequiredPattern "project-template\docs\maker-checker-protocol.md" "not a multi-agent scheduler" "Maker checker no scheduler boundary"
+    Test-RequiredPattern "project-template\docs\maker-checker-protocol.md" "Maker phase" "Maker phase section"
+    Test-RequiredPattern "project-template\docs\maker-checker-protocol.md" "Checker phase" "Checker phase section"
+    Test-RequiredPattern "project-template\docs\maker-checker-protocol.md" "Single Agent Use" "Single agent maker checker rule"
+    Test-RequiredPattern "project-template\docs\maker-checker-protocol.md" "ForgeKit v0.26 does not generate sub-agent configuration, runner code, worktree automation, or automatic review dispatch." "Maker checker no automation boundary"
+    Test-RequiredPattern "project-template\changes\_template\review.md" "## Maker Summary" "Review maker summary section"
+    Test-RequiredPattern "project-template\changes\_template\review.md" "MakerStatus: ready-for-check | blocked | partial" "Review maker status"
+    Test-RequiredPattern "project-template\changes\_template\review.md" "FilesChanged:" "Review maker files changed"
+    Test-RequiredPattern "project-template\changes\_template\review.md" "ImplementationSummary:" "Review maker implementation summary"
+    Test-RequiredPattern "project-template\changes\_template\review.md" "ValidationRun:" "Review maker validation run"
+    Test-RequiredPattern "project-template\changes\_template\review.md" "KnownRisks:" "Review maker known risks"
+    Test-RequiredPattern "project-template\changes\_template\review.md" "NotVerified:" "Review maker not verified"
+    Test-RequiredPattern "project-template\changes\_template\review.md" "## Checker Review" "Review checker section"
+    Test-RequiredPattern "project-template\changes\_template\review.md" "CheckerStatus: pass | needs-fix | manual-review | not-run" "Review checker status"
+    Test-RequiredPattern "project-template\changes\_template\review.md" "DiffReviewed: yes | no" "Review diff reviewed"
+    Test-RequiredPattern "project-template\changes\_template\review.md" "ValidationReviewed: yes | no" "Review validation reviewed"
+    Test-RequiredPattern "project-template\changes\_template\review.md" "DocsReviewed: yes | no" "Review docs reviewed"
+    Test-RequiredPattern "project-template\changes\_template\review.md" "RisksReviewed: yes | no" "Review risks reviewed"
+    Test-RequiredPattern "project-template\changes\_template\review.md" "FinalRecommendation:" "Review final recommendation"
     Test-RequiredPattern "project-template\AGENTS.md" "A loop must have a state file, validation command, stop condition, and human escalation path" "AGENTS loop short rule"
     Test-RequiredPattern "project-template\CLAUDE.md" "A loop must have a state file, validation command, stop condition, and human escalation path" "CLAUDE loop short rule"
     Test-RequiredPattern "project-template\.codex\rules.md" "loop 必须有状态文件、验证命令、停止条件和人工升级入口" "Rules loop short rule"
+    Test-RequiredPattern "project-template\AGENTS.md" "Medium or high risk code changes should separate Maker phase and Checker phase" "AGENTS maker checker short rule"
+    Test-RequiredPattern "project-template\CLAUDE.md" "Medium or high risk code changes should separate Maker phase and Checker phase" "CLAUDE maker checker short rule"
+    Test-RequiredPattern "project-template\.codex\rules.md" "中高风险代码变更应区分 Maker phase 和 Checker phase" "Rules maker checker short rule"
+    Test-RequiredPattern "project-template\AGENTS.md" "Checker should not expand scope or implement new features unless the user explicitly asks" "AGENTS checker scope rule"
+    Test-RequiredPattern "project-template\CLAUDE.md" "Checker should not expand scope or implement new features unless the user explicitly asks" "CLAUDE checker scope rule"
+    Test-RequiredPattern "project-template\.codex\rules.md" "Checker 不应扩大需求范围，不应顺手实现新功能" "Rules checker scope rule"
+    Test-RequiredPattern "project-template\.forgekit\docs\document-responsibility.md" "maker-checker-protocol.md" "Document responsibility maker checker"
+    Test-RequiredPattern "project-template\docs\codebase-map.md" "maker-checker-protocol.md" "Codebase map maker checker"
+    Test-RequiredPattern "README.md" "Maker / Checker Protocol" "Root README maker checker release"
+    Test-RequiredPattern "README.en.md" "Maker / Checker Protocol" "English README maker checker release"
+    Test-RequiredPattern "usage.html" "maker-checker-protocol.md" "Usage maker checker docs"
+    if (Test-Path -LiteralPath (Join-Path $repoRoot "scripts\maker-checker-runner.py")) {
+        Add-Error "v0.26 must not add automatic maker/checker runner"
+    }
+    if (Test-Path -LiteralPath (Join-Path $repoRoot "project-template\scripts\maker-checker-runner.py")) {
+        Add-Error "v0.26 must not add generated automatic maker/checker runner"
+    }
+    if (Test-Path -LiteralPath (Join-Path $repoRoot "project-template\.codex\agents\maker.md")) {
+        Add-Error "v0.26 must not add maker sub-agent config"
+    }
+    if (Test-Path -LiteralPath (Join-Path $repoRoot "project-template\.codex\agents\checker.md")) {
+        Add-Error "v0.26 must not add checker sub-agent config"
+    }
     Test-RequiredPattern "project-template\scripts\check-doc-sync.ps1" "Status: metadata" "PowerShell change status check"
     Test-RequiredPattern "project-template\scripts\check-doc-sync.ps1" "Change is done and may be archived" "PowerShell done archive warning"
     Test-RequiredPattern "project-template\scripts\check-doc-sync.sh" "Change is done and may be archived" "Bash done archive warning"
@@ -341,7 +386,7 @@ function Test-TemplateManifest {
     $manifestPath = Join-Path $repoRoot "project-template\.forgekit\template-manifest.json"
     if (Test-Path -LiteralPath $manifestPath) {
         $manifest = Get-Content -LiteralPath $manifestPath -Raw | ConvertFrom-Json
-        if ($manifest.template_version -ne "0.25.0") {
+        if ($manifest.template_version -ne "0.26.0") {
             Add-Error "Unexpected template manifest version: $($manifest.template_version)"
         }
         $sources = @($manifest.files | ForEach-Object { $_.source_path })
@@ -680,7 +725,7 @@ function Test-PluginDistribution {
     if ($codexPluginJson.name -ne "forgekit") {
         Add-Error "Unexpected Codex plugin name in root plugin.json: $($codexPluginJson.name)"
     }
-    if ($codexPluginJson.version -ne "0.25.0") {
+    if ($codexPluginJson.version -ne "0.26.0") {
         Add-Error "Unexpected Codex plugin version in root plugin.json: $($codexPluginJson.version)"
     }
     if ($codexPluginJson.skills -ne "./skills/") {
@@ -691,7 +736,7 @@ function Test-PluginDistribution {
     if ($claudePluginJson.name -ne "forgekit") {
         Add-Error "Unexpected Claude plugin name in root plugin.json: $($claudePluginJson.name)"
     }
-    if ($claudePluginJson.version -ne "0.25.0") {
+    if ($claudePluginJson.version -ne "0.26.0") {
         Add-Error "Unexpected Claude plugin version in root plugin.json: $($claudePluginJson.version)"
     }
     $claudeSkills = @($claudePluginJson.skills)

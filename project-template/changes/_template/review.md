@@ -1,5 +1,25 @@
 # Review
 
+## Maker Summary
+
+MakerStatus: ready-for-check | blocked | partial
+FilesChanged:
+ImplementationSummary:
+ValidationRun:
+KnownRisks:
+NotVerified:
+
+## Checker Review
+
+CheckerStatus: pass | needs-fix | manual-review | not-run
+DiffReviewed: yes | no
+ValidationReviewed: yes | no
+DocsReviewed: yes | no
+RisksReviewed: yes | no
+Findings:
+RequiredFixes:
+FinalRecommendation:
+
 ## Self Review
 
 - What changed?

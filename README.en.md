@@ -94,6 +94,7 @@ Key files:
 | `.forgekit/docs/version-roadmap.md` | Version roadmap and delivery gates |
 | `.forgekit/docs/loop-readiness.md` | Whether the project has the state, validation, boundary, stop, and escalation conditions needed for a safe loop |
 | `.forgekit/docs/loop-blueprint.md` | Reviewable loop design blueprint, not automatic execution authorization |
+| `.forgekit/docs/maker-checker-protocol.md` | Evidence protocol for Maker implementation and Checker review, not an automatic multi-agent system |
 | `.forgekit/changes/_template/` | proposal, design, tasks, verification, review, ship, and retro templates |
 | `.codex/commands.md` | Project-specific commands |
 | `.agents/skills/` | Self-contained project skills |
@@ -115,6 +116,8 @@ By default, ForgeKit governance docs are written under `.forgekit/docs/`, and me
 | `security-review` | Review security risks |
 
 Loop Readiness / Loop Blueprint provides managed docs templates and short entry rules only. It helps assess whether a project can safely run a loop; ForgeKit does not provide an automatic loop runner, daemon, cron, MCP, connector, automatic PR flow, sub-agent scheduler, or worktree automation.
+
+Maker / Checker Protocol defines evidence separation for medium/high-risk code changes: Maker implements and marks ready for check; Checker reviews diff, validation, risks, and document sync, then recommends pass / needs-fix / manual-review. It is not an automatic multi-agent system.
 
 The AI Engineering Loop scales artifacts by risk:
 
@@ -253,6 +256,7 @@ ForgeKit can coexist with ECC: ECC enhances the AI tool; ForgeKit constrains the
 
 | Version | User-facing change |
 | --- | --- |
+| `0.26.0` | Maker / Checker Protocol: adds a managed docs template and review evidence fields to separate implementation and review without automatic multi-agent scheduling. |
 | `0.25.0` | Loop Readiness / Loop Blueprint: adds managed docs templates and short entry rules for reviewing loop suitability and design, without an automatic runner. |
 | `0.24.0` | Smart Archive Apply: with clean Git status and explicit confirmation, archives only changes marked `auto_archive_candidate` by Smart Archive Advisor and writes an apply report. |
 | `0.23.0` | Smart Archive Advisor: combines archive plan, reference report, and sync report into a report-only archive advice report. |
