@@ -63,6 +63,7 @@ ForgeKit 在生成项目内提供轻量 AI Engineering Loop：澄清目标、判
 - `.forgekit/docs/exploration-report.md`、`.forgekit/docs/implementation-plan.md`：跨模块或高风险改动前的执行产物。
 - `.forgekit/docs/project-suitability.md`、`.forgekit/docs/project-trial-record.md`：初始化前判断适用性，并把真实项目经验回灌。
 - `.forgekit/docs/codex-next-work-order.md`：初始化后继续访谈、确认 MVP、落地条件和验证方式。
+- `.forgekit/docs/loop-readiness.md`、`.forgekit/docs/loop-blueprint.md`：判断项目是否适合安全运行 loop，并定义可审查的 loop 设计图纸；它们不是自动执行授权。
 - `.codex/commands-catalog.md`、`.codex/hooks.md`：可选命令和 hook 候选，默认不自动启用。
 - `.codex/automation-decision.md`：判断重复流程应该做成 skill、command、hook、script、plugin、MCP 还是保留文档。
 - `.forgekit/changes/_template/`：proposal、design、tasks、verification、review、ship、retro 模板。

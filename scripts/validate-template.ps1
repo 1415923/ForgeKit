@@ -310,6 +310,26 @@ function Test-AIEngineeringLoop {
     Test-RequiredPattern "project-template\AGENTS.md" ".forgekit/archive/**" "AGENTS archive default-read rule"
     Test-RequiredPattern "project-template\CLAUDE.md" ".forgekit/archive/**" "CLAUDE archive default-read rule"
     Test-RequiredPattern "project-template\.codex\rules.md" ".forgekit/archive/**" "Rules archive default-read rule"
+    Test-RequiredPath "project-template\docs\loop-readiness.md"
+    Test-RequiredPath "project-template\docs\loop-blueprint.md"
+    Test-RequiredPattern "project-template\docs\loop-readiness.md" "Readiness Status: not-ready | partial | ready" "Loop readiness status"
+    Test-RequiredPattern "project-template\docs\loop-readiness.md" "ForgeKit Loop Five" "Loop readiness five mapping"
+    Test-RequiredPattern "project-template\docs\loop-blueprint.md" "not authorization to execute automatically" "Loop blueprint authorization boundary"
+    Test-RequiredPattern "project-template\docs\loop-blueprint.md" "Default: manual only." "Loop blueprint manual trigger"
+    Test-RequiredPattern "project-template\docs\loop-blueprint.md" "## Trigger" "Loop blueprint trigger"
+    Test-RequiredPattern "project-template\docs\loop-blueprint.md" "## Input Sources" "Loop blueprint input sources"
+    Test-RequiredPattern "project-template\docs\loop-blueprint.md" "## State File" "Loop blueprint state file"
+    Test-RequiredPattern "project-template\docs\loop-blueprint.md" "## Allowed Paths" "Loop blueprint allowed paths"
+    Test-RequiredPattern "project-template\docs\loop-blueprint.md" "## Forbidden Paths" "Loop blueprint forbidden paths"
+    Test-RequiredPattern "project-template\docs\loop-blueprint.md" "## Validation Command" "Loop blueprint validation command"
+    Test-RequiredPattern "project-template\docs\loop-blueprint.md" "## Stop Condition" "Loop blueprint stop condition"
+    Test-RequiredPattern "project-template\docs\loop-blueprint.md" "## Human Escalation" "Loop blueprint human escalation"
+    Test-RequiredPattern "project-template\docs\loop-blueprint.md" "## Token Budget" "Loop blueprint token budget"
+    Test-RequiredPattern "project-template\docs\loop-blueprint.md" "## Comprehension Check" "Loop blueprint comprehension check"
+    Test-RequiredPattern "project-template\docs\loop-blueprint.md" "## Output / Writeback" "Loop blueprint output writeback"
+    Test-RequiredPattern "project-template\AGENTS.md" "A loop must have a state file, validation command, stop condition, and human escalation path" "AGENTS loop short rule"
+    Test-RequiredPattern "project-template\CLAUDE.md" "A loop must have a state file, validation command, stop condition, and human escalation path" "CLAUDE loop short rule"
+    Test-RequiredPattern "project-template\.codex\rules.md" "loop 必须有状态文件、验证命令、停止条件和人工升级入口" "Rules loop short rule"
     Test-RequiredPattern "project-template\scripts\check-doc-sync.ps1" "Status: metadata" "PowerShell change status check"
     Test-RequiredPattern "project-template\scripts\check-doc-sync.ps1" "Change is done and may be archived" "PowerShell done archive warning"
     Test-RequiredPattern "project-template\scripts\check-doc-sync.sh" "Change is done and may be archived" "Bash done archive warning"
@@ -321,7 +341,7 @@ function Test-TemplateManifest {
     $manifestPath = Join-Path $repoRoot "project-template\.forgekit\template-manifest.json"
     if (Test-Path -LiteralPath $manifestPath) {
         $manifest = Get-Content -LiteralPath $manifestPath -Raw | ConvertFrom-Json
-        if ($manifest.template_version -ne "0.24.0") {
+        if ($manifest.template_version -ne "0.25.0") {
             Add-Error "Unexpected template manifest version: $($manifest.template_version)"
         }
         $sources = @($manifest.files | ForEach-Object { $_.source_path })
@@ -660,7 +680,7 @@ function Test-PluginDistribution {
     if ($codexPluginJson.name -ne "forgekit") {
         Add-Error "Unexpected Codex plugin name in root plugin.json: $($codexPluginJson.name)"
     }
-    if ($codexPluginJson.version -ne "0.24.0") {
+    if ($codexPluginJson.version -ne "0.25.0") {
         Add-Error "Unexpected Codex plugin version in root plugin.json: $($codexPluginJson.version)"
     }
     if ($codexPluginJson.skills -ne "./skills/") {
@@ -671,7 +691,7 @@ function Test-PluginDistribution {
     if ($claudePluginJson.name -ne "forgekit") {
         Add-Error "Unexpected Claude plugin name in root plugin.json: $($claudePluginJson.name)"
     }
-    if ($claudePluginJson.version -ne "0.24.0") {
+    if ($claudePluginJson.version -ne "0.25.0") {
         Add-Error "Unexpected Claude plugin version in root plugin.json: $($claudePluginJson.version)"
     }
     $claudeSkills = @($claudePluginJson.skills)

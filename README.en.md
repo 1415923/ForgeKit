@@ -92,6 +92,8 @@ Key files:
 | `.forgekit/docs/local-toolchain.md` | Local lint, test, build, LSP, and toolchain capability |
 | `.forgekit/docs/changelog.md` | Current version update record |
 | `.forgekit/docs/version-roadmap.md` | Version roadmap and delivery gates |
+| `.forgekit/docs/loop-readiness.md` | Whether the project has the state, validation, boundary, stop, and escalation conditions needed for a safe loop |
+| `.forgekit/docs/loop-blueprint.md` | Reviewable loop design blueprint, not automatic execution authorization |
 | `.forgekit/changes/_template/` | proposal, design, tasks, verification, review, ship, and retro templates |
 | `.codex/commands.md` | Project-specific commands |
 | `.agents/skills/` | Self-contained project skills |
@@ -111,6 +113,8 @@ By default, ForgeKit governance docs are written under `.forgekit/docs/`, and me
 | `code-review` | Review for bugs, regression risks, and missing tests |
 | `release-check` | Check release gates, validation, rollback, and delivery records |
 | `security-review` | Review security risks |
+
+Loop Readiness / Loop Blueprint provides managed docs templates and short entry rules only. It helps assess whether a project can safely run a loop; ForgeKit does not provide an automatic loop runner, daemon, cron, MCP, connector, automatic PR flow, sub-agent scheduler, or worktree automation.
 
 The AI Engineering Loop scales artifacts by risk:
 
@@ -249,6 +253,7 @@ ForgeKit can coexist with ECC: ECC enhances the AI tool; ForgeKit constrains the
 
 | Version | User-facing change |
 | --- | --- |
+| `0.25.0` | Loop Readiness / Loop Blueprint: adds managed docs templates and short entry rules for reviewing loop suitability and design, without an automatic runner. |
 | `0.24.0` | Smart Archive Apply: with clean Git status and explicit confirmation, archives only changes marked `auto_archive_candidate` by Smart Archive Advisor and writes an apply report. |
 | `0.23.0` | Smart Archive Advisor: combines archive plan, reference report, and sync report into a report-only archive advice report. |
 | `0.22.0` | Current Docs Sync Check: generates a report-only current-docs sync evidence report from archive plan candidates without modifying project fact files. |

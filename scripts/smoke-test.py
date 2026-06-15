@@ -50,6 +50,8 @@ REQUIRED_REPO_PATHS = [
     "project-template/docs/codebase-map.md",
     "project-template/docs/work-log.md",
     "project-template/docs/local-toolchain.md",
+    "project-template/docs/loop-readiness.md",
+    "project-template/docs/loop-blueprint.md",
     "project-template/docs/version-roadmap.md",
     ".codex-plugin/plugin.json",
     ".claude-plugin/plugin.json",
@@ -67,6 +69,8 @@ REQUIRED_GENERATED_PATHS = [
     ".forgekit/docs/codebase-map.md",
     ".forgekit/docs/work-log.md",
     ".forgekit/docs/local-toolchain.md",
+    ".forgekit/docs/loop-readiness.md",
+    ".forgekit/docs/loop-blueprint.md",
     ".forgekit/docs/version-roadmap.md",
     ".forgekit/docs/changelog.md",
     "governance/ai-engineering-loop.md",
@@ -177,6 +181,47 @@ def assert_boundary_config(path):
         fail("Boundary config is missing required entries:\n" + "\n".join(missing))
 
 
+def assert_loop_docs(root, readiness_path, blueprint_path):
+    readiness = (root / readiness_path).read_text(encoding="utf-8")
+    blueprint = (root / blueprint_path).read_text(encoding="utf-8")
+    readiness_required = [
+        "Readiness Status: not-ready | partial | ready",
+        "State file exists",
+        "Validation command exists",
+        "Stop condition is defined",
+        "Human escalation path is defined",
+        "ForgeKit Loop Five",
+        "future roadmap items only",
+    ]
+    blueprint_required = [
+        "This is a reviewable loop design blueprint, not authorization to execute automatically.",
+        "Default: manual only.",
+        "## Trigger",
+        "## Input Sources",
+        "## State File",
+        "## Allowed Paths",
+        "## Forbidden Paths",
+        "## Validation Command",
+        "## Stop Condition",
+        "## Human Escalation",
+        "## Token Budget",
+        "## Comprehension Check",
+        "## Output / Writeback",
+        "daemon",
+        "cron",
+        "MCP",
+        "automatic PR",
+        "sub-agent scheduler",
+        "worktree automation",
+    ]
+    missing_readiness = [item for item in readiness_required if item not in readiness]
+    if missing_readiness:
+        fail(f"loop-readiness.md missing expected text:\n" + "\n".join(missing_readiness))
+    missing_blueprint = [item for item in blueprint_required if item not in blueprint]
+    if missing_blueprint:
+        fail(f"loop-blueprint.md missing expected text:\n" + "\n".join(missing_blueprint))
+
+
 def assert_json(path):
     try:
         json.loads(path.read_text(encoding="utf-8"))
@@ -187,8 +232,8 @@ def assert_json(path):
 def assert_manifest_lock(target):
     lock_path = target / ".forgekit" / "template-lock.json"
     lock = json.loads(lock_path.read_text(encoding="utf-8"))
-    if lock.get("installed_version") != "0.24.0":
-        fail("template-lock installed_version must be 0.24.0")
+    if lock.get("installed_version") != "0.25.0":
+        fail("template-lock installed_version must be 0.25.0")
     if lock.get("managed_docs_root") != ".forgekit/docs":
         fail("template-lock managed_docs_root must match boundary")
     if lock.get("change_root") != ".forgekit/changes":
@@ -241,7 +286,7 @@ def assert_upgrade_report(repo, target):
         fail("upgrade must not overwrite managed docs")
     assert_paths(target, [
         ".forgekit/upgrade-report.md",
-        ".forgekit/upgrade-export/0.24.0/.forgekit/docs/project-plan.md",
+        ".forgekit/upgrade-export/0.25.0/.forgekit/docs/project-plan.md",
     ])
 
 
@@ -842,6 +887,7 @@ def main():
     assert_json(repo / ".codex-plugin" / "plugin.json")
     assert_json(repo / ".claude-plugin" / "plugin.json")
     assert_json(repo / "project-template" / ".forgekit" / "template-manifest.json")
+    assert_loop_docs(repo / "project-template", "docs/loop-readiness.md", "docs/loop-blueprint.md")
     run([sys.executable, str(repo / "scripts" / "update-template-manifest.py"), "--check"], cwd=repo)
     assert_skill_frontmatter(repo / "skills")
     assert_skill_frontmatter(repo / "project-template" / ".agents" / "skills")
@@ -860,6 +906,7 @@ def main():
             "archive",
         ])
         assert_boundary_config(target / ".forgekit" / "project-boundary.yml")
+        assert_loop_docs(target, ".forgekit/docs/loop-readiness.md", ".forgekit/docs/loop-blueprint.md")
         assert_manifest_lock(target)
         assert_no_escaped_filenames(target)
         assert_no_forbidden_text(target, FORBIDDEN_LEGACY_REFS, "Forbidden legacy path text found in generated project")

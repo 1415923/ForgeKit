@@ -36,6 +36,9 @@
 - `.forgekit/current-docs-sync-report.md` 是 sync-check 生成产物，不是 current docs、active change，也不等于 current docs 语义正确性证明。
 - `.forgekit/smart-archive-report.md` 是 smart-check 生成的 report-only 建议，不是归档许可，不替代用户确认，也不是 current truth。
 - `.forgekit/docs/work-log.md` 是个人工作顺序记录，用于交接上下文和中断会话恢复；用户要求“更新 ForgeKit 文档”且本轮包含阶段收口、验证、提交/推送、阻塞、领导/组长确认时应同步，用户明确要求“同步工作日志”时必须同步；仅更新稳定技术事实时不强制同步。
+- `.forgekit/docs/loop-readiness.md` 和 `.forgekit/docs/loop-blueprint.md` 是可审查的 loop 设计文档，不是自动执行授权。
+- loop 必须有状态文件、验证命令、停止条件和人工升级入口。
+- loop 不默认修改 business docs、secrets、deploy 或 CI。
 - 如果用户要求把 ForgeKit 事实合并进业务 `docs/`，先列出目标文件、写入原因、与现有内容的关系和覆盖风险，等用户确认后再写。
 - `src/**`、`tests/**`、`scripts/**` 属于 task_scoped：任务开始前确认范围，确认后可在本任务范围内修改。
 
