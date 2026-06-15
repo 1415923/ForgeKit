@@ -8,6 +8,17 @@ Loop Name:
 Owner:
 Status: draft | reviewed | retired
 Last Reviewed:
+OperationMode: dry-run | one-step | continue | stop-handoff
+MaxRounds:
+MaxFilesRead:
+MaxFilesChanged:
+MaxCommands:
+RequiresUserConfirmation: yes
+WritebackTarget:
+StopOnUnclearScope: yes
+StopOnValidationFailure: yes
+
+These operation fields are review fields for `.forgekit/docs/loop-operations.md`. They are not automatic runner configuration.
 
 ## Trigger
 
@@ -26,6 +37,8 @@ Not allowed by default:
 - automatic PR or issue event
 - sub-agent scheduler
 - worktree automation
+
+Loop operation is off by default. Only enter `dry-run`, `one-step`, `continue`, or `stop-handoff` when the user explicitly asks for that operation.
 
 ## Input Sources
 
@@ -99,6 +112,11 @@ Question format:
 
 Budget:
 Stop or escalate when:
+
+Scope budget:
+Max files read:
+Max files changed:
+Max commands:
 
 ## Comprehension Check
 

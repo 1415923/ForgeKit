@@ -52,6 +52,7 @@ REQUIRED_REPO_PATHS = [
     "project-template/docs/local-toolchain.md",
     "project-template/docs/loop-readiness.md",
     "project-template/docs/loop-blueprint.md",
+    "project-template/docs/loop-operations.md",
     "project-template/docs/maker-checker-protocol.md",
     "project-template/docs/version-roadmap.md",
     ".codex-plugin/plugin.json",
@@ -72,6 +73,7 @@ REQUIRED_GENERATED_PATHS = [
     ".forgekit/docs/local-toolchain.md",
     ".forgekit/docs/loop-readiness.md",
     ".forgekit/docs/loop-blueprint.md",
+    ".forgekit/docs/loop-operations.md",
     ".forgekit/docs/maker-checker-protocol.md",
     ".forgekit/docs/version-roadmap.md",
     ".forgekit/docs/changelog.md",
@@ -209,6 +211,16 @@ def assert_loop_docs(root, readiness_path, blueprint_path):
         "## Token Budget",
         "## Comprehension Check",
         "## Output / Writeback",
+        "OperationMode: dry-run | one-step | continue | stop-handoff",
+        "MaxRounds:",
+        "MaxFilesRead:",
+        "MaxFilesChanged:",
+        "MaxCommands:",
+        "RequiresUserConfirmation: yes",
+        "WritebackTarget:",
+        "StopOnUnclearScope: yes",
+        "StopOnValidationFailure: yes",
+        "These operation fields are review fields",
         "daemon",
         "cron",
         "MCP",
@@ -222,6 +234,67 @@ def assert_loop_docs(root, readiness_path, blueprint_path):
     missing_blueprint = [item for item in blueprint_required if item not in blueprint]
     if missing_blueprint:
         fail(f"loop-blueprint.md missing expected text:\n" + "\n".join(missing_blueprint))
+
+
+def assert_loop_operations(root, operations_path, blueprint_path, agents_path, claude_path, rules_path):
+    operations = (root / operations_path).read_text(encoding="utf-8")
+    blueprint = (root / blueprint_path).read_text(encoding="utf-8")
+    agents = (root / agents_path).read_text(encoding="utf-8")
+    claude = (root / claude_path).read_text(encoding="utf-8")
+    rules = (root / rules_path).read_text(encoding="utf-8")
+    operations_required = [
+        "Loop operations are off by default.",
+        "not an automatic loop runner",
+        "## Loop Dry Run",
+        "## Loop One Step",
+        "## Loop Continue",
+        "## Loop Stop / Handoff",
+        "read the loop blueprint",
+        "do not modify files",
+        "execute only one round",
+        "continue exactly one next round",
+        "Do not start another loop round during stop or handoff.",
+        "Every executed loop round must write back",
+        ".forgekit/docs/work-log.md",
+    ]
+    blueprint_required = [
+        "OperationMode: dry-run | one-step | continue | stop-handoff",
+        "MaxRounds:",
+        "MaxFilesRead:",
+        "MaxFilesChanged:",
+        "MaxCommands:",
+        "RequiresUserConfirmation: yes",
+        "WritebackTarget:",
+        "StopOnUnclearScope: yes",
+        "StopOnValidationFailure: yes",
+    ]
+    entry_required = [
+        "Do not enter loop mode unless the user explicitly asks for loop dry-run, one-step, continue, or stop/handoff.",
+        "Before loop one-step, restate the blueprint fields",
+        "Loop continue must not run continuously",
+        "Stop and escalate on unclear scope, budget overrun, validation failure, or forbidden path contact.",
+        "Loop output must write back",
+    ]
+    rules_required = [
+        "不得自行进入 loop mode",
+        "loop one-step 前必须复述 blueprint",
+        "loop continue 不得自动连续运行",
+        "scope 不清、预算超限、验证失败或触及 forbidden paths",
+        "loop 输出必须写回",
+    ]
+    missing_operations = [item for item in operations_required if item not in operations]
+    if missing_operations:
+        fail(f"loop-operations.md missing expected text:\n" + "\n".join(missing_operations))
+    missing_blueprint = [item for item in blueprint_required if item not in blueprint]
+    if missing_blueprint:
+        fail(f"loop-blueprint.md missing loop operation fields:\n" + "\n".join(missing_blueprint))
+    for label, text in [("AGENTS.md", agents), ("CLAUDE.md", claude)]:
+        missing_entry = [item for item in entry_required if item not in text]
+        if missing_entry:
+            fail(f"{label} missing loop operation rules:\n" + "\n".join(missing_entry))
+    missing_rules = [item for item in rules_required if item not in rules]
+    if missing_rules:
+        fail(".codex/rules.md missing loop operation rules:\n" + "\n".join(missing_rules))
 
 
 def assert_maker_checker_protocol(root, protocol_path, review_path, agents_path, claude_path, rules_path):
@@ -299,8 +372,8 @@ def assert_json(path):
 def assert_manifest_lock(target):
     lock_path = target / ".forgekit" / "template-lock.json"
     lock = json.loads(lock_path.read_text(encoding="utf-8"))
-    if lock.get("installed_version") != "0.26.0":
-        fail("template-lock installed_version must be 0.26.0")
+    if lock.get("installed_version") != "0.27.0":
+        fail("template-lock installed_version must be 0.27.0")
     if lock.get("managed_docs_root") != ".forgekit/docs":
         fail("template-lock managed_docs_root must match boundary")
     if lock.get("change_root") != ".forgekit/changes":
@@ -353,7 +426,7 @@ def assert_upgrade_report(repo, target):
         fail("upgrade must not overwrite managed docs")
     assert_paths(target, [
         ".forgekit/upgrade-report.md",
-        ".forgekit/upgrade-export/0.26.0/.forgekit/docs/project-plan.md",
+        ".forgekit/upgrade-export/0.27.0/.forgekit/docs/project-plan.md",
     ])
 
 
@@ -955,6 +1028,14 @@ def main():
     assert_json(repo / ".claude-plugin" / "plugin.json")
     assert_json(repo / "project-template" / ".forgekit" / "template-manifest.json")
     assert_loop_docs(repo / "project-template", "docs/loop-readiness.md", "docs/loop-blueprint.md")
+    assert_loop_operations(
+        repo / "project-template",
+        "docs/loop-operations.md",
+        "docs/loop-blueprint.md",
+        "AGENTS.md",
+        "CLAUDE.md",
+        ".codex/rules.md",
+    )
     assert_maker_checker_protocol(
         repo / "project-template",
         "docs/maker-checker-protocol.md",
@@ -968,8 +1049,15 @@ def main():
         "scripts/checker-runner.py",
         "project-template/scripts/maker-checker-runner.py",
         "project-template/scripts/checker-runner.py",
+        "scripts/loop-runner.py",
+        "project-template/scripts/loop-runner.py",
+        "scripts/loop-daemon.py",
+        "project-template/scripts/loop-daemon.py",
+        "scripts/loop-scheduler.py",
+        "project-template/scripts/loop-scheduler.py",
         "project-template/.codex/agents/maker.md",
         "project-template/.codex/agents/checker.md",
+        "project-template/.codex/agents/loop-runner.md",
     ])
     run([sys.executable, str(repo / "scripts" / "update-template-manifest.py"), "--check"], cwd=repo)
     assert_skill_frontmatter(repo / "skills")
@@ -990,6 +1078,14 @@ def main():
         ])
         assert_boundary_config(target / ".forgekit" / "project-boundary.yml")
         assert_loop_docs(target, ".forgekit/docs/loop-readiness.md", ".forgekit/docs/loop-blueprint.md")
+        assert_loop_operations(
+            target,
+            ".forgekit/docs/loop-operations.md",
+            ".forgekit/docs/loop-blueprint.md",
+            "AGENTS.md",
+            "CLAUDE.md",
+            ".codex/rules.md",
+        )
         assert_maker_checker_protocol(
             target,
             ".forgekit/docs/maker-checker-protocol.md",
@@ -1001,8 +1097,12 @@ def main():
         assert_absent_paths(target, [
             "scripts/maker-checker-runner.py",
             "scripts/checker-runner.py",
+            "scripts/loop-runner.py",
+            "scripts/loop-daemon.py",
+            "scripts/loop-scheduler.py",
             ".codex/agents/maker.md",
             ".codex/agents/checker.md",
+            ".codex/agents/loop-runner.md",
         ])
         assert_manifest_lock(target)
         assert_no_escaped_filenames(target)

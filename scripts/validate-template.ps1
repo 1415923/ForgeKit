@@ -312,6 +312,7 @@ function Test-AIEngineeringLoop {
     Test-RequiredPattern "project-template\.codex\rules.md" ".forgekit/archive/**" "Rules archive default-read rule"
     Test-RequiredPath "project-template\docs\loop-readiness.md"
     Test-RequiredPath "project-template\docs\loop-blueprint.md"
+    Test-RequiredPath "project-template\docs\loop-operations.md"
     Test-RequiredPath "project-template\docs\maker-checker-protocol.md"
     Test-RequiredPattern "project-template\docs\loop-readiness.md" "Readiness Status: not-ready | partial | ready" "Loop readiness status"
     Test-RequiredPattern "project-template\docs\loop-readiness.md" "ForgeKit Loop Five" "Loop readiness five mapping"
@@ -328,6 +329,26 @@ function Test-AIEngineeringLoop {
     Test-RequiredPattern "project-template\docs\loop-blueprint.md" "## Token Budget" "Loop blueprint token budget"
     Test-RequiredPattern "project-template\docs\loop-blueprint.md" "## Comprehension Check" "Loop blueprint comprehension check"
     Test-RequiredPattern "project-template\docs\loop-blueprint.md" "## Output / Writeback" "Loop blueprint output writeback"
+    Test-RequiredPattern "project-template\docs\loop-blueprint.md" "OperationMode: dry-run | one-step | continue | stop-handoff" "Loop blueprint operation mode"
+    Test-RequiredPattern "project-template\docs\loop-blueprint.md" "MaxRounds:" "Loop blueprint max rounds"
+    Test-RequiredPattern "project-template\docs\loop-blueprint.md" "MaxFilesRead:" "Loop blueprint max files read"
+    Test-RequiredPattern "project-template\docs\loop-blueprint.md" "MaxFilesChanged:" "Loop blueprint max files changed"
+    Test-RequiredPattern "project-template\docs\loop-blueprint.md" "MaxCommands:" "Loop blueprint max commands"
+    Test-RequiredPattern "project-template\docs\loop-blueprint.md" "RequiresUserConfirmation: yes" "Loop blueprint user confirmation"
+    Test-RequiredPattern "project-template\docs\loop-blueprint.md" "WritebackTarget:" "Loop blueprint writeback target"
+    Test-RequiredPattern "project-template\docs\loop-blueprint.md" "StopOnUnclearScope: yes" "Loop blueprint unclear scope stop"
+    Test-RequiredPattern "project-template\docs\loop-blueprint.md" "StopOnValidationFailure: yes" "Loop blueprint validation stop"
+    Test-RequiredPattern "project-template\docs\loop-blueprint.md" "These operation fields are review fields" "Loop blueprint operation fields boundary"
+    Test-RequiredPattern "project-template\docs\loop-operations.md" "Loop operations are off by default." "Loop operations default off"
+    Test-RequiredPattern "project-template\docs\loop-operations.md" "not an automatic loop runner" "Loop operations no runner boundary"
+    Test-RequiredPattern "project-template\docs\loop-operations.md" "## Loop Dry Run" "Loop operations dry run"
+    Test-RequiredPattern "project-template\docs\loop-operations.md" "## Loop One Step" "Loop operations one step"
+    Test-RequiredPattern "project-template\docs\loop-operations.md" "## Loop Continue" "Loop operations continue"
+    Test-RequiredPattern "project-template\docs\loop-operations.md" "## Loop Stop / Handoff" "Loop operations stop handoff"
+    Test-RequiredPattern "project-template\docs\loop-operations.md" "do not modify files" "Loop dry-run no modification"
+    Test-RequiredPattern "project-template\docs\loop-operations.md" "execute only one round" "Loop one-step one round"
+    Test-RequiredPattern "project-template\docs\loop-operations.md" "continue exactly one next round" "Loop continue one round"
+    Test-RequiredPattern "project-template\docs\loop-operations.md" "Every executed loop round must write back" "Loop operations writeback"
     Test-RequiredPattern "project-template\docs\loop-blueprint.md" "Maker / Checker Strategy" "Loop blueprint maker checker strategy"
     Test-RequiredPattern "project-template\docs\maker-checker-protocol.md" "This protocol is a review workflow." "Maker checker protocol boundary"
     Test-RequiredPattern "project-template\docs\maker-checker-protocol.md" "not a multi-agent scheduler" "Maker checker no scheduler boundary"
@@ -352,6 +373,15 @@ function Test-AIEngineeringLoop {
     Test-RequiredPattern "project-template\AGENTS.md" "A loop must have a state file, validation command, stop condition, and human escalation path" "AGENTS loop short rule"
     Test-RequiredPattern "project-template\CLAUDE.md" "A loop must have a state file, validation command, stop condition, and human escalation path" "CLAUDE loop short rule"
     Test-RequiredPattern "project-template\.codex\rules.md" "loop 必须有状态文件、验证命令、停止条件和人工升级入口" "Rules loop short rule"
+    Test-RequiredPattern "project-template\AGENTS.md" "Do not enter loop mode unless the user explicitly asks for loop dry-run, one-step, continue, or stop/handoff." "AGENTS loop operation trigger rule"
+    Test-RequiredPattern "project-template\CLAUDE.md" "Do not enter loop mode unless the user explicitly asks for loop dry-run, one-step, continue, or stop/handoff." "CLAUDE loop operation trigger rule"
+    Test-RequiredPattern "project-template\.codex\rules.md" "不得自行进入 loop mode" "Rules loop operation trigger rule"
+    Test-RequiredPattern "project-template\AGENTS.md" "Loop continue must not run continuously" "AGENTS loop continue rule"
+    Test-RequiredPattern "project-template\CLAUDE.md" "Loop continue must not run continuously" "CLAUDE loop continue rule"
+    Test-RequiredPattern "project-template\.codex\rules.md" "loop continue 不得自动连续运行" "Rules loop continue rule"
+    Test-RequiredPattern "project-template\AGENTS.md" "Loop output must write back" "AGENTS loop writeback rule"
+    Test-RequiredPattern "project-template\CLAUDE.md" "Loop output must write back" "CLAUDE loop writeback rule"
+    Test-RequiredPattern "project-template\.codex\rules.md" "loop 输出必须写回" "Rules loop writeback rule"
     Test-RequiredPattern "project-template\AGENTS.md" "Medium or high risk code changes should separate Maker phase and Checker phase" "AGENTS maker checker short rule"
     Test-RequiredPattern "project-template\CLAUDE.md" "Medium or high risk code changes should separate Maker phase and Checker phase" "CLAUDE maker checker short rule"
     Test-RequiredPattern "project-template\.codex\rules.md" "中高风险代码变更应区分 Maker phase 和 Checker phase" "Rules maker checker short rule"
@@ -359,10 +389,15 @@ function Test-AIEngineeringLoop {
     Test-RequiredPattern "project-template\CLAUDE.md" "Checker should not expand scope or implement new features unless the user explicitly asks" "CLAUDE checker scope rule"
     Test-RequiredPattern "project-template\.codex\rules.md" "Checker 不应扩大需求范围，不应顺手实现新功能" "Rules checker scope rule"
     Test-RequiredPattern "project-template\.forgekit\docs\document-responsibility.md" "maker-checker-protocol.md" "Document responsibility maker checker"
+    Test-RequiredPattern "project-template\.forgekit\docs\document-responsibility.md" "loop-operations.md" "Document responsibility loop operations"
     Test-RequiredPattern "project-template\docs\codebase-map.md" "maker-checker-protocol.md" "Codebase map maker checker"
+    Test-RequiredPattern "project-template\docs\codebase-map.md" "loop-operations.md" "Codebase map loop operations"
     Test-RequiredPattern "README.md" "Maker / Checker Protocol" "Root README maker checker release"
     Test-RequiredPattern "README.en.md" "Maker / Checker Protocol" "English README maker checker release"
+    Test-RequiredPattern "README.md" "Optional Loop Operation Mode" "Root README loop operations release"
+    Test-RequiredPattern "README.en.md" "Optional Loop Operation Mode" "English README loop operations release"
     Test-RequiredPattern "usage.html" "maker-checker-protocol.md" "Usage maker checker docs"
+    Test-RequiredPattern "usage.html" "loop-operations.md" "Usage loop operations docs"
     if (Test-Path -LiteralPath (Join-Path $repoRoot "scripts\maker-checker-runner.py")) {
         Add-Error "v0.26 must not add automatic maker/checker runner"
     }
@@ -375,6 +410,19 @@ function Test-AIEngineeringLoop {
     if (Test-Path -LiteralPath (Join-Path $repoRoot "project-template\.codex\agents\checker.md")) {
         Add-Error "v0.26 must not add checker sub-agent config"
     }
+    foreach ($forbiddenLoopPath in @(
+        "scripts\loop-runner.py",
+        "project-template\scripts\loop-runner.py",
+        "scripts\loop-daemon.py",
+        "project-template\scripts\loop-daemon.py",
+        "scripts\loop-scheduler.py",
+        "project-template\scripts\loop-scheduler.py",
+        "project-template\.codex\agents\loop-runner.md"
+    )) {
+        if (Test-Path -LiteralPath (Join-Path $repoRoot $forbiddenLoopPath)) {
+            Add-Error "v0.27 must not add loop runner, daemon, scheduler, or sub-agent config: $forbiddenLoopPath"
+        }
+    }
     Test-RequiredPattern "project-template\scripts\check-doc-sync.ps1" "Status: metadata" "PowerShell change status check"
     Test-RequiredPattern "project-template\scripts\check-doc-sync.ps1" "Change is done and may be archived" "PowerShell done archive warning"
     Test-RequiredPattern "project-template\scripts\check-doc-sync.sh" "Change is done and may be archived" "Bash done archive warning"
@@ -386,7 +434,7 @@ function Test-TemplateManifest {
     $manifestPath = Join-Path $repoRoot "project-template\.forgekit\template-manifest.json"
     if (Test-Path -LiteralPath $manifestPath) {
         $manifest = Get-Content -LiteralPath $manifestPath -Raw | ConvertFrom-Json
-        if ($manifest.template_version -ne "0.26.0") {
+        if ($manifest.template_version -ne "0.27.0") {
             Add-Error "Unexpected template manifest version: $($manifest.template_version)"
         }
         $sources = @($manifest.files | ForEach-Object { $_.source_path })
@@ -725,7 +773,7 @@ function Test-PluginDistribution {
     if ($codexPluginJson.name -ne "forgekit") {
         Add-Error "Unexpected Codex plugin name in root plugin.json: $($codexPluginJson.name)"
     }
-    if ($codexPluginJson.version -ne "0.26.0") {
+    if ($codexPluginJson.version -ne "0.27.0") {
         Add-Error "Unexpected Codex plugin version in root plugin.json: $($codexPluginJson.version)"
     }
     if ($codexPluginJson.skills -ne "./skills/") {
@@ -736,7 +784,7 @@ function Test-PluginDistribution {
     if ($claudePluginJson.name -ne "forgekit") {
         Add-Error "Unexpected Claude plugin name in root plugin.json: $($claudePluginJson.name)"
     }
-    if ($claudePluginJson.version -ne "0.26.0") {
+    if ($claudePluginJson.version -ne "0.27.0") {
         Add-Error "Unexpected Claude plugin version in root plugin.json: $($claudePluginJson.version)"
     }
     $claudeSkills = @($claudePluginJson.skills)

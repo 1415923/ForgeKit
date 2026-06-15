@@ -37,9 +37,16 @@
 - `.forgekit/smart-archive-report.md` 是 smart-check 生成的 report-only 建议，不是归档许可，不替代用户确认，也不是 current truth。
 - `.forgekit/docs/work-log.md` 是个人工作顺序记录，用于交接上下文和中断会话恢复；用户要求“更新 ForgeKit 文档”且本轮包含阶段收口、验证、提交/推送、阻塞、领导/组长确认时应同步，用户明确要求“同步工作日志”时必须同步；仅更新稳定技术事实时不强制同步。
 - `.forgekit/docs/loop-readiness.md` 和 `.forgekit/docs/loop-blueprint.md` 是可审查的 loop 设计文档，不是自动执行授权。
+- `.forgekit/docs/loop-operations.md` 是显式触发的操作协议，不是自动 runner 或无人值守 loop 授权。
 - `.forgekit/docs/maker-checker-protocol.md` 是审查协议，不是多 agent 调度或自动 checker 授权。
 - loop 必须有状态文件、验证命令、停止条件和人工升级入口。
 - loop 不默认修改 business docs、secrets、deploy 或 CI。
+- 不得自行进入 loop mode；只有用户明确要求 loop dry-run、one-step、continue 或 stop/handoff 时才按 loop operation 规则执行。
+- loop one-step 前必须复述 blueprint 的 loop name、state file、allowed paths、forbidden paths、validation command、stop condition、human escalation、token/scope budget 和本轮是否会修改文件。
+- loop continue 不得自动连续运行，每一轮都需要用户明确触发。
+- scope 不清、预算超限、验证失败或触及 forbidden paths 时必须停止并升级给人。
+- loop 输出必须写回 `.forgekit/docs/work-log.md` 或指定 state file。
+- 不得默认修改 business docs、secrets、deploy、CI 或 `.forgekit/template-lock.json`。
 - 中高风险代码变更应区分 Maker phase 和 Checker phase。
 - Maker phase 可以声明 `ready for check`，但不得把自己的实现视为最终通过。
 - Checker phase 应优先复核 diff、验证结果、风险和文档同步，并输出 `pass`、`needs-fix` 或 `manual-review`。
