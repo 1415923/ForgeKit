@@ -174,6 +174,8 @@ function Test-ChangedDocsNeedVersionRecord {
         $_ -ne ".forgekit\archive-reference-report.md" -and
         $_ -ne ".forgekit/current-docs-sync-report.md" -and
         $_ -ne ".forgekit\current-docs-sync-report.md" -and
+        $_ -ne ".forgekit/smart-archive-report.md" -and
+        $_ -ne ".forgekit\smart-archive-report.md" -and
         $_ -notlike ".forgekit/archive/*" -and
         $_ -notlike ".forgekit\archive\*"
     })

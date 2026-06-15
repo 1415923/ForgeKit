@@ -31,6 +31,7 @@ FORBIDDEN_EXACT_PATHS = {
 
 REFERENCE_REPORT = ".forgekit/archive-reference-report.md"
 SYNC_REPORT = ".forgekit/current-docs-sync-report.md"
+SMART_REPORT = ".forgekit/smart-archive-report.md"
 
 
 def fail(message):
@@ -299,6 +300,7 @@ def iter_reference_files(project_root, candidate_source):
         ".forgekit/archive-apply-report.md",
         REFERENCE_REPORT,
         SYNC_REPORT,
+        SMART_REPORT,
     }
     candidate_prefix = candidate_source.rstrip("/") + "/"
 
@@ -594,6 +596,199 @@ def run_sync_check(project_root, plan_value):
     print(f"[ok] Current docs sync report written: {report_path}")
 
 
+def parse_machine_report(report_path, status_key):
+    if not report_path.is_file():
+        return {}, [f"missing report: {report_path}"]
+    lines = report_path.read_text(encoding="utf-8", errors="replace").splitlines()
+    if "Status: report-only" not in lines:
+        return {}, [f"report is not report-only: {report_path}"]
+
+    records = {}
+    current = None
+    in_warnings = False
+    for line in lines:
+        if line.startswith("### "):
+            if current and current.get("Change"):
+                records[current["Change"]] = current
+            current = {"Warnings": []}
+            in_warnings = False
+            continue
+        if current is None:
+            continue
+        if line == "Warnings:":
+            in_warnings = True
+            continue
+        if in_warnings:
+            if line.startswith("- "):
+                current["Warnings"].append(line[2:].strip())
+                continue
+            if line == "none":
+                continue
+            if line and not line.startswith("#"):
+                in_warnings = False
+        if ":" not in line:
+            continue
+        key, value = line.split(":", 1)
+        key = key.strip()
+        value = value.strip()
+        if key in {status_key, "Change", "Candidate-Path", "Target-Archive-Path", "Review-Path"}:
+            current[key] = value
+    if current and current.get("Change"):
+        records[current["Change"]] = current
+    return records, []
+
+
+def smart_status_for(plan_entry, reference_record, sync_record, missing_report_errors):
+    if missing_report_errors:
+        return "blocked_by_missing_report", "; ".join(missing_report_errors)
+
+    required_plan = {"change_id", "From", "To", "Risk", "Status"}
+    missing_plan = sorted(required_plan - set(plan_entry))
+    if missing_plan:
+        return "manual_review_required", "plan candidate is missing fields: " + ", ".join(missing_plan)
+
+    change_id = plan_entry["change_id"]
+    if reference_record is None:
+        return "blocked_by_missing_report", "missing reference report entry"
+    if sync_record is None:
+        return "blocked_by_missing_report", "missing sync report entry"
+
+    reference_status = reference_record.get("Reference-Status", "missing")
+    sync_status = sync_record.get("Sync-Status", "missing")
+    if reference_status == "missing" or sync_status == "missing":
+        return "manual_review_required", "reference or sync status field missing"
+    if reference_record.get("Change") != change_id or sync_record.get("Change") != change_id:
+        return "manual_review_required", "report entry Change field does not match plan candidate"
+
+    if reference_status == "referenced_by_active_change":
+        return "blocked_by_active_reference", "candidate is referenced by active change context"
+    if reference_status == "referenced_by_current_docs":
+        return "blocked_by_current_docs_reference", "candidate is still referenced by current docs"
+    if reference_status == "manual_review_needed":
+        return "manual_review_required", "reference report requires manual review"
+    if sync_status in {"missing_sync_metadata", "missing_required_docs"}:
+        return "blocked_by_missing_sync", "current docs sync evidence is missing or incomplete"
+    if reference_status == "safe_no_references" and sync_status in {"sync_confirmed", "sync_not_needed"}:
+        return "auto_archive_candidate", "no references and current docs sync evidence is acceptable"
+    return "manual_review_required", f"unrecognized reference/sync combination: {reference_status} / {sync_status}"
+
+
+def smart_section(record):
+    warnings = record["warnings"]
+    lines = [
+        f"### {record['change_id']}",
+        "",
+        f"Smart-Status: {record['category']}",
+        f"Change: {record['change_id']}",
+        f"Candidate-Path: {record.get('from') or 'missing'}",
+        f"Target-Archive-Path: {record.get('to') or 'missing'}",
+        f"Reference-Status: {record.get('reference_status') or 'missing'}",
+        f"Sync-Status: {record.get('sync_status') or 'missing'}",
+        f"Reason: {record['reason']}",
+        "Warnings:",
+    ]
+    if warnings:
+        lines.extend(f"- {warning}" for warning in warnings)
+    else:
+        lines.append("none")
+    return "\n".join(lines)
+
+
+def write_smart_report(project_root, plan_rel, reference_rel, sync_rel, records):
+    categories = [
+        "auto_archive_candidate",
+        "manual_review_required",
+        "blocked_by_active_reference",
+        "blocked_by_current_docs_reference",
+        "blocked_by_missing_sync",
+        "blocked_by_missing_report",
+    ]
+    grouped = {category: [item for item in records if item["category"] == category] for category in categories}
+    lines = [
+        "# Smart Archive Report",
+        "",
+        "Status: report-only",
+        "Mode: smart-check",
+        f"Plan path: {plan_rel.as_posix()}",
+        f"Reference report path: {reference_rel.as_posix()}",
+        f"Sync report path: {sync_rel.as_posix()}",
+        f"Generated: {utc_now()}",
+        "",
+        "This report only combines machine-readable fields from existing reports. It does not perform AI semantic judgment.",
+        "",
+        "## Summary",
+        "",
+        "| category | count |",
+        "| --- | ---: |",
+    ]
+    lines.extend(f"| {category} | {len(grouped[category])} |" for category in categories)
+    for category in categories:
+        lines.extend(["", f"## {category}", ""])
+        lines.extend([smart_section(item) + "\n" for item in grouped[category]] or ["None.\n"])
+
+    report_path = project_root / SMART_REPORT
+    report_path.write_text("\n".join(lines).rstrip() + "\n", encoding="utf-8")
+    return report_path
+
+
+def run_smart_check(project_root, plan_value, reference_value, sync_value):
+    plan_rel = safe_relative_path(plan_value, "plan")
+    reference_rel = safe_relative_path(reference_value, "reference-report")
+    sync_rel = safe_relative_path(sync_value, "sync-report")
+    if plan_rel.as_posix() != ".forgekit/archive-plan.md":
+        fail("v0.23 only supports --plan .forgekit/archive-plan.md")
+    if reference_rel.as_posix() != REFERENCE_REPORT:
+        fail(f"v0.23 only supports --reference-report {REFERENCE_REPORT}")
+    if sync_rel.as_posix() != SYNC_REPORT:
+        fail(f"v0.23 only supports --sync-report {SYNC_REPORT}")
+
+    missing_report_errors = []
+    try:
+        candidates = parse_plan(project_root / plan_rel)
+    except SystemExit as exc:
+        candidates = []
+        missing_report_errors.append(str(exc).replace("[fail] ", ""))
+
+    reference_records, reference_errors = parse_machine_report(project_root / reference_rel, "Reference-Status")
+    sync_records, sync_errors = parse_machine_report(project_root / sync_rel, "Sync-Status")
+    missing_report_errors.extend(reference_errors)
+    missing_report_errors.extend(sync_errors)
+
+    records = []
+    if not candidates and missing_report_errors:
+        records.append({
+            "change_id": "<missing-candidate>",
+            "from": "",
+            "to": "",
+            "reference_status": "missing",
+            "sync_status": "missing",
+            "category": "blocked_by_missing_report",
+            "reason": "; ".join(missing_report_errors),
+            "warnings": [],
+        })
+    for entry in candidates:
+        change_id = entry.get("change_id", "<missing-change>")
+        reference_record = reference_records.get(change_id)
+        sync_record = sync_records.get(change_id)
+        category, reason = smart_status_for(entry, reference_record, sync_record, missing_report_errors)
+        warnings = []
+        if sync_record:
+            warnings.extend(sync_record.get("Warnings", []))
+        records.append({
+            "change_id": change_id,
+            "from": entry.get("From", ""),
+            "to": entry.get("To", ""),
+            "reference_status": reference_record.get("Reference-Status", "missing") if reference_record else "missing",
+            "sync_status": sync_record.get("Sync-Status", "missing") if sync_record else "missing",
+            "category": category,
+            "reason": reason,
+            "warnings": warnings,
+        })
+
+    report_path = write_smart_report(project_root, plan_rel, reference_rel, sync_rel, records)
+    print(f"[ok] Smart archive report written: {report_path}")
+
+
 def git_status_allowing_plan(project_root, plan_rel):
     result = subprocess.run(
         ["git", "status", "--short"],
@@ -759,7 +954,10 @@ def main():
     mode.add_argument("--apply", action="store_true", help="Apply candidates from a reviewed archive plan.")
     mode.add_argument("--reference-check", action="store_true", help="Generate .forgekit/archive-reference-report.md from archive-plan candidates.")
     mode.add_argument("--sync-check", action="store_true", help="Generate .forgekit/current-docs-sync-report.md from archive-plan candidates.")
-    parser.add_argument("--plan", default=".forgekit/archive-plan.md", help="Archive plan path. v0.22 supports .forgekit/archive-plan.md.")
+    mode.add_argument("--smart-check", action="store_true", help="Generate .forgekit/smart-archive-report.md from archive, reference, and sync reports.")
+    parser.add_argument("--plan", default=".forgekit/archive-plan.md", help="Archive plan path. v0.23 supports .forgekit/archive-plan.md.")
+    parser.add_argument("--reference-report", default=REFERENCE_REPORT, help="Reference report path. v0.23 supports .forgekit/archive-reference-report.md.")
+    parser.add_argument("--sync-report", default=SYNC_REPORT, help="Sync report path. v0.23 supports .forgekit/current-docs-sync-report.md.")
     parser.add_argument("--confirm", action="store_true", help="Required with --apply to move candidates.")
     args = parser.parse_args()
     project_root = Path.cwd().resolve()
@@ -769,8 +967,10 @@ def main():
         run_apply(project_root, args.plan, args.confirm)
     elif args.reference_check:
         run_reference_check(project_root, args.plan)
-    else:
+    elif args.sync_check:
         run_sync_check(project_root, args.plan)
+    else:
+        run_smart_check(project_root, args.plan, args.reference_report, args.sync_report)
 
 
 if __name__ == "__main__":

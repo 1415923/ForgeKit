@@ -108,6 +108,16 @@ python .\scripts\archive-changes.py --sync-check --plan .forgekit/archive-plan.m
 python3 ./scripts/archive-changes.py --sync-check --plan .forgekit/archive-plan.md
 ```
 
+Smart check 只综合 dry-run plan、reference report 和 sync report 的机器字段，生成 `.forgekit/smart-archive-report.md`，不移动、不改链接、不改 current docs、不改 business docs、不改 lock。
+
+```powershell
+python .\scripts\archive-changes.py --smart-check --plan .forgekit/archive-plan.md --reference-report .forgekit/archive-reference-report.md --sync-report .forgekit/current-docs-sync-report.md
+```
+
+```bash
+python3 ./scripts/archive-changes.py --smart-check --plan .forgekit/archive-plan.md --reference-report .forgekit/archive-reference-report.md --sync-report .forgekit/current-docs-sync-report.md
+```
+
 Apply 需要先人工 review plan，并且必须显式确认。工作区除 `.forgekit/archive-plan.md` 外不干净时会拒绝执行。
 
 ```powershell

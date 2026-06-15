@@ -35,3 +35,11 @@ python scripts/archive-changes.py --sync-check --plan .forgekit/archive-plan.md
 ```
 
 The sync report is report-only. It reads `review.md` metadata for candidates and does not change current docs, business docs, archive-plan, template-lock, links, or files.
+
+Smart Archive Advisor:
+
+```bash
+python scripts/archive-changes.py --smart-check --plan .forgekit/archive-plan.md --reference-report .forgekit/archive-reference-report.md --sync-report .forgekit/current-docs-sync-report.md
+```
+
+Smart check combines machine-readable fields from the archive plan, reference report, and sync report. It writes `.forgekit/smart-archive-report.md` and remains report-only.

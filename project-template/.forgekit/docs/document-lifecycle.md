@@ -108,6 +108,12 @@ The sync check reads only `Archive-Status: candidate` entries from `.forgekit/ar
 
 The primary field is `CurrentDocsSync: confirmed | not-needed | missing | unknown`. `ChangelogUpdated` creates warnings when it is `no`, `unknown`, or missing. `ArchitectureUpdated`, `TestingUpdated`, and `RequirementsUpdated` are supporting evidence only.
 
+## Smart Archive Advisor
+
+`scripts/archive-changes.py --smart-check --plan .forgekit/archive-plan.md --reference-report .forgekit/archive-reference-report.md --sync-report .forgekit/current-docs-sync-report.md` can generate `.forgekit/smart-archive-report.md`.
+
+Smart check only combines machine-readable fields from the archive plan, reference report, and sync report. It does not read archive as current truth, perform AI semantic judgment, move files, change proposal status, rewrite links, modify current docs, write business docs, update template-lock, commit, or push.
+
 It checks `.forgekit/docs/**`, draft/active/missing/unknown changes, and entry docs (`README.md`, `AGENTS.md`, `CLAUDE.md`). It skips archive, upgrade-export, report files, templates, and the candidate source directory itself.
 
 The report is generated fresh on every run. It does not move files, rewrite links, update current docs, write business docs, update template-lock, commit, tag, or push.

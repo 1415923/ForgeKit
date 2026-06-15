@@ -1,7 +1,7 @@
 {
   "$schema": "https://json.schemastore.org/claude-code-marketplace.json",
   "name": "forgekit-local",
-  "version": "0.22.0",
+  "version": "0.23.0",
   "description": "Local ForgeKit marketplace.",
   "owner": {
     "name": "ForgeKit Maintainers"
@@ -10,7 +10,7 @@
     {
       "name": "forgekit",
       "description": "Project-level workflow harness for Claude Code, Codex, and adjacent AI coding tools.",
-      "version": "0.22.0",
+      "version": "0.23.0",
       "source": "./",
       "category": "productivity"
     }

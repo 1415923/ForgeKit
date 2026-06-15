@@ -63,6 +63,7 @@ When a task names a ForgeKit skill, read the project-local `.agents/skills/<skil
 - Treat `.forgekit/archive-apply-report.md` as generated apply output. It is not current-state docs, an active change, or release evidence.
 - Treat `.forgekit/archive-reference-report.md` as generated report-only output. It is not current-state docs, an active change, or release evidence.
 - Treat `.forgekit/current-docs-sync-report.md` as generated report-only output. It is not current-state docs, an active change, or proof that current docs are semantically correct.
+- Treat `.forgekit/smart-archive-report.md` as generated report-only advice. It is not permission to archive, does not replace user confirmation, and is not current-state truth.
 - Treat `.forgekit/docs/work-log.md` as a personal work sequence log for handoff and interrupted session recovery. If the user asks to update ForgeKit docs and this turn includes phase closure, validation, commit/push, blocking, or leader/team lead confirmation, update it; if the user explicitly asks to sync the work log, update it; stable technical fact updates alone do not force it.
 - Do not install tools or start services just because `.forgekit/docs/local-toolchain.md` has unknown values; ask first.
 - `scripts/detect-local-toolchain.ps1` and `scripts/run-harness-check.ps1` are read-only helpers; do not treat their output as permission to install or change anything.

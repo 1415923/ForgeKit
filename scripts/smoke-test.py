@@ -187,8 +187,8 @@ def assert_json(path):
 def assert_manifest_lock(target):
     lock_path = target / ".forgekit" / "template-lock.json"
     lock = json.loads(lock_path.read_text(encoding="utf-8"))
-    if lock.get("installed_version") != "0.22.0":
-        fail("template-lock installed_version must be 0.22.0")
+    if lock.get("installed_version") != "0.23.0":
+        fail("template-lock installed_version must be 0.23.0")
     if lock.get("managed_docs_root") != ".forgekit/docs":
         fail("template-lock managed_docs_root must match boundary")
     if lock.get("change_root") != ".forgekit/changes":
@@ -241,7 +241,7 @@ def assert_upgrade_report(repo, target):
         fail("upgrade must not overwrite managed docs")
     assert_paths(target, [
         ".forgekit/upgrade-report.md",
-        ".forgekit/upgrade-export/0.22.0/.forgekit/docs/project-plan.md",
+        ".forgekit/upgrade-export/0.23.0/.forgekit/docs/project-plan.md",
     ])
 
 
@@ -305,6 +305,12 @@ def assert_archive_flow(target):
         target,
         "20260107-manual-ref",
         "Status: done\nRisk: medium\nCreated: 2026-01-07\nOwner: smoke\nReason: smoke manual ref\n\n# Proposal\n",
+        ["tasks.md", "verification.md", "review.md"],
+    )
+    write_change(
+        target,
+        "20260110-missing-sync-safe",
+        "Status: done\nRisk: medium\nCreated: 2026-01-10\nOwner: smoke\nReason: smoke missing sync safe reference\n\n# Proposal\n",
         ["tasks.md", "verification.md", "review.md"],
     )
     with (target / ".forgekit" / "docs" / "project-plan.md").open("a", encoding="utf-8") as handle:
@@ -406,6 +412,10 @@ def assert_archive_flow(target):
         "# review.md\n\nCurrentDocsSync: missing\nChangelogUpdated: unknown\nArchitectureUpdated: yes\nTestingUpdated: yes\nRequirementsUpdated: not-needed\n",
         encoding="utf-8",
     )
+    (target / ".forgekit" / "changes" / "20260110-missing-sync-safe" / "review.md").write_text(
+        "# review.md\n\nCurrentDocsSync: missing\nChangelogUpdated: yes\nArchitectureUpdated: not-needed\nTestingUpdated: yes\nRequirementsUpdated: not-needed\n",
+        encoding="utf-8",
+    )
     missing_review_dir = target / ".forgekit" / "changes" / "20260109-plan-missing-review"
     missing_review_dir.mkdir(parents=True, exist_ok=True)
     (missing_review_dir / "proposal.md").write_text(
@@ -448,6 +458,7 @@ def assert_archive_flow(target):
         "Sync-Status: missing_required_docs",
         "Change: 20260105-done-high",
         "CurrentDocsSync: missing",
+        "Change: 20260110-missing-sync-safe",
         "Sync-Status: manual_review_needed",
         "Change: 20260109-plan-missing-review",
         "review.md missing",
@@ -466,7 +477,79 @@ def assert_archive_flow(target):
             fail(f"current docs sync check must not modify current docs: {relative}")
     if not (target / ".forgekit" / "changes" / "20260101-done-medium").is_dir():
         fail("current docs sync check must not move candidates")
+
+    before_smart_plan = plan_path.read_bytes()
+    before_smart_reference = reference_report_path.read_bytes()
+    before_smart_sync = sync_report_path.read_bytes()
+    before_smart_lock = (target / ".forgekit" / "template-lock.json").read_bytes()
+    before_smart_business = business_note.read_bytes()
+    before_smart_docs = {path.relative_to(target).as_posix(): path.read_bytes() for path in (target / ".forgekit" / "docs").rglob("*") if path.is_file()}
+    run([
+        sys.executable,
+        "scripts/archive-changes.py",
+        "--smart-check",
+        "--plan",
+        ".forgekit/archive-plan.md",
+        "--reference-report",
+        ".forgekit/archive-reference-report.md",
+        "--sync-report",
+        ".forgekit/current-docs-sync-report.md",
+    ], cwd=target)
+    smart_report_path = target / ".forgekit" / "smart-archive-report.md"
+    if not smart_report_path.is_file():
+        fail("smart archive check must create .forgekit/smart-archive-report.md")
+    smart_report = smart_report_path.read_text(encoding="utf-8")
+    smart_required = [
+        "Mode: smart-check",
+        "Status: report-only",
+        "Smart-Status: auto_archive_candidate",
+        "Change: 20260101-done-medium",
+        "Reference-Status: safe_no_references",
+        "Sync-Status: sync_confirmed",
+        "Smart-Status: blocked_by_current_docs_reference",
+        "Change: 20260106-current-ref",
+        "Smart-Status: blocked_by_active_reference",
+        "Change: 20260105-done-high",
+        "Smart-Status: manual_review_required",
+        "Change: 20260107-manual-ref",
+        "Smart-Status: blocked_by_missing_sync",
+        "Change: 20260110-missing-sync-safe",
+    ]
+    missing_smart_text = [item for item in smart_required if item not in smart_report]
+    if missing_smart_text:
+        fail("smart archive report missing expected text:\n" + "\n".join(missing_smart_text))
+    if before_smart_plan != plan_path.read_bytes():
+        fail("smart archive check must not update archive-plan.md")
+    if before_smart_reference != reference_report_path.read_bytes():
+        fail("smart archive check must not update archive-reference-report.md")
+    if before_smart_sync != sync_report_path.read_bytes():
+        fail("smart archive check must not update current-docs-sync-report.md")
+    if before_smart_lock != (target / ".forgekit" / "template-lock.json").read_bytes():
+        fail("smart archive check must not update template-lock.json")
+    if before_smart_business != business_note.read_bytes():
+        fail("smart archive check must not write business docs")
+    for relative, content in before_smart_docs.items():
+        if content != (target / relative).read_bytes():
+            fail(f"smart archive check must not modify current docs: {relative}")
+    if not (target / ".forgekit" / "changes" / "20260101-done-medium").is_dir():
+        fail("smart archive check must not move candidates")
+
     sync_report_path.unlink()
+    run([
+        sys.executable,
+        "scripts/archive-changes.py",
+        "--smart-check",
+        "--plan",
+        ".forgekit/archive-plan.md",
+        "--reference-report",
+        ".forgekit/archive-reference-report.md",
+        "--sync-report",
+        ".forgekit/current-docs-sync-report.md",
+    ], cwd=target)
+    smart_missing_report = smart_report_path.read_text(encoding="utf-8")
+    if "Smart-Status: blocked_by_missing_report" not in smart_missing_report or "missing report:" not in smart_missing_report:
+        fail("smart archive check must classify missing reports as blocked_by_missing_report")
+    smart_report_path.unlink()
     reference_report_path.unlink()
     run([sys.executable, "scripts/archive-changes.py", "--dry-run"], cwd=target)
     run(["git", "add", "."], cwd=target)
