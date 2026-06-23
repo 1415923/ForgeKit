@@ -2,7 +2,7 @@
 
 本文只做代码搜索入口，不做项目百科。目标是帮助 AI 和接手人员快速知道：从哪里开始看、哪些目录谨慎碰、怎么验证。
 
-Role: code search entry, not project encyclopedia.
+定位：代码搜索入口，不是项目百科。
 
 维护原则：
 
@@ -20,8 +20,8 @@ Role: code search entry, not project encyclopedia.
 | 数据库 | 待补充 | schema、migration、数据访问 | 改动前确认 |
 | 部署配置 | 待补充 | 环境变量、容器、脚本、发布配置 | 默认只读 |
 | 测试 | 待补充 | 单元测试、集成测试、端到端测试 | 修改后验证 |
-| 业务文档 | `docs/` | 业务说明、既有方案、验收资料 | read-mostly |
-| ForgeKit managed docs | `.forgekit/docs/` | 当前项目事实和工作状态 | 按职责矩阵读取 |
+| 业务文档 | `docs/` | 业务说明、既有方案、验收资料 | 默认只读 |
+| ForgeKit 管理文档 | `.forgekit/docs/` | 当前项目事实和工作状态 | 按职责矩阵读取 |
 
 ## 当前主要模块
 
@@ -71,7 +71,7 @@ Role: code search entry, not project encyclopedia.
 | 路径或类型 | 处理方式 | 原因 |
 | --- | --- | --- |
 | 构建产物、依赖目录、缓存 | 默认忽略 | 噪音大，通常不应手改 |
-| `.DS_Store`、`Thumbs.db`、`__pycache__`、`.pytest_cache`、`*.tmp` | 不记录进 managed docs，不纳入模板 | 系统或临时产物 |
+| `.DS_Store`、`Thumbs.db`、`__pycache__`、`.pytest_cache`、`*.tmp` | 不记录进管理文档，不纳入模板 | 系统或临时产物 |
 | 大型二进制文件 | 先询问 | 不适合直接读入上下文 |
 | 凭据、私钥、token、证书、真实环境地址 | 不输出完整值 | 安全风险 |
 

@@ -9,7 +9,7 @@
       "role": "agent_entry",
       "update_policy": "ask",
       "render_mode": "copy",
-      "checksum": "sha256:dc57868d60b7b1bd3a767a82a2a195108a7c446d1d51d6f494679d06f676f416"
+      "checksum": "sha256:bcc0c905b73b9c1c5cfa2f97657a97a0c3864494e55c2fa4817d612b9e2b12ed"
     },
     {
       "source_path": "CLAUDE.md",
@@ -17,7 +17,7 @@
       "role": "agent_entry",
       "update_policy": "ask",
       "render_mode": "copy",
-      "checksum": "sha256:7ba596091267559b09b035a849e9d5d31c563ca5404bb749348e46b918c42f1d"
+      "checksum": "sha256:ff3dba7b651dd3732ea31da889dfbaae9ea7c8cecfe5b55127e4f2a6744ad99f"
     },
     {
       "source_path": "README.md",
@@ -25,7 +25,7 @@
       "role": "readme",
       "update_policy": "ask",
       "render_mode": "copy",
-      "checksum": "sha256:0103a5866a5a45e290a2138db483924323a90e512bc123eb6f3b853a9848f6d6"
+      "checksum": "sha256:492851d4096883da729b9bedba56af9a5d91cdc69554d13129daf19f13d1ace2"
     },
     {
       "source_path": ".forgekit/project-boundary.yml",
@@ -41,7 +41,7 @@
       "role": "managed_doc",
       "update_policy": "merge",
       "render_mode": "copy",
-      "checksum": "sha256:5f565e53de08a8b70a9dc514c64c5ff700c62732c15b7d4fc1576f4a745f5b2f"
+      "checksum": "sha256:97917b6b87aac6c4f4a63b2fb2dba9b334a85d56989cf18a56a816b0547cc6bd"
     },
     {
       "source_path": ".forgekit/docs/document-lifecycle.md",
@@ -177,7 +177,7 @@
       "role": "managed_doc",
       "update_policy": "merge",
       "render_mode": "copy",
-      "checksum": "sha256:5937a1fbef4128c843a028a6ecc6a85184ab68312dd34d1a61a8badea3612ce1"
+      "checksum": "sha256:bc748e7311ba1519a1ae7a3233db21148e30372e23854d7153d4a745c0942631"
     },
     {
       "source_path": "docs/work-log.md",
@@ -185,7 +185,7 @@
       "role": "managed_doc",
       "update_policy": "merge",
       "render_mode": "copy",
-      "checksum": "sha256:a96892203d9281c6705ba6e11d554a17aac11de2b4bc7b3601a09bcc70eb7f3c"
+      "checksum": "sha256:5441871ee61920bcadc5d1eb251073875a551086d655a8683dda5629075dedef"
     },
     {
       "source_path": "docs/task-intake.md",
@@ -193,7 +193,7 @@
       "role": "managed_doc",
       "update_policy": "merge",
       "render_mode": "copy",
-      "checksum": "sha256:8135e989ba858deb12f9b7d5fe3480a2d24b05a35a14bcff85e0727ed51cfdc0"
+      "checksum": "sha256:8f63343edac7e4cbfcda1c3bcdf6a07cc13e4475bfb51ee12c93125e7a1bd91d"
     },
     {
       "source_path": "docs/local-toolchain.md",

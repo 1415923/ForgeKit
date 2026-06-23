@@ -49,7 +49,7 @@ When a task names a ForgeKit skill, read the project-local `.agents/skills/<skil
 ## Context Rules
 
 - Do not read every file in `governance/` by default.
-- Do not read `.forgekit/docs/**` by default. Start with `.forgekit/docs/document-responsibility.md` and `.forgekit/docs/codebase-map.md`, then read only the docs whose `Default Read` and trigger fit the task.
+- 默认不要读取全部 `.forgekit/docs/**`。先读 `.forgekit/docs/document-responsibility.md` 和 `.forgekit/docs/codebase-map.md`，再按默认读取策略和任务触发条件读取相关文档。
 - Boundary first: ForgeKitRoot is the toolkit source and is read-only unless this task is maintaining ForgeKit itself; ProjectRoot is the business repository and Git commit location.
 - Use `.forgekit/docs` as the default ForgeKit-managed docs root and `.forgekit/changes` as the default change root.
 - Treat business `docs/` as read-mostly evidence. Read and cite it, but do not write ForgeKit governance templates there unless the user confirms target files and reasons.
@@ -58,9 +58,9 @@ When a task names a ForgeKit skill, read the project-local `.agents/skills/<skil
 - Treat `.forgekit/upgrade-export/**` as candidate comparison material, not current-state docs, active changes, release evidence, or changelog content.
 - Treat `.forgekit/docs/**` as current state docs: keep stable facts, not long process history.
 - Before updating managed docs, classify the content type: source record, requirement fact, task status, validation method, work sequence, release change, risk, design decision, or history.
-- Do not write the same fact into multiple docs. Write it once in the responsible document and cross-link from related docs.
-- Triggered docs are updated only when their event happens; do not fill defect, incident, dependency, threat, release, traceability, loop, maker-checker, or worktree docs as routine noise.
-- User-facing docs should be short and natural: conclusion first, only enough evidence for review, no template filler or long AI process narration.
+- 不要把同一事实重复写进多个文档。只写到负责文档，相关文档用链接或 Source ID 交叉引用。
+- 触发式文档只有对应事件发生时才更新；不要把缺陷、事故、依赖、安全、发布、追踪、loop、maker-checker 或 worktree 文档当成日常噪音填充。
+- 给用户看的文档要短、自然、可确认：先写结论，再写必要证据，不写模板腔和长篇 AI 过程自述。
 - Treat `.forgekit/changes/<change-id>/**` as one-change process records: proposal, design, tasks, verification, review, ship, and retro.
 - Treat `.forgekit/archive/**` as historical material, not current truth. Do not read archive by default; read it only when the user asks for history, audit, regression analysis, retro, incident review, historical decision explanation, or old-version comparison.
 - Treat `.forgekit/archive-plan.md` as generated dry-run output. It is not current-state docs or an active change, and each dry-run may overwrite it.
@@ -68,8 +68,8 @@ When a task names a ForgeKit skill, read the project-local `.agents/skills/<skil
 - Treat `.forgekit/archive-reference-report.md` as generated report-only output. It is not current-state docs, an active change, or release evidence.
 - Treat `.forgekit/current-docs-sync-report.md` as generated report-only output. It is not current-state docs, an active change, or proof that current docs are semantically correct.
 - Treat `.forgekit/smart-archive-report.md` as generated report-only advice. It is not permission to archive, does not replace user confirmation, and is not current-state truth.
-- Treat `.forgekit/docs/task-intake.md` as the source-first ledger for leader tasks, WeChat tasks, plan cells, meeting action items, document tasks, and manual notes. Preserve redacted original text before AI interpretation and task splitting; derived tasks must cite Source ID; unreviewed assignments stay `Human Review: pending`; never write secrets or unredacted sensitive data into managed docs.
-- Treat `.forgekit/docs/work-log.md` as a personal work sequence log for handoff and interrupted session recovery. If the user asks to update ForgeKit docs and this turn includes phase closure, validation, commit/push, blocking, or leader/team lead confirmation, update it; if the user explicitly asks to sync the work log, update it; stable technical fact updates alone do not force it.
+- `.forgekit/docs/task-intake.md` 是领导任务、微信任务、计划表格子、会议任务、文档任务和手工记录的来源台账。先保留脱敏原文，再做 AI 理解和任务拆解；拆解任务必须引用 Source ID；未人工确认的派发内容保持 `Human Review: pending`；不要把密钥或未脱敏敏感信息写入管理文档。
+- `.forgekit/docs/work-log.md` 是个人工作顺序记录，用于交接和中断会话恢复。用户要求更新 ForgeKit 文档且本轮包含阶段收口、验证、提交/推送、阻塞或领导/组长确认时，应同步它；用户明确要求同步工作日志时必须更新；仅稳定技术事实变化不强制更新。
 - Treat `.forgekit/docs/loop-readiness.md` and `.forgekit/docs/loop-blueprint.md` as reviewable loop design docs, not automatic execution authorization.
 - Treat `.forgekit/docs/loop-operations.md` as an explicit operation protocol, not an automatic runner or unattended loop authorization.
 - Treat `.forgekit/docs/maker-checker-protocol.md` as a review protocol, not multi-agent scheduling or automatic checker authorization.

@@ -36,7 +36,7 @@ ForgeKit 在生成项目内提供轻量 AI Engineering Loop：澄清目标、判
 
 - `AGENTS.md`：Codex 第一入口，只放任务路由、上下文规则和禁止动作。
 - `CLAUDE.md`：Claude Code 第一入口，只放任务路由、上下文规则和禁止动作。
-- `.forgekit/docs/document-responsibility.md`：managed docs 职责矩阵，记录 Audience、Default Read、触发条件、写什么和不写什么。
+- `.forgekit/docs/document-responsibility.md`：管理文档职责矩阵，记录读者、默认读取策略、触发条件、写什么和不写什么。
 - `.forgekit/docs/codebase-map.md`：代码搜索起点，记录模块入口、常用关键词和局部验证命令，不做项目百科。
 - `.forgekit/docs/local-toolchain.md`：记录各技术栈 LSP、lint、test、build 和局部验证能力。
 - `governance/agent-harness.md`：说明 AGENTS 分层、agentic search、停止编码条件和输出要求。

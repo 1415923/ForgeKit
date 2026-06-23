@@ -1,67 +1,67 @@
-# Work Log
+# 工作日志
 
-This is a recent work-window log for handoff and interrupted session recovery. It is not a full history warehouse, not a release note, not a task board, and not a test report.
+本文只记录最近工作窗口，用于交接和中断会话恢复。它不是全量历史仓库、不是正式发布说明、不是任务看板，也不是测试报告。
 
-Purpose: handoff context and interrupted session recovery.
+用途：交接上下文和中断会话恢复。
 
-Keep it short enough for a person to review. Prefer the current stage and recent days. Move old history to archive only when the user asks.
+保持短到用户能快速复查。优先保留当前阶段和最近几天；旧历史只有在用户要求时才归档。
 
-## Use This For
+## 写入边界
 
-| Write Here | Do Not Write Here |
+| 写在这里 | 不写在这里 |
 | --- | --- |
-| What happened in order during the current stage | Full project history |
-| Validation result summaries and evidence pointers | Every test run log |
-| Commit / push status | MR-ready changelog |
-| Blocker changes and unblock reasons | Risk register |
-| Leader or team lead confirmation conclusions | Sensitive operational data |
-| Next personal follow-up items | Long technical design |
+| 当前阶段按顺序发生了什么 | 全项目历史 |
+| 验证结果摘要和证据链接 | 每次测试运行日志 |
+| 提交 / 推送状态 | 可直接用于 MR 的 changelog |
+| 阻塞变化和解除原因 | 风险登记册 |
+| 领导或组长确认结论 | 敏感运维数据 |
+| 个人后续待办 | 长技术设计 |
 
-## Update Triggers
+## 更新触发
 
-Update when one of these happens:
+发生以下情况时更新：
 
-- Phase closure.
-- Validation completes.
-- Commit or push completes.
-- Blocking status changes.
-- Leader or team lead confirms a conclusion.
-- Important schedule or responsibility changes.
-- Daily summary is requested or useful.
-- Interrupted session recovery needs context.
-- User explicitly asks to sync the work log.
+- 阶段收口。
+- 验证完成。
+- 提交或推送完成。
+- 阻塞状态变化。
+- 领导或组长确认结论。
+- 重要排期或责任变化。
+- 用户要求或确实需要每日总结。
+- 中断会话需要恢复上下文。
+- 用户明确要求同步工作日志。
 
-Stable technical facts alone do not force a work-log update.
+仅稳定技术事实变化时，不强制更新工作日志。
 
-## Recent Work Window
+## 最近工作窗口
 
 ### YYYY-MM-DD
 
 Status: in-progress | blocked | verified | committed | pushed | handed-off
 
-#### Summary
+#### 摘要
 
 - 
 
-#### Validation
+#### 验证
 
-| Check | Result | Evidence |
+| 检查 | 结果 | 证据 |
 | --- | --- | --- |
 |  |  |  |
 
-#### Commit / Push
+#### 提交 / 推送
 
-| Action | Result | Reference |
+| 动作 | 结果 | 引用 |
 | --- | --- | --- |
 | Commit | Not run |  |
 | Push | Not run |  |
 
-#### Blocking / Confirmation
+#### 阻塞 / 确认
 
-| Item | Status | Owner | Conclusion |
+| 项目 | 状态 | 负责人 | 结论 |
 | --- | --- | --- | --- |
 |  |  |  |  |
 
-#### Next Follow-Up
+#### 后续跟进
 
 - 

@@ -1,66 +1,66 @@
-# Managed Docs Responsibility Matrix v2
+# Managed Docs 职责矩阵 v2
 
-Use this file before editing `.forgekit/docs/**`. Its purpose is to reduce default reading, avoid duplicate writes, and keep human-facing documents short enough to review.
+编辑 `.forgekit/docs/**` 前先看本文。它的作用是减少默认读取、避免重复写入，并让给用户确认的文档保持短、自然、可读。
 
-Document classes:
+## 文档分类
 
-- `core`: usually relevant during onboarding or daily work.
-- `current`: current project facts; update only when the stable fact changes.
-- `working`: short operational state for current work.
-- `triggered`: update only when the named event happens.
-- `reference`: read only when the task needs that topic.
-- `generated`: tool output; do not edit as current truth.
-- `archive`: history; not read by default.
+- `core`：初始化、接手项目或日常工作通常会用到。
+- `current`：当前项目事实；只有稳定事实变化时才更新。
+- `working`：当前工作状态、任务来源、近期交接信息。
+- `triggered`：只有对应事件发生时才更新。
+- `reference`：任务需要该主题时才读取。
+- `generated`：脚本生成物；不要当作当前事实手改。
+- `archive`：历史材料；默认不读取。
 
-Default Read values:
+## 默认读取
 
-- `yes`: normal startup or broad handover may read it.
-- `as-needed`: read when the task points to that topic.
-- `no`: do not read by default.
+- `yes`：初始化、广义交接或启动时可以读取。
+- `as-needed`：任务指向该主题时读取。
+- `no`：默认不读取。
 
-| Document | Document Class | Audience | Default Read | Write Here | Do Not Write Here | Update Trigger | Related Docs |
+| 文档 | 文档分类 | 读者 | 默认读取 | 写什么 | 不写什么 | 更新触发 | 相关文档 |
 | --- | --- | --- | --- | --- | --- | --- | --- |
-| `README.md` | core | users | yes | What this project is, quick start, basic usage | Internal process, long history, task logs | User entry or startup path changes | `AGENTS.md`, `CLAUDE.md` |
-| `AGENTS.md` / `CLAUDE.md` | core | AI tools | yes | Short startup order, boundary rules, task routing | Long checklists, template bodies, stack manuals | Startup order, write boundary, routing change | `.codex/rules.md`, skills |
-| `.forgekit/project-boundary.yml` | core | AI tools, maintainers | yes | ForgeKitRoot, ProjectRoot, managed docs root, change root, write policy | Product plan, architecture, task status | Directory layout or write policy changes | `AGENTS.md`, `CLAUDE.md` |
-| `.forgekit/docs/document-responsibility.md` | core | users, AI tools | yes | Where facts belong and when docs should be updated | Project facts, task logs, release notes | Managed doc responsibility changes | `document-lifecycle.md` |
-| `.forgekit/docs/codebase-map.md` | core | AI tools, maintainers | yes | Code search entry points, module map, key commands, cautious paths | Full architecture, API encyclopedia, long scan history | Module entry, command, or ownership changes | `architecture.md`, `api.md`, `local-toolchain.md` |
-| `.forgekit/docs/task-intake.md` | working | users, AI tools | as-needed | Original task source, Source ID, responsibility split, time window, human review | Final requirements, task status, changelog, long analysis | Leader task, WeChat task, plan cell, meeting action, manual note | `requirements.md`, `task-board.md`, `work-log.md` |
-| `.forgekit/docs/requirements.md` | current | users, product, AI tools | as-needed | Confirmed requirement facts, acceptance criteria, scope boundaries, Source ID reference | Original assignment text, long reasoning, execution status | Requirement confirmed, corrected, rejected, or scoped | `task-intake.md`, `traceability.md` |
-| `.forgekit/docs/task-board.md` | working | users, AI tools | as-needed | Compact task status, owner, next action, validation method, Source ID | Original task text, changelog, test logs, long plans | Task is created, blocked, reviewed, done, or dropped | `task-intake.md`, `work-log.md`, `changes/<id>/tasks.md` |
-| `.forgekit/docs/work-log.md` | working | users, AI tools | as-needed | Recent work window, handoff notes, validation/commit/push/blocker summaries | Full history warehouse, formal release notes, task board, secrets | Phase closure, validation, commit/push, blocker change, leader confirmation, daily summary, interrupted session recovery | `task-board.md`, `testing.md`, `changelog.md` |
-| `.forgekit/docs/changelog.md` | current | users, release reviewers | as-needed | User-visible changes, compatibility, migration notes | Internal work sequence, every commit, raw validation logs | Completed user-visible change or release note update | `work-log.md`, `ship.md` |
-| `.forgekit/docs/testing.md` | current | developers, QA, AI tools | as-needed | Current validation commands, test scope, manual verification checklist, known gaps | Every test run log, long failure history, screenshots | Test strategy or runnable validation command changes | `work-log.md`, `changes/<id>/verification.md` |
-| `.forgekit/docs/risk-register.md` | current | users, maintainers | as-needed | Open risks that still affect delivery, safety, compatibility, cost, or schedule | Closed risk history, every bug, generic concerns | New risk, changed likelihood/impact, mitigation or closure | `technical-debt.md`, `incident-review.md` |
-| `.forgekit/docs/project-plan.md` | current | users, maintainers | as-needed | Current project goal, non-goals, scope, landing conditions | Daily progress, version history, raw task source | Product direction or scope changes | `requirements.md`, `version-roadmap.md` |
-| `.forgekit/docs/architecture.md` | current | developers, maintainers | as-needed | Current architecture, module responsibilities, data flow, boundaries | Old designs, implementation diary, API details | Architecture, boundary, or major dependency changes | `api.md`, `database-design.md`, ADR |
-| `.forgekit/docs/local-toolchain.md` | reference | AI tools, developers | as-needed | Local build/test/lint/runtime facts | Install permission, credentials, unrelated environment notes | Toolchain detection or validation command changes | `.codex/commands.md` |
-| `.forgekit/docs/codex-next-work-order.md` | working | users, AI tools | as-needed | Next useful AI work order after init or handoff | Long roadmap, work log, task board replacement | Init, handoff, or user direction changes | `project-plan.md`, `task-board.md` |
-| `.forgekit/docs/implementation-plan.md` | triggered | developers, AI tools | no | Plan for large or cross-module work only | Small task status, current requirements | Large/cross-module/high-risk task is confirmed | `changes/<id>/tasks.md`, `exploration-report.md` |
-| `.forgekit/docs/exploration-report.md` | triggered | developers, AI tools | no | Read-only findings before large work | Final architecture, task status, release notes | Large/cross-module/high-risk exploration | `implementation-plan.md` |
-| `.forgekit/docs/defect-fix-plan.md` | triggered | developers, maintainers | no | Focused plan for a confirmed defect | General task board, unrelated risk history | Confirmed defect needs repair planning | `defect-review.md`, `task-board.md` |
-| `.forgekit/docs/defect-review.md` | triggered | developers, maintainers | no | Root cause and prevention for repeated or serious defects | Ordinary bug status | Serious/repeated defect review | `incident-review.md`, `risk-register.md` |
-| `.forgekit/docs/incident-review.md` | triggered | maintainers | no | Incident timeline, impact, root cause, follow-up | Normal bugs, daily logs | Incident or production-impacting failure | `risk-register.md`, `work-log.md` |
-| `.forgekit/docs/dependency-review.md` | triggered | developers, security | no | Dependency change rationale, risk, license/security notes | All package versions, install logs | Dependency add/remove/major upgrade | `threat-model.md`, `.codex/security.md` |
-| `.forgekit/docs/threat-model.md` | triggered | security, maintainers | no | Security-sensitive data flows, trust boundaries, threats, mitigations | Generic quality risks, credentials | Auth, permission, data exposure, secrets, external integration changes | `risk-register.md`, `.codex/security.md` |
-| `.forgekit/docs/release-pipeline.md` | triggered | release owners | no | Current release path, rollback, deployment checks | Changelog, task history | Release process or deployment path changes | `changelog.md`, `environment-matrix.md` |
-| `.forgekit/docs/quality-metrics.md` | triggered | maintainers | no | Selected quality indicators and review gates | Every test result, every defect | Quality metric or review gate changes | `testing.md`, `risk-register.md` |
-| `.forgekit/docs/technical-debt.md` | triggered | maintainers | no | Accepted debt with owner and revisit condition | All TODOs, closed risks | Debt is accepted or retired | `risk-register.md`, `task-board.md` |
-| `.forgekit/docs/traceability.md` | triggered | QA, maintainers | no | Requirement-task-test-defect mapping when needed | Original task text, long evidence | Regulated, high-risk, or user-requested traceability | `requirements.md`, `testing.md`, `task-board.md` |
-| `.forgekit/docs/loop-readiness.md` | triggered | users, AI tools | no | Whether a loop is safe to run | Loop runner config, daemon setup | Before loop design or operation | `loop-blueprint.md`, `loop-operations.md` |
-| `.forgekit/docs/loop-blueprint.md` | triggered | users, AI tools | no | Reviewable loop design | Automatic execution authorization | User asks for loop-like repeated work | `loop-readiness.md`, `work-log.md` |
-| `.forgekit/docs/loop-operations.md` | triggered | users, AI tools | no | Explicit dry-run, one-step, continue, stop/handoff protocol | Background runner, scheduler, automation code | User explicitly operates a loop | `loop-blueprint.md` |
-| `.forgekit/docs/maker-checker-protocol.md` | triggered | users, AI tools | no | Maker/Checker review protocol | Multi-agent scheduler or final human approval | Medium/high risk review separation | `changes/<id>/review.md` |
-| `.forgekit/docs/worktree-playbook.md` | triggered | users, AI tools | no | Manual worktree isolation guidance | Automatic worktree orchestration | User asks for parallel isolated work | `work-log.md` |
-| `.forgekit/changes/<id>/*` | triggered | developers, reviewers | no | One medium/high risk change process | Current-state truth, unrelated history | Medium/high risk change starts or closes | `document-lifecycle.md` |
-| `.forgekit/archive/*` | archive | auditors, maintainers | no | Historical evidence and old change material | Current truth, active change context | User asks for history/audit/regression/retro | `document-lifecycle.md` |
-| `.forgekit/*-report.md` | generated | users, AI tools | no | Tool output generated by scripts | Current facts or editable project docs | Script run creates/overwrites it | Relevant script docs |
-| `docs/**` business docs | reference | users, AI tools | as-needed | Existing business evidence when user allows or requests | ForgeKit governance templates by default | User explicitly asks to update business docs | `.forgekit/project-boundary.yml` |
+| `README.md` | core | 用户 | yes | 项目是什么、快速开始、基础用法 | 内部过程、长历史、任务流水 | 用户入口或启动方式变化 | `AGENTS.md`, `CLAUDE.md` |
+| `AGENTS.md` / `CLAUDE.md` | core | AI 工具 | yes | 简短启动顺序、边界规则、任务路由 | 长清单、模板正文、技术栈手册 | 启动顺序、写入边界或路由变化 | `.codex/rules.md`, skills |
+| `.forgekit/project-boundary.yml` | core | AI 工具、维护者 | yes | ForgeKitRoot、ProjectRoot、managed docs root、change root、写入策略 | 产品计划、架构、任务状态 | 目录布局或写入策略变化 | `AGENTS.md`, `CLAUDE.md` |
+| `.forgekit/docs/document-responsibility.md` | core | 用户、AI 工具 | yes | 文档职责、更新触发、事实归属 | 项目事实、任务日志、发布说明 | managed docs 职责变化 | `document-lifecycle.md` |
+| `.forgekit/docs/codebase-map.md` | core | AI 工具、维护者 | yes | 代码搜索入口、模块入口、关键命令、谨慎读取路径 | 完整架构、API 百科、长扫描历史 | 模块入口、命令或归属变化 | `architecture.md`, `api.md`, `local-toolchain.md` |
+| `.forgekit/docs/task-intake.md` | working | 用户、AI 工具 | as-needed | 任务派发原文、Source ID、责任拆分、时间窗口、人工确认状态 | 最终需求、任务状态、changelog、长分析 | 领导任务、微信任务、计划表格子、会议任务、手工记录 | `requirements.md`, `task-board.md`, `work-log.md` |
+| `.forgekit/docs/requirements.md` | current | 用户、产品、AI 工具 | as-needed | 已确认的需求事实、验收标准、范围边界、Source ID 引用 | 任务派发原文、长推理、执行状态 | 需求被确认、修正、拒绝或定界 | `task-intake.md`, `traceability.md` |
+| `.forgekit/docs/task-board.md` | working | 用户、AI 工具 | as-needed | 紧凑任务状态、负责人、下一步、验证方式、Source ID | 任务原文、changelog、测试流水、长计划 | 任务创建、阻塞、复查、完成或取消 | `task-intake.md`, `work-log.md`, `changes/<id>/tasks.md` |
+| `.forgekit/docs/work-log.md` | working | 用户、AI 工具 | as-needed | 近期工作窗口、交接记录、验证/提交/推送/阻塞摘要 | 全量历史仓库、正式发布说明、任务看板、敏感信息 | 阶段收口、验证完成、提交/推送、阻塞变化、领导确认、日报、中断恢复 | `task-board.md`, `testing.md`, `changelog.md` |
+| `.forgekit/docs/changelog.md` | current | 用户、发布复查者 | as-needed | 用户可见变化、兼容性、迁移提示 | 内部工作顺序、每次提交、原始验证日志 | 用户可见变化完成或发布说明更新 | `work-log.md`, `ship.md` |
+| `.forgekit/docs/testing.md` | current | 开发者、测试、AI 工具 | as-needed | 当前验证命令、测试范围、人工验证清单、已知缺口 | 每次测试运行日志、长失败历史、截图堆积 | 测试策略或可运行验证命令变化 | `work-log.md`, `changes/<id>/verification.md` |
+| `.forgekit/docs/risk-register.md` | current | 用户、维护者 | as-needed | 仍影响交付、安全、兼容性、成本或排期的开放风险 | 已关闭风险长历史、所有 bug、泛泛担忧 | 新风险、概率/影响变化、缓解或关闭 | `technical-debt.md`, `incident-review.md` |
+| `.forgekit/docs/project-plan.md` | current | 用户、维护者 | as-needed | 当前项目目标、非目标、范围、落地条件 | 日常进展、版本历史、任务原文 | 产品方向或范围变化 | `requirements.md`, `version-roadmap.md` |
+| `.forgekit/docs/architecture.md` | current | 开发者、维护者 | as-needed | 当前架构、模块职责、数据流、边界 | 旧设计、实现日记、API 细节 | 架构、边界或主要依赖变化 | `api.md`, `database-design.md`, ADR |
+| `.forgekit/docs/local-toolchain.md` | reference | AI 工具、开发者 | as-needed | 本地构建/测试/lint/运行事实 | 安装许可、凭据、无关环境记录 | 工具链探测或验证命令变化 | `.codex/commands.md` |
+| `.forgekit/docs/codex-next-work-order.md` | working | 用户、AI 工具 | as-needed | 初始化或交接后的下一步 AI 工作单 | 长路线图、工作日志、任务看板替代品 | 初始化、交接或用户方向变化 | `project-plan.md`, `task-board.md` |
+| `.forgekit/docs/implementation-plan.md` | triggered | 开发者、AI 工具 | no | 大型或跨模块工作的实施计划 | 小任务状态、当前需求 | 大型/跨模块/高风险任务确认后 | `changes/<id>/tasks.md`, `exploration-report.md` |
+| `.forgekit/docs/exploration-report.md` | triggered | 开发者、AI 工具 | no | 大型工作前的只读调研发现 | 最终架构、任务状态、发布说明 | 大型/跨模块/高风险调研 | `implementation-plan.md` |
+| `.forgekit/docs/defect-fix-plan.md` | triggered | 开发者、维护者 | no | 已确认缺陷的修复计划 | 通用任务看板、无关风险历史 | 缺陷需要单独修复计划 | `defect-review.md`, `task-board.md` |
+| `.forgekit/docs/defect-review.md` | triggered | 开发者、维护者 | no | 严重或重复缺陷的根因和预防 | 普通 bug 状态 | 严重/重复缺陷复查 | `incident-review.md`, `risk-register.md` |
+| `.forgekit/docs/incident-review.md` | triggered | 维护者 | no | 事故时间线、影响、根因、后续动作 | 普通 bug、日常日志 | 事故或生产影响故障 | `risk-register.md`, `work-log.md` |
+| `.forgekit/docs/dependency-review.md` | triggered | 开发者、安全 | no | 依赖变更原因、风险、许可证/安全说明 | 所有包版本、安装日志 | 新增/删除/大版本升级依赖 | `threat-model.md`, `.codex/security.md` |
+| `.forgekit/docs/threat-model.md` | triggered | 安全、维护者 | no | 安全敏感数据流、信任边界、威胁、缓解 | 泛质量风险、凭据 | 鉴权、权限、数据暴露、密钥、外部集成变化 | `risk-register.md`, `.codex/security.md` |
+| `.forgekit/docs/release-pipeline.md` | triggered | 发布负责人 | no | 当前发布路径、回滚、部署检查 | changelog、任务历史 | 发布流程或部署路径变化 | `changelog.md`, `environment-matrix.md` |
+| `.forgekit/docs/quality-metrics.md` | triggered | 维护者 | no | 选定质量指标和复查门槛 | 每次测试结果、每个缺陷 | 质量指标或复查门槛变化 | `testing.md`, `risk-register.md` |
+| `.forgekit/docs/technical-debt.md` | triggered | 维护者 | no | 已接受的技术债、负责人、复查条件 | 所有 TODO、已关闭风险 | 技术债被接受或退休 | `risk-register.md`, `task-board.md` |
+| `.forgekit/docs/traceability.md` | triggered | 测试、维护者 | no | 需要时的需求-任务-测试-缺陷映射 | 任务原文、长证据 | 受监管、高风险或用户要求追踪 | `requirements.md`, `testing.md`, `task-board.md` |
+| `.forgekit/docs/loop-readiness.md` | triggered | 用户、AI 工具 | no | 是否具备安全运行 loop 的条件 | loop runner 配置、daemon 设置 | loop 设计或操作前 | `loop-blueprint.md`, `loop-operations.md` |
+| `.forgekit/docs/loop-blueprint.md` | triggered | 用户、AI 工具 | no | 可审查的 loop 设计 | 自动执行授权 | 用户要求类似循环的重复工作 | `loop-readiness.md`, `work-log.md` |
+| `.forgekit/docs/loop-operations.md` | triggered | 用户、AI 工具 | no | 明确触发的 dry-run、one-step、continue、stop/handoff 协议 | 后台 runner、调度器、自动化代码 | 用户明确操作 loop | `loop-blueprint.md` |
+| `.forgekit/docs/maker-checker-protocol.md` | triggered | 用户、AI 工具 | no | Maker/Checker 复查协议 | 多 agent 调度器或最终人工批准 | 中高风险复查分离 | `changes/<id>/review.md` |
+| `.forgekit/docs/worktree-playbook.md` | triggered | 用户、AI 工具 | no | 手动 worktree 隔离指南 | 自动 worktree 编排 | 用户要求并行隔离工作 | `work-log.md` |
+| `.forgekit/changes/<id>/*` | triggered | 开发者、复查者 | no | 单次中高风险变更过程 | 当前态事实、无关历史 | 中高风险变更开始或收口 | `document-lifecycle.md` |
+| `.forgekit/archive/*` | archive | 审计者、维护者 | no | 历史证据和旧变更材料 | 当前事实、活跃变更上下文 | 用户要求历史、审计、回归、复盘 | `document-lifecycle.md` |
+| `.forgekit/*-report.md` | generated | 用户、AI 工具 | no | 脚本生成的报告 | 当前事实或可编辑项目文档 | 脚本运行生成或覆盖 | 对应脚本文档 |
+| `docs/**` 业务文档 | reference | 用户、AI 工具 | as-needed | 用户允许或要求时读取的业务证据 | 默认写入 ForgeKit 治理模板 | 用户明确要求更新业务文档 | `.forgekit/project-boundary.yml` |
 
-Before writing:
+写入前先做 5 步判断：
 
-1. Decide the content type: source record, requirement fact, task status, validation method, work sequence, release change, risk, design decision, or history.
-2. Write the fact once in the responsible document.
-3. Add cross-references instead of copying the same paragraph into multiple docs.
-4. Keep user-facing docs readable: short conclusion first, then only the evidence needed for review.
-5. Do not read or update triggered docs unless the trigger actually happened.
+1. 判断内容类型：任务来源、需求事实、任务状态、验证方式、工作顺序、发布变化、风险、设计决策还是历史。
+2. 只把事实写入一个负责文档。
+3. 相关文档只放链接或 Source ID，不复制同一段内容。
+4. 给用户看的文档先写结论，再写必要证据，避免模板腔和长过程自述。
+5. 触发式文档只有事件真的发生时才读取或更新。

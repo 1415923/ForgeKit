@@ -459,9 +459,9 @@ def assert_task_intake(root, intake_path, task_board_path, requirements_path, ch
     claude = (root / claude_path).read_text(encoding="utf-8")
     rules = (root / rules_path).read_text(encoding="utf-8")
     intake_required = [
-        "## Purpose",
-        "## When to Use",
-        "## Source Record Template",
+        "## 用途",
+        "## 什么时候使用",
+        "## 来源记录模板",
         "Source ID",
         "Source Type: leader-plan-cell | wechat | meeting | document | manual-note",
         "Received At",
@@ -469,14 +469,14 @@ def assert_task_intake(root, intake_path, task_board_path, requirements_path, ch
         "Original Location",
         "Human Review: pending | confirmed | corrected | rejected",
         "Confidentiality: normal | sensitive-redacted",
-        "Original Text",
-        "Responsibility Split",
-        "Time Window",
-        "AI Interpretation",
-        "Derived Tasks",
-        "Open Questions",
-        "Human Review Status",
-        "Redaction Rules",
+        "原文",
+        "责任拆分",
+        "时间窗口",
+        "AI 理解",
+        "拆解任务",
+        "待确认问题",
+        "人工确认状态",
+        "脱敏规则",
     ]
     missing_intake = [item for item in intake_required if item not in intake]
     if missing_intake:
@@ -489,8 +489,8 @@ def assert_task_intake(root, intake_path, task_board_path, requirements_path, ch
         fail("changelog.md must not imply it replaces task-intake.md")
     entry_required = [
         ".forgekit/docs/task-intake.md",
-        "Preserve redacted original text before AI interpretation and task splitting",
-        "derived tasks must cite Source ID",
+        "先保留脱敏原文",
+        "拆解任务必须引用 Source ID",
         "Human Review: pending",
     ]
     for label, text in [("AGENTS.md", agents), ("CLAUDE.md", claude)]:
@@ -517,14 +517,14 @@ def assert_managed_docs_responsibility_v2(root, responsibility_path, codebase_pa
     rules = (root / rules_path).read_text(encoding="utf-8")
 
     responsibility_required = [
-        "Managed Docs Responsibility Matrix v2",
-        "Document Class",
-        "Audience",
-        "Default Read",
-        "Write Here",
-        "Do Not Write Here",
-        "Update Trigger",
-        "Related Docs",
+        "Managed Docs 职责矩阵 v2",
+        "文档分类",
+        "读者",
+        "默认读取",
+        "写什么",
+        "不写什么",
+        "更新触发",
+        "相关文档",
         "core",
         "current",
         "working",
@@ -550,10 +550,10 @@ def assert_managed_docs_responsibility_v2(root, responsibility_path, codebase_pa
         fail("codebase-map.md missing responsibility-v2 boundaries:\n" + "\n".join(missing_codebase))
 
     entry_required = [
-        "Do not read `.forgekit/docs/**` by default",
+        "默认不要读取全部 `.forgekit/docs/**`",
         "document-responsibility.md",
-        "Do not write the same fact into multiple docs",
-        "Triggered docs are updated only when their event happens",
+        "不要把同一事实重复写进多个文档",
+        "触发式文档只有对应事件发生时才更新",
     ]
     for label, text in [("AGENTS.md", agents), ("CLAUDE.md", claude)]:
         missing_entry = [item for item in entry_required if item not in text]
