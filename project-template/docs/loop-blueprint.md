@@ -17,8 +17,15 @@ RequiresUserConfirmation: yes
 WritebackTarget:
 StopOnUnclearScope: yes
 StopOnValidationFailure: yes
+WorktreeStrategy: none | optional | required
+WorktreePath:
+WorktreeBranch:
+IsolationReason:
+CleanupRule:
 
 These operation fields are review fields for `.forgekit/docs/loop-operations.md`. They are not automatic runner configuration.
+
+Worktree fields are design fields for `.forgekit/docs/worktree-playbook.md`. They do not authorize automatic worktree creation, agent launch, merge, push, PR creation, branch deletion, or cleanup.
 
 ## Trigger
 
@@ -146,3 +153,15 @@ Do not leave loop results only in chat when they are needed for handoff, validat
 If the loop involves code changes, define how Maker phase and Checker phase are separated. Use `.forgekit/docs/maker-checker-protocol.md` for responsibilities, evidence fields, and review outputs.
 
 This section is not automatic sub-agent configuration. It does not authorize multi-agent scheduling, worktree automation, or automatic checker execution.
+
+## Worktree Strategy
+
+Use worktrees only when isolation is explicitly needed for parallel tasks, experiments, or Maker / Checker separation.
+
+WorktreeStrategy: none | optional | required
+WorktreePath:
+WorktreeBranch:
+IsolationReason:
+CleanupRule:
+
+These fields describe reviewable isolation intent. They are not automatic worktree creation, scheduler, agent orchestration, merge, push, PR, branch deletion, or cleanup configuration.

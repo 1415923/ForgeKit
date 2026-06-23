@@ -573,7 +573,7 @@
       if (mode === 'Enterprise') {
         return 'Standard 文档，加 ADR/RFC、风险登记、变更影响评估、环境矩阵、发布流水线、代码所有权、安全治理、质量指标';
       }
-      return '.forgekit/docs/project-plan.md、.forgekit/docs/tech-decisions.md、.forgekit/docs/version-roadmap.md、.forgekit/docs/requirements.md、.forgekit/docs/task-board.md、.forgekit/docs/testing.md、.forgekit/docs/loop-readiness.md、.forgekit/docs/loop-blueprint.md、.forgekit/docs/loop-operations.md、.forgekit/docs/maker-checker-protocol.md';
+      return '.forgekit/docs/project-plan.md、.forgekit/docs/tech-decisions.md、.forgekit/docs/version-roadmap.md、.forgekit/docs/requirements.md、.forgekit/docs/task-board.md、.forgekit/docs/testing.md、.forgekit/docs/loop-readiness.md、.forgekit/docs/loop-blueprint.md、.forgekit/docs/loop-operations.md、.forgekit/docs/maker-checker-protocol.md、.forgekit/docs/worktree-playbook.md';
     }
 
     function stackStartupHints() {
@@ -615,6 +615,7 @@
         '   .forgekit/docs/loop-readiness.md、.forgekit/docs/loop-blueprint.md（仅作为 loop 评估和设计图纸，不是自动执行授权）',
         '   .forgekit/docs/loop-operations.md（仅作为显式触发的 loop 操作协议，不是自动 runner）',
         '   .forgekit/docs/maker-checker-protocol.md（仅作为 Maker / Checker 审查协议，不是自动多 agent 调度）',
+        '   .forgekit/docs/worktree-playbook.md（仅作为手动 worktree 隔离指南，不是自动调度器）',
         '   .codex/project.md、.codex/scope.md、.codex/commands.md',
         '',
         '3. 只按需读取技术栈：',

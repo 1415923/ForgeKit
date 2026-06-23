@@ -50,6 +50,12 @@ Single-agent use is still a process separation. It is not proof of independence,
 
 Multiple agents, sub-agents, or human reviewers may use the same protocol, but they are optional implementation choices. ForgeKit v0.26 does not generate sub-agent configuration, runner code, worktree automation, or automatic review dispatch.
 
+## Worktree Isolation
+
+Maker and Checker may use Git worktrees for isolation when the user explicitly asks or confirms the plan. Worktrees can help separate parallel tasks, experiments, or clean review views.
+
+ForgeKit v0.28 does not require worktrees and does not automatically create them. Before using a worktree, confirm a clean source working tree, base branch, worktree path, branch name, allowed paths, validation command, and cleanup plan. Record the outcome in the work log or change review.
+
 ## Evidence Location
 
 For medium or high risk changes, record Maker and Checker evidence in:

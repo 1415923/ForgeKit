@@ -314,6 +314,7 @@ function Test-AIEngineeringLoop {
     Test-RequiredPath "project-template\docs\loop-blueprint.md"
     Test-RequiredPath "project-template\docs\loop-operations.md"
     Test-RequiredPath "project-template\docs\maker-checker-protocol.md"
+    Test-RequiredPath "project-template\docs\worktree-playbook.md"
     Test-RequiredPattern "project-template\docs\loop-readiness.md" "Readiness Status: not-ready | partial | ready" "Loop readiness status"
     Test-RequiredPattern "project-template\docs\loop-readiness.md" "ForgeKit Loop Five" "Loop readiness five mapping"
     Test-RequiredPattern "project-template\docs\loop-blueprint.md" "not authorization to execute automatically" "Loop blueprint authorization boundary"
@@ -339,6 +340,13 @@ function Test-AIEngineeringLoop {
     Test-RequiredPattern "project-template\docs\loop-blueprint.md" "StopOnUnclearScope: yes" "Loop blueprint unclear scope stop"
     Test-RequiredPattern "project-template\docs\loop-blueprint.md" "StopOnValidationFailure: yes" "Loop blueprint validation stop"
     Test-RequiredPattern "project-template\docs\loop-blueprint.md" "These operation fields are review fields" "Loop blueprint operation fields boundary"
+    Test-RequiredPattern "project-template\docs\loop-blueprint.md" "## Worktree Strategy" "Loop blueprint worktree strategy section"
+    Test-RequiredPattern "project-template\docs\loop-blueprint.md" "WorktreeStrategy: none | optional | required" "Loop blueprint worktree strategy"
+    Test-RequiredPattern "project-template\docs\loop-blueprint.md" "WorktreePath:" "Loop blueprint worktree path"
+    Test-RequiredPattern "project-template\docs\loop-blueprint.md" "WorktreeBranch:" "Loop blueprint worktree branch"
+    Test-RequiredPattern "project-template\docs\loop-blueprint.md" "IsolationReason:" "Loop blueprint isolation reason"
+    Test-RequiredPattern "project-template\docs\loop-blueprint.md" "CleanupRule:" "Loop blueprint cleanup rule"
+    Test-RequiredPattern "project-template\docs\loop-blueprint.md" "These fields describe reviewable isolation intent." "Loop blueprint worktree no automation boundary"
     Test-RequiredPattern "project-template\docs\loop-operations.md" "Loop operations are off by default." "Loop operations default off"
     Test-RequiredPattern "project-template\docs\loop-operations.md" "not an automatic loop runner" "Loop operations no runner boundary"
     Test-RequiredPattern "project-template\docs\loop-operations.md" "## Loop Dry Run" "Loop operations dry run"
@@ -356,6 +364,21 @@ function Test-AIEngineeringLoop {
     Test-RequiredPattern "project-template\docs\maker-checker-protocol.md" "Checker phase" "Checker phase section"
     Test-RequiredPattern "project-template\docs\maker-checker-protocol.md" "Single Agent Use" "Single agent maker checker rule"
     Test-RequiredPattern "project-template\docs\maker-checker-protocol.md" "ForgeKit v0.26 does not generate sub-agent configuration, runner code, worktree automation, or automatic review dispatch." "Maker checker no automation boundary"
+    Test-RequiredPattern "project-template\docs\maker-checker-protocol.md" "## Worktree Isolation" "Maker checker worktree isolation"
+    Test-RequiredPattern "project-template\docs\maker-checker-protocol.md" "ForgeKit v0.28 does not require worktrees and does not automatically create them." "Maker checker no automatic worktree"
+    Test-RequiredPattern "project-template\docs\worktree-playbook.md" "# Worktree Playbook" "Worktree playbook title"
+    Test-RequiredPattern "project-template\docs\worktree-playbook.md" "## When to Use" "Worktree playbook when to use"
+    Test-RequiredPattern "project-template\docs\worktree-playbook.md" "## When Not to Use" "Worktree playbook when not to use"
+    Test-RequiredPattern "project-template\docs\worktree-playbook.md" "## Naming Convention" "Worktree playbook naming"
+    Test-RequiredPattern "project-template\docs\worktree-playbook.md" "## Worktree Creation Checklist" "Worktree playbook checklist"
+    Test-RequiredPattern "project-template\docs\worktree-playbook.md" "## Recommended Commands" "Worktree playbook commands"
+    Test-RequiredPattern "project-template\docs\worktree-playbook.md" "## Maker / Checker Usage" "Worktree playbook maker checker"
+    Test-RequiredPattern "project-template\docs\worktree-playbook.md" "## Cleanup" "Worktree playbook cleanup"
+    Test-RequiredPattern "project-template\docs\worktree-playbook.md" "## Safety Rules" "Worktree playbook safety"
+    Test-RequiredPattern "project-template\docs\worktree-playbook.md" "not a worktree runner" "Worktree playbook no runner"
+    Test-RequiredPattern "project-template\docs\worktree-playbook.md" "Do not create a worktree unless the user explicitly asks." "Worktree explicit user request"
+    Test-RequiredPattern "project-template\docs\worktree-playbook.md" "git status --short" "Worktree clean status command"
+    Test-RequiredPattern "project-template\docs\worktree-playbook.md" "Do not automatically merge, push, delete branches, remove worktrees, create PRs, or start agents." "Worktree no automation"
     Test-RequiredPattern "project-template\changes\_template\review.md" "## Maker Summary" "Review maker summary section"
     Test-RequiredPattern "project-template\changes\_template\review.md" "MakerStatus: ready-for-check | blocked | partial" "Review maker status"
     Test-RequiredPattern "project-template\changes\_template\review.md" "FilesChanged:" "Review maker files changed"
@@ -388,16 +411,30 @@ function Test-AIEngineeringLoop {
     Test-RequiredPattern "project-template\AGENTS.md" "Checker should not expand scope or implement new features unless the user explicitly asks" "AGENTS checker scope rule"
     Test-RequiredPattern "project-template\CLAUDE.md" "Checker should not expand scope or implement new features unless the user explicitly asks" "CLAUDE checker scope rule"
     Test-RequiredPattern "project-template\.codex\rules.md" "Checker 不应扩大需求范围，不应顺手实现新功能" "Rules checker scope rule"
+    Test-RequiredPattern "project-template\AGENTS.md" "Do not create a worktree unless the user explicitly asks." "AGENTS worktree explicit rule"
+    Test-RequiredPattern "project-template\CLAUDE.md" "Do not create a worktree unless the user explicitly asks." "CLAUDE worktree explicit rule"
+    Test-RequiredPattern "project-template\.codex\rules.md" "不得自行创建 worktree" "Rules worktree explicit rule"
+    Test-RequiredPattern "project-template\AGENTS.md" "Before creating a worktree, confirm ``git status --short`` is clean" "AGENTS worktree clean status rule"
+    Test-RequiredPattern "project-template\CLAUDE.md" "Before creating a worktree, confirm ``git status --short`` is clean" "CLAUDE worktree clean status rule"
+    Test-RequiredPattern "project-template\.codex\rules.md" "git status --short" "Rules worktree clean status rule"
+    Test-RequiredPattern "project-template\AGENTS.md" "Do not automatically merge, push, delete branches, remove worktrees, create PRs, start agents, or schedule worktree tasks." "AGENTS worktree no automation rule"
+    Test-RequiredPattern "project-template\CLAUDE.md" "Do not automatically merge, push, delete branches, remove worktrees, create PRs, start agents, or schedule worktree tasks." "CLAUDE worktree no automation rule"
+    Test-RequiredPattern "project-template\.codex\rules.md" "不得自动 merge、push、delete branch、remove worktree、创建 PR、启动 agent 或调度 worktree 任务" "Rules worktree no automation rule"
     Test-RequiredPattern "project-template\.forgekit\docs\document-responsibility.md" "maker-checker-protocol.md" "Document responsibility maker checker"
     Test-RequiredPattern "project-template\.forgekit\docs\document-responsibility.md" "loop-operations.md" "Document responsibility loop operations"
+    Test-RequiredPattern "project-template\.forgekit\docs\document-responsibility.md" "worktree-playbook.md" "Document responsibility worktree playbook"
     Test-RequiredPattern "project-template\docs\codebase-map.md" "maker-checker-protocol.md" "Codebase map maker checker"
     Test-RequiredPattern "project-template\docs\codebase-map.md" "loop-operations.md" "Codebase map loop operations"
+    Test-RequiredPattern "project-template\docs\codebase-map.md" "worktree-playbook.md" "Codebase map worktree playbook"
     Test-RequiredPattern "README.md" "Maker / Checker Protocol" "Root README maker checker release"
     Test-RequiredPattern "README.en.md" "Maker / Checker Protocol" "English README maker checker release"
     Test-RequiredPattern "README.md" "Optional Loop Operation Mode" "Root README loop operations release"
     Test-RequiredPattern "README.en.md" "Optional Loop Operation Mode" "English README loop operations release"
+    Test-RequiredPattern "README.md" "Worktree Playbook" "Root README worktree release"
+    Test-RequiredPattern "README.en.md" "Worktree Playbook" "English README worktree release"
     Test-RequiredPattern "usage.html" "maker-checker-protocol.md" "Usage maker checker docs"
     Test-RequiredPattern "usage.html" "loop-operations.md" "Usage loop operations docs"
+    Test-RequiredPattern "usage.html" "worktree-playbook.md" "Usage worktree playbook docs"
     if (Test-Path -LiteralPath (Join-Path $repoRoot "scripts\maker-checker-runner.py")) {
         Add-Error "v0.26 must not add automatic maker/checker runner"
     }
@@ -417,10 +454,17 @@ function Test-AIEngineeringLoop {
         "project-template\scripts\loop-daemon.py",
         "scripts\loop-scheduler.py",
         "project-template\scripts\loop-scheduler.py",
-        "project-template\.codex\agents\loop-runner.md"
+        "project-template\.codex\agents\loop-runner.md",
+        "scripts\worktree-runner.py",
+        "project-template\scripts\worktree-runner.py",
+        "scripts\worktree-scheduler.py",
+        "project-template\scripts\worktree-scheduler.py",
+        "scripts\worktree-agent.py",
+        "project-template\scripts\worktree-agent.py",
+        "project-template\.codex\agents\worktree-runner.md"
     )) {
         if (Test-Path -LiteralPath (Join-Path $repoRoot $forbiddenLoopPath)) {
-            Add-Error "v0.27 must not add loop runner, daemon, scheduler, or sub-agent config: $forbiddenLoopPath"
+            Add-Error "v0.28 must not add loop/worktree runner, daemon, scheduler, or sub-agent config: $forbiddenLoopPath"
         }
     }
     Test-RequiredPattern "project-template\scripts\check-doc-sync.ps1" "Status: metadata" "PowerShell change status check"
@@ -434,7 +478,7 @@ function Test-TemplateManifest {
     $manifestPath = Join-Path $repoRoot "project-template\.forgekit\template-manifest.json"
     if (Test-Path -LiteralPath $manifestPath) {
         $manifest = Get-Content -LiteralPath $manifestPath -Raw | ConvertFrom-Json
-        if ($manifest.template_version -ne "0.27.0") {
+        if ($manifest.template_version -ne "0.28.0") {
             Add-Error "Unexpected template manifest version: $($manifest.template_version)"
         }
         $sources = @($manifest.files | ForEach-Object { $_.source_path })
@@ -773,7 +817,7 @@ function Test-PluginDistribution {
     if ($codexPluginJson.name -ne "forgekit") {
         Add-Error "Unexpected Codex plugin name in root plugin.json: $($codexPluginJson.name)"
     }
-    if ($codexPluginJson.version -ne "0.27.0") {
+    if ($codexPluginJson.version -ne "0.28.0") {
         Add-Error "Unexpected Codex plugin version in root plugin.json: $($codexPluginJson.version)"
     }
     if ($codexPluginJson.skills -ne "./skills/") {
@@ -784,7 +828,7 @@ function Test-PluginDistribution {
     if ($claudePluginJson.name -ne "forgekit") {
         Add-Error "Unexpected Claude plugin name in root plugin.json: $($claudePluginJson.name)"
     }
-    if ($claudePluginJson.version -ne "0.27.0") {
+    if ($claudePluginJson.version -ne "0.28.0") {
         Add-Error "Unexpected Claude plugin version in root plugin.json: $($claudePluginJson.version)"
     }
     $claudeSkills = @($claudePluginJson.skills)

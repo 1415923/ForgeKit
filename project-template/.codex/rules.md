@@ -39,6 +39,7 @@
 - `.forgekit/docs/loop-readiness.md` 和 `.forgekit/docs/loop-blueprint.md` 是可审查的 loop 设计文档，不是自动执行授权。
 - `.forgekit/docs/loop-operations.md` 是显式触发的操作协议，不是自动 runner 或无人值守 loop 授权。
 - `.forgekit/docs/maker-checker-protocol.md` 是审查协议，不是多 agent 调度或自动 checker 授权。
+- `.forgekit/docs/worktree-playbook.md` 是手动隔离指南，不是自动 worktree 调度或 agent 编排。
 - loop 必须有状态文件、验证命令、停止条件和人工升级入口。
 - loop 不默认修改 business docs、secrets、deploy 或 CI。
 - 不得自行进入 loop mode；只有用户明确要求 loop dry-run、one-step、continue 或 stop/handoff 时才按 loop operation 规则执行。
@@ -52,6 +53,10 @@
 - Checker phase 应优先复核 diff、验证结果、风险和文档同步，并输出 `pass`、`needs-fix` 或 `manual-review`。
 - Checker 不应扩大需求范围，不应顺手实现新功能，除非用户明确要求。
 - 对公司或业务项目，Checker 必须检查是否误写敏感信息、业务 docs、secrets、deploy 或 CI。
+- 不得自行创建 worktree，除非用户明确要求。
+- 创建 worktree 前必须确认 `git status --short` 干净，并说明 base branch、worktree path、branch name、allowed paths、validation command 和 cleanup plan。
+- 不得自动 merge、push、delete branch、remove worktree、创建 PR、启动 agent 或调度 worktree 任务。
+- worktree 结果必须写回 `.forgekit/docs/work-log.md` 或 scoped change review。
 - 如果用户要求把 ForgeKit 事实合并进业务 `docs/`，先列出目标文件、写入原因、与现有内容的关系和覆盖风险，等用户确认后再写。
 - `src/**`、`tests/**`、`scripts/**` 属于 task_scoped：任务开始前确认范围，确认后可在本任务范围内修改。
 

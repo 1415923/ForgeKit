@@ -96,6 +96,7 @@ Key files:
 | `.forgekit/docs/loop-blueprint.md` | Reviewable loop design blueprint, not automatic execution authorization |
 | `.forgekit/docs/loop-operations.md` | Explicitly triggered loop dry-run, one-step, continue, and stop/handoff operation protocol, not an automatic runner |
 | `.forgekit/docs/maker-checker-protocol.md` | Evidence protocol for Maker implementation and Checker review, not an automatic multi-agent system |
+| `.forgekit/docs/worktree-playbook.md` | Manual worktree isolation guide; no automatic creation, scheduling, merge, push, or PR |
 | `.forgekit/changes/_template/` | proposal, design, tasks, verification, review, ship, and retro templates |
 | `.codex/commands.md` | Project-specific commands |
 | `.agents/skills/` | Self-contained project skills |
@@ -121,6 +122,8 @@ Loop Readiness / Loop Blueprint provides managed docs templates and short entry 
 Optional Loop Operation Mode defines only explicitly triggered dry-run, one-step, continue, and stop/handoff protocols. Loop operation is off by default; ForgeKit does not provide background automation, unattended runners, or continuous looping.
 
 Maker / Checker Protocol defines evidence separation for medium/high-risk code changes: Maker implements and marks ready for check; Checker reviews diff, validation, risks, and document sync, then recommends pass / needs-fix / manual-review. It is not an automatic multi-agent system.
+
+Worktree Playbook provides only manual worktree isolation guidance for parallel tasks, experiment branches, and AI multi-session collaboration. ForgeKit does not automatically create worktrees, start agents, merge, push, or create PRs.
 
 The AI Engineering Loop scales artifacts by risk:
 
@@ -259,6 +262,7 @@ ForgeKit can coexist with ECC: ECC enhances the AI tool; ForgeKit constrains the
 
 | Version | User-facing change |
 | --- | --- |
+| `0.28.0` | Worktree Playbook: adds manual worktree isolation guidance and short entry rules without automatic worktree scheduling. |
 | `0.27.0` | Optional Loop Operation Mode: adds explicit loop dry-run / one-step / continue / stop-handoff protocols without an automatic runner. |
 | `0.26.0` | Maker / Checker Protocol: adds a managed docs template and review evidence fields to separate implementation and review without automatic multi-agent scheduling. |
 | `0.25.0` | Loop Readiness / Loop Blueprint: adds managed docs templates and short entry rules for reviewing loop suitability and design, without an automatic runner. |

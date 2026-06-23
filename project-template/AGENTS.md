@@ -68,6 +68,7 @@ When a task names a ForgeKit skill, read the project-local `.agents/skills/<skil
 - Treat `.forgekit/docs/loop-readiness.md` and `.forgekit/docs/loop-blueprint.md` as reviewable loop design docs, not automatic execution authorization.
 - Treat `.forgekit/docs/loop-operations.md` as an explicit operation protocol, not an automatic runner or unattended loop authorization.
 - Treat `.forgekit/docs/maker-checker-protocol.md` as a review protocol, not multi-agent scheduling or automatic checker authorization.
+- Treat `.forgekit/docs/worktree-playbook.md` as a manual isolation guide, not automatic worktree scheduling or agent orchestration.
 - A loop must have a state file, validation command, stop condition, and human escalation path before it runs.
 - A loop must not modify business docs, secrets, deploy files, or CI by default.
 - Do not enter loop mode unless the user explicitly asks for loop dry-run, one-step, continue, or stop/handoff.
@@ -81,6 +82,10 @@ When a task names a ForgeKit skill, read the project-local `.agents/skills/<skil
 - Checker phase should review diff, validation, risks, and document sync; it should output `pass`, `needs-fix`, or `manual-review`.
 - Checker should not expand scope or implement new features unless the user explicitly asks.
 - For company or business projects, Checker must check for accidental writes to sensitive information, business docs, secrets, deploy files, and CI.
+- Do not create a worktree unless the user explicitly asks.
+- Before creating a worktree, confirm `git status --short` is clean and state base branch, worktree path, branch name, allowed paths, validation command, and cleanup plan.
+- Do not automatically merge, push, delete branches, remove worktrees, create PRs, start agents, or schedule worktree tasks.
+- Worktree results must be written to `.forgekit/docs/work-log.md` or the scoped change review.
 - Do not install tools or start services just because `.forgekit/docs/local-toolchain.md` has unknown values; ask first.
 - `scripts/detect-local-toolchain.ps1` and `scripts/run-harness-check.ps1` are read-only helpers; do not treat their output as permission to install or change anything.
 - Use `.codex/automation-decision.md` to decide whether repeated work belongs in a skill, command, hook, script, plugin, MCP, or documentation.

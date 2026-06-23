@@ -17,6 +17,7 @@
 | Loop Blueprint | `.forgekit/docs/loop-blueprint.md` | 定义可审查的 loop 设计图纸，不是自动执行授权 | 待补充 |
 | Loop Operations | `.forgekit/docs/loop-operations.md` | 定义显式触发的 loop dry-run、one-step、continue、stop/handoff 操作协议，不是自动执行器 | 待补充 |
 | Maker / Checker Protocol | `.forgekit/docs/maker-checker-protocol.md` | 定义 Maker 写代码、Checker 独立复核的证据和输出协议，不是自动调度器 | 待补充 |
+| Worktree Playbook | `.forgekit/docs/worktree-playbook.md` | 定义手动 worktree 并行隔离、命名、创建检查、Maker/Checker 用法和清理规则，不是自动调度器 | 待补充 |
 
 ## 关键模块
 
@@ -64,6 +65,8 @@ Loop 设计记录在 `.forgekit/docs/loop-readiness.md` 和 `.forgekit/docs/loop
 Loop 操作协议记录在 `.forgekit/docs/loop-operations.md`。它用于用户显式触发的 dry-run、one-step、continue、stop/handoff；它不是自动 runner、daemon、cron、connector、自动 PR、多 agent 调度、worktree 自动化或无人值守连续循环配置。
 
 Maker / Checker 协议记录在 `.forgekit/docs/maker-checker-protocol.md`。它用于中高风险代码变更的实现证据和复核证据分离；它不是自动 checker runner、子 agent 配置、多 agent 调度器或用户最终批准。
+
+Worktree 使用规范记录在 `.forgekit/docs/worktree-playbook.md`。它用于并行任务、实验分支和 AI 多会话协作的手动隔离；它不是自动 worktree runner、scheduler、agent orchestration、merge、push 或 PR 配置。
 
 ## 忽略和谨慎读取
 

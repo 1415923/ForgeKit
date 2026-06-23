@@ -54,6 +54,7 @@ REQUIRED_REPO_PATHS = [
     "project-template/docs/loop-blueprint.md",
     "project-template/docs/loop-operations.md",
     "project-template/docs/maker-checker-protocol.md",
+    "project-template/docs/worktree-playbook.md",
     "project-template/docs/version-roadmap.md",
     ".codex-plugin/plugin.json",
     ".claude-plugin/plugin.json",
@@ -75,6 +76,7 @@ REQUIRED_GENERATED_PATHS = [
     ".forgekit/docs/loop-blueprint.md",
     ".forgekit/docs/loop-operations.md",
     ".forgekit/docs/maker-checker-protocol.md",
+    ".forgekit/docs/worktree-playbook.md",
     ".forgekit/docs/version-roadmap.md",
     ".forgekit/docs/changelog.md",
     "governance/ai-engineering-loop.md",
@@ -220,6 +222,12 @@ def assert_loop_docs(root, readiness_path, blueprint_path):
         "WritebackTarget:",
         "StopOnUnclearScope: yes",
         "StopOnValidationFailure: yes",
+        "WorktreeStrategy: none | optional | required",
+        "WorktreePath:",
+        "WorktreeBranch:",
+        "IsolationReason:",
+        "CleanupRule:",
+        "Worktree fields are design fields",
         "These operation fields are review fields",
         "daemon",
         "cron",
@@ -315,6 +323,8 @@ def assert_maker_checker_protocol(root, protocol_path, review_path, agents_path,
         "manual-review",
         "Single Agent Use",
         "ForgeKit v0.26 does not generate sub-agent configuration, runner code, worktree automation, or automatic review dispatch.",
+        "## Worktree Isolation",
+        "ForgeKit v0.28 does not require worktrees and does not automatically create them.",
     ]
     review_required = [
         "## Maker Summary",
@@ -362,6 +372,69 @@ def assert_maker_checker_protocol(root, protocol_path, review_path, agents_path,
         fail(".codex/rules.md missing Maker/Checker rules:\n" + "\n".join(missing_rules))
 
 
+def assert_worktree_playbook(root, playbook_path, blueprint_path, maker_checker_path, agents_path, claude_path, rules_path):
+    playbook = (root / playbook_path).read_text(encoding="utf-8")
+    blueprint = (root / blueprint_path).read_text(encoding="utf-8")
+    maker_checker = (root / maker_checker_path).read_text(encoding="utf-8")
+    agents = (root / agents_path).read_text(encoding="utf-8")
+    claude = (root / claude_path).read_text(encoding="utf-8")
+    rules = (root / rules_path).read_text(encoding="utf-8")
+    playbook_required = [
+        "# Worktree Playbook",
+        "Purpose:",
+        "## When to Use",
+        "## When Not to Use",
+        "## Naming Convention",
+        "## Worktree Creation Checklist",
+        "## Recommended Commands",
+        "## Maker / Checker Usage",
+        "## Cleanup",
+        "## Safety Rules",
+        "not a worktree runner",
+        "Do not create a worktree unless the user explicitly asks.",
+        "git status --short",
+        "Do not automatically merge, push, delete branches, remove worktrees, create PRs, or start agents.",
+    ]
+    blueprint_required = [
+        "## Worktree Strategy",
+        "WorktreeStrategy: none | optional | required",
+        "WorktreePath:",
+        "WorktreeBranch:",
+        "IsolationReason:",
+        "CleanupRule:",
+        "These fields describe reviewable isolation intent.",
+    ]
+    entry_required = [
+        "Do not create a worktree unless the user explicitly asks.",
+        "Before creating a worktree, confirm `git status --short` is clean",
+        "base branch, worktree path, branch name, allowed paths, validation command, and cleanup plan",
+        "Do not automatically merge, push, delete branches, remove worktrees, create PRs, start agents, or schedule worktree tasks.",
+        "Worktree results must be written to `.forgekit/docs/work-log.md` or the scoped change review.",
+    ]
+    rules_required = [
+        "不得自行创建 worktree",
+        "git status --short",
+        "base branch、worktree path、branch name、allowed paths、validation command 和 cleanup plan",
+        "不得自动 merge、push、delete branch、remove worktree、创建 PR、启动 agent 或调度 worktree 任务",
+        "worktree 结果必须写回",
+    ]
+    missing_playbook = [item for item in playbook_required if item not in playbook]
+    if missing_playbook:
+        fail(f"worktree-playbook.md missing expected text:\n" + "\n".join(missing_playbook))
+    missing_blueprint = [item for item in blueprint_required if item not in blueprint]
+    if missing_blueprint:
+        fail(f"loop-blueprint.md missing worktree strategy fields:\n" + "\n".join(missing_blueprint))
+    if "Worktree Isolation" not in maker_checker or "does not automatically create them" not in maker_checker:
+        fail("maker-checker-protocol.md missing worktree isolation boundary")
+    for label, text in [("AGENTS.md", agents), ("CLAUDE.md", claude)]:
+        missing_entry = [item for item in entry_required if item not in text]
+        if missing_entry:
+            fail(f"{label} missing worktree safety rules:\n" + "\n".join(missing_entry))
+    missing_rules = [item for item in rules_required if item not in rules]
+    if missing_rules:
+        fail(".codex/rules.md missing worktree safety rules:\n" + "\n".join(missing_rules))
+
+
 def assert_json(path):
     try:
         json.loads(path.read_text(encoding="utf-8"))
@@ -372,8 +445,8 @@ def assert_json(path):
 def assert_manifest_lock(target):
     lock_path = target / ".forgekit" / "template-lock.json"
     lock = json.loads(lock_path.read_text(encoding="utf-8"))
-    if lock.get("installed_version") != "0.27.0":
-        fail("template-lock installed_version must be 0.27.0")
+    if lock.get("installed_version") != "0.28.0":
+        fail("template-lock installed_version must be 0.28.0")
     if lock.get("managed_docs_root") != ".forgekit/docs":
         fail("template-lock managed_docs_root must match boundary")
     if lock.get("change_root") != ".forgekit/changes":
@@ -426,7 +499,7 @@ def assert_upgrade_report(repo, target):
         fail("upgrade must not overwrite managed docs")
     assert_paths(target, [
         ".forgekit/upgrade-report.md",
-        ".forgekit/upgrade-export/0.27.0/.forgekit/docs/project-plan.md",
+        ".forgekit/upgrade-export/0.28.0/.forgekit/docs/project-plan.md",
     ])
 
 
@@ -1044,6 +1117,15 @@ def main():
         "CLAUDE.md",
         ".codex/rules.md",
     )
+    assert_worktree_playbook(
+        repo / "project-template",
+        "docs/worktree-playbook.md",
+        "docs/loop-blueprint.md",
+        "docs/maker-checker-protocol.md",
+        "AGENTS.md",
+        "CLAUDE.md",
+        ".codex/rules.md",
+    )
     assert_absent_paths(repo, [
         "scripts/maker-checker-runner.py",
         "scripts/checker-runner.py",
@@ -1055,9 +1137,16 @@ def main():
         "project-template/scripts/loop-daemon.py",
         "scripts/loop-scheduler.py",
         "project-template/scripts/loop-scheduler.py",
+        "scripts/worktree-runner.py",
+        "project-template/scripts/worktree-runner.py",
+        "scripts/worktree-scheduler.py",
+        "project-template/scripts/worktree-scheduler.py",
+        "scripts/worktree-agent.py",
+        "project-template/scripts/worktree-agent.py",
         "project-template/.codex/agents/maker.md",
         "project-template/.codex/agents/checker.md",
         "project-template/.codex/agents/loop-runner.md",
+        "project-template/.codex/agents/worktree-runner.md",
     ])
     run([sys.executable, str(repo / "scripts" / "update-template-manifest.py"), "--check"], cwd=repo)
     assert_skill_frontmatter(repo / "skills")
@@ -1094,15 +1183,28 @@ def main():
             "CLAUDE.md",
             ".codex/rules.md",
         )
+        assert_worktree_playbook(
+            target,
+            ".forgekit/docs/worktree-playbook.md",
+            ".forgekit/docs/loop-blueprint.md",
+            ".forgekit/docs/maker-checker-protocol.md",
+            "AGENTS.md",
+            "CLAUDE.md",
+            ".codex/rules.md",
+        )
         assert_absent_paths(target, [
             "scripts/maker-checker-runner.py",
             "scripts/checker-runner.py",
             "scripts/loop-runner.py",
             "scripts/loop-daemon.py",
             "scripts/loop-scheduler.py",
+            "scripts/worktree-runner.py",
+            "scripts/worktree-scheduler.py",
+            "scripts/worktree-agent.py",
             ".codex/agents/maker.md",
             ".codex/agents/checker.md",
             ".codex/agents/loop-runner.md",
+            ".codex/agents/worktree-runner.md",
         ])
         assert_manifest_lock(target)
         assert_no_escaped_filenames(target)
