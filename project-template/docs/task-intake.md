@@ -1,20 +1,27 @@
 # Task Intake
 
-Purpose: personal and project-local source-first task intake. Use this file to preserve the original task assignment before AI analysis, task splitting, status tracking, or changelog writing.
+## Purpose
 
-This file supports handoff context, interrupted session recovery, and human review of whether AI misunderstood, deleted, or over-compressed a task. It is not the company official version number, not an MR-ready changelog, not a replacement for requirements, task-board, testing, risk-register, or traceability, and must not contain secrets.
+This is the source-first ledger for assigned work. Keep the original task source here before turning it into requirements, task-board items, work-log entries, or changelog notes.
+
+Use this file to answer one question: what exactly was assigned, by whom, when, for whom, and under which human review status?
+
+Boundaries:
+
+- Preserve redacted original text. Do not keep only an AI summary.
+- Do not store passwords, tokens, certificates, private keys, internal addresses, private package contents, or sensitive configuration values.
+- This file is not `requirements.md`, not `task-board.md`, not `work-log.md`, and not `changelog.md`.
+- If the source has not been reviewed by a person, keep `Human Review: pending`.
 
 ## When to Use
 
-Create or update a source record when work comes from:
+Create a source record when work comes from:
 
 - leader-plan-cell
 - wechat
 - meeting
 - document
 - manual-note
-
-Use this before turning the assignment into requirements, task-board items, change artifacts, or release notes.
 
 ## Source Record Template
 
@@ -23,7 +30,7 @@ Source ID: SRC-YYYYMMDD-001
 Source Type: leader-plan-cell | wechat | meeting | document | manual-note
 Received At: YYYY-MM-DD HH:MM
 Sender / Source: <name or source label>
-Original Location: <chat, meeting note, document path, plan row, or other pointer>
+Original Location: <chat, meeting note, document path, plan row, or pointer>
 Human Review: pending | confirmed | corrected | rejected
 Confidentiality: normal | sensitive-redacted
 Derived Task IDs: TASK-001, BUG-001, FEAT-001
@@ -31,7 +38,7 @@ Derived Task IDs: TASK-001, BUG-001, FEAT-001
 
 ### Original Text
 
-Paste the original assignment here after redaction. Do not replace it with only an AI summary.
+Paste the redacted original assignment here. Keep wording close enough for a human to check whether AI misunderstood or over-compressed it.
 
 ### Responsibility Split
 
@@ -50,17 +57,18 @@ Paste the original assignment here after redaction. Do not replace it with only 
 
 ### AI Interpretation
 
+Keep this short.
+
 - Parsed intent:
 - Scope:
 - Out of scope:
 - Assumptions:
-- Risks:
 
 ### Derived Tasks
 
-| Task ID | Title | Source ID | Status | Notes |
-| --- | --- | --- | --- | --- |
-| TASK-001 | TBD | SRC-YYYYMMDD-001 | Todo | TBD |
+| Task ID | Title | Source ID | Status |
+| --- | --- | --- | --- |
+| TASK-001 | TBD | SRC-YYYYMMDD-001 | Todo |
 
 ### Open Questions
 
@@ -79,9 +87,8 @@ Paste the original assignment here after redaction. Do not replace it with only 
 
 ## Redaction Rules
 
-- Do not keep account names, passwords, tokens, certificates, private keys, internal environment addresses, or sensitive configuration values in this file.
-- If the original text contains sensitive information, redact it before writing and set `Confidentiality: sensitive-redacted`.
-- If the original assignment has not been manually confirmed, keep `Human Review: pending`; do not mark it as `confirmed`.
-- `requirements.md` records requirement facts; it does not replace this source ledger.
-- `task-board.md` records derived task status; derived tasks must link back to `Source ID`.
-- `changelog.md` records completed version changes; it does not replace original task assignment records.
+- If sensitive information appears, redact it before writing and set `Confidentiality: sensitive-redacted`.
+- Keep enough context to preserve meaning, but never copy secrets.
+- After confirmation, sync only stable facts to `requirements.md`.
+- Sync execution state to `task-board.md` with Source ID backlinks.
+- Sync completed user-visible changes to `changelog.md`; do not copy the source text there.

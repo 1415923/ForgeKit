@@ -1,28 +1,31 @@
 # 代码库地图
 
-本文是 Codex 的代码搜索起点。新项目初始化时先保留模板；随着项目落地，逐步把真实目录、入口、验证命令补齐。
+本文只做代码搜索入口，不做项目百科。目标是帮助 AI 和接手人员快速知道：从哪里开始看、哪些目录谨慎碰、怎么验证。
 
-## 项目入口
+Role: code search entry, not project encyclopedia.
 
-| 区域 | 路径 | 用途 | 负责人 |
+维护原则：
+
+- 只记录当前稳定入口，不写长扫描历史。
+- 模块细节放到 `architecture.md`、`api.md`、`database-design.md`。
+- 任务来源放到 `task-intake.md`，任务状态放到 `task-board.md`。
+- 如果本文超过日常可读范围，优先删旧细节并改成链接。
+
+## 搜索入口
+
+| 区域 | 路径 | 用途 | 默认处理 |
 | --- | --- | --- | --- |
-| 后端入口 | 待补充 | 应用启动、接口、业务逻辑 | 待补充 |
-| 前端入口 | 待补充 | 页面、路由、组件、状态管理 | 待补充 |
-| 数据库 | 待补充 | schema、migration、数据访问 | 待补充 |
-| 部署配置 | 待补充 | 环境变量、容器、脚本、发布配置 | 待补充 |
-| 测试 | 待补充 | 单元测试、集成测试、端到端测试 | 待补充 |
-| 文档 | `docs/` | 方案、架构、版本、任务、风险 | 待补充 |
-| 任务派发原文台账 | `.forgekit/docs/task-intake.md` | 领导原文、微信原文、计划表格子、会议任务、AI 分析、责任拆分、时间窗口、任务反链和人工确认状态 | 待补充 |
-| ForgeKit 工作日志 | `.forgekit/docs/work-log.md` | 个人工作顺序、交接上下文、中断恢复、验证/提交/阻塞/确认摘要 | 待补充 |
-| Loop Readiness | `.forgekit/docs/loop-readiness.md` | 判断项目是否具备安全运行 loop 的状态、验证、边界、停止和升级条件 | 待补充 |
-| Loop Blueprint | `.forgekit/docs/loop-blueprint.md` | 定义可审查的 loop 设计图纸，不是自动执行授权 | 待补充 |
-| Loop Operations | `.forgekit/docs/loop-operations.md` | 定义显式触发的 loop dry-run、one-step、continue、stop/handoff 操作协议，不是自动执行器 | 待补充 |
-| Maker / Checker Protocol | `.forgekit/docs/maker-checker-protocol.md` | 定义 Maker 写代码、Checker 独立复核的证据和输出协议，不是自动调度器 | 待补充 |
-| Worktree Playbook | `.forgekit/docs/worktree-playbook.md` | 定义手动 worktree 并行隔离、命名、创建检查、Maker/Checker 用法和清理规则，不是自动调度器 | 待补充 |
+| 后端入口 | 待补充 | 应用启动、接口、业务逻辑 | 任务相关时读取 |
+| 前端入口 | 待补充 | 页面、路由、组件、状态管理 | 任务相关时读取 |
+| 数据库 | 待补充 | schema、migration、数据访问 | 改动前确认 |
+| 部署配置 | 待补充 | 环境变量、容器、脚本、发布配置 | 默认只读 |
+| 测试 | 待补充 | 单元测试、集成测试、端到端测试 | 修改后验证 |
+| 业务文档 | `docs/` | 业务说明、既有方案、验收资料 | read-mostly |
+| ForgeKit managed docs | `.forgekit/docs/` | 当前项目事实和工作状态 | 按职责矩阵读取 |
 
-## 关键模块
+## 当前主要模块
 
-| 模块 | 路径 | 关键文件 | 外部依赖 | 验证方式 |
+| 模块 | 路径 | 关键文件 | 什么时候读 | 验证方式 |
 | --- | --- | --- | --- | --- |
 | 待补充 | 待补充 | 待补充 | 待补充 | 待补充 |
 
@@ -37,17 +40,6 @@
 | 配置 | config、application、env、docker、vite、webpack、pom、gradle、package |
 | 测试 | test、spec、mock、fixture、e2e |
 
-## 推荐启动目录
-
-| 技术栈 | 推荐启动目录 | 备注 |
-| --- | --- | --- |
-| Java Spring Boot | 后端模块根目录 | 优先找 `pom.xml`、`build.gradle`、`src/main` |
-| Vue | 前端模块根目录 | 优先找 `package.json`、`vite.config.*`、`src/router` |
-| React | 前端模块根目录 | 优先找 `package.json`、`src/`、路由配置 |
-| Python FastAPI | API 模块根目录 | 优先找 `pyproject.toml`、`requirements.txt`、`app/` |
-| Node Express | Node 服务根目录 | 优先找 `package.json`、`src/`、路由配置 |
-| FPGA Vivado/Vitis | 硬件工程根目录 | 优先找 Vivado/Vitis 工程、HLS 工程、仿真脚本 |
-
 ## 局部验证命令
 
 | 区域 | 命令 | 何时运行 |
@@ -57,32 +49,35 @@
 | 测试 | 待补充 | 修改业务逻辑或修复缺陷后 |
 | 构建 | 待补充 | 发布前或跨模块变更后 |
 
-详细工具链状态记录在 `.forgekit/docs/local-toolchain.md`。如果该文档未填写，Codex 应先询问或用只读命令探测，不要默认安装依赖或启动服务。
+详细工具链状态记录在 `.forgekit/docs/local-toolchain.md`。如果该文档未填写，先询问或用只读命令探测，不要默认安装依赖或启动服务。
 
-任务派发原文记录在 `.forgekit/docs/task-intake.md`。它用于保留领导原文、微信原文、计划表格子、会议任务或手工记录；先保留脱敏后的原文，再做 AI 分析和任务拆解。`.forgekit/docs/requirements.md` 记录需求事实，`.forgekit/docs/task-board.md` 记录拆解后的任务状态并反链 Source ID，`.forgekit/docs/changelog.md` 记录完成后的版本变化；它们都不替代任务派发原文台账。
+## ForgeKit 文档入口
 
-个人工作顺序记录在 `.forgekit/docs/work-log.md`。它用于阶段收口、验证、提交/推送、阻塞变化、领导/组长确认和中断恢复，不替代 `.forgekit/docs/changelog.md`、`.forgekit/docs/task-board.md`、`.forgekit/docs/testing.md` 或风险/追踪文档。
+| 需要了解 | 读取 |
+| --- | --- |
+| 文档该写到哪里 | `.forgekit/docs/document-responsibility.md` |
+| 当前项目目标和范围 | `.forgekit/docs/project-plan.md` |
+| 任务派发原文和 Source ID | `.forgekit/docs/task-intake.md` |
+| 当前任务状态 | `.forgekit/docs/task-board.md` |
+| 最近工作顺序和交接 | `.forgekit/docs/work-log.md` |
+| 验证命令和测试策略 | `.forgekit/docs/testing.md` |
+| 用户可见版本变化 | `.forgekit/docs/changelog.md` |
+| 中高风险变更过程 | `.forgekit/changes/<change-id>/` |
 
-Loop 设计记录在 `.forgekit/docs/loop-readiness.md` 和 `.forgekit/docs/loop-blueprint.md`。它们用于判断项目是否适合安全运行 loop，并定义 Trigger、Input Sources、State File、Allowed Paths、Forbidden Paths、Validation Command、Stop Condition、Human Escalation、Token Budget、Comprehension Check 和 Output / Writeback；它们不是 daemon、cron、MCP、connector、自动 PR、多 agent 调度或 worktree 自动化配置。
-
-Loop 操作协议记录在 `.forgekit/docs/loop-operations.md`。它用于用户显式触发的 dry-run、one-step、continue、stop/handoff；它不是自动 runner、daemon、cron、connector、自动 PR、多 agent 调度、worktree 自动化或无人值守连续循环配置。
-
-Maker / Checker 协议记录在 `.forgekit/docs/maker-checker-protocol.md`。它用于中高风险代码变更的实现证据和复核证据分离；它不是自动 checker runner、子 agent 配置、多 agent 调度器或用户最终批准。
-
-Worktree 使用规范记录在 `.forgekit/docs/worktree-playbook.md`。它用于并行任务、实验分支和 AI 多会话协作的手动隔离；它不是自动 worktree runner、scheduler、agent orchestration、merge、push 或 PR 配置。
+不要默认读取 `.forgekit/docs/**` 全量内容。先按本文件和 `document-responsibility.md` 判断需要哪些文档。
 
 ## 忽略和谨慎读取
 
 | 路径或类型 | 处理方式 | 原因 |
 | --- | --- | --- |
-| 构建产物 | 默认忽略 | 噪音大，通常不应手改 |
-| 依赖目录 | 默认忽略 | 由包管理器维护 |
+| 构建产物、依赖目录、缓存 | 默认忽略 | 噪音大，通常不应手改 |
+| `.DS_Store`、`Thumbs.db`、`__pycache__`、`.pytest_cache`、`*.tmp` | 不记录进 managed docs，不纳入模板 | 系统或临时产物 |
 | 大型二进制文件 | 先询问 | 不适合直接读入上下文 |
-| 凭据和私钥 | 不输出完整值 | 安全风险 |
+| 凭据、私钥、token、证书、真实环境地址 | 不输出完整值 | 安全风险 |
 
-## 维护规则
+## 维护触发
 
-- 新增模块时，同步更新本文件。
-- 接手既有项目时，先补齐真实目录和启动命令。
-- 大版本 review/refactor gate 时，检查本文件是否过期。
-- 如果本文件和代码不一致，以代码为准，并在本文件记录修正。
+- 新增或删除主要模块。
+- 入口文件、验证命令、谨慎读取路径变化。
+- 接手项目时发现本文和代码不一致。
+- 大版本 review/refactor gate 要求复查入口。

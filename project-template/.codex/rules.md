@@ -5,6 +5,7 @@
 - 先读取 `governance/overview.md`，再按项目入口选择新项目、接手项目、Bug 修复、发布或安全审查流程。
 - 先读取 `.forgekit/project-boundary.yml`，确认 ForgeKitRoot、ProjectRoot、managed docs root、change root、business docs roots 和 write policy。
 - 修改前先阅读相关代码、文档和配置。
+- 不要默认全量读取 `.forgekit/docs/**`；先看 `.forgekit/docs/document-responsibility.md` 和 `.forgekit/docs/codebase-map.md`，再按任务触发读取相关文档。
 - 优先遵循本项目已有风格。
 - 只修改与当前任务相关的文件。
 - 大范围架构调整前必须先给出方案。
@@ -28,6 +29,10 @@
 - `.forgekit/template-lock.json` 是安装基线；report-only upgrade 期间不要写回 lock。
 - `.forgekit/upgrade-export/**` 是候选模板对比材料，不是当前态文档、活跃 change、发布证据或 changelog 内容。
 - `.forgekit/docs/**` 是 current state docs，只保留当前事实和稳定结论，不堆长期过程流水。
+- 更新 managed docs 前先判断内容类型：任务来源、需求事实、任务状态、验证方法、工作顺序、版本变化、风险、设计决策或历史证据。
+- 同一事实只写到负责的文档；其他文档只做引用，不复制长段内容。
+- 触发式文档只有事件发生才更新；不要把缺陷复盘、事故复盘、依赖审查、威胁建模、发布流水线、traceability、loop、maker-checker 或 worktree 文档当作日常必填项。
+- 给用户看的文档要短、自然、可确认；先写结论，再写必要证据，避免模板腔和长篇 AI 过程叙述。
 - `.forgekit/changes/<change-id>/**` 是 change process docs，只记录单次中高风险变更的 proposal/design/tasks/verification/review/ship/retro。
 - `.forgekit/archive/**` 是 archive docs，不是当前事实来源；默认不读，只有用户要求历史、审计、回归、复盘、事故复盘、解释历史决策或比对旧版本时才读取。
 - `.forgekit/archive-plan.md` 是 dry-run 生成产物，不是 current docs 或 active change；每次 dry-run 可以覆盖它。

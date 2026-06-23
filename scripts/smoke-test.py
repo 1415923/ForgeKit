@@ -29,6 +29,8 @@ FORBIDDEN_PRIVATE_PATHS = [
     r"D:\nodejs",
     r"C:\Users\32390",
 ]
+NOISE_NAMES = {".DS_Store", "Thumbs.db", "__pycache__", ".pytest_cache"}
+NOISE_SUFFIXES = (".tmp",)
 REQUIRED_REPO_PATHS = [
     "usage.html",
     "project-template/.forgekit/project-boundary.yml",
@@ -133,6 +135,17 @@ def assert_no_escaped_filenames(root):
             bad.append(str(path.relative_to(root)))
     if bad:
         fail("Escaped #Uxxxx file names found:\n" + "\n".join(bad))
+
+
+def assert_no_noise_files(root):
+    bad = []
+    for path in root.rglob("*"):
+        if ".git" in path.parts:
+            continue
+        if path.name in NOISE_NAMES or path.name.endswith(NOISE_SUFFIXES):
+            bad.append(str(path.relative_to(root)))
+    if bad:
+        fail("Noise files should not be present in templates or generated projects:\n" + "\n".join(bad))
 
 
 def read_text(path):
@@ -446,7 +459,7 @@ def assert_task_intake(root, intake_path, task_board_path, requirements_path, ch
     claude = (root / claude_path).read_text(encoding="utf-8")
     rules = (root / rules_path).read_text(encoding="utf-8")
     intake_required = [
-        "Purpose:",
+        "## Purpose",
         "## When to Use",
         "## Source Record Template",
         "Source ID",
@@ -496,6 +509,69 @@ def assert_task_intake(root, intake_path, task_board_path, requirements_path, ch
         fail(".codex/rules.md missing task-intake rules:\n" + "\n".join(missing_rules))
 
 
+def assert_managed_docs_responsibility_v2(root, responsibility_path, codebase_path, agents_path, claude_path, rules_path):
+    responsibility = (root / responsibility_path).read_text(encoding="utf-8")
+    codebase = (root / codebase_path).read_text(encoding="utf-8")
+    agents = (root / agents_path).read_text(encoding="utf-8")
+    claude = (root / claude_path).read_text(encoding="utf-8")
+    rules = (root / rules_path).read_text(encoding="utf-8")
+
+    responsibility_required = [
+        "Managed Docs Responsibility Matrix v2",
+        "Document Class",
+        "Audience",
+        "Default Read",
+        "Write Here",
+        "Do Not Write Here",
+        "Update Trigger",
+        "Related Docs",
+        "core",
+        "current",
+        "working",
+        "triggered",
+        "generated",
+        "archive",
+    ]
+    missing = [item for item in responsibility_required if item not in responsibility]
+    if missing:
+        fail("document-responsibility.md missing v2 fields:\n" + "\n".join(missing))
+
+    codebase_required = [
+        "本文只做代码搜索入口，不做项目百科",
+        "不要默认读取 `.forgekit/docs/**` 全量内容",
+        ".DS_Store",
+        "Thumbs.db",
+        "__pycache__",
+        ".pytest_cache",
+        "*.tmp",
+    ]
+    missing_codebase = [item for item in codebase_required if item not in codebase]
+    if missing_codebase:
+        fail("codebase-map.md missing responsibility-v2 boundaries:\n" + "\n".join(missing_codebase))
+
+    entry_required = [
+        "Do not read `.forgekit/docs/**` by default",
+        "document-responsibility.md",
+        "Do not write the same fact into multiple docs",
+        "Triggered docs are updated only when their event happens",
+    ]
+    for label, text in [("AGENTS.md", agents), ("CLAUDE.md", claude)]:
+        missing_entry = [item for item in entry_required if item not in text]
+        if missing_entry:
+            fail(f"{label} missing managed-docs v2 entry rules:\n" + "\n".join(missing_entry))
+
+    rules_required = [
+        "不要默认全量读取 `.forgekit/docs/**`",
+        "document-responsibility.md",
+        "同一事实只写到负责的文档",
+        "触发式文档只有事件发生才更新",
+        "给用户看的文档要短、自然、可确认",
+    ]
+    missing_rules = [item for item in rules_required if item not in rules]
+    if missing_rules:
+        fail(".codex/rules.md missing managed-docs v2 rules:\n" + "\n".join(missing_rules))
+
+
 def assert_json(path):
     try:
         json.loads(path.read_text(encoding="utf-8"))
@@ -506,8 +582,8 @@ def assert_json(path):
 def assert_manifest_lock(target):
     lock_path = target / ".forgekit" / "template-lock.json"
     lock = json.loads(lock_path.read_text(encoding="utf-8"))
-    if lock.get("installed_version") != "0.28.1":
-        fail("template-lock installed_version must be 0.28.1")
+    if lock.get("installed_version") != "0.28.2":
+        fail("template-lock installed_version must be 0.28.2")
     if lock.get("managed_docs_root") != ".forgekit/docs":
         fail("template-lock managed_docs_root must match boundary")
     if lock.get("change_root") != ".forgekit/changes":
@@ -560,7 +636,7 @@ def assert_upgrade_report(repo, target):
         fail("upgrade must not overwrite managed docs")
     assert_paths(target, [
         ".forgekit/upgrade-report.md",
-        ".forgekit/upgrade-export/0.28.1/.forgekit/docs/project-plan.md",
+        ".forgekit/upgrade-export/0.28.2/.forgekit/docs/project-plan.md",
     ])
 
 
@@ -1156,6 +1232,7 @@ def main():
     repo = Path(args.repo_root).resolve()
     assert_paths(repo, REQUIRED_REPO_PATHS)
     assert_no_escaped_filenames(repo)
+    assert_no_noise_files(repo / "project-template")
     assert_no_forbidden_text(repo, FORBIDDEN_LEGACY_REFS, "Forbidden legacy path text found", LEGACY_REF_ALLOWLIST)
     assert_no_forbidden_text(repo / "templates", FORBIDDEN_PRIVATE_PATHS, "Private machine paths found in templates")
     assert_json(repo / ".codex-plugin" / "plugin.json")
@@ -1193,6 +1270,14 @@ def main():
         "docs/task-board.md",
         "docs/requirements.md",
         "docs/changelog.md",
+        "AGENTS.md",
+        "CLAUDE.md",
+        ".codex/rules.md",
+    )
+    assert_managed_docs_responsibility_v2(
+        repo / "project-template",
+        ".forgekit/docs/document-responsibility.md",
+        "docs/codebase-map.md",
         "AGENTS.md",
         "CLAUDE.md",
         ".codex/rules.md",
@@ -1273,6 +1358,14 @@ def main():
             "CLAUDE.md",
             ".codex/rules.md",
         )
+        assert_managed_docs_responsibility_v2(
+            target,
+            ".forgekit/docs/document-responsibility.md",
+            ".forgekit/docs/codebase-map.md",
+            "AGENTS.md",
+            "CLAUDE.md",
+            ".codex/rules.md",
+        )
         assert_absent_paths(target, [
             "scripts/maker-checker-runner.py",
             "scripts/checker-runner.py",
@@ -1289,6 +1382,7 @@ def main():
         ])
         assert_manifest_lock(target)
         assert_no_escaped_filenames(target)
+        assert_no_noise_files(target)
         assert_no_forbidden_text(target, FORBIDDEN_LEGACY_REFS, "Forbidden legacy path text found in generated project")
         run_generated_checks(target)
         assert_archive_flow(target)

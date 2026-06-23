@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "template_version": "0.28.1",
+  "template_version": "0.28.2",
   "boundary_aware": true,
   "files": [
     {
@@ -9,7 +9,7 @@
       "role": "agent_entry",
       "update_policy": "ask",
       "render_mode": "copy",
-      "checksum": "sha256:1a5e5e1788837ad4d0e3ddd564122540ab04a37d4d6560be5d67a974f8c78954"
+      "checksum": "sha256:dc57868d60b7b1bd3a767a82a2a195108a7c446d1d51d6f494679d06f676f416"
     },
     {
       "source_path": "CLAUDE.md",
@@ -17,7 +17,7 @@
       "role": "agent_entry",
       "update_policy": "ask",
       "render_mode": "copy",
-      "checksum": "sha256:73d3a22115ba20c9a43837ea19db8aaf2bec981c75bbb04ff6e7502d054480cb"
+      "checksum": "sha256:7ba596091267559b09b035a849e9d5d31c563ca5404bb749348e46b918c42f1d"
     },
     {
       "source_path": "README.md",
@@ -25,7 +25,7 @@
       "role": "readme",
       "update_policy": "ask",
       "render_mode": "copy",
-      "checksum": "sha256:1901f76a6ed7b81da51450bc6c43302655100d30c8ab5b9a6dbec466b791b270"
+      "checksum": "sha256:0103a5866a5a45e290a2138db483924323a90e512bc123eb6f3b853a9848f6d6"
     },
     {
       "source_path": ".forgekit/project-boundary.yml",
@@ -41,7 +41,7 @@
       "role": "managed_doc",
       "update_policy": "merge",
       "render_mode": "copy",
-      "checksum": "sha256:c56b2b1e878bd7daa1f4f6cfc542b81e58bf83f4be365fda3c7be953cbea0069"
+      "checksum": "sha256:5f565e53de08a8b70a9dc514c64c5ff700c62732c15b7d4fc1576f4a745f5b2f"
     },
     {
       "source_path": ".forgekit/docs/document-lifecycle.md",
@@ -81,7 +81,7 @@
       "role": "codex_rule",
       "update_policy": "ask",
       "render_mode": "copy",
-      "checksum": "sha256:44af1a5d454cde79b2f32134db45426da8488f06aef355d91482ce329b951ee6"
+      "checksum": "sha256:12652e85b96bac40ff89548bfe10e8a7716f5b7325abda878ab432e17c66941e"
     },
     {
       "source_path": ".codex/version-gates.md",
@@ -169,7 +169,7 @@
       "role": "managed_doc",
       "update_policy": "merge",
       "render_mode": "copy",
-      "checksum": "sha256:f3aae42350baa23bbe250dfdd4892d71aea0c9f122b92c685e624189391bc3e2"
+      "checksum": "sha256:31393f299ebbae8369fcac6be47296d5c16d9b5a2efecebafd04e590a286fa3b"
     },
     {
       "source_path": "docs/codebase-map.md",
@@ -177,7 +177,7 @@
       "role": "managed_doc",
       "update_policy": "merge",
       "render_mode": "copy",
-      "checksum": "sha256:d37357dce2a5c38b057bfff716e5e1a1f28c54ee0564f87863b709602f09dbef"
+      "checksum": "sha256:5937a1fbef4128c843a028a6ecc6a85184ab68312dd34d1a61a8badea3612ce1"
     },
     {
       "source_path": "docs/work-log.md",
@@ -185,7 +185,7 @@
       "role": "managed_doc",
       "update_policy": "merge",
       "render_mode": "copy",
-      "checksum": "sha256:aa3216b7617d1d6458b01478c124bc19c841f662dc186b3e5100b4c9887b6b4c"
+      "checksum": "sha256:a96892203d9281c6705ba6e11d554a17aac11de2b4bc7b3601a09bcc70eb7f3c"
     },
     {
       "source_path": "docs/task-intake.md",
@@ -193,7 +193,7 @@
       "role": "managed_doc",
       "update_policy": "merge",
       "render_mode": "copy",
-      "checksum": "sha256:89dd5c0e99f80bf6c0feed96f36eb1431ba1bb911edfc607f4cf612307c790ba"
+      "checksum": "sha256:8135e989ba858deb12f9b7d5fe3480a2d24b05a35a14bcff85e0727ed51cfdc0"
     },
     {
       "source_path": "docs/local-toolchain.md",
@@ -257,7 +257,7 @@
       "role": "managed_doc",
       "update_policy": "merge",
       "render_mode": "copy",
-      "checksum": "sha256:1be57470834982246f2330a276c28f2f6b9f9631ae197207a7bbcf38941f1b73"
+      "checksum": "sha256:2d075200bd251bd5b6615842b71dedff5adff4293e9d18abc6e257af8b6332bd"
     },
     {
       "source_path": "docs/requirements.md",
@@ -265,7 +265,7 @@
       "role": "managed_doc",
       "update_policy": "merge",
       "render_mode": "copy",
-      "checksum": "sha256:26c93d37cdc17ab390e248b3daf0a5510d778ba19aa5598e02d060b41b46bfac"
+      "checksum": "sha256:e376eab870339079eefa266cfb512a12c002d92455d71c6c9c9508257141079f"
     },
     {
       "source_path": "docs/architecture.md",
@@ -281,7 +281,7 @@
       "role": "managed_doc",
       "update_policy": "merge",
       "render_mode": "copy",
-      "checksum": "sha256:456bf150dff9a51a4c026b3633a58a7ad4f9cbe001f501804db62708efea0bd7"
+      "checksum": "sha256:6dd390fa3389eced99a70aeaf9c66c43a7a6492bc795bfea893b071cec63ff37"
     },
     {
       "source_path": "governance/ai-engineering-loop.md",

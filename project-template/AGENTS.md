@@ -12,18 +12,19 @@ When a task names a ForgeKit skill, read the project-local `.agents/skills/<skil
 
 1. Read this file first.
 2. Read `.forgekit/project-boundary.yml` to identify ForgeKitRoot, ProjectRoot, managed docs root, change root, business docs roots, and write policy.
-3. Read `.forgekit/docs/codebase-map.md` to find likely modules, entry files, and local validation commands.
-4. Read `.forgekit/docs/local-toolchain.md` when LSP, lint, test, build, or local validation commands matter.
-5. Read `.forgekit/docs/codex-next-work-order.md` after initialization or when project direction is unclear.
-6. Read `.codex/project.md`, `.codex/scope.md`, and `.codex/commands.md` only as needed.
-7. Read only the selected stack folder under `.codex/stacks/`.
-8. Read `governance/agent-harness.md` when the task involves context strategy, large code search, AGENTS maintenance, or unclear entry points.
-9. Read `governance/large-change-execution.md` for large, cross-module, high-risk, migration, or refactor work.
-10. Read `governance/ai-engineering-loop.md` when risk level, change artifacts, verification, review, ship, or retro expectations are unclear.
-11. Read `.forgekit/docs/document-lifecycle.md` when deciding whether material belongs in current docs, change process docs, or archive.
-12. Read `governance/team-agent-rollout.md` only when the task involves commands, hooks, plugins, MCP, CI, issue trackers, or team rollout.
-13. Read `governance/agent-suitability.md` for project initialization, existing project handover, or when the project may not fit an AI agent workflow.
-14. Read `.codex/automation-decision.md` before turning a repeated workflow into a skill, command, hook, script, plugin, or MCP.
+3. Read `.forgekit/docs/document-responsibility.md` to choose the right managed docs and avoid duplicate writes.
+4. Read `.forgekit/docs/codebase-map.md` to find likely modules, entry files, and local validation commands.
+5. Read `.forgekit/docs/local-toolchain.md` when LSP, lint, test, build, or local validation commands matter.
+6. Read `.forgekit/docs/codex-next-work-order.md` after initialization or when project direction is unclear.
+7. Read `.codex/project.md`, `.codex/scope.md`, and `.codex/commands.md` only as needed.
+8. Read only the selected stack folder under `.codex/stacks/`.
+9. Read `governance/agent-harness.md` when the task involves context strategy, large code search, AGENTS maintenance, or unclear entry points.
+10. Read `governance/large-change-execution.md` for large, cross-module, high-risk, migration, or refactor work.
+11. Read `governance/ai-engineering-loop.md` when risk level, change artifacts, verification, review, ship, or retro expectations are unclear.
+12. Read `.forgekit/docs/document-lifecycle.md` when deciding whether material belongs in current docs, change process docs, or archive.
+13. Read `governance/team-agent-rollout.md` only when the task involves commands, hooks, plugins, MCP, CI, issue trackers, or team rollout.
+14. Read `governance/agent-suitability.md` for project initialization, existing project handover, or when the project may not fit an AI agent workflow.
+15. Read `.codex/automation-decision.md` before turning a repeated workflow into a skill, command, hook, script, plugin, or MCP.
 
 ## Task Routing
 
@@ -51,6 +52,7 @@ When a task names a ForgeKit skill, read the project-local `.agents/skills/<skil
 ## Context Rules
 
 - Do not read every file in `governance/` by default.
+- Do not read `.forgekit/docs/**` by default. Start with `.forgekit/docs/document-responsibility.md` and `.forgekit/docs/codebase-map.md`, then read only the docs whose `Default Read` and trigger fit the task.
 - Boundary first: ForgeKitRoot is the toolkit source and is read-only unless this task is maintaining ForgeKit itself; ProjectRoot is the business repository and Git commit location.
 - Use `.forgekit/docs` as the default ForgeKit-managed docs root and `.forgekit/changes` as the default change root.
 - Treat business `docs/` as read-mostly evidence. Read and cite it, but do not write ForgeKit governance templates there unless the user confirms target files and reasons.
@@ -58,6 +60,10 @@ When a task names a ForgeKit skill, read the project-local `.agents/skills/<skil
 - Treat `.forgekit/template-lock.json` as an installation baseline. Do not edit it during report-only upgrade checks.
 - Treat `.forgekit/upgrade-export/**` as candidate comparison material, not current-state docs, active changes, release evidence, or changelog content.
 - Treat `.forgekit/docs/**` as current state docs: keep stable facts, not long process history.
+- Before updating managed docs, classify the content type: source record, requirement fact, task status, validation method, work sequence, release change, risk, design decision, or history.
+- Do not write the same fact into multiple docs. Write it once in the responsible document and cross-link from related docs.
+- Triggered docs are updated only when their event happens; do not fill defect, incident, dependency, threat, release, traceability, loop, maker-checker, or worktree docs as routine noise.
+- User-facing docs should be short and natural: conclusion first, only enough evidence for review, no template filler or long AI process narration.
 - Treat `.forgekit/changes/<change-id>/**` as one-change process records: proposal, design, tasks, verification, review, ship, and retro.
 - Treat `.forgekit/archive/**` as historical material, not current truth. Do not read archive by default; read it only when the user asks for history, audit, regression analysis, retro, incident review, historical decision explanation, or old-version comparison.
 - Treat `.forgekit/archive-plan.md` as generated dry-run output. It is not current-state docs or an active change, and each dry-run may overwrite it.
