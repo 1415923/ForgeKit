@@ -28,9 +28,10 @@ ForgeKit 在生成项目内提供轻量 AI Engineering Loop：澄清目标、判
 20. 安全敏感变更写入 `.forgekit/docs/threat-model.md`，依赖变更写入 `.forgekit/docs/dependency-review.md`。
 21. 环境和发布链路写入 `.forgekit/docs/environment-matrix.md` 和 `.forgekit/docs/release-pipeline.md`。
 22. 模块负责人和评审责任写入 `.forgekit/docs/code-ownership.md`。
-23. Epic、Feature、Task、Bug 写入 `.forgekit/docs/task-board.md`。
-24. 技术债写入 `.forgekit/docs/technical-debt.md`，版本质量写入 `.forgekit/docs/quality-metrics.md`。
-25. 开始编码前，确认 Definition of Ready；完成时确认 Definition of Done。
+23. 领导任务、微信任务、计划表格子、会议任务或手工记录先写入 `.forgekit/docs/task-intake.md`，保留脱敏原文、责任拆分、时间窗口、AI 分析和 Source ID。
+24. Epic、Feature、Task、Bug 写入 `.forgekit/docs/task-board.md`，并反链 Source ID。
+25. 技术债写入 `.forgekit/docs/technical-debt.md`，版本质量写入 `.forgekit/docs/quality-metrics.md`。
+26. 开始编码前，确认 Definition of Ready；完成时确认 Definition of Done。
 
 ## 升级兼容
 
@@ -67,6 +68,7 @@ ForgeKit 在生成项目内提供轻量 AI Engineering Loop：澄清目标、判
 - `.forgekit/docs/loop-operations.md`：定义用户显式触发的 loop dry-run、one-step、continue、stop/handoff；它不是后台自动化或无人值守 runner。
 - `.forgekit/docs/maker-checker-protocol.md`：定义 Maker 写代码、Checker 复核证据的审查协议；它不是自动多 agent 调度器。
 - `.forgekit/docs/worktree-playbook.md`：定义手动 worktree 并行隔离、命名、检查、Maker/Checker 用法和清理规则；它不是自动调度器。
+- `.forgekit/docs/task-intake.md`：记录任务派发原文、AI 分析、责任拆分、时间窗口、Derived Task IDs 和人工确认状态；它不是需求文档、任务看板或 changelog。
 - `.codex/commands-catalog.md`、`.codex/hooks.md`：可选命令和 hook 候选，默认不自动启用。
 - `.codex/automation-decision.md`：判断重复流程应该做成 skill、command、hook、script、plugin、MCP 还是保留文档。
 - `.forgekit/changes/_template/`：proposal、design、tasks、verification、review、ship、retro 模板。

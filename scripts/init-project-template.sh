@@ -168,7 +168,7 @@ write_boundary_config() {
   mkdir -p "$(dirname "$boundary_file")"
   cat > "$boundary_file" <<EOF
 forgekit:
-  version: "0.28.0"
+  version: "0.28.1"
   mode: "$mode"
 
 roots:

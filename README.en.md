@@ -92,6 +92,7 @@ Key files:
 | `.forgekit/docs/local-toolchain.md` | Local lint, test, build, LSP, and toolchain capability |
 | `.forgekit/docs/changelog.md` | Current version update record |
 | `.forgekit/docs/version-roadmap.md` | Version roadmap and delivery gates |
+| `.forgekit/docs/task-intake.md` | Source-first task assignment ledger: preserve leader/WeChat/plan/meeting text before AI interpretation and task splitting |
 | `.forgekit/docs/loop-readiness.md` | Whether the project has the state, validation, boundary, stop, and escalation conditions needed for a safe loop |
 | `.forgekit/docs/loop-blueprint.md` | Reviewable loop design blueprint, not automatic execution authorization |
 | `.forgekit/docs/loop-operations.md` | Explicitly triggered loop dry-run, one-step, continue, and stop/handoff operation protocol, not an automatic runner |
@@ -124,6 +125,8 @@ Optional Loop Operation Mode defines only explicitly triggered dry-run, one-step
 Maker / Checker Protocol defines evidence separation for medium/high-risk code changes: Maker implements and marks ready for check; Checker reviews diff, validation, risks, and document sync, then recommends pass / needs-fix / manual-review. It is not an automatic multi-agent system.
 
 Worktree Playbook provides only manual worktree isolation guidance for parallel tasks, experiment branches, and AI multi-session collaboration. ForgeKit does not automatically create worktrees, start agents, merge, push, or create PRs.
+
+Source-First Task Intake requires leader tasks, WeChat tasks, plan cells, meeting action items, or manual notes to be recorded in `.forgekit/docs/task-intake.md` first: redacted original text, responsibility split, time window, AI interpretation, Derived Task IDs, and Human Review status. `requirements.md` records requirement facts, `task-board.md` records derived task status with Source ID backlinks, and `changelog.md` records completed version changes; none of them replaces the source assignment ledger.
 
 The AI Engineering Loop scales artifacts by risk:
 
@@ -262,6 +265,7 @@ ForgeKit can coexist with ECC: ECC enhances the AI tool; ForgeKit constrains the
 
 | Version | User-facing change |
 | --- | --- |
+| `0.28.1` | Source-First Task Intake: adds `.forgekit/docs/task-intake.md` for source assignment text, AI interpretation, task backlinks, and human review status. |
 | `0.28.0` | Worktree Playbook: adds manual worktree isolation guidance and short entry rules without automatic worktree scheduling. |
 | `0.27.0` | Optional Loop Operation Mode: adds explicit loop dry-run / one-step / continue / stop-handoff protocols without an automatic runner. |
 | `0.26.0` | Maker / Checker Protocol: adds a managed docs template and review evidence fields to separate implementation and review without automatic multi-agent scheduling. |

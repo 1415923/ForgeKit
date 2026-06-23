@@ -33,6 +33,7 @@ When a task names a ForgeKit skill, read the project-local `.agents/skills/<skil
 | Project suitability assessment | `governance/agent-suitability.md`, `.forgekit/docs/project-suitability.md`, `.forgekit/docs/project-trial-record.md` | `project-suitability` |
 | Existing project handover | existing README/usage/setup/test/deploy docs first, then `.forgekit/docs/codebase-map.md`, `.codex/handover.md`, `.forgekit/docs/handover-audit.md` | `handover-review` |
 | Backfill ForgeKit managed docs from business docs | source docs one at a time, then target files under `.forgekit/docs/` | `document-backfill` |
+| Source-first task intake | `.forgekit/docs/task-intake.md`, then `.forgekit/docs/task-board.md` and `.forgekit/docs/requirements.md` | relevant existing skill |
 | Document lifecycle or archive decision | `.forgekit/docs/document-lifecycle.md`, `.forgekit/docs/document-responsibility.md` | `release-check` |
 | Feature implementation | `.codex/rules.md`, `.codex/scope.md`, `.codex/commands.md`, relevant `.codex/stacks/` only | relevant stack rules |
 | Medium or high risk change | `governance/ai-engineering-loop.md`, `.forgekit/changes/README.md`, relevant `.forgekit/changes/<id>/` files | relevant existing skill |
@@ -61,6 +62,7 @@ When a task names a ForgeKit skill, read the project-local `.agents/skills/<skil
 - Treat `.forgekit/archive-reference-report.md` as generated report-only output. It is not current-state docs, an active change, or release evidence.
 - Treat `.forgekit/current-docs-sync-report.md` as generated report-only output. It is not current-state docs, an active change, or proof that current docs are semantically correct.
 - Treat `.forgekit/smart-archive-report.md` as generated report-only advice. It is not permission to archive, does not replace user confirmation, and is not current-state truth.
+- Treat `.forgekit/docs/task-intake.md` as the source-first ledger for leader tasks, WeChat tasks, plan cells, meeting action items, document tasks, and manual notes. Preserve redacted original text before AI interpretation and task splitting; derived tasks must cite Source ID; unreviewed assignments stay `Human Review: pending`; never write secrets or unredacted sensitive data into managed docs.
 - Treat `.forgekit/docs/work-log.md` as a personal work sequence log for handoff and interrupted session recovery. If the user asks to update ForgeKit docs and this turn includes phase closure, validation, commit/push, blocking, or leader/team lead confirmation, update it; if the user explicitly asks to sync the work log, update it; stable technical fact updates alone do not force it.
 - Treat `.forgekit/docs/loop-readiness.md` and `.forgekit/docs/loop-blueprint.md` as reviewable loop design docs, not automatic execution authorization.
 - Treat `.forgekit/docs/loop-operations.md` as an explicit operation protocol, not an automatic runner or unattended loop authorization.

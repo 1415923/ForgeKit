@@ -230,6 +230,7 @@ function Test-AgentsHarness {
     Test-RequiredPath "project-template\.forgekit\docs\document-responsibility.md"
     Test-RequiredPath "project-template\.forgekit\docs\document-lifecycle.md"
     Test-RequiredPath "project-template\docs\work-log.md"
+    Test-RequiredPath "project-template\docs\task-intake.md"
     Test-RequiredPath "project-template\.forgekit\archive\README.md"
     Test-RequiredPath "project-template\.forgekit\archive\changes\README.md"
     Test-RequiredPath "project-template\.forgekit\archive\releases\README.md"
@@ -293,12 +294,25 @@ function Test-AIEngineeringLoop {
     Test-RequiredPattern "project-template\.forgekit\docs\document-lifecycle.md" "archive docs" "Document lifecycle archive docs"
     Test-RequiredPattern "project-template\.forgekit\docs\document-responsibility.md" "document-lifecycle.md" "Document responsibility lifecycle reference"
     Test-RequiredPattern "project-template\.forgekit\docs\document-responsibility.md" "work-log.md" "Document responsibility work log entry"
+    Test-RequiredPattern "project-template\.forgekit\docs\document-responsibility.md" "task-intake.md" "Document responsibility task intake entry"
     Test-RequiredPattern "project-template\docs\codebase-map.md" ".forgekit/docs/work-log.md" "Codebase map work log index"
+    Test-RequiredPattern "project-template\docs\codebase-map.md" ".forgekit/docs/task-intake.md" "Codebase map task intake index"
     Test-RequiredPattern "project-template\docs\work-log.md" "personal work sequence log" "Work log purpose"
     Test-RequiredPattern "project-template\docs\work-log.md" "handoff context" "Work log handoff purpose"
     Test-RequiredPattern "project-template\docs\work-log.md" "interrupted session recovery" "Work log recovery purpose"
     Test-RequiredPattern "project-template\docs\work-log.md" "not an MR-ready changelog" "Work log changelog boundary"
     Test-RequiredPattern "project-template\docs\work-log.md" "must not contain sensitive information" "Work log sensitive info boundary"
+    Test-RequiredPattern "project-template\docs\task-intake.md" "Source Record Template" "Task intake source record template"
+    Test-RequiredPattern "project-template\docs\task-intake.md" "Original Text" "Task intake original text"
+    Test-RequiredPattern "project-template\docs\task-intake.md" "Responsibility Split" "Task intake responsibility split"
+    Test-RequiredPattern "project-template\docs\task-intake.md" "Time Window" "Task intake time window"
+    Test-RequiredPattern "project-template\docs\task-intake.md" "AI Interpretation" "Task intake AI interpretation"
+    Test-RequiredPattern "project-template\docs\task-intake.md" "Derived Tasks" "Task intake derived tasks"
+    Test-RequiredPattern "project-template\docs\task-intake.md" "Human Review" "Task intake human review"
+    Test-RequiredPattern "project-template\docs\task-intake.md" "Confidentiality: normal | sensitive-redacted" "Task intake confidentiality"
+    Test-RequiredPattern "project-template\docs\task-board.md" "Source ID" "Task board source ID backlink"
+    Test-RequiredPattern "project-template\docs\requirements.md" "不替代" "Requirements task-intake boundary"
+    Test-RequiredPattern "project-template\docs\changelog.md" "不替代" "Changelog task-intake boundary"
     Test-RequiredPattern "project-template\changes\_template\review.md" "CurrentDocsSync: confirmed | not-needed | missing | unknown" "Review current docs sync metadata"
     Test-RequiredPattern "project-template\changes\_template\review.md" "ChangelogUpdated: yes | no | not-needed | unknown" "Review changelog sync metadata"
     Test-RequiredPattern "project-template\changes\_template\review.md" "ArchitectureUpdated: yes | no | not-needed | unknown" "Review architecture sync metadata"
@@ -478,7 +492,7 @@ function Test-TemplateManifest {
     $manifestPath = Join-Path $repoRoot "project-template\.forgekit\template-manifest.json"
     if (Test-Path -LiteralPath $manifestPath) {
         $manifest = Get-Content -LiteralPath $manifestPath -Raw | ConvertFrom-Json
-        if ($manifest.template_version -ne "0.28.0") {
+        if ($manifest.template_version -ne "0.28.1") {
             Add-Error "Unexpected template manifest version: $($manifest.template_version)"
         }
         $sources = @($manifest.files | ForEach-Object { $_.source_path })
@@ -671,7 +685,7 @@ function Test-ExecutableHarness {
     Test-RequiredPattern "project-template\.codex\hooks.md" "install-hooks.sh" "Hooks installer bash"
     Test-RequiredPattern (Get-LocalToolchainPath) "detect-local-toolchain.ps1" "Local toolchain executable detector reference"
     Test-RequiredPattern "project-template\scripts\archive-changes.py" "--confirm" "Archive script apply confirmation"
-    Test-RequiredPattern "project-template\scripts\archive-changes.py" "Git working tree must be clean except the selected archive plan" "Archive script clean git guard"
+    Test-RequiredPattern "project-template\scripts\archive-changes.py" "Git working tree must be clean except the selected" "Archive script clean git guard"
     Test-RequiredPattern "project-template\scripts\archive-changes.py" "Archive-Status" "Archive script machine-readable plan"
     Test-RequiredPattern "project-template\scripts\archive-changes.py" "archive-apply-report.md" "Archive script apply report"
     Test-RequiredPattern "project-template\scripts\archive-changes.py" "--reference-check" "Archive script reference check"
@@ -817,7 +831,7 @@ function Test-PluginDistribution {
     if ($codexPluginJson.name -ne "forgekit") {
         Add-Error "Unexpected Codex plugin name in root plugin.json: $($codexPluginJson.name)"
     }
-    if ($codexPluginJson.version -ne "0.28.0") {
+    if ($codexPluginJson.version -ne "0.28.1") {
         Add-Error "Unexpected Codex plugin version in root plugin.json: $($codexPluginJson.version)"
     }
     if ($codexPluginJson.skills -ne "./skills/") {
@@ -828,7 +842,7 @@ function Test-PluginDistribution {
     if ($claudePluginJson.name -ne "forgekit") {
         Add-Error "Unexpected Claude plugin name in root plugin.json: $($claudePluginJson.name)"
     }
-    if ($claudePluginJson.version -ne "0.28.0") {
+    if ($claudePluginJson.version -ne "0.28.1") {
         Add-Error "Unexpected Claude plugin version in root plugin.json: $($claudePluginJson.version)"
     }
     $claudeSkills = @($claudePluginJson.skills)

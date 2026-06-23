@@ -49,6 +49,7 @@ REQUIRED_REPO_PATHS = [
     "project-template/changes/_template/retro.md",
     "project-template/docs/codebase-map.md",
     "project-template/docs/work-log.md",
+    "project-template/docs/task-intake.md",
     "project-template/docs/local-toolchain.md",
     "project-template/docs/loop-readiness.md",
     "project-template/docs/loop-blueprint.md",
@@ -71,6 +72,7 @@ REQUIRED_GENERATED_PATHS = [
     ".forgekit/archive/releases/README.md",
     ".forgekit/docs/codebase-map.md",
     ".forgekit/docs/work-log.md",
+    ".forgekit/docs/task-intake.md",
     ".forgekit/docs/local-toolchain.md",
     ".forgekit/docs/loop-readiness.md",
     ".forgekit/docs/loop-blueprint.md",
@@ -435,6 +437,65 @@ def assert_worktree_playbook(root, playbook_path, blueprint_path, maker_checker_
         fail(".codex/rules.md missing worktree safety rules:\n" + "\n".join(missing_rules))
 
 
+def assert_task_intake(root, intake_path, task_board_path, requirements_path, changelog_path, agents_path, claude_path, rules_path):
+    intake = (root / intake_path).read_text(encoding="utf-8")
+    task_board = (root / task_board_path).read_text(encoding="utf-8")
+    requirements = (root / requirements_path).read_text(encoding="utf-8")
+    changelog = (root / changelog_path).read_text(encoding="utf-8")
+    agents = (root / agents_path).read_text(encoding="utf-8")
+    claude = (root / claude_path).read_text(encoding="utf-8")
+    rules = (root / rules_path).read_text(encoding="utf-8")
+    intake_required = [
+        "Purpose:",
+        "## When to Use",
+        "## Source Record Template",
+        "Source ID",
+        "Source Type: leader-plan-cell | wechat | meeting | document | manual-note",
+        "Received At",
+        "Sender / Source",
+        "Original Location",
+        "Human Review: pending | confirmed | corrected | rejected",
+        "Confidentiality: normal | sensitive-redacted",
+        "Original Text",
+        "Responsibility Split",
+        "Time Window",
+        "AI Interpretation",
+        "Derived Tasks",
+        "Open Questions",
+        "Human Review Status",
+        "Redaction Rules",
+    ]
+    missing_intake = [item for item in intake_required if item not in intake]
+    if missing_intake:
+        fail(f"task-intake.md missing expected text:\n" + "\n".join(missing_intake))
+    if "Source ID" not in task_board:
+        fail("task-board.md must include Source ID backlinks")
+    if "task-intake.md" not in requirements or "不替代" not in requirements:
+        fail("requirements.md must not imply it replaces task-intake.md")
+    if "task-intake.md" not in changelog or "不替代" not in changelog:
+        fail("changelog.md must not imply it replaces task-intake.md")
+    entry_required = [
+        ".forgekit/docs/task-intake.md",
+        "Preserve redacted original text before AI interpretation and task splitting",
+        "derived tasks must cite Source ID",
+        "Human Review: pending",
+    ]
+    for label, text in [("AGENTS.md", agents), ("CLAUDE.md", claude)]:
+        missing_entry = [item for item in entry_required if item not in text]
+        if missing_entry:
+            fail(f"{label} missing task-intake rules:\n" + "\n".join(missing_entry))
+    rules_required = [
+        ".forgekit/docs/task-intake.md",
+        "先保留脱敏原文",
+        "拆解任务必须引用 Source ID",
+        "Human Review: pending",
+        "不得把账号、密码、token、证书、环境地址或敏感配置原样写入 managed docs",
+    ]
+    missing_rules = [item for item in rules_required if item not in rules]
+    if missing_rules:
+        fail(".codex/rules.md missing task-intake rules:\n" + "\n".join(missing_rules))
+
+
 def assert_json(path):
     try:
         json.loads(path.read_text(encoding="utf-8"))
@@ -445,8 +506,8 @@ def assert_json(path):
 def assert_manifest_lock(target):
     lock_path = target / ".forgekit" / "template-lock.json"
     lock = json.loads(lock_path.read_text(encoding="utf-8"))
-    if lock.get("installed_version") != "0.28.0":
-        fail("template-lock installed_version must be 0.28.0")
+    if lock.get("installed_version") != "0.28.1":
+        fail("template-lock installed_version must be 0.28.1")
     if lock.get("managed_docs_root") != ".forgekit/docs":
         fail("template-lock managed_docs_root must match boundary")
     if lock.get("change_root") != ".forgekit/changes":
@@ -499,7 +560,7 @@ def assert_upgrade_report(repo, target):
         fail("upgrade must not overwrite managed docs")
     assert_paths(target, [
         ".forgekit/upgrade-report.md",
-        ".forgekit/upgrade-export/0.28.0/.forgekit/docs/project-plan.md",
+        ".forgekit/upgrade-export/0.28.1/.forgekit/docs/project-plan.md",
     ])
 
 
@@ -1126,6 +1187,16 @@ def main():
         "CLAUDE.md",
         ".codex/rules.md",
     )
+    assert_task_intake(
+        repo / "project-template",
+        "docs/task-intake.md",
+        "docs/task-board.md",
+        "docs/requirements.md",
+        "docs/changelog.md",
+        "AGENTS.md",
+        "CLAUDE.md",
+        ".codex/rules.md",
+    )
     assert_absent_paths(repo, [
         "scripts/maker-checker-runner.py",
         "scripts/checker-runner.py",
@@ -1188,6 +1259,16 @@ def main():
             ".forgekit/docs/worktree-playbook.md",
             ".forgekit/docs/loop-blueprint.md",
             ".forgekit/docs/maker-checker-protocol.md",
+            "AGENTS.md",
+            "CLAUDE.md",
+            ".codex/rules.md",
+        )
+        assert_task_intake(
+            target,
+            ".forgekit/docs/task-intake.md",
+            ".forgekit/docs/task-board.md",
+            ".forgekit/docs/requirements.md",
+            ".forgekit/docs/changelog.md",
             "AGENTS.md",
             "CLAUDE.md",
             ".codex/rules.md",

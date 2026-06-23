@@ -2,6 +2,8 @@
 
 版本推进必须同时参考 `.forgekit/docs/version-roadmap.md`。每个大版本结束后，应先完成对应 review/refactor 中版本，再进入下一个大版本。
 
+本文只记录完成后的用户可见版本变化、兼容性和迁移提示，不替代 `.forgekit/docs/task-intake.md` 中的任务派发原文台账，也不替代 `.forgekit/docs/task-board.md` 的执行状态。
+
 ## Unreleased
 
 关联编号：

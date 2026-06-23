@@ -33,6 +33,7 @@ This repository maintains a reusable Codex CLI workflow template.
 - Do not duplicate the same long instruction in HTML, prompts, skills, and AGENTS.
 - When adding startup behavior, make sure Codex can answer: first file to read, search starting point, stack-specific files, and validation command.
 - When adding managed docs, update `project-template/.forgekit/docs/document-responsibility.md`, `project-template/docs/codebase-map.md`, manifest checks, and smoke tests.
+- Source-first task intake belongs in `project-template/docs/task-intake.md`; do not let `requirements.md`, `task-board.md`, or `changelog.md` replace the original assignment ledger.
 
 ## Validation
 
