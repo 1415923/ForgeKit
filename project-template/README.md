@@ -17,9 +17,9 @@ ForgeKit 在生成项目内提供轻量 AI Engineering Loop：澄清目标、判
 
 ## 升级兼容
 
-从旧版本 ForgeKit 升级到新版本时，使用模板仓库里的初始化脚本加升级模式，不要使用 `-Force` / `--force`。升级模式是 report-only：只生成 `.forgekit/upgrade-report.md` 和 `.forgekit/upgrade-export/<version>/` 候选模板，不覆盖项目文件、不更新 `.forgekit/template-lock.json`、不写 business `docs/`。
+从旧版本 ForgeKit 升级到新版本时，优先使用模板仓库里的 guided upgrade 脚本，不要使用 `-Force` / `--force`。guided upgrade 是 report-only：只生成 `.forgekit/upgrade/upgrade-plan.md`、`.forgekit/upgrade/upgrade-actions.md` 和 `.forgekit/upgrade/candidates/<version>/` 候选模板，不覆盖项目文件、不更新 `.forgekit/template-lock.json`、不写 business `docs/`。
 
-升级后先查看 `.forgekit/upgrade-report.md` 和 `.forgekit/upgrade-export/<version>/`，再人工或让 AI 判断是否需要合并到当前项目流程。不要把 `.forgekit/upgrade-export/**` 当作当前态文档、活跃 change、发布证据或 changelog 内容。
+升级后先查看 `.forgekit/upgrade/upgrade-actions.md` 和 `.forgekit/upgrade/upgrade-plan.md`，再人工或让 AI 判断是否需要合并到当前项目流程。不要把 `.forgekit/upgrade/candidates/**` 当作当前态文档、活跃 change、发布证据或 changelog 内容。
 
 ## 可选增强
 

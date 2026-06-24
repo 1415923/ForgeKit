@@ -47,6 +47,7 @@ function Test-SkipTemplatePath {
     if ($normalized -eq ".forgekit/smart-archive-report.md") { return $true }
     if ($normalized -eq ".forgekit/smart-archive-apply-report.md") { return $true }
     if ($normalized -like ".forgekit/upgrade-export/*") { return $true }
+    if ($normalized -like ".forgekit/upgrade/*") { return $true }
     return $false
 }
 
@@ -144,7 +145,7 @@ function Write-BoundaryConfig {
 
     $lines = @(
         'forgekit:',
-        '  version: "0.28.2"',
+        '  version: "0.29.0"',
         "  mode: `"$SelectedMode`"",
         '',
         'roots:',

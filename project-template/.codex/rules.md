@@ -45,6 +45,7 @@
 - `.forgekit/docs/work-log.md` 只记录推进过程、验证、提交/推送、阻塞和确认，并引用 `Task ID` / `Source ID`。工作日志里的后续跟进不自动成为任务；先回到 task-intake 做 Task Decision。
 - 拆解任务必须引用 Source ID；未经人工确认的派发内容必须保持 `Human Review: pending`，不得视为最终事实；不得把账号、密码、token、证书、环境地址或敏感配置原样写入 managed docs。
 - `.forgekit/docs/work-log.md` 是个人工作顺序记录，用于交接上下文和中断会话恢复；用户要求“更新 ForgeKit 文档”且本轮包含阶段收口、验证、提交/推送、阻塞、领导/组长确认时应同步，用户明确要求“同步工作日志”时必须同步；仅更新稳定技术事实时不强制同步。
+- `.forgekit/upgrade/**` 是升级引导生成物。先读 `upgrade-actions.md`，候选模板只用于对比，不是当前态文档。
 - `.forgekit/docs/loop-readiness.md` 和 `.forgekit/docs/loop-blueprint.md` 是可审查的 loop 设计文档，不是自动执行授权。
 - `.forgekit/docs/loop-operations.md` 是显式触发的操作协议，不是自动 runner 或无人值守 loop 授权。
 - `.forgekit/docs/maker-checker-protocol.md` 是审查协议，不是多 agent 调度或自动 checker 授权。

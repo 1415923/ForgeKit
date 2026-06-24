@@ -59,6 +59,7 @@ When a task names a ForgeKit skill, read the project-local `.agents/skills/<skil
 - Do not read all business `docs/` by default; use `.forgekit/docs/codebase-map.md` to choose what matters.
 - Treat `.forgekit/template-lock.json` as an installation baseline. Do not edit it during report-only upgrade checks.
 - Treat `.forgekit/upgrade-export/**` as candidate comparison material, not current-state docs, active changes, release evidence, or changelog content.
+- Treat `.forgekit/upgrade/**` as guided upgrade output. Read `upgrade-actions.md` first; do not treat candidates as current-state docs.
 - Treat `.forgekit/docs/**` as current state docs: keep stable facts, not long process history.
 - Before updating managed docs, classify the content type: source record, requirement fact, task status, validation method, work sequence, release change, risk, design decision, or history.
 - 不要把同一事实重复写进多个文档。只写到负责文档，相关文档用链接或 Source ID 交叉引用。

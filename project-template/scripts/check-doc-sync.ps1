@@ -166,6 +166,8 @@ function Test-ChangedDocsNeedVersionRecord {
     $changedPaths = @($changedPaths | Where-Object {
         $_ -notlike ".forgekit/upgrade-export/*" -and
         $_ -notlike ".forgekit\upgrade-export\*" -and
+        $_ -notlike ".forgekit/upgrade/*" -and
+        $_ -notlike ".forgekit\upgrade\*" -and
         $_ -ne ".forgekit/archive-plan.md" -and
         $_ -ne ".forgekit\archive-plan.md" -and
         $_ -ne ".forgekit/archive-apply-report.md" -and

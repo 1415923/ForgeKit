@@ -614,8 +614,8 @@ def assert_json(path):
 def assert_manifest_lock(target):
     lock_path = target / ".forgekit" / "template-lock.json"
     lock = json.loads(lock_path.read_text(encoding="utf-8"))
-    if lock.get("installed_version") != "0.28.5":
-        fail("template-lock installed_version must be 0.28.5")
+    if lock.get("installed_version") != "0.29.0":
+        fail("template-lock installed_version must be 0.29.0")
     if lock.get("managed_docs_root") != ".forgekit/docs":
         fail("template-lock managed_docs_root must match boundary")
     if lock.get("change_root") != ".forgekit/changes":
@@ -668,8 +668,60 @@ def assert_upgrade_report(repo, target):
         fail("upgrade must not overwrite managed docs")
     assert_paths(target, [
         ".forgekit/upgrade-report.md",
-        ".forgekit/upgrade-export/0.28.5/.forgekit/docs/project-plan.md",
+        ".forgekit/upgrade-export/0.29.0/.forgekit/docs/project-plan.md",
     ])
+
+
+def assert_guided_upgrade(repo, target):
+    before_lock = (target / ".forgekit" / "template-lock.json").read_bytes()
+    doc_path = target / ".forgekit" / "docs" / "project-plan.md"
+    before_doc = doc_path.read_bytes()
+    business_note = target / "docs" / "business.md"
+    before_business = business_note.read_bytes()
+    if os.name == "nt":
+        run([
+            "powershell",
+            "-ExecutionPolicy",
+            "Bypass",
+            "-File",
+            str(repo / "scripts" / "upgrade-forgekit.ps1"),
+            "-ProjectPath",
+            str(target),
+        ], cwd=repo)
+    else:
+        run([
+            "bash",
+            str(repo / "scripts" / "upgrade-forgekit.sh"),
+            "--project-path",
+            str(target),
+        ], cwd=repo)
+    if before_lock != (target / ".forgekit" / "template-lock.json").read_bytes():
+        fail("guided upgrade must not update template-lock.json")
+    if before_doc != doc_path.read_bytes():
+        fail("guided upgrade must not overwrite managed docs")
+    if before_business != business_note.read_bytes():
+        fail("guided upgrade must not write business docs")
+    assert_paths(target, [
+        ".forgekit/upgrade/upgrade-plan.md",
+        ".forgekit/upgrade/upgrade-actions.md",
+        ".forgekit/upgrade/upgrade-inventory.json",
+        ".forgekit/upgrade/candidates/0.29.0/.forgekit/docs/project-plan.md",
+    ])
+    plan = (target / ".forgekit" / "upgrade" / "upgrade-plan.md").read_text(encoding="utf-8")
+    actions = (target / ".forgekit" / "upgrade" / "upgrade-actions.md").read_text(encoding="utf-8")
+    required_plan = [
+        "Status: report-only",
+        "Mode: guided-upgrade",
+        "must_review",
+        "merge_carefully",
+        "can_add",
+        "template_only",
+    ]
+    missing_plan = [item for item in required_plan if item not in plan]
+    if missing_plan:
+        fail("guided upgrade plan missing expected text:\n" + "\n".join(missing_plan))
+    if "Do not overwrite project facts" not in actions or "template-lock" not in actions:
+        fail("guided upgrade actions must include safety policy")
 
 
 def write_change(root, change_id, metadata, files):
@@ -1169,36 +1221,27 @@ def assert_legacy_upgrade_no_lock(repo, target):
             "-ExecutionPolicy",
             "Bypass",
             "-File",
-            str(repo / "scripts" / "init-project-template.ps1"),
-            "-TargetPath",
+            str(repo / "scripts" / "upgrade-forgekit.ps1"),
+            "-ProjectPath",
             str(target),
-            "-ProjectName",
-            "forgekit-legacy",
-            "-Mode",
-            "Standard",
-            "-Upgrade",
-            "-ExportUpgradeTemplates",
         ], cwd=repo)
     else:
         run([
             "bash",
-            str(repo / "scripts" / "init-project-template.sh"),
-            "--target-path",
+            str(repo / "scripts" / "upgrade-forgekit.sh"),
+            "--project-path",
             str(target),
-            "--project-name",
-            "forgekit-legacy",
-            "--mode",
-            "Standard",
-            "--upgrade",
-            "--export-upgrade-templates",
         ], cwd=repo)
-    report = target / ".forgekit" / "upgrade-report.md"
-    if not report.is_file():
-        fail("legacy upgrade must write .forgekit/upgrade-report.md")
+    report = target / ".forgekit" / "upgrade" / "upgrade-plan.md"
+    legacy = target / ".forgekit" / "upgrade" / "legacy-inventory.md"
+    if not report.is_file() or not legacy.is_file():
+        fail("legacy guided upgrade must write upgrade-plan.md and legacy-inventory.md")
     if (target / ".forgekit" / "template-lock.json").exists():
-        fail("legacy upgrade must not create template-lock.json")
-    if "legacy_no_lock" not in report.read_text(encoding="utf-8"):
-        fail("legacy upgrade report must mention legacy_no_lock")
+        fail("legacy guided upgrade must not create template-lock.json")
+    if "legacy_needs_inventory" not in report.read_text(encoding="utf-8"):
+        fail("legacy guided upgrade report must mention legacy_needs_inventory")
+    if "does not have `.forgekit/template-lock.json`" not in legacy.read_text(encoding="utf-8"):
+        fail("legacy inventory must explain missing lock")
 
 
 def assert_skill_frontmatter(root):
@@ -1418,6 +1461,7 @@ def main():
         assert_no_forbidden_text(target, FORBIDDEN_LEGACY_REFS, "Forbidden legacy path text found in generated project")
         run_generated_checks(target)
         assert_archive_flow(target)
+        assert_guided_upgrade(repo, target)
         assert_upgrade_report(repo, target)
         run_generated_checks(target)
         assert_legacy_upgrade_no_lock(repo, temp_parent / "legacy")

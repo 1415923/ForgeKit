@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "template_version": "0.28.5",
+  "template_version": "0.29.0",
   "boundary_aware": true,
   "files": [
     {
@@ -9,7 +9,7 @@
       "role": "agent_entry",
       "update_policy": "ask",
       "render_mode": "copy",
-      "checksum": "sha256:14d3a6fa4ae051b85cd11f50c22b5d2ff7eb9a2376a5fa13f820bb367196a575"
+      "checksum": "sha256:4d348c21869db05f5a7072e646d3730fd985f30624db82d5985bdbe06110c489"
     },
     {
       "source_path": "CLAUDE.md",
@@ -17,7 +17,7 @@
       "role": "agent_entry",
       "update_policy": "ask",
       "render_mode": "copy",
-      "checksum": "sha256:65d40db7c76405a2f4d53897e0dc0c85fe5713021acbc6c95ce2231ce30b0930"
+      "checksum": "sha256:4f0c7ee808489744a3a64c0a8464985a89d21104399dd4b5385c8e928e0d39f9"
     },
     {
       "source_path": "README.md",
@@ -25,7 +25,7 @@
       "role": "readme",
       "update_policy": "ask",
       "render_mode": "copy",
-      "checksum": "sha256:f266ebf5604b0b726f39a6722edc34159414625438674a70d755a172e4975f04"
+      "checksum": "sha256:2358082db83d9a7a02a7a5661ed46253f2fa0692e05bfc36975bcb65a907b768"
     },
     {
       "source_path": ".forgekit/project-boundary.yml",
@@ -81,7 +81,7 @@
       "role": "codex_rule",
       "update_policy": "ask",
       "render_mode": "copy",
-      "checksum": "sha256:c334fa1c894dd93c4b1bcf2529e4f116e79e0bbe60c921c46339308ea3732e50"
+      "checksum": "sha256:4467b8b3fce7bb74834c913097b8c7ce00decd8d8c9382fdb31be7d9e1595f36"
     },
     {
       "source_path": ".codex/version-gates.md",
@@ -313,7 +313,7 @@
       "role": "script",
       "update_policy": "replace",
       "render_mode": "copy",
-      "checksum": "sha256:2a31677ceeb2d7f2a66f0309ce253e00c346c13833d63fa2ef8f9af912c4bb08"
+      "checksum": "sha256:b979b5050b9adbae7e2131677faaa6719c9feacbc63e3e863e05b13d03d002d6"
     },
     {
       "source_path": "scripts/check-doc-sync.sh",
@@ -321,7 +321,7 @@
       "role": "script",
       "update_policy": "replace",
       "render_mode": "copy",
-      "checksum": "sha256:33c2fc044e3d7a99b8b7d3b13b31ad023fa12fa71f57dd751c1d60f637708f3c"
+      "checksum": "sha256:003e60ce2ea9422f773ae45b17bc2a64f03544d802b246cdd14eb91bfebc431c"
     },
     {
       "source_path": "scripts/archive-changes.py",

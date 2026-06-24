@@ -79,6 +79,21 @@ Claude Code:
 Read CLAUDE.md, prefer the project-local .agents/skills/project-init/SKILL.md, and help me initialize this project with ForgeKit. Do not read a user-level or system-level project-init path.
 ```
 
+## What To Read By Scenario
+
+New users do not need to read every file. Start with the scenario-specific entry points:
+
+| Scenario | Main files |
+| --- | --- |
+| Personal greenfield project | `AGENTS.md` / `CLAUDE.md`, `.forgekit/docs/document-responsibility.md`, `.forgekit/docs/codebase-map.md`, `.forgekit/docs/task-intake.md`, `.forgekit/docs/task-board.md`, `.forgekit/docs/work-log.md` |
+| Company project takeover | `AGENTS.md` / `CLAUDE.md`, `.forgekit/docs/document-responsibility.md`, `.forgekit/docs/codebase-map.md`, `.forgekit/docs/local-toolchain.md`, `.forgekit/docs/handover-audit.md`, business `README` / `docs/` |
+| Daily task development | `.forgekit/docs/task-intake.md`, `.forgekit/docs/task-board.md`, `.forgekit/docs/work-log.md`; read `testing.md` / `requirements.md` / `architecture.md` as needed |
+| Medium/high-risk change | `.forgekit/changes/<change-id>/`, `.forgekit/docs/testing.md`, `.forgekit/docs/changelog.md`, and `architecture.md` when needed |
+| Release check | `.forgekit/docs/changelog.md`, `.forgekit/docs/testing.md`, `.forgekit/docs/task-board.md`, `.codex/version-gates.md` |
+| ForgeKit upgrade | `.forgekit/upgrade/upgrade-plan.md`, `.forgekit/upgrade/upgrade-actions.md`, `.forgekit/upgrade/candidates/<version>/` |
+
+Takeover audit docs are not the daily task entry point. Once a project is stable, daily work usually follows `task-intake -> task-board -> work-log`, with requirements, testing, architecture, and changelog updated only when their facts change.
+
 ## What Gets Generated
 
 After generation, Codex starts from `AGENTS.md`; Claude Code starts from `CLAUDE.md`. Both share `.codex/`, `.forgekit/`, `governance/`, and `.agents/skills/`.
@@ -193,27 +208,28 @@ python3 scripts/archive-changes.py --smart-apply --report .forgekit/smart-archiv
 
 ## Upgrade An Existing Project
 
-When upgrading from an older ForgeKit version, use upgrade mode and do not use `-Force` / `--force`:
+When upgrading from an older ForgeKit version, prefer guided upgrade and do not use `-Force` / `--force`:
 
 ```powershell
-powershell -ExecutionPolicy Bypass -File .\scripts\init-project-template.ps1 -TargetPath "D:\projects\my-app" -ProjectName "my-app" -Mode Standard -Upgrade -ExportUpgradeTemplates
+powershell -ExecutionPolicy Bypass -File .\scripts\upgrade-forgekit.ps1 -ProjectPath "D:\projects\my-app"
 ```
 
 ```bash
-./scripts/init-project-template.sh --target-path "$HOME/projects/my-app" --project-name "my-app" --mode Standard --upgrade --export-upgrade-templates
+./scripts/upgrade-forgekit.sh --project-path "$HOME/projects/my-app"
 ```
 
-Upgrade mode generates reports and candidate templates only; it does not overwrite project files:
+Guided upgrade generates plans and candidate templates only; it does not overwrite project files:
 
-- Preserves project facts, `.forgekit/template-lock.json`, business `docs/`, `.codex/`, `AGENTS.md`, and `CLAUDE.md`.
-- Writes skip / can_replace / needs_merge_report / can_restore / ask / readonly classifications to `.forgekit/upgrade-report.md`.
-- Exports newer candidate templates by expanded target path under `.forgekit/upgrade-export/<version>/`.
-- If an old project has no `.forgekit/template-lock.json`, ForgeKit writes a `legacy_no_lock` report and does not create a lock automatically.
+- Preserves project facts, `.forgekit/template-lock.json`, business `docs/`, source code, `.codex/`, `AGENTS.md`, and `CLAUDE.md`.
+- Writes `.forgekit/upgrade/upgrade-plan.md` with must_review / merge_carefully / can_add / can_ignore / template_only classifications.
+- Writes `.forgekit/upgrade/upgrade-actions.md` as a short AI merge work order.
+- Exports newer candidate templates by expanded target path under `.forgekit/upgrade/candidates/<version>/`.
+- If an old project has no `.forgekit/template-lock.json`, ForgeKit writes `.forgekit/upgrade/legacy-inventory.md` and does not create a lock automatically.
 
 After upgrading, ask the assistant:
 
 ```text
-Review .forgekit/upgrade-report.md and compare .forgekit/upgrade-export/. Merge useful new ForgeKit template sections into existing project files without overwriting project facts, and do not treat upgrade-export as current-state docs.
+Read .forgekit/upgrade/upgrade-actions.md and merge ForgeKit upgrade content according to .forgekit/upgrade/upgrade-plan.md. Inspect only must_review, merge_carefully, and needed can_add files; do not overwrite project facts, business docs, source code, or template-lock, and do not treat candidates as current-state docs.
 ```
 
 ## Inherited Projects
@@ -268,6 +284,7 @@ ForgeKit can coexist with ECC: ECC enhances the AI tool; ForgeKit constrains the
 
 | Version | User-facing change |
 | --- | --- |
+| `0.29.0` | Guided Upgrade Workflow: adds standalone upgrade scripts that generate upgrade-plan, upgrade-actions, and candidate templates to reduce manual judgment and token cost. |
 | `0.28.5` | Work Source Unification: brings assigned work, self-planned work, user feedback, bugs, and technical debt into one Source ID -> Task ID -> Work Log chain. |
 | `0.28.4` | Source-to-Task Alignment: tightens task-intake, task-board, and work-log linkage so updates merge into existing Sources and task-board only accepts executable tasks. |
 | `0.28.3` | Localized triggered managed docs: loop, maker-checker, worktree, and change templates are Chinese-readable while keeping machine fields stable. |

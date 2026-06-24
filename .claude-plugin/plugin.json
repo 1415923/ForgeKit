@@ -1,6 +1,6 @@
 {
   "name": "forgekit",
-  "version": "0.28.5",
+  "version": "0.29.0",
   "description": "Project-level workflow harness for Claude Code, Codex, and adjacent AI coding tools.",
   "author": {
     "name": "ForgeKit Maintainers"

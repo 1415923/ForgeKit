@@ -512,7 +512,7 @@ function Test-TemplateManifest {
     $manifestPath = Join-Path $repoRoot "project-template\.forgekit\template-manifest.json"
     if (Test-Path -LiteralPath $manifestPath) {
         $manifest = Get-Content -LiteralPath $manifestPath -Raw | ConvertFrom-Json
-        if ($manifest.template_version -ne "0.28.5") {
+        if ($manifest.template_version -ne "0.29.0") {
             Add-Error "Unexpected template manifest version: $($manifest.template_version)"
         }
         $sources = @($manifest.files | ForEach-Object { $_.source_path })
@@ -730,12 +730,14 @@ function Test-ExecutableHarness {
     Test-RequiredPattern "project-template\scripts\check-doc-sync.ps1" ".forgekit/current-docs-sync-report.md" "PowerShell current docs sync report exclusion"
     Test-RequiredPattern "project-template\scripts\check-doc-sync.ps1" ".forgekit/smart-archive-report.md" "PowerShell smart archive report exclusion"
     Test-RequiredPattern "project-template\scripts\check-doc-sync.ps1" ".forgekit/smart-archive-apply-report.md" "PowerShell smart archive apply report exclusion"
+    Test-RequiredPattern "project-template\scripts\check-doc-sync.ps1" ".forgekit/upgrade/*" "PowerShell guided upgrade exclusion"
     Test-RequiredPattern "project-template\scripts\check-doc-sync.sh" ".forgekit/archive-plan.md" "Bash archive plan exclusion"
     Test-RequiredPattern "project-template\scripts\check-doc-sync.sh" ".forgekit/archive-apply-report.md" "Bash archive apply report exclusion"
     Test-RequiredPattern "project-template\scripts\check-doc-sync.sh" ".forgekit/archive-reference-report.md" "Bash archive reference report exclusion"
     Test-RequiredPattern "project-template\scripts\check-doc-sync.sh" ".forgekit/current-docs-sync-report.md" "Bash current docs sync report exclusion"
     Test-RequiredPattern "project-template\scripts\check-doc-sync.sh" ".forgekit/smart-archive-report.md" "Bash smart archive report exclusion"
     Test-RequiredPattern "project-template\scripts\check-doc-sync.sh" ".forgekit/smart-archive-apply-report.md" "Bash smart archive apply report exclusion"
+    Test-RequiredPattern "project-template\scripts\check-doc-sync.sh" ".forgekit/upgrade/" "Bash guided upgrade exclusion"
 }
 
 function Test-StaleText {
@@ -809,11 +811,18 @@ function Test-HarnessEntryConsistency {
     Test-RequiredPattern "scripts\init-project-template.sh" ".agents/skills/project-init/SKILL.md" "Bash init project-local startup skill"
     Test-RequiredPattern "scripts\init-project-template.sh" "upgrade-report.md" "Bash init upgrade report"
     Test-RequiredPattern "scripts\init-project-template.sh" "--export-upgrade-templates" "Bash init export upgrade templates"
-    Test-RequiredPattern "README.md" "-Upgrade" "Root README upgrade guidance"
-    Test-RequiredPattern "README.md" "upgrade-report.md" "Root README upgrade report guidance"
+    Test-RequiredPath "scripts\upgrade-forgekit.py"
+    Test-RequiredPath "scripts\upgrade-forgekit.ps1"
+    Test-RequiredPath "scripts\upgrade-forgekit.sh"
+    Test-RequiredPattern "scripts\upgrade-forgekit.py" "guided-upgrade" "Guided upgrade mode"
+    Test-RequiredPattern "scripts\upgrade-forgekit.py" "upgrade-plan.md" "Guided upgrade plan"
+    Test-RequiredPattern "scripts\upgrade-forgekit.py" "upgrade-actions.md" "Guided upgrade actions"
+    Test-RequiredPattern "scripts\upgrade-forgekit.py" "legacy-inventory.md" "Guided upgrade legacy inventory"
+    Test-RequiredPattern "README.md" "upgrade-forgekit.ps1" "Root README guided upgrade PowerShell"
+    Test-RequiredPattern "README.md" "upgrade-plan.md" "Root README guided upgrade plan"
     Test-RequiredPattern "README.md" ".agents/skills/project-init/SKILL.md" "Root README project-local startup skill"
-    Test-RequiredPattern "README.en.md" "-Upgrade" "English README upgrade guidance"
-    Test-RequiredPattern "README.en.md" "upgrade-report.md" "English README upgrade report guidance"
+    Test-RequiredPattern "README.en.md" "upgrade-forgekit.ps1" "English README guided upgrade PowerShell"
+    Test-RequiredPattern "README.en.md" "upgrade-plan.md" "English README guided upgrade plan"
     Test-RequiredPattern "README.en.md" ".agents/skills/project-init/SKILL.md" "English README project-local startup skill"
     Test-RequiredPattern "usage.html" "startupOutput" "HTML startup output"
     Test-RequiredPattern "usage.html" ".agents/skills/project-init/SKILL.md" "HTML project-local startup skill"
@@ -854,7 +863,7 @@ function Test-PluginDistribution {
     if ($codexPluginJson.name -ne "forgekit") {
         Add-Error "Unexpected Codex plugin name in root plugin.json: $($codexPluginJson.name)"
     }
-    if ($codexPluginJson.version -ne "0.28.5") {
+    if ($codexPluginJson.version -ne "0.29.0") {
         Add-Error "Unexpected Codex plugin version in root plugin.json: $($codexPluginJson.version)"
     }
     if ($codexPluginJson.skills -ne "./skills/") {
@@ -865,7 +874,7 @@ function Test-PluginDistribution {
     if ($claudePluginJson.name -ne "forgekit") {
         Add-Error "Unexpected Claude plugin name in root plugin.json: $($claudePluginJson.name)"
     }
-    if ($claudePluginJson.version -ne "0.28.5") {
+    if ($claudePluginJson.version -ne "0.29.0") {
         Add-Error "Unexpected Claude plugin version in root plugin.json: $($claudePluginJson.version)"
     }
     $claudeSkills = @($claudePluginJson.skills)
