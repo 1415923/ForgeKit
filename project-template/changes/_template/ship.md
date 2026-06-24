@@ -1,17 +1,17 @@
-# Ship
+# 发布 / 交接
 
-## Release Steps
+## 发布 / 交接步骤
 
-- Steps needed to release or hand off this change.
+- 发布或交接本变更需要哪些步骤。
 
-## Rollback
+## 回滚
 
-- How to undo or mitigate the change if needed.
+- 必要时如何撤销或缓解本变更。
 
-## User-Visible Change
+## 用户可见变化
 
-- What users, operators, or maintainers should know.
+- 用户、运维人员或维护者需要知道什么。
 
-## Current Docs Sync
+## 当前态文档同步
 
-- Which stable result was synced to `.forgekit/docs/changelog.md`, `.forgekit/docs/version-roadmap.md`, or other current state docs?
+- 哪些稳定结果已经同步到 `.forgekit/docs/changelog.md`、`.forgekit/docs/version-roadmap.md` 或其他当前态文档？

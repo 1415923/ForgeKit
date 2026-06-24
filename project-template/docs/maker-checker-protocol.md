@@ -1,100 +1,100 @@
-# Maker / Checker Protocol
+# Maker / Checker 协议
 
-Purpose: separate code-writing evidence from independent review evidence for medium and high risk changes.
+用途：为中高风险代码变更分离“实现证据”和“独立复核证据”。
 
-This protocol is a review workflow. It is not a multi-agent scheduler, sub-agent configuration, automatic checker runner, daemon, MCP integration, worktree automation, or automatic PR flow.
+本文是审查流程，不是多 agent 调度器、sub-agent 配置、自动 checker runner、daemon、MCP 集成、worktree 自动化或自动 PR 流程。
 
-## Roles
+## 角色
 
-| Role | Responsible For | Not Responsible For |
+| 角色 | 负责什么 | 不负责什么 |
 | --- | --- | --- |
-| Maker | Understand the task, edit code, run baseline validation, and record implementation evidence | Declaring the change finally passed |
-| Checker | Review the diff, validation evidence, risks, document sync, and open issues from a clean review perspective | Expanding scope or implementing new features unless the user explicitly asks |
-| User | Accept final product, business, release, and risk decisions | Supplying missing implementation evidence after the fact |
+| Maker | 理解任务、修改代码、运行基础验证、记录实现证据 | 宣布变更最终通过 |
+| Checker | 从干净复查视角审查 diff、验证证据、风险、文档同步和未决问题 | 扩大范围或新增功能，除非用户明确要求 |
+| User | 接受最终产品、业务、发布和风险决定 | 事后补充缺失的实现证据 |
 
-## Maker Phase
+## Maker 阶段
 
-The Maker should:
+Maker 应该：
 
-- restate the requested scope and risk level
-- modify only files needed for the confirmed scope
-- run the agreed baseline validation command when feasible
-- record changed files, implementation summary, validation run, known risks, and not-verified items
-- mark the change `ready-for-check`, `blocked`, or `partial`
+- 复述请求范围和风险等级
+- 只修改确认范围内需要修改的文件
+- 可行时运行约定的基础验证命令
+- 记录修改文件、实现摘要、验证运行、已知风险和未验证项
+- 将变更标记为 `ready-for-check`、`blocked` 或 `partial`
 
-The Maker must not treat its own implementation as final approval. The strongest Maker outcome is `ready-for-check`.
+Maker 不能把自己的实现视为最终批准。Maker 能给出的最强结论是 `ready-for-check`。
 
-## Checker Phase
+## Checker 阶段
 
-The Checker should:
+Checker 应该：
 
-- start from the current diff and recorded Maker evidence
-- review code behavior, validation results, risk notes, and document sync
-- check whether sensitive information, business docs, secrets, deploy files, or CI were modified unexpectedly
-- report findings with file and line references where possible
-- recommend `pass`, `needs-fix`, or `manual-review`
+- 从当前 diff 和已记录的 Maker 证据开始
+- 审查代码行为、验证结果、风险说明和文档同步
+- 检查是否意外修改了敏感信息、业务文档、secrets、deploy 文件或 CI
+- 尽量用文件和行号报告发现的问题
+- 给出 `pass`、`needs-fix` 或 `manual-review` 建议
 
-The Checker should not broaden the requested scope, rewrite unrelated code, or add new features unless the user explicitly asks for that work.
+Checker 不应扩大请求范围、重写无关代码或新增功能，除非用户明确要求。
 
-## Single Agent Use
+## 单 agent 使用
 
-A single agent may follow this protocol by separating context and output:
+单个 agent 也可以通过分离上下文和输出使用本协议：
 
-1. Maker phase: implement and write Maker evidence.
-2. Context reset or explicit phase switch.
-3. Checker phase: review the diff and Maker evidence as if reviewing another contributor.
+1. Maker 阶段：实现并写下 Maker 证据。
+2. 上下文重置或明确切换阶段。
+3. Checker 阶段：像复查另一个贡献者一样审查 diff 和 Maker 证据。
 
-Single-agent use is still a process separation. It is not proof of independence, and high-risk decisions may still require human review.
+单 agent 使用仍然只是流程分离，不代表真正独立；高风险决定仍可能需要人工复查。
 
-## Multi Agent Use
+## 多 agent 使用
 
-Multiple agents, sub-agents, or human reviewers may use the same protocol, but they are optional implementation choices. ForgeKit v0.26 does not generate sub-agent configuration, runner code, worktree automation, or automatic review dispatch.
+多个 agent、sub-agent 或人工 reviewer 可以使用同一协议，但它们只是可选实现方式。ForgeKit v0.26 不生成 sub-agent 配置、runner 代码、worktree 自动化或自动审查派发。
 
-## Worktree Isolation
+## Worktree 隔离
 
-Maker and Checker may use Git worktrees for isolation when the user explicitly asks or confirms the plan. Worktrees can help separate parallel tasks, experiments, or clean review views.
+用户明确要求或确认方案时，Maker 和 Checker 可以使用 Git worktree 做隔离。Worktree 可用于分离并行任务、实验或干净复查视角。
 
-ForgeKit v0.28 does not require worktrees and does not automatically create them. Before using a worktree, confirm a clean source working tree, base branch, worktree path, branch name, allowed paths, validation command, and cleanup plan. Record the outcome in the work log or change review.
+ForgeKit v0.28 不要求 worktree，也不会自动创建 worktree。使用前必须确认源工作区干净、base branch、worktree path、branch name、allowed paths、validation command 和 cleanup plan。结果记录到工作日志或 change review。
 
-## Evidence Location
+## 证据位置
 
-For medium or high risk changes, record Maker and Checker evidence in:
+中高风险变更的 Maker 和 Checker 证据记录在：
 
 - `.forgekit/changes/<change-id>/review.md`
 
-Low risk changes may summarize Maker/Checker evidence in the final response when the user has not requested a change folder.
+低风险变更如果用户没有要求 change folder，可以在最终回复里简要总结 Maker/Checker 证据。
 
-## Status Values
+## 状态值
 
 Maker status:
 
-- `ready-for-check`: implementation and baseline validation evidence are ready for review
-- `blocked`: implementation cannot continue without user input or external state
-- `partial`: implementation is incomplete or validation is incomplete
+- `ready-for-check`：实现和基础验证证据已准备好复查
+- `blocked`：缺少用户输入或外部状态，无法继续实现
+- `partial`：实现未完成或验证未完成
 
 Checker status:
 
-- `pass`: no blocking finding found in the reviewed scope
-- `needs-fix`: blocking issues should be fixed before final acceptance
-- `manual-review`: user or domain owner judgment is required
-- `not-run`: checker phase has not run yet
+- `pass`：审查范围内没有发现阻塞问题
+- `needs-fix`：最终接受前应修复阻塞问题
+- `manual-review`：需要用户或领域负责人判断
+- `not-run`：尚未运行 checker 阶段
 
-## Minimum Review Focus
+## 最小复查重点
 
-The Checker should prioritize:
+Checker 优先检查：
 
-- diff behavior and unintended side effects
-- validation command and result quality
-- known risks and missing verification
-- document sync for current facts and changelog needs
-- accidental changes to business docs, sensitive information, secrets, deploy files, or CI
-- whether the implementation stayed inside the requested scope
+- diff 行为和非预期副作用
+- 验证命令和结果质量
+- 已知风险和缺失验证
+- 当前事实和 changelog 是否需要同步
+- 是否意外修改业务文档、敏感信息、secrets、deploy 文件或 CI
+- 实现是否保持在请求范围内
 
-## Output
+## 输出
 
-Maker output should end with a clear `ready for check`, `blocked`, or `partial` statement.
+Maker 输出应以明确的 `ready for check`、`blocked` 或 `partial` 结论结束。
 
-Checker output should end with exactly one recommendation:
+Checker 输出应以且只以一个建议结束：
 
 - `pass`
 - `needs-fix`

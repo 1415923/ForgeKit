@@ -207,27 +207,27 @@ def assert_loop_docs(root, readiness_path, blueprint_path):
     blueprint = (root / blueprint_path).read_text(encoding="utf-8")
     readiness_required = [
         "Readiness Status: not-ready | partial | ready",
-        "State file exists",
-        "Validation command exists",
-        "Stop condition is defined",
-        "Human escalation path is defined",
-        "ForgeKit Loop Five",
-        "future roadmap items only",
+        "有状态文件",
+        "有验证命令",
+        "已定义停止条件",
+        "已定义人工升级路径",
+        "ForgeKit Loop 五要素",
+        "未来路线图内容",
     ]
     blueprint_required = [
-        "This is a reviewable loop design blueprint, not authorization to execute automatically.",
+        "不是自动执行授权",
         "Default: manual only.",
-        "## Trigger",
-        "## Input Sources",
-        "## State File",
-        "## Allowed Paths",
-        "## Forbidden Paths",
-        "## Validation Command",
-        "## Stop Condition",
-        "## Human Escalation",
-        "## Token Budget",
-        "## Comprehension Check",
-        "## Output / Writeback",
+        "## 触发方式",
+        "## 输入来源",
+        "## 状态文件",
+        "## 允许路径",
+        "## 禁止路径",
+        "## 验证命令",
+        "## 停止条件",
+        "## 人工升级",
+        "## Token 预算",
+        "## 理解复述",
+        "## 输出 / 回写",
         "OperationMode: dry-run | one-step | continue | stop-handoff",
         "MaxRounds:",
         "MaxFilesRead:",
@@ -242,14 +242,14 @@ def assert_loop_docs(root, readiness_path, blueprint_path):
         "WorktreeBranch:",
         "IsolationReason:",
         "CleanupRule:",
-        "Worktree fields are design fields",
-        "These operation fields are review fields",
+        "Worktree 字段只是",
+        "这些操作字段只是",
         "daemon",
         "cron",
         "MCP",
-        "automatic PR",
-        "sub-agent scheduler",
-        "worktree automation",
+        "自动 PR",
+        "sub-agent 调度器",
+        "worktree 自动化",
     ]
     missing_readiness = [item for item in readiness_required if item not in readiness]
     if missing_readiness:
@@ -266,18 +266,18 @@ def assert_loop_operations(root, operations_path, blueprint_path, agents_path, c
     claude = (root / claude_path).read_text(encoding="utf-8")
     rules = (root / rules_path).read_text(encoding="utf-8")
     operations_required = [
-        "Loop operations are off by default.",
-        "not an automatic loop runner",
+        "Loop 默认关闭",
+        "不是自动 loop runner",
         "## Loop Dry Run",
         "## Loop One Step",
         "## Loop Continue",
         "## Loop Stop / Handoff",
-        "read the loop blueprint",
-        "do not modify files",
-        "execute only one round",
-        "continue exactly one next round",
-        "Do not start another loop round during stop or handoff.",
-        "Every executed loop round must write back",
+        "只读取 loop 蓝图",
+        "不修改文件",
+        "只执行一轮",
+        "只继续下一轮",
+        "不要启动另一轮 loop",
+        "每一轮实际执行过的 loop 都必须回写",
         ".forgekit/docs/work-log.md",
     ]
     blueprint_required = [
@@ -327,29 +327,29 @@ def assert_maker_checker_protocol(root, protocol_path, review_path, agents_path,
     claude = (root / claude_path).read_text(encoding="utf-8")
     rules = (root / rules_path).read_text(encoding="utf-8")
     protocol_required = [
-        "Maker / Checker Protocol",
-        "This protocol is a review workflow.",
-        "not a multi-agent scheduler",
+        "Maker / Checker 协议",
+        "本文是审查流程",
+        "不是多 agent 调度器",
         "Maker",
         "Checker",
         "ready-for-check",
         "pass",
         "needs-fix",
         "manual-review",
-        "Single Agent Use",
-        "ForgeKit v0.26 does not generate sub-agent configuration, runner code, worktree automation, or automatic review dispatch.",
-        "## Worktree Isolation",
-        "ForgeKit v0.28 does not require worktrees and does not automatically create them.",
+        "单 agent 使用",
+        "不生成 sub-agent 配置",
+        "## Worktree 隔离",
+        "不会自动创建 worktree",
     ]
     review_required = [
-        "## Maker Summary",
+        "## Maker 摘要",
         "MakerStatus: ready-for-check | blocked | partial",
         "FilesChanged:",
         "ImplementationSummary:",
         "ValidationRun:",
         "KnownRisks:",
         "NotVerified:",
-        "## Checker Review",
+        "## Checker 复查",
         "CheckerStatus: pass | needs-fix | manual-review | not-run",
         "DiffReviewed: yes | no",
         "ValidationReviewed: yes | no",
@@ -395,29 +395,29 @@ def assert_worktree_playbook(root, playbook_path, blueprint_path, maker_checker_
     claude = (root / claude_path).read_text(encoding="utf-8")
     rules = (root / rules_path).read_text(encoding="utf-8")
     playbook_required = [
-        "# Worktree Playbook",
-        "Purpose:",
-        "## When to Use",
-        "## When Not to Use",
-        "## Naming Convention",
-        "## Worktree Creation Checklist",
-        "## Recommended Commands",
-        "## Maker / Checker Usage",
-        "## Cleanup",
-        "## Safety Rules",
-        "not a worktree runner",
-        "Do not create a worktree unless the user explicitly asks.",
+        "# Worktree 手册",
+        "用途：",
+        "## 什么时候使用",
+        "## 什么时候不要使用",
+        "## 命名约定",
+        "## 创建前检查清单",
+        "## 推荐命令",
+        "## Maker / Checker 用法",
+        "## 清理",
+        "## 安全规则",
+        "不是 worktree runner",
+        "除非用户明确要求，不要创建 worktree",
         "git status --short",
-        "Do not automatically merge, push, delete branches, remove worktrees, create PRs, or start agents.",
+        "不要自动 merge、push、删除分支、移除 worktree、创建 PR 或启动 agent",
     ]
     blueprint_required = [
-        "## Worktree Strategy",
+        "## Worktree 策略",
         "WorktreeStrategy: none | optional | required",
         "WorktreePath:",
         "WorktreeBranch:",
         "IsolationReason:",
         "CleanupRule:",
-        "These fields describe reviewable isolation intent.",
+        "这些字段只描述可审查的隔离意图",
     ]
     entry_required = [
         "Do not create a worktree unless the user explicitly asks.",
@@ -439,7 +439,7 @@ def assert_worktree_playbook(root, playbook_path, blueprint_path, maker_checker_
     missing_blueprint = [item for item in blueprint_required if item not in blueprint]
     if missing_blueprint:
         fail(f"loop-blueprint.md missing worktree strategy fields:\n" + "\n".join(missing_blueprint))
-    if "Worktree Isolation" not in maker_checker or "does not automatically create them" not in maker_checker:
+    if "Worktree 隔离" not in maker_checker or "不会自动创建 worktree" not in maker_checker:
         fail("maker-checker-protocol.md missing worktree isolation boundary")
     for label, text in [("AGENTS.md", agents), ("CLAUDE.md", claude)]:
         missing_entry = [item for item in entry_required if item not in text]

@@ -1,6 +1,6 @@
-# Review
+# 复查
 
-## Maker Summary
+## Maker 摘要
 
 MakerStatus: ready-for-check | blocked | partial
 FilesChanged:
@@ -9,7 +9,7 @@ ValidationRun:
 KnownRisks:
 NotVerified:
 
-## Checker Review
+## Checker 复查
 
 CheckerStatus: pass | needs-fix | manual-review | not-run
 DiffReviewed: yes | no
@@ -20,21 +20,21 @@ Findings:
 RequiredFixes:
 FinalRecommendation:
 
-## Self Review
+## 自查
 
-- What changed?
-- Why is the change limited to the intended scope?
+- 改了什么？
+- 为什么本次变更仍限制在预期范围内？
 
-## Risks Remaining
+## 剩余风险
 
-- Known tradeoffs, edge cases, or follow-up work.
+- 已知取舍、边界情况或后续工作。
 
-## Docs Updated
+## 文档同步
 
-- Current state docs, changelog, task board, or change artifacts updated.
-- Stable conclusions that belong in `.forgekit/docs/` are not left only in this change folder.
+- 当前态文档、changelog、任务看板或 change 工件是否已更新。
+- 属于 `.forgekit/docs/` 的稳定结论，不应只留在本 change folder 中。
 
-## Current Docs Sync Metadata
+## 当前态文档同步元信息
 
 CurrentDocsSync: confirmed | not-needed | missing | unknown
 ChangelogUpdated: yes | no | not-needed | unknown

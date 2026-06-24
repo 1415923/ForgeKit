@@ -1,8 +1,8 @@
-# Loop Blueprint
+# Loop 蓝图
 
-Purpose: define a reviewable loop design for a specific project workflow.
+用途：为某个具体项目工作流定义可审查的 loop 设计。
 
-This is a reviewable loop design blueprint, not authorization to execute automatically. It is not a daemon, cron job, MCP integration, connector, automatic PR flow, sub-agent scheduler, or worktree automation configuration.
+本文只是可审查的 loop 设计蓝图，不是自动执行授权。它不是 daemon、cron job、MCP 集成、connector、自动 PR 流程、sub-agent 调度器或 worktree 自动化配置。
 
 Loop Name:
 Owner:
@@ -23,99 +23,99 @@ WorktreeBranch:
 IsolationReason:
 CleanupRule:
 
-These operation fields are review fields for `.forgekit/docs/loop-operations.md`. They are not automatic runner configuration.
+这些操作字段只是 `.forgekit/docs/loop-operations.md` 的审查字段，不是自动 runner 配置。
 
-Worktree fields are design fields for `.forgekit/docs/worktree-playbook.md`. They do not authorize automatic worktree creation, agent launch, merge, push, PR creation, branch deletion, or cleanup.
+Worktree 字段只是 `.forgekit/docs/worktree-playbook.md` 的设计字段，不授权自动创建 worktree、启动 agent、merge、push、创建 PR、删除分支或清理目录。
 
-## Trigger
+## 触发方式
 
 Default: manual only.
 
-Allowed trigger:
+允许的触发：
 
-- User explicitly asks to run this loop for the scope below.
+- 用户明确要求按下方范围运行这个 loop。
 
-Not allowed by default:
+默认不允许：
 
 - daemon
-- cron or timer
-- connector event
-- MCP event
-- automatic PR or issue event
-- sub-agent scheduler
-- worktree automation
+- cron 或定时器
+- connector 事件
+- MCP 事件
+- 自动 PR 或 issue 事件
+- sub-agent 调度器
+- worktree 自动化
 
-Loop operation is off by default. Only enter `dry-run`, `one-step`, `continue`, or `stop-handoff` when the user explicitly asks for that operation.
+Loop 默认关闭。只有用户明确要求 `dry-run`、`one-step`、`continue` 或 `stop-handoff` 时，才进入对应操作模式。
 
-## Input Sources
+## 输入来源
 
-| Source | Purpose | Required? |
+| 来源 | 用途 | 是否必需 |
 | --- | --- | --- |
-| `AGENTS.md` or `CLAUDE.md` | entry rules and task routing | yes |
-| `.forgekit/project-boundary.yml` | write boundary and managed roots | yes |
-| `.forgekit/docs/codebase-map.md` | modules, entry files, validation hints | yes |
-| `.forgekit/docs/local-toolchain.md` | local toolchain and command evidence | recommended |
-| `.forgekit/docs/work-log.md` | recent handoff and interruption context | recommended |
-| `.forgekit/changes/<change-id>/` | active change artifacts when loop is scoped to a change | conditional |
-| generated reports | archive, sync, smart archive, upgrade, review, or verification evidence | conditional |
+| `AGENTS.md` 或 `CLAUDE.md` | 入口规则和任务路由 | yes |
+| `.forgekit/project-boundary.yml` | 写入边界和 managed roots | yes |
+| `.forgekit/docs/codebase-map.md` | 模块、入口文件、验证提示 | yes |
+| `.forgekit/docs/local-toolchain.md` | 本地工具链和命令证据 | recommended |
+| `.forgekit/docs/work-log.md` | 最近交接和中断恢复上下文 | recommended |
+| `.forgekit/changes/<change-id>/` | loop 绑定到某个变更时的活跃 change 工件 | conditional |
+| 生成报告 | 归档、同步、smart archive、升级、审查或验证证据 | conditional |
 
-## State File
+## 状态文件
 
 Path:
 Owner:
 Write rule:
 
-The loop must not run without a clear state file. The state file must record the current step, last validation result, blocking condition, and next allowed action.
+没有明确状态文件时不能运行 loop。状态文件必须记录当前步骤、上次验证结果、阻塞条件和下一步允许动作。
 
-## Allowed Paths
+## 允许路径
 
-List exact paths or narrow prefixes:
+列出精确路径或窄前缀：
 
 - 
 
-## Forbidden Paths
+## 禁止路径
 
-Default forbidden paths and actions:
+默认禁止路径和动作：
 
-- business `docs/**` unless explicitly scoped and confirmed
-- secrets, credentials, private keys, tokens, and local-only environment files
-- deploy, release, migration, and production operation files unless explicitly scoped and confirmed
-- CI configuration unless explicitly scoped and confirmed
+- business `docs/**`，除非明确纳入范围并确认
+- secrets、credentials、private keys、tokens、本机专用环境文件
+- deploy、release、migration 和生产操作文件，除非明确纳入范围并确认
+- CI 配置，除非明确纳入范围并确认
 - `.forgekit/template-lock.json`
-- generated reports unless the loop scope explicitly says they may be regenerated
-- `README.md`, `AGENTS.md`, and `CLAUDE.md` unless the loop scope explicitly includes entry documentation changes
-- Git commit, tag, push, issue creation, PR creation, or external writes
+- 生成报告，除非 loop 范围明确允许重新生成
+- `README.md`、`AGENTS.md`、`CLAUDE.md`，除非 loop 范围明确包含入口文档变更
+- Git commit、tag、push、issue 创建、PR 创建或外部写入
 
-## Validation Command
+## 验证命令
 
 Command:
 Expected result:
 Failure handling:
 
-The loop must not run without a validation command. If validation fails, stop or escalate according to the section below.
+没有验证命令时不能运行 loop。验证失败时，按下面的停止和升级规则停止或升级给用户。
 
-## Stop Condition
+## 停止条件
 
-Stop when:
+满足以下条件时停止：
 
 - 
 
-The loop must have an observable stop condition before it starts.
+Loop 启动前必须有可观察的停止条件。
 
-## Human Escalation
+## 人工升级
 
-Escalate when:
+出现以下情况时升级给用户或负责人：
 
-- the state file is missing, ambiguous, or inconsistent
-- allowed and forbidden paths conflict
-- validation is missing, failing, or too expensive for the budget
-- required project facts are missing or contradictory
-- secrets, deploy, CI, external services, Git push, automatic PR, MCP, connector, sub-agent scheduling, or worktree automation would be needed
+- 状态文件缺失、含糊或前后不一致
+- 允许路径和禁止路径冲突
+- 验证缺失、失败或超出预算
+- 必需项目事实缺失或互相矛盾
+- 需要触碰 secrets、deploy、CI、外部服务、Git push、自动 PR、MCP、connector、sub-agent 调度或 worktree 自动化
 
 Decision owner:
 Question format:
 
-## Token Budget
+## Token 预算
 
 Budget:
 Stop or escalate when:
@@ -125,38 +125,38 @@ Max files read:
 Max files changed:
 Max commands:
 
-## Comprehension Check
+## 理解复述
 
-Before modifying files, restate:
+修改文件前先复述：
 
-- objective
-- state file
-- allowed paths
-- forbidden paths
-- validation command
-- stop condition
-- human escalation path
-- token budget
-- output and writeback target
+- 目标
+- 状态文件
+- 允许路径
+- 禁止路径
+- 验证命令
+- 停止条件
+- 人工升级路径
+- token 预算
+- 输出和回写位置
 
-## Output / Writeback
+## 输出 / 回写
 
-Write results to:
+结果写入：
 
-- `.forgekit/docs/work-log.md` or the loop state file
-- the scoped `.forgekit/changes/<change-id>/` artifact when the loop belongs to a medium or high risk change
+- `.forgekit/docs/work-log.md` 或 loop 状态文件
+- 如果 loop 属于中高风险变更，写入对应 `.forgekit/changes/<change-id>/` 工件
 
-Do not leave loop results only in chat when they are needed for handoff, validation, or interruption recovery.
+需要用于交接、验证或中断恢复的 loop 结果，不要只留在聊天里。
 
-## Maker / Checker Strategy
+## Maker / Checker 策略
 
-If the loop involves code changes, define how Maker phase and Checker phase are separated. Use `.forgekit/docs/maker-checker-protocol.md` for responsibilities, evidence fields, and review outputs.
+如果 loop 涉及代码变更，需要定义 Maker 阶段和 Checker 阶段如何分离。职责、证据字段和审查输出见 `.forgekit/docs/maker-checker-protocol.md`。
 
-This section is not automatic sub-agent configuration. It does not authorize multi-agent scheduling, worktree automation, or automatic checker execution.
+本节不是自动 sub-agent 配置，不授权多 agent 调度、worktree 自动化或自动 checker 执行。
 
-## Worktree Strategy
+## Worktree 策略
 
-Use worktrees only when isolation is explicitly needed for parallel tasks, experiments, or Maker / Checker separation.
+只有并行任务、实验或 Maker / Checker 分离确实需要隔离时，才使用 worktree。
 
 WorktreeStrategy: none | optional | required
 WorktreePath:
@@ -164,4 +164,4 @@ WorktreeBranch:
 IsolationReason:
 CleanupRule:
 
-These fields describe reviewable isolation intent. They are not automatic worktree creation, scheduler, agent orchestration, merge, push, PR, branch deletion, or cleanup configuration.
+这些字段只描述可审查的隔离意图，不授权自动创建 worktree、调度器、agent 编排、merge、push、PR、删除分支或清理目录。

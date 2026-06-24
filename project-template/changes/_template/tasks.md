@@ -1,11 +1,10 @@
-# Tasks
+# 任务
 
-| ID | Task | Status | Verification |
+| ID | 任务 | 状态 | 验证方式 |
 | --- | --- | --- | --- |
-| T-001 | Define the first implementation slice | Todo | Review proposal and scope |
+| T-001 | 定义第一段可实施切片 | Todo | 复查 proposal 和范围 |
 
-## Notes
+## 说明
 
-- Keep tasks small enough to review.
-- Do not mark Done until verification is recorded.
-
+- 任务要小到便于复查。
+- 验证记录完成前，不要标记 Done。

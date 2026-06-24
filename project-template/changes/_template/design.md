@@ -1,18 +1,17 @@
-# Design
+# 设计
 
-## Approach
+## 方案
 
-- Chosen approach and why it fits this project.
+- 选择的方案，以及为什么适合当前项目。
 
-## Alternatives
+## 备选方案
 
-- Options considered and why they were not chosen.
+- 考虑过哪些选项，为什么没有选择。
 
-## Interfaces And Data
+## 接口和数据
 
-- API, schema, config, migration, or compatibility impact.
+- API、schema、配置、migration 或兼容性影响。
 
-## Risks
+## 风险
 
-- Technical, product, security, deployment, or rollback risks.
-
+- 技术、产品、安全、部署或回滚风险。

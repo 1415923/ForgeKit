@@ -1,21 +1,20 @@
-# Verification
+# 验证
 
-## Automated Checks
+## 自动检查
 
 - Command:
 - Result:
 
-## Manual Checks
+## 人工检查
 
 - Step:
 - Expected:
 - Result:
 
-## Regression Scope
+## 回归范围
 
-- What could break and how it was checked.
+- 可能破坏什么，以及如何检查。
 
-## Not Verified
+## 未验证项
 
-- Items intentionally not verified and why.
-
+- 有意未验证的项目和原因。

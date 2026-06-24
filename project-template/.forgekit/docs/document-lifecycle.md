@@ -1,8 +1,8 @@
-# Document Lifecycle
+# 文档生命周期
 
-ForgeKit separates project documents into current facts, change process records, and archived history.
+ForgeKit 把项目文档分成当前事实、变更过程记录和历史归档，避免把“现在是什么”和“以前怎么讨论”混在一起。
 
-Core rule:
+核心规则：
 
 ```text
 current docs say what is true now.
@@ -10,33 +10,39 @@ changes explain why and how one change happened.
 archive preserves history without becoming current truth.
 ```
 
-## Document Layers
+中文理解：
 
-| Layer | Default Path | Purpose | Default Read |
+- 当前态文档只写现在仍然成立的事实。
+- change 文档解释一次变更为什么发生、怎么执行、怎么验证。
+- archive 保存历史，但默认不再作为当前事实来源。
+
+## 文档层级
+
+| 层级 | 默认路径 | 用途 | 默认读取 |
 | --- | --- | --- | --- |
-| current state docs | `.forgekit/docs/` | Current project facts, requirements, architecture, validation, and release state | Yes, read task-relevant files |
-| change process docs | `.forgekit/changes/<change-id>/` | Reviewable artifacts for one medium/high risk change | Only when related to the current task |
-| archive docs | `.forgekit/archive/` | Closed changes, old release material, retros, audit evidence | No, unless history is explicitly relevant |
+| current state docs | `.forgekit/docs/` | 当前项目事实、需求、架构、验证方式和发布状态 | 是，但只读任务相关文件 |
+| change process docs | `.forgekit/changes/<change-id>/` | 单次中高风险变更的可审查工件 | 只在和当前任务相关时读取 |
+| archive docs | `.forgekit/archive/` | 已关闭变更、旧发布材料、复盘和审计证据 | 默认不读，除非历史明确相关 |
 
-## Current State Docs
+## 当前态文档
 
-Current docs keep stable facts, not long process logs.
+当前态文档保留稳定事实，不保存长过程流水。
 
-| Document | Write | Do Not Write |
+| 文档 | 写什么 | 不写什么 |
 | --- | --- | --- |
-| `project-plan.md` | Current users, product shape, scope, non-goals, landing conditions, and roadmap | Discussion logs, discarded option details, historical arguments |
-| `architecture.md` | Current architecture, module responsibilities, data flow, API boundaries, and constraints | Every architecture change process or long old-architecture history |
-| `requirements.md` | Current requirements, acceptance criteria, priority, and scope boundary | Full debate history for discarded requirements |
-| `testing.md` | Current validation commands, test scope, test strategy, and known gaps | One-off test run logs or temporary failure streams |
-| `changelog.md` | User-visible changes, compatibility notes, migration notes, release summaries | Internal implementation logs, task minutiae, long review records |
+| `project-plan.md` | 当前用户、产品形态、范围、非目标、落地条件和路线 | 讨论流水、已废弃方案细节、历史争论 |
+| `architecture.md` | 当前架构、模块职责、数据流、API 边界和约束 | 每次架构变化过程或旧架构长历史 |
+| `requirements.md` | 当前需求、验收标准、优先级和范围边界 | 已废弃需求的完整讨论过程 |
+| `testing.md` | 当前验证命令、测试范围、测试策略和已知缺口 | 单次测试运行日志或临时失败流水 |
+| `changelog.md` | 用户可见变化、兼容性、迁移提示、发布摘要 | 内部实现流水、所有任务细节、长 review 记录 |
 
-Short stable reasons may stay in current docs with `Reason:`. Long process history belongs in the related change or archive.
+短的稳定原因可以用 `Reason:` 留在当前态文档里。长过程历史应放到对应 change 或 archive。
 
-## Change Process
+## 变更过程
 
-Change process docs live under `.forgekit/changes/<change-id>/`.
+变更过程文档位于 `.forgekit/changes/<change-id>/`。
 
-`proposal.md` owns the lifecycle metadata:
+`proposal.md` 负责生命周期元信息：
 
 ```text
 Status: draft | active | done | archived
@@ -46,74 +52,74 @@ Owner: <name>
 Reason: <short reason>
 ```
 
-Status meanings:
+Status 含义：
 
-| Status | Meaning |
+| Status | 含义 |
 | --- | --- |
-| `draft` | Being discussed; implementation is not confirmed. |
-| `active` | Confirmed and being executed. |
-| `done` | Implemented and verified; stable conclusions have been synced back to current docs, but the change still sits in the active change area for short-term review. |
-| `archived` | Historical material; default agents should not treat it as active context. |
+| `draft` | 正在讨论，尚未确认实施。 |
+| `active` | 已确认并正在执行。 |
+| `done` | 已实现并验证，稳定结论已同步回当前态文档，但短期仍留在 active change 区方便复查。 |
+| `archived` | 历史材料；默认 agent 不应把它当作活跃上下文。 |
 
-When a medium/high change is completed, sync stable conclusions back to current docs:
+中高风险变更完成后，应把稳定结论同步回当前态文档：
 
-| Conclusion | Sync To |
+| 稳定结论 | 同步到 |
 | --- | --- |
-| Product scope or non-goal changes | `.forgekit/docs/project-plan.md` |
-| Architecture, module, interface, or data-flow changes | `.forgekit/docs/architecture.md` |
-| Requirement and acceptance changes | `.forgekit/docs/requirements.md` |
-| Validation command or test strategy changes | `.forgekit/docs/testing.md` |
-| User-visible behavior, compatibility, or migration changes | `.forgekit/docs/changelog.md` |
-| Risk, debt, or incidents | Matching risk, debt, or incident docs |
+| 产品范围或非目标变化 | `.forgekit/docs/project-plan.md` |
+| 架构、模块、接口或数据流变化 | `.forgekit/docs/architecture.md` |
+| 需求和验收变化 | `.forgekit/docs/requirements.md` |
+| 验证命令或测试策略变化 | `.forgekit/docs/testing.md` |
+| 用户可见行为、兼容性或迁移变化 | `.forgekit/docs/changelog.md` |
+| 风险、债务或事故 | 对应 risk、debt 或 incident 文档 |
 
-## Archive
+## 归档
 
-Archive docs live under `.forgekit/archive/`.
+归档文档位于 `.forgekit/archive/`。
 
-Archive is not a current-state source. Do not read it by default. Read archive only when the user asks for history, audit, regression analysis, incident review, historical decision explanation, or old-version comparison.
+Archive 不是当前态事实来源。默认不要读取 archive；只有用户要求历史、审计、回归分析、事故复盘、历史决策解释或旧版本对比时才读取。
 
-## Archive Plan Dry Run
+## 归档计划 dry-run
 
-`scripts/archive-changes.py --dry-run` can generate `.forgekit/archive-plan.md` for completed changes.
+`scripts/archive-changes.py --dry-run` 可以为已完成 change 生成 `.forgekit/archive-plan.md`。
 
-The dry-run only creates or overwrites `.forgekit/archive-plan.md`. It does not move files, change proposal status, rewrite links, update current docs, write business docs, update template-lock, commit, or push.
+dry-run 只创建或覆盖 `.forgekit/archive-plan.md`。它不移动文件、不修改 proposal 状态、不重写链接、不更新当前态文档、不写业务文档、不更新 template-lock、不 commit、不 push。
 
-The archive plan lists candidates, blocked changes, and skipped changes. `Status: archived` changes are listed as skipped with `already archived by status`.
+归档计划会列出 candidates、blocked changes 和 skipped changes。`Status: archived` 的 change 会作为 skipped 列出，原因是 `already archived by status`。
 
-`Current docs sync: not verified by script` means a human still needs to confirm that stable conclusions were copied back into current state docs before any future archive apply step.
+`Current docs sync: not verified by script` 表示脚本没有确认稳定结论是否已经同步回当前态文档；未来执行 apply 前仍需人工确认。
 
-v0.18 and v0.19 do not move files automatically. If old material becomes true again, sync the stable conclusion back into current docs instead of only linking to archive.
+v0.18 和 v0.19 不自动移动文件。旧材料如果重新变成当前事实，必须把稳定结论同步回当前态文档，而不是只链接 archive。
 
-## Archive Apply
+## 归档 apply
 
-`scripts/archive-changes.py --apply --plan .forgekit/archive-plan.md --confirm` can move reviewed candidates from `.forgekit/changes/<change-id>/` to `.forgekit/archive/changes/YYYY/<change-id>/`.
+`scripts/archive-changes.py --apply --plan .forgekit/archive-plan.md --confirm` 可以把已审查的 candidates 从 `.forgekit/changes/<change-id>/` 移动到 `.forgekit/archive/changes/YYYY/<change-id>/`。
 
-Apply requires an explicit `--confirm` flag and a clean Git working tree except for the selected `.forgekit/archive-plan.md`. It only reads `Archive-Status: candidate` entries from the dry-run plan.
+Apply 必须显式传入 `--confirm`，并要求 Git 工作区干净；唯一允许未提交的是指定的 `.forgekit/archive-plan.md`。它只读取 dry-run 计划里的 `Archive-Status: candidate` 条目。
 
-Apply does not move blocked or skipped entries. It does not rewrite links, update current docs, write business docs, update template-lock, commit, tag, or push.
+Apply 不处理 blocked 或 skipped 条目，不重写链接，不更新当前态文档，不写业务文档，不更新 template-lock，不 commit、tag 或 push。
 
-After moving a candidate, apply may update only the archived copy of `proposal.md` from `Status: done` to `Status: archived`. If the archived proposal status is not `done`, the apply report records a warning instead of guessing.
+移动 candidate 后，apply 最多只把归档后副本里的 `proposal.md` 从 `Status: done` 改成 `Status: archived`。如果归档后 proposal 状态不是 `done`，apply report 只记录 warning，不猜测修改。
 
-## Archive Reference Check
+## 归档引用检查
 
-`scripts/archive-changes.py --reference-check --plan .forgekit/archive-plan.md` can generate `.forgekit/archive-reference-report.md`.
+`scripts/archive-changes.py --reference-check --plan .forgekit/archive-plan.md` 可以生成 `.forgekit/archive-reference-report.md`。
 
-The reference check reads only `Archive-Status: candidate` entries from `.forgekit/archive-plan.md`. It does string matching only and does not decide whether a reference is harmful.
+引用检查只读取 `.forgekit/archive-plan.md` 里的 `Archive-Status: candidate` 条目。它只做字符串匹配，不判断引用是否有害。
 
-## Current Docs Sync Check
+## 当前态文档同步检查
 
-`scripts/archive-changes.py --sync-check --plan .forgekit/archive-plan.md` can generate `.forgekit/current-docs-sync-report.md`.
+`scripts/archive-changes.py --sync-check --plan .forgekit/archive-plan.md` 可以生成 `.forgekit/current-docs-sync-report.md`。
 
-The sync check reads only `Archive-Status: candidate` entries from `.forgekit/archive-plan.md` and checks structured metadata in each candidate's `review.md`. It does not semantically verify current docs, modify `.forgekit/docs/**`, write business docs, update template-lock, rewrite archive-plan, or move files.
+同步检查只读取 `.forgekit/archive-plan.md` 里的 `Archive-Status: candidate` 条目，并检查每个 candidate 的 `review.md` 结构化元信息。它不做语义验证，不修改 `.forgekit/docs/**`，不写业务文档，不更新 template-lock，不重写 archive-plan，不移动文件。
 
-The primary field is `CurrentDocsSync: confirmed | not-needed | missing | unknown`. `ChangelogUpdated` creates warnings when it is `no`, `unknown`, or missing. `ArchitectureUpdated`, `TestingUpdated`, and `RequirementsUpdated` are supporting evidence only.
+核心字段是 `CurrentDocsSync: confirmed | not-needed | missing | unknown`。`ChangelogUpdated` 为 `no`、`unknown` 或缺失时产生 warning。`ArchitectureUpdated`、`TestingUpdated`、`RequirementsUpdated` 只是辅助证据。
 
 ## Smart Archive Advisor
 
-`scripts/archive-changes.py --smart-check --plan .forgekit/archive-plan.md --reference-report .forgekit/archive-reference-report.md --sync-report .forgekit/current-docs-sync-report.md` can generate `.forgekit/smart-archive-report.md`.
+`scripts/archive-changes.py --smart-check --plan .forgekit/archive-plan.md --reference-report .forgekit/archive-reference-report.md --sync-report .forgekit/current-docs-sync-report.md` 可以生成 `.forgekit/smart-archive-report.md`。
 
-Smart check only combines machine-readable fields from the archive plan, reference report, and sync report. It does not read archive as current truth, perform AI semantic judgment, move files, change proposal status, rewrite links, modify current docs, write business docs, update template-lock, commit, or push.
+Smart check 只综合 archive plan、reference report 和 sync report 中的机器可读字段。它不把 archive 当当前事实，不做 AI 语义判断，不移动文件，不改 proposal 状态，不重写链接，不修改当前态文档，不写业务文档，不更新 template-lock，不 commit、不 push。
 
-It checks `.forgekit/docs/**`, draft/active/missing/unknown changes, and entry docs (`README.md`, `AGENTS.md`, `CLAUDE.md`). It skips archive, upgrade-export, report files, templates, and the candidate source directory itself.
+它检查 `.forgekit/docs/**`、draft/active/missing/unknown changes 和入口文档（`README.md`、`AGENTS.md`、`CLAUDE.md`）。它跳过 archive、upgrade-export、报告文件、模板和 candidate 自己的源目录。
 
-The report is generated fresh on every run. It does not move files, rewrite links, update current docs, write business docs, update template-lock, commit, tag, or push.
+报告每次运行都会重新生成。它不移动文件、不重写链接、不更新当前态文档、不写业务文档、不更新 template-lock、不 commit、tag 或 push。

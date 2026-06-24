@@ -1,50 +1,50 @@
-# Worktree Playbook
+# Worktree 手册
 
-Purpose: define safe, reviewable use of Git worktrees for parallel tasks, experiment branches, and AI multi-session collaboration.
+用途：定义 Git worktree 在并行任务、实验分支和 AI 多会话协作中的安全、可审查用法。
 
-This playbook is guidance only. It is not a worktree runner, scheduler, agent orchestration system, automatic merge flow, automatic PR flow, or unattended automation.
+本文只是指南，不是 worktree runner、scheduler、agent 编排系统、自动 merge 流程、自动 PR 流程或无人值守自动化。
 
-## When to Use
+## 什么时候使用
 
-Use a worktree when:
+以下情况可以考虑 worktree：
 
-- two tasks must proceed in parallel without sharing a dirty working tree
-- an experiment needs an isolated branch and directory
-- Maker and Checker need separate views of the same repository
-- a risky refactor needs an easy way to compare against the base branch
-- multiple AI or human sessions must avoid overwriting each other's files
+- 两个任务必须并行推进，不能共享同一个脏工作区
+- 实验需要隔离的分支和目录
+- Maker 和 Checker 需要同一仓库的不同视角
+- 高风险重构需要方便和 base branch 对比
+- 多个 AI 或人工会话需要避免互相覆盖文件
 
-## When Not to Use
+## 什么时候不要使用
 
-Do not use a worktree when:
+以下情况不要使用 worktree：
 
-- the current task is small and can be completed safely in the main working tree
-- the repository has unresolved dirty changes that have not been reviewed
-- the base branch is unclear
-- branch naming, cleanup, or validation ownership is unclear
-- secrets, deploy, CI, migrations, or production operations are involved without explicit user confirmation
-- the user has not explicitly asked to create or use a worktree
+- 当前任务很小，可以安全地在主工作区完成
+- 仓库里有未审查的脏改动
+- base branch 不清楚
+- 分支命名、清理方式或验证负责人不清楚
+- 涉及 secrets、deploy、CI、migration 或生产操作，且没有用户明确确认
+- 用户没有明确要求创建或使用 worktree
 
-## Naming Convention
+## 命名约定
 
-Recommended pattern:
+推荐模式：
 
 - Worktree path: `../<repo-name>-wt/<change-id-or-topic>`
 - Branch name: `work/<change-id-or-topic>`
 
-Examples:
+示例：
 
 - `../my-app-wt/20260616-search-refactor`
 - `work/20260616-search-refactor`
 
-Use short, scoped names. Avoid user names, secrets, ticket text with private data, or machine-specific absolute paths in template documentation.
+名称要短、范围明确。模板文档里不要写用户名、密钥、含私密信息的 ticket 原文或本机绝对路径。
 
-## Worktree Creation Checklist
+## 创建前检查清单
 
-Before creating a worktree, confirm and state:
+创建 worktree 前，先确认并说明：
 
-- user explicitly requested worktree use
-- `git status --short` is clean in the source working tree
+- 用户明确要求使用 worktree
+- 源工作区 `git status --short` 干净
 - base branch
 - worktree path
 - branch name
@@ -52,13 +52,13 @@ Before creating a worktree, confirm and state:
 - forbidden paths
 - validation command
 - cleanup plan
-- whether Maker, Checker, or both will use the worktree
+- Maker、Checker 或两者是否使用 worktree
 
-If any item is unclear, stop and ask.
+任何一项不清楚，都先停止并询问。
 
-## Recommended Commands
+## 推荐命令
 
-Inspect state:
+查看状态：
 
 ```bash
 git status --short
@@ -66,60 +66,60 @@ git branch --show-current
 git worktree list
 ```
 
-Create an isolated worktree after explicit confirmation:
+用户明确确认后创建隔离 worktree：
 
 ```bash
 git worktree add -b work/<topic> ../<repo-name>-wt/<topic> <base-branch>
 ```
 
-Check the isolated worktree:
+检查隔离 worktree：
 
 ```bash
 cd ../<repo-name>-wt/<topic>
 git status --short
 ```
 
-Remove a completed worktree only after explicit confirmation:
+只有用户明确确认后，才删除完成的 worktree：
 
 ```bash
 git worktree remove ../<repo-name>-wt/<topic>
 ```
 
-Delete a branch only after explicit confirmation:
+只有用户明确确认后，才删除分支：
 
 ```bash
 git branch -d work/<topic>
 ```
 
-Do not automatically merge, push, delete branches, remove worktrees, create PRs, or start agents.
+不要自动 merge、push、删除分支、移除 worktree、创建 PR 或启动 agent。
 
-## Maker / Checker Usage
+## Maker / Checker 用法
 
-Maker may use a worktree to implement a scoped change without disturbing the main working tree.
+Maker 可以使用 worktree 实现有范围的变更，避免干扰主工作区。
 
-Checker may use a separate worktree or the main working tree to review a clean diff, validation evidence, risks, and document sync.
+Checker 可以使用独立 worktree 或主工作区审查干净 diff、验证证据、风险和文档同步。
 
-Worktree use does not replace Maker / Checker evidence. Record the worktree path, branch, validation command, and findings in `.forgekit/changes/<change-id>/review.md` or `.forgekit/docs/work-log.md`.
+Worktree 不能替代 Maker / Checker 证据。worktree path、branch、validation command 和发现的问题应记录在 `.forgekit/changes/<change-id>/review.md` 或 `.forgekit/docs/work-log.md`。
 
-## Cleanup
+## 清理
 
-Before cleanup, record:
+清理前先记录：
 
-- final status
-- validation result
-- files changed
-- whether changes were merged, abandoned, or still pending
-- remaining branch and worktree paths
-- next owner or next step
+- 最终状态
+- 验证结果
+- 修改文件
+- 变更是已合并、放弃还是仍待处理
+- 剩余 branch 和 worktree path
+- 下一负责人或下一步
 
-Cleanup must be explicit. Do not automatically remove a worktree, delete a branch, merge, push, or create a PR.
+清理必须显式确认。不要自动移除 worktree、删除分支、merge、push 或创建 PR。
 
-## Safety Rules
+## 安全规则
 
-- Do not create a worktree unless the user explicitly asks.
-- Confirm the source working tree is clean before creation.
-- State base branch, worktree path, branch name, allowed paths, validation command, and cleanup plan before creation.
-- Do not use worktrees to bypass forbidden paths.
-- Do not write secrets or private local paths into managed docs.
-- Do not automatically merge, push, delete branches, remove worktrees, create PRs, or start agents.
-- Write results to `.forgekit/docs/work-log.md` or the scoped change review.
+- 除非用户明确要求，不要创建 worktree。
+- 创建前确认源工作区干净。
+- 创建前说明 base branch、worktree path、branch name、allowed paths、validation command 和 cleanup plan。
+- 不要用 worktree 绕过禁止路径。
+- 不要把 secrets 或本机私有路径写入管理文档。
+- 不要自动 merge、push、删除分支、移除 worktree、创建 PR 或启动 agent。
+- 结果写入 `.forgekit/docs/work-log.md` 或对应 change review。

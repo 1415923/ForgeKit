@@ -1,57 +1,56 @@
-# Loop Readiness
+# Loop 准备度
 
-Purpose: decide whether this project has enough evidence, boundaries, validation, and escalation paths to run a loop safely.
+用途：判断当前项目是否具备足够的证据、边界、验证命令和人工升级路径，可以安全运行一次明确范围的 loop。
 
-This document is not automation approval. A loop still requires an explicit user request and a reviewed `loop-blueprint.md`.
+本文不是自动化授权。真正运行 loop 仍需要用户明确请求，并且需要先审查 `loop-blueprint.md`。
 
 Readiness Status: not-ready | partial | ready
 Last Reviewed:
 Reviewer:
 Scope:
 
-## Required Conditions
+## 必备条件
 
-| Condition | Status | Evidence | Gap |
+| 条件 | 状态 | 证据 | 缺口 |
 | --- | --- | --- | --- |
-| Explicit loop objective exists | unknown |  |  |
-| State file exists | unknown |  |  |
-| Validation command exists | unknown |  |  |
-| Allowed paths are defined | unknown |  |  |
-| Forbidden paths are defined | unknown |  |  |
-| Stop condition is defined | unknown |  |  |
-| Human escalation path is defined | unknown |  |  |
-| Token budget is defined | unknown |  |  |
-| Comprehension check is defined | unknown |  |  |
-| Work-log or loop state writeback is defined | unknown |  |  |
+| 有明确的 loop 目标 | unknown |  |  |
+| 有状态文件 | unknown |  |  |
+| 有验证命令 | unknown |  |  |
+| 已定义允许修改路径 | unknown |  |  |
+| 已定义禁止触碰路径 | unknown |  |  |
+| 已定义停止条件 | unknown |  |  |
+| 已定义人工升级路径 | unknown |  |  |
+| 已定义 token 或范围预算 | unknown |  |  |
+| 已定义理解复述检查 | unknown |  |  |
+| 已定义工作日志或状态文件回写位置 | unknown |  |  |
 
-## Safety Gates
+## 安全门禁
 
-| Area | Default | Project Decision | Evidence |
+| 区域 | 默认策略 | 项目决定 | 证据 |
 | --- | --- | --- | --- |
-| Business docs | read-mostly |  |  |
-| Secrets and credentials | forbidden |  |  |
-| Deploy and release actions | forbidden without explicit confirmation |  |  |
-| CI configuration | forbidden unless explicitly scoped |  |  |
-| External services | forbidden without explicit confirmation |  |  |
-| Git commit, tag, push | forbidden without explicit confirmation |  |  |
+| 业务文档 | 默认只读 |  |  |
+| 密钥和凭据 | 禁止触碰 |  |  |
+| 部署和发布动作 | 未明确确认前禁止 |  |  |
+| CI 配置 | 未明确纳入范围前禁止 |  |  |
+| 外部服务 | 未明确确认前禁止 |  |  |
+| Git commit、tag、push | 未明确确认前禁止 |  |  |
 
-## ForgeKit Loop Five
+## ForgeKit Loop 五要素
 
-| Loop capability | ForgeKit evidence | Ready? |
+| loop 能力 | ForgeKit 证据 | 是否就绪 |
 | --- | --- | --- |
-| skill | `.agents/skills/`, `.codex/skills.md`, project-local skill instructions | unknown |
-| memory | `.forgekit/docs/work-log.md`, `.forgekit/docs/*`, `.forgekit/changes/*` | unknown |
-| validation | `.codex/commands.md`, `scripts/check-doc-sync.*`, `scripts/run-harness-check.ps1`, project validation commands | unknown |
-| boundary | `.forgekit/project-boundary.yml`, `AGENTS.md`, `CLAUDE.md`, `.codex/rules.md` | unknown |
-| reports | archive, sync, smart archive, upgrade, review, and verification reports | unknown |
+| skill | `.agents/skills/`、`.codex/skills.md`、项目内 skill 说明 | unknown |
+| memory | `.forgekit/docs/work-log.md`、`.forgekit/docs/*`、`.forgekit/changes/*` | unknown |
+| validation | `.codex/commands.md`、`scripts/check-doc-sync.*`、`scripts/run-harness-check.ps1`、项目验证命令 | unknown |
+| boundary | `.forgekit/project-boundary.yml`、`AGENTS.md`、`CLAUDE.md`、`.codex/rules.md` | unknown |
+| reports | 归档、同步、smart archive、升级、审查和验证报告 | unknown |
 
-## Known Gaps
+## 已知缺口
 
-Automation runners, worktree orchestration, connectors, MCP integration, sub-agent scheduling, and automatic PR or issue flows are future roadmap items only. They are not provided by this project template.
+自动 runner、worktree 编排、connector、MCP 集成、sub-agent 调度、自动 PR 或 issue 流程都只是未来路线图内容。当前项目模板不提供这些能力。
 
-## Decision
+## 决定
 
 Loop suitability: not-ready | partial | ready
 Reason:
 Required fixes before loop:
-

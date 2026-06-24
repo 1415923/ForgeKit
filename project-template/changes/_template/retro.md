@@ -1,17 +1,17 @@
-# Retro
+# 复盘
 
-## What Worked
+## 有效做法
 
-- Useful decisions, checks, or constraints.
+- 有帮助的决定、检查或约束。
 
-## What Did Not Work
+## 无效做法
 
-- Delays, surprises, or incorrect assumptions.
+- 延误、意外情况或错误假设。
 
-## Follow-Up
+## 后续动作
 
-- Process, docs, tests, or architecture improvements.
+- 流程、文档、测试或架构改进。
 
-## Archive Recommendation
+## 归档建议
 
-- Should this change remain under `.forgekit/changes/` for short-term review, or can it be manually archived later?
+- 本 change 是否应短期留在 `.forgekit/changes/` 方便复查，还是后续可以手动归档？

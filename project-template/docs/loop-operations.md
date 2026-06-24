@@ -1,42 +1,42 @@
-# Loop Operations
+# Loop 操作协议
 
-Purpose: define explicitly triggered loop operation modes for reviewed loop blueprints.
+用途：为已审查的 loop 蓝图定义需要用户明确触发的操作模式。
 
-Loop operations are off by default. This document is an operation protocol, not an automatic loop runner, daemon, cron job, scheduler, MCP connector, automatic PR flow, multi-agent dispatcher, worktree automation, or unattended continuous loop.
+Loop 默认关闭。本文只是操作协议，不是自动 loop runner、daemon、cron job、scheduler、MCP connector、自动 PR 流程、多 agent dispatcher、worktree 自动化或无人值守连续循环。
 
-Before any loop operation, the project must have:
+任何 loop 操作开始前，项目必须已经具备：
 
-- reviewed `.forgekit/docs/loop-blueprint.md`
-- explicit user request for the operation mode
-- state file
-- token or scope budget
-- validation command
-- stop condition
-- human escalation path
-- writeback target in `.forgekit/docs/work-log.md` or the loop state file
+- 已审查的 `.forgekit/docs/loop-blueprint.md`
+- 用户明确要求本次操作模式
+- 状态文件
+- token 或范围预算
+- 验证命令
+- 停止条件
+- 人工升级路径
+- `.forgekit/docs/work-log.md` 或 loop 状态文件中的回写位置
 
-`loop-readiness.md` and `loop-blueprint.md` remain review documents. They are not automatic execution authorization.
+`loop-readiness.md` 和 `loop-blueprint.md` 仍然只是审查文档，不是自动执行授权。
 
 ## Loop Dry Run
 
-Use when the user asks what one loop round would do.
+用户询问“一轮 loop 会做什么”时使用。
 
-Rules:
+规则：
 
-- read the loop blueprint and relevant state only
-- explain the planned one-round action, inputs, write boundary, validation, stop condition, and escalation path
-- do not modify files
-- do not run dangerous commands
-- do not commit, tag, push, create issues, or create PRs
-- write nothing unless the user explicitly asks for a record
+- 只读取 loop 蓝图和相关状态
+- 说明计划执行的一轮动作、输入、写入边界、验证、停止条件和升级路径
+- 不修改文件
+- 不运行危险命令
+- 不 commit、tag、push、创建 issue 或创建 PR
+- 除非用户明确要求记录，否则不写任何文件
 
-Output should state whether the blueprint is ready for `one-step`, blocked, or needs human clarification.
+输出应说明蓝图是否可以进入 `one-step`，还是被阻塞或需要人工澄清。
 
 ## Loop One Step
 
-Use only after the user explicitly confirms one loop round.
+只在用户明确确认执行一轮 loop 后使用。
 
-Before execution, restate:
+执行前先复述：
 
 - Loop Name
 - State File
@@ -46,64 +46,64 @@ Before execution, restate:
 - Stop Condition
 - Human Escalation
 - Token / Scope Budget
-- whether this round will modify files
+- 本轮是否会修改文件
 
-Rules:
+规则：
 
-- execute only one round
-- stay inside the allowed paths and budget
-- stop on unclear scope, budget exhaustion, validation failure, or forbidden path contact
-- run the validation command when required and feasible
-- write back the round result to `.forgekit/docs/work-log.md` or the loop state file
+- 只执行一轮
+- 保持在允许路径和预算内
+- 范围不清、预算耗尽、验证失败或触碰禁止路径时停止
+- 需要且可行时运行验证命令
+- 将本轮结果回写到 `.forgekit/docs/work-log.md` 或 loop 状态文件
 
-Default operation is one round only. Do not continue automatically.
+默认操作只是一轮，不自动继续。
 
 ## Loop Continue
 
-Use only when the user explicitly asks to continue from a state file.
+只在用户明确要求从状态文件继续时使用。
 
-Rules:
+规则：
 
-- read the state file before acting
-- continue exactly one next round unless the user explicitly confirms another round later
-- do not infer permission for repeated or unattended execution
-- write each round result to `.forgekit/docs/work-log.md` or the loop state file
-- stop and escalate on unclear state, unclear scope, budget exhaustion, validation failure, forbidden path contact, or human-decision points
+- 行动前先读状态文件
+- 只继续下一轮；如果还要再继续，必须等用户之后再次明确确认
+- 不推断用户允许重复或无人值守执行
+- 每轮结果都写入 `.forgekit/docs/work-log.md` 或 loop 状态文件
+- 状态不清、范围不清、预算耗尽、验证失败、触碰禁止路径或遇到需要人判断的节点时停止并升级
 
-`continue` means resume from state once. It does not mean keep looping.
+`continue` 的含义是从状态恢复一次，不是一直循环。
 
 ## Loop Stop / Handoff
 
-Use when the user asks to stop, pause, hand off, or summarize loop state.
+用户要求停止、暂停、交接或总结 loop 状态时使用。
 
-Write a handoff summary to `.forgekit/docs/work-log.md` or the loop state file with:
+把交接摘要写入 `.forgekit/docs/work-log.md` 或 loop 状态文件，包含：
 
-- completed work
-- unfinished work
-- blocking issues
-- validation results
-- files changed or intentionally left untouched
-- risks and not-verified items
-- recommended next step
+- 已完成工作
+- 未完成工作
+- 阻塞问题
+- 验证结果
+- 已改文件或有意未改的文件
+- 风险和未验证项
+- 建议下一步
 
-Do not start another loop round during stop or handoff.
+停止或交接期间不要启动另一轮 loop。
 
-## Stop And Escalate
+## 停止并升级
 
-Stop and ask the user or owner when:
+出现以下情况时停止并询问用户或负责人：
 
-- scope is unclear
-- budget is exhausted or missing
-- validation fails or is missing
-- state file is missing, stale, or contradictory
-- allowed paths and forbidden paths conflict
-- business docs, secrets, deploy, CI, `.forgekit/template-lock.json`, generated reports, Git writes, external writes, MCP, connector, automatic PR, sub-agent scheduling, or worktree automation would be needed
+- 范围不清
+- 预算耗尽或缺失
+- 验证失败或缺失
+- 状态文件缺失、过期或矛盾
+- 允许路径和禁止路径冲突
+- 需要触碰 business docs、secrets、deploy、CI、`.forgekit/template-lock.json`、生成报告、Git 写入、外部写入、MCP、connector、自动 PR、sub-agent 调度或 worktree 自动化
 
-## Writeback
+## 回写
 
-Every executed loop round must write back to one of:
+每一轮实际执行过的 loop 都必须回写到以下位置之一：
 
 - `.forgekit/docs/work-log.md`
-- the explicit loop state file
+- 明确指定的 loop 状态文件
 
-Chat-only output is acceptable for dry-run unless the user asks for a written record. One-step, continue, stop, and handoff should not leave required state only in chat.
+dry-run 只输出到聊天是可以的，除非用户要求写记录。one-step、continue、stop 和 handoff 不应把必要状态只留在聊天里。

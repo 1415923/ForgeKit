@@ -49,7 +49,7 @@
       "role": "managed_doc",
       "update_policy": "merge",
       "render_mode": "copy",
-      "checksum": "sha256:fdfddd556568ffb8ce23de35fbb565e68f732401fa9baa160686cdeb3fc065fd"
+      "checksum": "sha256:a5885d898f0d1b7a7f795b545b2113d9ce845c9ee3be939e181e1d502c970d2c"
     },
     {
       "source_path": ".forgekit/archive/README.md",
@@ -97,7 +97,7 @@
       "role": "change_template",
       "update_policy": "replace",
       "render_mode": "copy",
-      "checksum": "sha256:5631c11b8410ed6700d649491d59a91e6612c8ad1f5c8d7c02ec4402ea31179b"
+      "checksum": "sha256:d3fbc417e66322d117878708ac4de1c713b765bd810566cbf51efac9594b148a"
     },
     {
       "source_path": "changes/_template/proposal.md",
@@ -105,7 +105,7 @@
       "role": "change_template",
       "update_policy": "replace",
       "render_mode": "copy",
-      "checksum": "sha256:0525c15e7ae2e70c6d583aaae90e1b656cc2689bbbf3371238653aad00b5613f"
+      "checksum": "sha256:d22291268a1de36bc357753b79b55a9e3bcae5e9d42f7df4ba23e44576725333"
     },
     {
       "source_path": "changes/_template/design.md",
@@ -113,7 +113,7 @@
       "role": "change_template",
       "update_policy": "replace",
       "render_mode": "copy",
-      "checksum": "sha256:e380db054dce554b654127964f86a2a980c443c658aad8e56d2b551da3095d55"
+      "checksum": "sha256:7139070b1176fe948bd7f4f0774367cf1988afe44ed7423dc6181188a34737ef"
     },
     {
       "source_path": "changes/_template/tasks.md",
@@ -121,7 +121,7 @@
       "role": "change_template",
       "update_policy": "replace",
       "render_mode": "copy",
-      "checksum": "sha256:03fe366f484c8820af3e5e8a392e1b6c0d5396d0baeca11c7a3401a6da0107e3"
+      "checksum": "sha256:e1ee6083ca114d69b41bbb1883f794d57817937bad5f7eefc069ef4cd93c9ab1"
     },
     {
       "source_path": "changes/_template/verification.md",
@@ -129,7 +129,7 @@
       "role": "change_template",
       "update_policy": "replace",
       "render_mode": "copy",
-      "checksum": "sha256:64b540f31154ee85eb60bc8263594d24f32025f5294f7cf0efcf5b7cd51c4476"
+      "checksum": "sha256:11d3623c236abe763651b4e5c8b18f086e9c0a10a6aac2d040f4b94ac3a5aa6e"
     },
     {
       "source_path": "changes/_template/review.md",
@@ -137,7 +137,7 @@
       "role": "change_template",
       "update_policy": "replace",
       "render_mode": "copy",
-      "checksum": "sha256:f8dd7690f2d740790296df300d96893750164531db8b002309c6e934a0a78f49"
+      "checksum": "sha256:25a0cfeafd1ab2c081bf830c20e7e4ba0b8e92a086fe45a1859777b263de03ea"
     },
     {
       "source_path": "changes/_template/ship.md",
@@ -145,7 +145,7 @@
       "role": "change_template",
       "update_policy": "replace",
       "render_mode": "copy",
-      "checksum": "sha256:8d60bf475a8830c9024ce30d55c49c991fc8697bcbb5c5917e147eb22b872ea5"
+      "checksum": "sha256:7608e5a170089bcdcbd1c43fb8fdf300482bc8ad3dcc78a7c4d2a398fb6ce373"
     },
     {
       "source_path": "changes/_template/retro.md",
@@ -153,7 +153,7 @@
       "role": "change_template",
       "update_policy": "replace",
       "render_mode": "copy",
-      "checksum": "sha256:e71180b2edc37d3f919ad11206b017efbb1de8bc5f2f43cf5e8307f9729a4f5f"
+      "checksum": "sha256:ab971afbf6eb83d94ad44ca2c4583f5a72ea25118fb70a0d483b46c9b3a9d3c9"
     },
     {
       "source_path": "docs/project-plan.md",
@@ -209,7 +209,7 @@
       "role": "managed_doc",
       "update_policy": "merge",
       "render_mode": "copy",
-      "checksum": "sha256:8d601a0e8aab8bcbad4ee6b782122a6cbcbab73ed2d9633ef8202c6ee98e40bd"
+      "checksum": "sha256:ad8127e7a68b3f584c345726a757c60959360929d951616b5bc7317a65e56216"
     },
     {
       "source_path": "docs/loop-blueprint.md",
@@ -217,7 +217,7 @@
       "role": "managed_doc",
       "update_policy": "merge",
       "render_mode": "copy",
-      "checksum": "sha256:15769afa2cba34830f1a330800ef6bda24f1cf63c38410eb08c28c43dbfa8472"
+      "checksum": "sha256:6c7089adbe8a8c14facd7c308bacb0b997ea5a7249d6b500fafaf092958458d2"
     },
     {
       "source_path": "docs/loop-operations.md",
@@ -225,7 +225,7 @@
       "role": "managed_doc",
       "update_policy": "merge",
       "render_mode": "copy",
-      "checksum": "sha256:ced8fcf7cdccd47b0f34f1d71091640ab6054760d3388100f47513d2b3b8f0c4"
+      "checksum": "sha256:309c7412f9b6f390f305a1c70dcf40010381d4c40e38776d2633dfa5f2237c93"
     },
     {
       "source_path": "docs/maker-checker-protocol.md",
@@ -233,7 +233,7 @@
       "role": "managed_doc",
       "update_policy": "merge",
       "render_mode": "copy",
-      "checksum": "sha256:e5fdf21d8a87260ce5c5fcbfb4fa09d9a38a39a9bd0f3c3a1d4738bf55ebffb0"
+      "checksum": "sha256:2e770d57c58424fd3aa46fd324992a4f77dc8bbaa67635191da389b6b519b246"
     },
     {
       "source_path": "docs/worktree-playbook.md",
@@ -241,7 +241,7 @@
       "role": "managed_doc",
       "update_policy": "merge",
       "render_mode": "copy",
-      "checksum": "sha256:ba29fb2655242ff403bd0bd4c7c0d0ae83dbf62fd2cacc2589c2f2b2c5adac49"
+      "checksum": "sha256:7a4f52873ae8e44de5eb8c3e8997d52bb50d61ba323811eae0b16bb1608f74ff"
     },
     {
       "source_path": "docs/version-roadmap.md",
