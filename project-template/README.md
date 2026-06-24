@@ -10,7 +10,7 @@ ForgeKit 在生成项目内提供轻量 AI Engineering Loop：澄清目标、判
 2. 读取 `.forgekit/docs/document-responsibility.md`，判断哪些 managed docs 需要读、哪些不应更新。
 3. 读取 `.forgekit/docs/codebase-map.md`，找到代码搜索起点、模块入口和局部验证命令。
 4. 需要验证时读取 `.forgekit/docs/local-toolchain.md`；方向不清时读取 `.forgekit/docs/codex-next-work-order.md`。
-5. 任务来自领导、微信、计划表、会议或手工记录时，先写 `.forgekit/docs/task-intake.md`，再拆到 `task-board.md` 或 `requirements.md`。
+5. 工作来自领导、微信、计划表、会议、个人规划、用户反馈、bug、技术债或测试失败时，先写 `.forgekit/docs/task-intake.md`；补充和确认默认归并到已有 Source，只有满足任务准入时才进入 `task-board.md`。
 6. 中高风险变更使用 `.forgekit/changes/<id>/`；低风险改动保持轻流程。
 7. 触发式文档只在事件发生时更新：缺陷复盘、事故复盘、依赖审查、威胁建模、发布流水线、traceability、loop、maker-checker、worktree 等都不是日常必填。
 8. 编码前确认范围和验证方式；完成后只更新真正负责的文档，不把同一事实重复写入多个文件。
@@ -51,7 +51,7 @@ ForgeKit 在生成项目内提供轻量 AI Engineering Loop：澄清目标、判
 - `.forgekit/docs/loop-operations.md`：定义用户显式触发的 loop dry-run、one-step、continue、stop/handoff；它不是后台自动化或无人值守 runner。
 - `.forgekit/docs/maker-checker-protocol.md`：定义 Maker 写代码、Checker 复核证据的审查协议；它不是自动多 agent 调度器。
 - `.forgekit/docs/worktree-playbook.md`：定义手动 worktree 并行隔离、命名、检查、Maker/Checker 用法和清理规则；它不是自动调度器。
-- `.forgekit/docs/task-intake.md`：记录任务派发原文、AI 分析、责任拆分、时间窗口、Derived Task IDs 和人工确认状态；它不是需求文档、任务看板或 changelog。
+- `.forgekit/docs/task-intake.md`：记录工作来源原文或原始想法、Update Notes、Task Decision、Derived Task IDs 和人工确认状态；它不是需求文档、任务看板或 changelog。`.forgekit/docs/task-board.md` 只接收有动作、owner、下一步、Source ID 和验证方式的可执行任务。
 - `.codex/commands-catalog.md`、`.codex/hooks.md`：可选命令和 hook 候选，默认不自动启用。
 - `.codex/automation-decision.md`：判断重复流程应该做成 skill、command、hook、script、plugin、MCP 还是保留文档。
 - `.forgekit/changes/_template/`：proposal、design、tasks、verification、review、ship、retro 模板。

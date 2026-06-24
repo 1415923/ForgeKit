@@ -308,15 +308,30 @@ function Test-AIEngineeringLoop {
     Test-RequiredPattern "project-template\docs\work-log.md" "Push" "Work log push status"
     Test-RequiredPattern "project-template\docs\work-log.md" "handed-off" "Work log handoff status"
     Test-RequiredPattern "project-template\docs\work-log.md" "Not run" "Work log boundary"
+    Test-RequiredPattern "project-template\docs\work-log.md" "Task ID" "Work log task backlink"
+    Test-RequiredPattern "project-template\docs\work-log.md" "Source ID" "Work log source backlink"
+    Test-RequiredPattern "project-template\docs\work-log.md" "needs-task-decision" "Work log no automatic task creation"
     Test-RequiredPattern "project-template\docs\task-intake.md" "Source ID" "Task intake source record template"
     Test-RequiredPattern "project-template\docs\task-intake.md" "Source Type" "Task intake source type"
+    Test-RequiredPattern "project-template\docs\task-intake.md" "self-planned" "Task intake self planned source"
+    Test-RequiredPattern "project-template\docs\task-intake.md" "user-feedback" "Task intake user feedback source"
+    Test-RequiredPattern "project-template\docs\task-intake.md" "bug-found" "Task intake bug source"
+    Test-RequiredPattern "project-template\docs\task-intake.md" "tech-debt" "Task intake technical debt source"
     Test-RequiredPattern "project-template\docs\task-intake.md" "Received At" "Task intake received at"
     Test-RequiredPattern "project-template\docs\task-intake.md" "Human Review" "Task intake human review field"
     Test-RequiredPattern "project-template\docs\task-intake.md" "AI" "Task intake AI interpretation"
     Test-RequiredPattern "project-template\docs\task-intake.md" "Task ID" "Task intake derived tasks"
+    Test-RequiredPattern "project-template\docs\task-intake.md" "Update Notes" "Task intake update notes"
+    Test-RequiredPattern "project-template\docs\task-intake.md" "Task Decision" "Task intake decision gate"
+    Test-RequiredPattern "project-template\docs\task-intake.md" "Task Gate" "Task intake gate"
+    Test-RequiredPattern "project-template\docs\task-intake.md" "update-existing-task" "Task intake update existing task"
+    Test-RequiredPattern "project-template\docs\task-intake.md" "note-only" "Task intake note only"
     Test-RequiredPattern "project-template\docs\task-intake.md" "Human Review" "Task intake human review"
     Test-RequiredPattern "project-template\docs\task-intake.md" "Confidentiality:" "Task intake confidentiality"
     Test-RequiredPattern "project-template\docs\task-board.md" "Source ID" "Task board source ID backlink"
+    Test-RequiredPattern "project-template\docs\task-intake.md" "Task Gate" "Task board intake gate"
+    Test-RequiredPattern "project-template\docs\task-board.md" "Closed / Dropped / Superseded" "Task board closed table"
+    Test-RequiredPattern "project-template\docs\task-board.md" "Superseded" "Task board alignment check"
     Test-RequiredPattern "project-template\docs\requirements.md" "task-intake.md" "Requirements task-intake boundary"
     Test-RequiredPattern "project-template\docs\changelog.md" "task-intake.md" "Changelog task-intake boundary"
     Test-RequiredPattern "project-template\changes\_template\review.md" "CurrentDocsSync: confirmed `| not-needed `| missing `| unknown" "Review current docs sync metadata"
@@ -497,7 +512,7 @@ function Test-TemplateManifest {
     $manifestPath = Join-Path $repoRoot "project-template\.forgekit\template-manifest.json"
     if (Test-Path -LiteralPath $manifestPath) {
         $manifest = Get-Content -LiteralPath $manifestPath -Raw | ConvertFrom-Json
-        if ($manifest.template_version -ne "0.28.2") {
+        if ($manifest.template_version -ne "0.28.5") {
             Add-Error "Unexpected template manifest version: $($manifest.template_version)"
         }
         $sources = @($manifest.files | ForEach-Object { $_.source_path })
@@ -839,7 +854,7 @@ function Test-PluginDistribution {
     if ($codexPluginJson.name -ne "forgekit") {
         Add-Error "Unexpected Codex plugin name in root plugin.json: $($codexPluginJson.name)"
     }
-    if ($codexPluginJson.version -ne "0.28.2") {
+    if ($codexPluginJson.version -ne "0.28.5") {
         Add-Error "Unexpected Codex plugin version in root plugin.json: $($codexPluginJson.version)"
     }
     if ($codexPluginJson.skills -ne "./skills/") {
@@ -850,7 +865,7 @@ function Test-PluginDistribution {
     if ($claudePluginJson.name -ne "forgekit") {
         Add-Error "Unexpected Claude plugin name in root plugin.json: $($claudePluginJson.name)"
     }
-    if ($claudePluginJson.version -ne "0.28.2") {
+    if ($claudePluginJson.version -ne "0.28.5") {
         Add-Error "Unexpected Claude plugin version in root plugin.json: $($claudePluginJson.version)"
     }
     $claudeSkills = @($claudePluginJson.skills)

@@ -36,7 +36,7 @@ When a task names a ForgeKit skill, read the project-local `.agents/skills/<skil
 | Fill docs from answers | `governance/project-bootstrap-fill.md`, `.codex/questionnaires/` | `project-init` or `project-bootstrap-fill` |
 | Existing project handover | existing README/usage/setup/test/deploy docs first, then `.forgekit/docs/codebase-map.md`, `.codex/handover.md`, `.forgekit/docs/handover-audit.md` | `handover-review` |
 | Backfill ForgeKit managed docs from business docs | source docs one at a time, then target files under `.forgekit/docs/` | `document-backfill` |
-| Source-first task intake | `.forgekit/docs/task-intake.md`, then `.forgekit/docs/task-board.md` and `.forgekit/docs/requirements.md` | relevant existing skill |
+| Work source intake | `.forgekit/docs/task-intake.md`, then `.forgekit/docs/task-board.md` and `.forgekit/docs/requirements.md` | relevant existing skill |
 | Document lifecycle or archive decision | `.forgekit/docs/document-lifecycle.md`, `.forgekit/docs/document-responsibility.md` | `release-check` |
 | Feature implementation | `.codex/rules.md`, `.codex/scope.md`, `.codex/commands.md`, relevant `.codex/stacks/` only | relevant stack rules |
 | Medium or high risk change | `governance/ai-engineering-loop.md`, `.forgekit/changes/README.md`, relevant `.forgekit/changes/<id>/` files | relevant existing skill |
@@ -71,7 +71,10 @@ When a task names a ForgeKit skill, read the project-local `.agents/skills/<skil
 - Treat `.forgekit/archive-reference-report.md` as generated report-only output. It is not current-state docs, an active change, or release evidence.
 - Treat `.forgekit/current-docs-sync-report.md` as generated report-only output. It is not current-state docs, an active change, or proof that current docs are semantically correct.
 - Treat `.forgekit/smart-archive-report.md` as generated report-only advice. It is not permission to archive, does not replace user confirmation, and is not current-state truth.
-- `.forgekit/docs/task-intake.md` 是领导任务、微信任务、计划表格子、会议任务、文档任务和手工记录的来源台账。先保留脱敏原文，再做 AI 理解和任务拆解；拆解任务必须引用 Source ID；未人工确认的派发内容保持 `Human Review: pending`；不要把密钥或未脱敏敏感信息写入管理文档。
+- `.forgekit/docs/task-intake.md` 是工作来源台账。领导任务、微信任务、计划表格子、会议任务、文档任务、个人规划、用户反馈、bug、技术债、测试失败和调研发现都先归并来源，再生成任务；补充、确认、改期或责任修正默认写入已有 Source 的 `Update Notes`，不要默认创建新任务。
+- `.forgekit/docs/task-board.md` 只接收可执行任务：必须有动作、owner 或待确认 owner、下一步、`Source ID`、完成标准或验证方式。过时任务必须标为 `Superseded` / `Dropped`，不要继续出现在当前重点。
+- `.forgekit/docs/work-log.md` 只记录推进过程、验证、提交/推送、阻塞和确认，并引用 `Task ID` / `Source ID`。工作日志里的后续跟进不自动成为任务；先回到 task-intake 做 Task Decision。
+- 拆解任务必须引用 Source ID；未人工确认的派发内容保持 `Human Review: pending`；不要把密钥或未脱敏敏感信息写入管理文档。
 - `.forgekit/docs/work-log.md` 是个人工作顺序记录，用于交接和中断会话恢复。用户要求更新 ForgeKit 文档且本轮包含阶段收口、验证、提交/推送、阻塞或领导/组长确认时，应同步它；用户明确要求同步工作日志时必须更新；仅稳定技术事实变化不强制更新。
 - Treat `.forgekit/docs/loop-readiness.md` and `.forgekit/docs/loop-blueprint.md` as reviewable loop design docs, not automatic execution authorization.
 - Treat `.forgekit/docs/loop-operations.md` as an explicit operation protocol, not an automatic runner or unattended loop authorization.

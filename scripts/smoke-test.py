@@ -453,34 +453,60 @@ def assert_worktree_playbook(root, playbook_path, blueprint_path, maker_checker_
 def assert_task_intake(root, intake_path, task_board_path, requirements_path, changelog_path, agents_path, claude_path, rules_path):
     intake = (root / intake_path).read_text(encoding="utf-8")
     task_board = (root / task_board_path).read_text(encoding="utf-8")
+    work_log_path = task_board_path.replace("task-board.md", "work-log.md")
+    work_log = (root / work_log_path).read_text(encoding="utf-8")
     requirements = (root / requirements_path).read_text(encoding="utf-8")
     changelog = (root / changelog_path).read_text(encoding="utf-8")
     agents = (root / agents_path).read_text(encoding="utf-8")
     claude = (root / claude_path).read_text(encoding="utf-8")
     rules = (root / rules_path).read_text(encoding="utf-8")
     intake_required = [
-        "## 用途",
-        "## 什么时候使用",
-        "## 来源记录模板",
+        "Source Record",
         "Source ID",
-        "Source Type: leader-plan-cell | wechat | meeting | document | manual-note",
+        "self-planned",
+        "user-feedback",
+        "bug-found",
+        "tech-debt",
         "Received At",
         "Sender / Source",
         "Original Location",
         "Human Review: pending | confirmed | corrected | rejected",
         "Confidentiality: normal | sensitive-redacted",
         "原文",
+        "Update Notes",
         "责任拆分",
         "时间窗口",
         "AI 理解",
-        "拆解任务",
-        "待确认问题",
-        "人工确认状态",
-        "脱敏规则",
+        "Task Decision",
+        "Derived Tasks",
+        "Task Gate",
+        "note-only",
+        "update-existing-task",
+        "create-task",
+        "Human Review Status",
     ]
     missing_intake = [item for item in intake_required if item not in intake]
     if missing_intake:
         fail(f"task-intake.md missing expected text:\n" + "\n".join(missing_intake))
+    board_required = [
+        "任务准入",
+        "Source ID",
+        "Closed / Dropped / Superseded",
+        "Superseded",
+        "对齐检查",
+    ]
+    missing_board = [item for item in board_required if item not in task_board]
+    if missing_board:
+        fail("task-board.md missing source-to-task alignment rules:\n" + "\n".join(missing_board))
+    work_log_required = [
+        "Task ID",
+        "Source ID",
+        "needs-task-decision",
+        "工作日志里的待办不得直接进入看板",
+    ]
+    missing_work_log = [item for item in work_log_required if item not in work_log]
+    if missing_work_log:
+        fail("work-log.md missing task/source backlink rules:\n" + "\n".join(missing_work_log))
     if "Source ID" not in task_board:
         fail("task-board.md must include Source ID backlinks")
     if "task-intake.md" not in requirements or "不替代" not in requirements:
@@ -489,7 +515,10 @@ def assert_task_intake(root, intake_path, task_board_path, requirements_path, ch
         fail("changelog.md must not imply it replaces task-intake.md")
     entry_required = [
         ".forgekit/docs/task-intake.md",
-        "先保留脱敏原文",
+        "先归并来源，再生成任务",
+        "Update Notes",
+        "不要默认创建新任务",
+        "task-board.md",
         "拆解任务必须引用 Source ID",
         "Human Review: pending",
     ]
@@ -499,7 +528,10 @@ def assert_task_intake(root, intake_path, task_board_path, requirements_path, ch
             fail(f"{label} missing task-intake rules:\n" + "\n".join(missing_entry))
     rules_required = [
         ".forgekit/docs/task-intake.md",
-        "先保留脱敏原文",
+        "先归并来源，再生成任务",
+        "Update Notes",
+        "不要默认创建新任务",
+        "task-board.md",
         "拆解任务必须引用 Source ID",
         "Human Review: pending",
         "不得把账号、密码、token、证书、环境地址或敏感配置原样写入 managed docs",
@@ -582,8 +614,8 @@ def assert_json(path):
 def assert_manifest_lock(target):
     lock_path = target / ".forgekit" / "template-lock.json"
     lock = json.loads(lock_path.read_text(encoding="utf-8"))
-    if lock.get("installed_version") != "0.28.2":
-        fail("template-lock installed_version must be 0.28.2")
+    if lock.get("installed_version") != "0.28.5":
+        fail("template-lock installed_version must be 0.28.5")
     if lock.get("managed_docs_root") != ".forgekit/docs":
         fail("template-lock managed_docs_root must match boundary")
     if lock.get("change_root") != ".forgekit/changes":
@@ -636,7 +668,7 @@ def assert_upgrade_report(repo, target):
         fail("upgrade must not overwrite managed docs")
     assert_paths(target, [
         ".forgekit/upgrade-report.md",
-        ".forgekit/upgrade-export/0.28.2/.forgekit/docs/project-plan.md",
+        ".forgekit/upgrade-export/0.28.5/.forgekit/docs/project-plan.md",
     ])
 
 

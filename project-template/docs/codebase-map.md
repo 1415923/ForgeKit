@@ -57,14 +57,16 @@
 | --- | --- |
 | 文档该写到哪里 | `.forgekit/docs/document-responsibility.md` |
 | 当前项目目标和范围 | `.forgekit/docs/project-plan.md` |
-| 任务派发原文和 Source ID | `.forgekit/docs/task-intake.md` |
-| 当前任务状态 | `.forgekit/docs/task-board.md` |
-| 最近工作顺序和交接 | `.forgekit/docs/work-log.md` |
+| 工作来源原文、补充记录和 Task Decision | `.forgekit/docs/task-intake.md` |
+| 可执行任务、Task ID、状态和 Source ID 反链 | `.forgekit/docs/task-board.md` |
+| 最近工作顺序、验证、提交/推送和阻塞确认 | `.forgekit/docs/work-log.md` |
 | 验证命令和测试策略 | `.forgekit/docs/testing.md` |
 | 用户可见版本变化 | `.forgekit/docs/changelog.md` |
 | 中高风险变更过程 | `.forgekit/changes/<change-id>/` |
 
 不要默认读取 `.forgekit/docs/**` 全量内容。先按本文件和 `document-responsibility.md` 判断需要哪些文档。
+
+任务链路按 `task-intake.md -> task-board.md -> work-log.md` 处理：先归并工作来源，再进入看板，最后记录推进过程。公司派发、个人规划、用户反馈、bug、技术债、测试失败都走同一条链路。补充和确认默认更新已有 Source 或 Task，不默认创建新任务。
 
 ## 忽略和谨慎读取
 

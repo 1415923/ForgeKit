@@ -617,7 +617,7 @@
         '   .forgekit/docs/loop-operations.md（仅作为显式触发的 loop 操作协议，不是自动 runner）',
         '   .forgekit/docs/maker-checker-protocol.md（仅作为 Maker / Checker 审查协议，不是自动多 agent 调度）',
         '   .forgekit/docs/worktree-playbook.md（仅作为手动 worktree 隔离指南，不是自动调度器）',
-        '   .forgekit/docs/task-intake.md（任务派发原文台账：先保留脱敏原文，再做 AI 分析和任务拆解）',
+        '   .forgekit/docs/task-intake.md（工作来源台账：统一记录公司派发、个人规划、用户反馈、bug、技术债等来源，再判断是否生成可执行任务）',
         '   .codex/project.md、.codex/scope.md、.codex/commands.md',
         '',
         '3. 只按需读取技术栈：',
@@ -694,7 +694,7 @@
     function buildPrompt(type) {
       const prompts = {
         init: buildInitPrompt(),
-        dev: '请开始实现我接下来描述的功能。\n先读取 AGENTS.md、.codex/rules.md、.codex/scope.md、.codex/commands.md、.forgekit/docs/document-responsibility.md、.forgekit/docs/codebase-map.md，以及 .codex/stacks/ 中相关技术栈规则；不要默认读取全部 .forgekit/docs/**。\n如果本次任务来自领导任务、微信任务、计划表格子、会议任务或手工记录，先把脱敏原文、责任拆分、时间窗口和人工确认状态写入 .forgekit/docs/task-intake.md。\n先确认本次工作对应的 EPIC / FEAT / TASK / BUG 编号；没有编号时先帮我拆分并补到任务看板，拆解任务必须引用 Source ID。\n实现时不要做无关重构；完成后运行必要验证，并只更新真正负责的文档，不要把同一事实重复写进多个 managed docs。',
+        dev: '请开始实现我接下来描述的功能。\n先读取 AGENTS.md、.codex/rules.md、.codex/scope.md、.codex/commands.md、.forgekit/docs/document-responsibility.md、.forgekit/docs/codebase-map.md，以及 .codex/stacks/ 中相关技术栈规则；不要默认读取全部 .forgekit/docs/**。\n如果本次工作来自领导任务、微信任务、计划表格子、会议任务、个人规划、用户反馈、bug、技术债、测试失败或调研发现，先把脱敏原文或原始想法、Update Notes、Task Decision、责任拆分、时间窗口和人工确认状态写入 .forgekit/docs/task-intake.md。\n先确认本次工作对应的 EPIC / FEAT / TASK / BUG 编号；没有编号时先判断是否满足任务准入：可执行动作、owner 或待确认 owner、下一步、Source ID、完成标准或验证方式。补充和确认默认更新已有 Source 或 Task，不默认创建新任务。\n实现时不要做无关重构；完成后运行必要验证，并只更新真正负责的文档，不要把同一事实重复写进多个 managed docs。',
         large: '请按大任务多会话执行协议处理我接下来描述的任务。\n先读取 AGENTS.md、.forgekit/docs/document-responsibility.md、.forgekit/docs/codebase-map.md、.forgekit/docs/local-toolchain.md、governance/large-change-execution.md，以及相关 .codex/stacks/<stack>/。\n不要直接开始编码。请先只读探索，并只在确实需要时更新 .forgekit/docs/exploration-report.md 和 .forgekit/docs/implementation-plan.md，说明目标、非目标、相关模块、调用链、验证能力、风险和待确认问题。\n最后给出是否允许进入第一阶段编码；如果范围、风险、验证或用户确认不足，请明确拒绝进入编码并列出需要我确认的问题。',
         review: '使用项目内 .agents/skills/code-review/SKILL.md 审查当前改动，不要读取用户级或系统级 code-review 路径。\n请先查看 git status 和 git diff，并读取 AGENTS.md、.forgekit/docs/code-ownership.md、.forgekit/docs/task-board.md。\n重点检查 bug、行为回归、安全风险、兼容性问题、代码所有权缺口、必要评审人缺口、任务状态不一致和测试缺口。\n按 Findings、Open Questions、Test Gaps、Summary 输出。',
         release: '使用项目内 .agents/skills/release-check/SKILL.md 做发布前检查，不要读取用户级或系统级 release-check 路径。\n先读取 AGENTS.md、.forgekit/docs/version-roadmap.md、.forgekit/docs/changelog.md、.forgekit/docs/task-board.md、.codex/version-gates.md、.codex/git.md、.codex/commands.md。\n按需要读取环境矩阵、发布流水线、代码所有权、安全、质量指标和事故复盘文档。\n不要 commit、tag、push 或部署。若 review/refactor gate、任务状态、S2/S3 安全风险、CI/CD 回滚、Critical/Unknown 评审结论不完整，请拒绝推进并列出需要人工确认的问题。',

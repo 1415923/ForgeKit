@@ -25,10 +25,10 @@
 | `.forgekit/project-boundary.yml` | core | AI 工具、维护者 | yes | ForgeKitRoot、ProjectRoot、managed docs root、change root、写入策略 | 产品计划、架构、任务状态 | 目录布局或写入策略变化 | `AGENTS.md`, `CLAUDE.md` |
 | `.forgekit/docs/document-responsibility.md` | core | 用户、AI 工具 | yes | 文档职责、更新触发、事实归属 | 项目事实、任务日志、发布说明 | managed docs 职责变化 | `document-lifecycle.md` |
 | `.forgekit/docs/codebase-map.md` | core | AI 工具、维护者 | yes | 代码搜索入口、模块入口、关键命令、谨慎读取路径 | 完整架构、API 百科、长扫描历史 | 模块入口、命令或归属变化 | `architecture.md`, `api.md`, `local-toolchain.md` |
-| `.forgekit/docs/task-intake.md` | working | 用户、AI 工具 | as-needed | 任务派发原文、Source ID、责任拆分、时间窗口、人工确认状态 | 最终需求、任务状态、changelog、长分析 | 领导任务、微信任务、计划表格子、会议任务、手工记录 | `requirements.md`, `task-board.md`, `work-log.md` |
+| `.forgekit/docs/task-intake.md` | working | 用户、AI 工具 | as-needed | 工作来源原文或原始想法、Source ID、Update Notes、Task Decision、Derived Task IDs、人工确认状态 | 执行状态总表、工作流水、changelog、长分析 | 领导任务、微信任务、计划表格子、会议任务、个人规划、用户反馈、bug、技术债、测试失败；小补充默认更新已有 Source | `requirements.md`, `task-board.md`, `work-log.md` |
 | `.forgekit/docs/requirements.md` | current | 用户、产品、AI 工具 | as-needed | 已确认的需求事实、验收标准、范围边界、Source ID 引用 | 任务派发原文、长推理、执行状态 | 需求被确认、修正、拒绝或定界 | `task-intake.md`, `traceability.md` |
-| `.forgekit/docs/task-board.md` | working | 用户、AI 工具 | as-needed | 紧凑任务状态、负责人、下一步、验证方式、Source ID | 任务原文、changelog、测试流水、长计划 | 任务创建、阻塞、复查、完成或取消 | `task-intake.md`, `work-log.md`, `changes/<id>/tasks.md` |
-| `.forgekit/docs/work-log.md` | working | 用户、AI 工具 | as-needed | 近期工作窗口、交接记录、验证/提交/推送/阻塞摘要 | 全量历史仓库、正式发布说明、任务看板、敏感信息 | 阶段收口、验证完成、提交/推送、阻塞变化、领导确认、日报、中断恢复 | `task-board.md`, `testing.md`, `changelog.md` |
+| `.forgekit/docs/task-board.md` | working | 用户、AI 工具 | as-needed | 通过准入的可执行任务、状态、owner、下一步、验证方式、Source ID、Superseded/Dropped 结论 | 任务原文、聊天补充、纯确认、工作流水、长计划 | Task Gate ready、任务阻塞、复查、完成、取消或被替代 | `task-intake.md`, `work-log.md`, `changes/<id>/tasks.md` |
+| `.forgekit/docs/work-log.md` | working | 用户、AI 工具 | as-needed | 近期工作窗口、Task ID / Source ID 引用、验证/提交/推送/阻塞/确认摘要 | 任务原文、任务总表、全量历史、正式发布说明、敏感信息 | 阶段收口、验证完成、提交/推送、阻塞变化、领导确认、日报、中断恢复 | `task-board.md`, `testing.md`, `changelog.md` |
 | `.forgekit/docs/changelog.md` | current | 用户、发布复查者 | as-needed | 用户可见变化、兼容性、迁移提示 | 内部工作顺序、每次提交、原始验证日志 | 用户可见变化完成或发布说明更新 | `work-log.md`, `ship.md` |
 | `.forgekit/docs/testing.md` | current | 开发者、测试、AI 工具 | as-needed | 当前验证命令、测试范围、人工验证清单、已知缺口 | 每次测试运行日志、长失败历史、截图堆积 | 测试策略或可运行验证命令变化 | `work-log.md`, `changes/<id>/verification.md` |
 | `.forgekit/docs/risk-register.md` | current | 用户、维护者 | as-needed | 仍影响交付、安全、兼容性、成本或排期的开放风险 | 已关闭风险长历史、所有 bug、泛泛担忧 | 新风险、概率/影响变化、缓解或关闭 | `technical-debt.md`, `incident-review.md` |
@@ -64,3 +64,13 @@
 3. 相关文档只放链接或 Source ID，不复制同一段内容。
 4. 给用户看的文档先写结论，再写必要证据，避免模板腔和长过程自述。
 5. 触发式文档只有事件真的发生时才读取或更新。
+
+## Source-to-Task 链路
+
+任务和个人开发工作按以下顺序处理：
+
+1. `task-intake.md`：记录工作来源原文或原始想法、补充、人工确认和 Task Decision。
+2. `task-board.md`：只接收满足准入条件的可执行任务，并保留 `Source ID`。
+3. `work-log.md`：记录推进过程、验证、提交/推送、阻塞和确认，并引用 `Task ID` / `Source ID`。
+
+公司派发、个人规划、用户反馈、bug 发现、技术债、测试失败和调研发现都使用同一条 Source-to-Task 链路，只是 `Source Type` 不同。小补充、小确认、改期或责任修正默认写到已有 Source 的 `Update Notes`，不要直接变成新任务。过时任务必须进入 `Closed / Dropped / Superseded`，不要继续出现在当前重点。

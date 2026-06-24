@@ -93,7 +93,7 @@ Key files:
 | `.forgekit/docs/local-toolchain.md` | Local lint, test, build, LSP, and toolchain capability |
 | `.forgekit/docs/changelog.md` | Current version update record |
 | `.forgekit/docs/version-roadmap.md` | Version roadmap and delivery gates |
-| `.forgekit/docs/task-intake.md` | Source-first task assignment ledger: preserve leader/WeChat/plan/meeting text before AI interpretation and task splitting |
+| `.forgekit/docs/task-intake.md` | Work source ledger: record assigned work, self-planned work, user feedback, bugs, and technical debt before deciding whether to create executable tasks |
 | `.forgekit/docs/loop-readiness.md` | Whether the project has the state, validation, boundary, stop, and escalation conditions needed for a safe loop |
 | `.forgekit/docs/loop-blueprint.md` | Reviewable loop design blueprint, not automatic execution authorization |
 | `.forgekit/docs/loop-operations.md` | Explicitly triggered loop dry-run, one-step, continue, and stop/handoff operation protocol, not an automatic runner |
@@ -127,7 +127,7 @@ Maker / Checker Protocol defines evidence separation for medium/high-risk code c
 
 Worktree Playbook provides only manual worktree isolation guidance for parallel tasks, experiment branches, and AI multi-session collaboration. ForgeKit does not automatically create worktrees, start agents, merge, push, or create PRs.
 
-Source-First Task Intake requires leader tasks, WeChat tasks, plan cells, meeting action items, or manual notes to be recorded in `.forgekit/docs/task-intake.md` first: redacted original text, responsibility split, time window, AI interpretation, Derived Task IDs, and Human Review status. `requirements.md` records requirement facts, `task-board.md` records derived task status with Source ID backlinks, and `changelog.md` records completed version changes; none of them replaces the source assignment ledger.
+Work Source Intake requires assigned work, self-planned work, user feedback, bugs, technical debt, test failures, or research findings to be recorded in `.forgekit/docs/task-intake.md` first: redacted original text or original idea, Update Notes, Task Decision, Derived Task IDs, and Human Review status. Small confirmations and schedule/responsibility updates should update the existing Source by default, not create new tasks. `task-board.md` only accepts executable tasks with action, owner, next step, Source ID, and verification method; `work-log.md` records progress and references Task ID / Source ID.
 
 Managed Docs Responsibility Matrix v2 classifies `.forgekit/docs/**` as core, current, working, triggered, reference, generated, or archive. AI should start with `document-responsibility.md` and `codebase-map.md`, then read only docs triggered by the task; do not read all docs by default or duplicate the same fact across documents.
 
@@ -268,6 +268,9 @@ ForgeKit can coexist with ECC: ECC enhances the AI tool; ForgeKit constrains the
 
 | Version | User-facing change |
 | --- | --- |
+| `0.28.5` | Work Source Unification: brings assigned work, self-planned work, user feedback, bugs, and technical debt into one Source ID -> Task ID -> Work Log chain. |
+| `0.28.4` | Source-to-Task Alignment: tightens task-intake, task-board, and work-log linkage so updates merge into existing Sources and task-board only accepts executable tasks. |
+| `0.28.3` | Localized triggered managed docs: loop, maker-checker, worktree, and change templates are Chinese-readable while keeping machine fields stable. |
 | `0.28.2` | Managed Docs Responsibility Matrix v2: tightens managed doc ownership, default-read policy, and duplicate-write boundaries so human-facing docs stay shorter and easier to confirm. |
 | `0.28.1` | Source-First Task Intake: adds `.forgekit/docs/task-intake.md` for source assignment text, AI interpretation, task backlinks, and human review status. |
 | `0.28.0` | Worktree Playbook: adds manual worktree isolation guidance and short entry rules without automatic worktree scheduling. |
