@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "template_version": "0.29.0",
+  "template_version": "0.30.0",
   "boundary_aware": true,
   "files": [
     {
@@ -9,7 +9,7 @@
       "role": "agent_entry",
       "update_policy": "ask",
       "render_mode": "copy",
-      "checksum": "sha256:4d348c21869db05f5a7072e646d3730fd985f30624db82d5985bdbe06110c489"
+      "checksum": "sha256:67946f76f63da5e1fdd7c4af1556f39887a13d67b49ddee0f049e751ef1ace24"
     },
     {
       "source_path": "CLAUDE.md",
@@ -17,7 +17,7 @@
       "role": "agent_entry",
       "update_policy": "ask",
       "render_mode": "copy",
-      "checksum": "sha256:4f0c7ee808489744a3a64c0a8464985a89d21104399dd4b5385c8e928e0d39f9"
+      "checksum": "sha256:eeab4ed077d7014480ad3e4a0e4d534ff437091c262528fcfb762d444f81c151"
     },
     {
       "source_path": "README.md",
@@ -81,7 +81,7 @@
       "role": "codex_rule",
       "update_policy": "ask",
       "render_mode": "copy",
-      "checksum": "sha256:4467b8b3fce7bb74834c913097b8c7ce00decd8d8c9382fdb31be7d9e1595f36"
+      "checksum": "sha256:8677b7bc55346353634c99a08eafcc99cd525d42c7da04579b116ff0e83a9b18"
     },
     {
       "source_path": ".codex/version-gates.md",
@@ -177,7 +177,7 @@
       "role": "managed_doc",
       "update_policy": "merge",
       "render_mode": "copy",
-      "checksum": "sha256:ffdbde06ac3979a912c25749d8a2e56542e2b07f041680c540bc9a898c33eced"
+      "checksum": "sha256:8d72ab00d24d3ac81e9869a9343ce11db7917c318aadc0db96e206e65309bc98"
     },
     {
       "source_path": "docs/work-log.md",
@@ -234,6 +234,14 @@
       "update_policy": "merge",
       "render_mode": "copy",
       "checksum": "sha256:2e770d57c58424fd3aa46fd324992a4f77dc8bbaa67635191da389b6b519b246"
+    },
+    {
+      "source_path": "docs/native-agent-adapter.md",
+      "target_path": "${managed_docs_root}/native-agent-adapter.md",
+      "role": "managed_doc",
+      "update_policy": "merge",
+      "render_mode": "copy",
+      "checksum": "sha256:49e5ae1b6f938e3591b1d8b5b0e15dc5e2e6c394416c868397f21f1459464820"
     },
     {
       "source_path": "docs/worktree-playbook.md",

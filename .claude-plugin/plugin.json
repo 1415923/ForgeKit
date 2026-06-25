@@ -1,7 +1,7 @@
 {
   "name": "forgekit",
-  "version": "0.29.0",
-  "description": "Project-level workflow harness for Claude Code, Codex, and adjacent AI coding tools.",
+  "version": "0.30.0",
+  "description": "Project-level workflow harness for Claude Code, Codex, and adjacent AI coding tools, with opt-in native agent configuration templates.",
   "author": {
     "name": "ForgeKit Maintainers"
   },
@@ -12,7 +12,8 @@
     "workflow",
     "harness",
     "skills",
-    "project-template"
+    "project-template",
+    "native-agent-config"
   ],
   "skills": [
     "./skills/"

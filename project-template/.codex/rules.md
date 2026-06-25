@@ -50,6 +50,7 @@
 - `.forgekit/docs/loop-operations.md` 是显式触发的操作协议，不是自动 runner 或无人值守 loop 授权。
 - `.forgekit/docs/maker-checker-protocol.md` 是审查协议，不是多 agent 调度或自动 checker 授权。
 - `.forgekit/docs/worktree-playbook.md` 是手动隔离指南，不是自动 worktree 调度或 agent 编排。
+- `.forgekit/docs/native-agent-adapter.md` 是 opt-in 原生 agent 配置适配说明，不授权自动执行、调度、merge、commit、push 或 PR。
 - loop 必须有状态文件、验证命令、停止条件和人工升级入口。
 - loop 不默认修改 business docs、secrets、deploy 或 CI。
 - 不得自行进入 loop mode；只有用户明确要求 loop dry-run、one-step、continue 或 stop/handoff 时才按 loop operation 规则执行。
@@ -142,6 +143,7 @@
 
 - 项目 skill 放在 `.agents/skills/`，只在任务匹配时使用。
 - 多 agent 角色放在 `.codex/agents/`，默认不启用。
+- Native Agent Adapter 生成的 `.codex/agents/` 和 `.claude/agents/` 只作为可审查配置模板，需用户显式启用。
 - `.codex/config.example.toml` 只能作为示例，不能直接覆盖用户级配置。
 - 技术栈专用规则按需从 `templates/<stack>/` 引入，不加载无关技术栈内容。
 

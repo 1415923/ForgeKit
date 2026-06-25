@@ -16,6 +16,18 @@ powershell -ExecutionPolicy Bypass -File .\scripts\upgrade-forgekit.ps1 -Project
 ./scripts/upgrade-forgekit.sh --project-path "$HOME/projects/demo-api"
 ```
 
+## generate-native-agent-adapter.ps1 / .sh / .py
+
+按需生成 Native Agent Adapter 配置模板。它只写入 Claude Code / Codex 可审查配置，不启动 agent、不执行 loop、不创建 worktree、不 merge、commit、push 或 PR。
+
+```powershell
+powershell -ExecutionPolicy Bypass -File .\scripts\generate-native-agent-adapter.ps1 -Target all -ProjectRoot "D:\projects\demo-api" -DryRun
+```
+
+```bash
+python3 scripts/generate-native-agent-adapter.py --target codex --project-root ./demo --dry-run
+```
+
 ## validate-template.ps1
 
 检查模板结构、治理文档、技术栈模板、项目级 skills 和常见文档漂移。

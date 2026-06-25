@@ -185,6 +185,24 @@ powershell -ExecutionPolicy Bypass -File .\scripts\check-doc-sync.ps1
 ```
 
 These scripts only check, copy templates, or install local opt-in hooks. They do not install dependencies, start services, deploy, commit, tag, or push.
+## Native Agent Adapter
+
+Native Agent Adapter is an opt-in feature that exports ForgeKit loop / maker-checker / verification protocols into reviewable native agent configuration templates for Claude Code and Codex. It only generates configuration; it does not run loops, start agents, provide a runner or dispatcher, automate worktrees, merge, commit, push, or create PRs.
+
+Windows PowerShell:
+
+```powershell
+powershell -ExecutionPolicy Bypass -File .\scripts\generate-native-agent-adapter.ps1 -Target claude-code -ProjectRoot "D:\projects\my-app" -DryRun
+powershell -ExecutionPolicy Bypass -File .\scripts\generate-native-agent-adapter.ps1 -Target all -ProjectRoot "D:\projects\my-app"
+```
+
+Python:
+
+```bash
+python scripts/generate-native-agent-adapter.py --target codex --project-root ./demo --dry-run
+```
+
+The Codex adapter is an example / reviewable template. After generation, review `.codex/config.example.toml` and `.codex/agents/*.toml` against your current Codex version.
 
 ## Change Archiving
 
@@ -284,6 +302,7 @@ ForgeKit can coexist with ECC: ECC enhances the AI tool; ForgeKit constrains the
 
 | Version | User-facing change |
 | --- | --- |
+| `0.30.0` | Native Agent Adapter: adds opt-in native agent configuration generation, exporting ForgeKit loop / maker-checker / verification protocols as reviewable Claude Code / Codex templates without automatic execution. |
 | `0.29.0` | Guided Upgrade Workflow: adds standalone upgrade scripts that generate upgrade-plan, upgrade-actions, and candidate templates to reduce manual judgment and token cost. |
 | `0.28.5` | Work Source Unification: brings assigned work, self-planned work, user feedback, bugs, and technical debt into one Source ID -> Task ID -> Work Log chain. |
 | `0.28.4` | Source-to-Task Alignment: tightens task-intake, task-board, and work-log linkage so updates merge into existing Sources and task-board only accepts executable tasks. |

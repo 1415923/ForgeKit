@@ -1,7 +1,7 @@
 {
   "name": "forgekit",
-  "version": "0.29.0",
-  "description": "Project-level workflow harness for Codex, Claude Code, and adjacent AI coding tools.",
+  "version": "0.30.0",
+  "description": "Project-level workflow harness for Codex, Claude Code, and adjacent AI coding tools, with opt-in native agent configuration templates.",
   "author": {
     "name": "ForgeKit Maintainers"
   },
@@ -18,13 +18,14 @@
   "interface": {
     "displayName": "ForgeKit",
     "shortDescription": "Project workflow harness for AI coding tools.",
-    "longDescription": "ForgeKit provides shared skills, project templates, and read-only checks for project initialization, handover, review, release, and safety gates across Codex and Claude Code.",
+    "longDescription": "ForgeKit provides shared skills, project templates, read-only checks, and opt-in reviewable native agent configuration templates for project initialization, handover, review, release, and safety gates across Codex and Claude Code. It does not provide automatic agent execution.",
     "developerName": "ForgeKit Maintainers",
     "category": "Productivity",
     "capabilities": [
       "Skills",
       "Templates",
-      "Local validation"
+      "Local validation",
+      "Native agent config generation"
     ],
     "defaultPrompt": [
       "Use ForgeKit to initialize this project.",

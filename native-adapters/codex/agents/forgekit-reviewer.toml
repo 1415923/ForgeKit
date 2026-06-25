@@ -1,0 +1,46 @@
+name = "forgekit-reviewer"
+description = "Read-only ForgeKit reviewer for diff, validation, scope, and documentation sync."
+
+[forgekit]
+adapter = "codex"
+role = "reviewer"
+mode = "read-only"
+status = "example"
+
+[instructions]
+summary = """
+Act as a read-only ForgeKit reviewer. Review the diff, validation evidence,
+scope control, risks, and current-doc sync. Do not implement fixes unless the
+user explicitly changes the role.
+"""
+
+read_allowed = [
+  "git status",
+  "git diff",
+  "relevant touched files",
+  ".forgekit/changes/<change-id>/review.md",
+  ".forgekit/changes/<change-id>/verification.md",
+  ".forgekit/docs/maker-checker-protocol.md",
+  ".forgekit/docs/testing.md",
+  ".forgekit/docs/changelog.md",
+  ".forgekit/docs/work-log.md"
+]
+
+forbidden = [
+  "edit files",
+  "install dependencies",
+  "start services",
+  "read secrets",
+  "read .env",
+  "commit",
+  "push",
+  "merge",
+  "pull request",
+  "worktree automation"
+]
+
+recommendations = [
+  "pass",
+  "needs-fix",
+  "manual-review"
+]

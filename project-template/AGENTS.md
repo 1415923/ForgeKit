@@ -43,6 +43,7 @@ When a task names a ForgeKit skill, read the project-local `.agents/skills/<skil
 | Large or cross-module change | `governance/large-change-execution.md`, `governance/ai-engineering-loop.md`, `.forgekit/docs/exploration-report.md`, `.forgekit/docs/implementation-plan.md`, relevant stack rules | `large-change-planning` |
 | Commands, hooks, plugin, MCP, CI integration | `governance/team-agent-rollout.md`, `.codex/commands-catalog.md`, `.codex/hooks.md`, `.codex/config.example.toml` | release-check or security-review |
 | Automation boundary decision | `.codex/automation-decision.md`, `governance/team-agent-rollout.md` | relevant existing skill |
+| Native agent adapter review | `.forgekit/docs/native-agent-adapter.md`, `.forgekit/docs/loop-operations.md`, `.forgekit/docs/maker-checker-protocol.md` | release-check or security-review |
 | Document synchronization check | `.codex/hooks.md`, `.codex/commands.md`, `.forgekit/docs/changelog.md`, related docs | `release-check` |
 | Archive dry-run plan | `.forgekit/docs/document-lifecycle.md`, `.forgekit/archive/README.md`, `.codex/commands.md` | `release-check` |
 | Code review | `.codex/testing.md`, `.codex/security.md`, `.forgekit/docs/code-ownership.md`, `.forgekit/docs/task-board.md` | `code-review` |
@@ -81,6 +82,7 @@ When a task names a ForgeKit skill, read the project-local `.agents/skills/<skil
 - Treat `.forgekit/docs/loop-operations.md` as an explicit operation protocol, not an automatic runner or unattended loop authorization.
 - Treat `.forgekit/docs/maker-checker-protocol.md` as a review protocol, not multi-agent scheduling or automatic checker authorization.
 - Treat `.forgekit/docs/worktree-playbook.md` as a manual isolation guide, not automatic worktree scheduling or agent orchestration.
+- Treat `.forgekit/docs/native-agent-adapter.md` as an opt-in configuration adapter guide, not automatic agent execution, scheduling, merge, commit, push, or PR authorization.
 - A loop must have a state file, validation command, stop condition, and human escalation path before it runs.
 - A loop must not modify business docs, secrets, deploy files, or CI by default.
 - Do not enter loop mode unless the user explicitly asks for loop dry-run, one-step, continue, or stop/handoff.

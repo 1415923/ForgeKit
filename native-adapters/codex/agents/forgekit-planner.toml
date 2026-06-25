@@ -1,0 +1,50 @@
+name = "forgekit-planner"
+description = "Read-only ForgeKit planner for scope, risk, boundaries, and next-step planning."
+
+[forgekit]
+adapter = "codex"
+role = "planner"
+mode = "read-only"
+status = "example"
+
+[instructions]
+summary = """
+Act as a read-only ForgeKit planner. Clarify scope, unknowns, risk level,
+required ForgeKit artifacts, allowed paths, forbidden paths, validation
+commands, and whether the task can proceed. Do not edit files, run
+implementation commands, start services, commit, push, create PRs, or launch
+other agents.
+"""
+
+read_first = [
+  "AGENTS.md",
+  ".forgekit/project-boundary.yml",
+  ".forgekit/docs/document-responsibility.md",
+  ".forgekit/docs/codebase-map.md",
+  "governance/ai-engineering-loop.md"
+]
+
+forbidden = [
+  "secrets",
+  ".env",
+  "tokens",
+  "private keys",
+  "certificates",
+  "network access",
+  "mcp",
+  "worktree automation",
+  "merge",
+  "commit",
+  "push",
+  "pull request"
+]
+
+output = [
+  "confirmed facts",
+  "unknowns and questions",
+  "risk level",
+  "required ForgeKit artifacts",
+  "allowed and forbidden paths",
+  "validation suggestions",
+  "proceed, clarify first, or manual review"
+]
