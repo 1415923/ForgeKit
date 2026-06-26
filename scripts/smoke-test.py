@@ -68,7 +68,9 @@ REQUIRED_REPO_PATHS = [
     "project-template/.codex/agents/forgekit-reviewer.toml",
     "project-template/.codex/agents/forgekit-verifier.toml",
     "project-template/scripts/check-codex-native-agents.py",
+    "project-template/scripts/doc-health-report.py",
     "scripts/check-codex-native-agents.py",
+    "scripts/doc-health-report.py",
     ".codex-plugin/plugin.json",
     ".claude-plugin/plugin.json",
 ]
@@ -112,6 +114,7 @@ REQUIRED_GENERATED_PATHS = [
     "scripts/run-harness-check.ps1",
     "scripts/check-doc-sync.ps1",
     "scripts/check-codex-native-agents.py",
+    "scripts/doc-health-report.py",
     "scripts/archive-changes.py",
 ]
 
@@ -496,6 +499,49 @@ def assert_codex_native_agents(target):
             fail(f"Codex native doctor must not modify {rel_path}")
 
 
+def assert_doc_health_report(target):
+    report_path = target / ".forgekit" / "doc-health-report.md"
+    if report_path.exists():
+        report_path.unlink()
+
+    before_hashes = {}
+    for rel_path in [
+        ".forgekit/docs/task-board.md",
+        ".forgekit/docs/work-log.md",
+        ".forgekit/docs/changelog.md",
+        ".forgekit/docs/testing.md",
+        ".forgekit/docs/requirements.md",
+    ]:
+        path = target / rel_path
+        if path.is_file():
+            before_hashes[rel_path] = sha256_file(path)
+
+    run([sys.executable, "scripts/doc-health-report.py", "--project-root", "."], cwd=target)
+    if not report_path.is_file():
+        fail("doc-health-report.py did not write .forgekit/doc-health-report.md")
+
+    report = report_path.read_text(encoding="utf-8")
+    required = [
+        "Status: report-only",
+        "Mode: doc-health",
+        "## Summary",
+        "## Findings by Severity",
+        "## Findings by Document",
+        "## Suggested Manual Fixes",
+        "## Non-Goals",
+        "No automatic doc slimming",
+        "No runner, daemon, scheduler, auto PR, worktree automation, commit, tag, or push",
+    ]
+    missing = [item for item in required if item not in report]
+    if missing:
+        fail("doc-health-report.md missing expected content:\n" + "\n".join(missing))
+
+    for rel_path, before in before_hashes.items():
+        after = sha256_file(target / rel_path)
+        if after != before:
+            fail(f"doc-health-report.py must not modify managed doc: {rel_path}")
+
+
 def assert_maker_checker_protocol(root, protocol_path, review_path, agents_path, claude_path, rules_path):
     protocol = (root / protocol_path).read_text(encoding="utf-8")
     review = (root / review_path).read_text(encoding="utf-8")
@@ -873,8 +919,8 @@ def assert_json(path):
 def assert_manifest_lock(target):
     lock_path = target / ".forgekit" / "template-lock.json"
     lock = json.loads(lock_path.read_text(encoding="utf-8"))
-    if lock.get("installed_version") != "0.32.0":
-        fail("template-lock installed_version must be 0.32.0")
+    if lock.get("installed_version") != "0.33.0":
+        fail("template-lock installed_version must be 0.33.0")
     if lock.get("managed_docs_root") != ".forgekit/docs":
         fail("template-lock managed_docs_root must match boundary")
     if lock.get("change_root") != ".forgekit/changes":
@@ -927,7 +973,7 @@ def assert_upgrade_report(repo, target):
         fail("upgrade must not overwrite managed docs")
     assert_paths(target, [
         ".forgekit/upgrade-report.md",
-        ".forgekit/upgrade-export/0.32.0/.forgekit/docs/project-plan.md",
+        ".forgekit/upgrade-export/0.33.0/.forgekit/docs/project-plan.md",
     ])
 
 
@@ -964,7 +1010,7 @@ def assert_guided_upgrade(repo, target):
         ".forgekit/upgrade/upgrade-plan.md",
         ".forgekit/upgrade/upgrade-actions.md",
         ".forgekit/upgrade/upgrade-inventory.json",
-        ".forgekit/upgrade/candidates/0.32.0/.forgekit/docs/project-plan.md",
+        ".forgekit/upgrade/candidates/0.33.0/.forgekit/docs/project-plan.md",
     ])
     plan = (target / ".forgekit" / "upgrade" / "upgrade-plan.md").read_text(encoding="utf-8")
     actions = (target / ".forgekit" / "upgrade" / "upgrade-actions.md").read_text(encoding="utf-8")
@@ -1694,6 +1740,7 @@ def main():
         )
         assert_native_agent_adapter(repo, target, ".forgekit/docs/native-agent-adapter.md")
         assert_codex_native_agents(target)
+        assert_doc_health_report(target)
         assert_task_intake(
             target,
             ".forgekit/docs/task-intake.md",

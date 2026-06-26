@@ -58,6 +58,7 @@
 | `.forgekit/changes/<id>/*` | triggered | 开发者、复查者 | no | 单次中高风险变更过程 | 当前态事实、无关历史 | 中高风险变更开始或收口 | `document-lifecycle.md` |
 | `.forgekit/archive/*` | archive | 审计者、维护者 | no | 历史证据和旧变更材料 | 当前事实、活跃变更上下文 | 用户要求历史、审计、回归、复盘 | `document-lifecycle.md` |
 | `.forgekit/*-report.md` | generated | 用户、AI 工具 | no | 脚本生成的报告 | 当前事实或可编辑项目文档 | 脚本运行生成或覆盖 | 对应脚本文档 |
+| `.forgekit/doc-health-report.md` | generated | 用户、AI 工具 | no | managed docs 健康汇总：过长、重复、职责错位、router 边界风险 | 长期 managed doc、修复结果、事实来源 | 用户要求检查文档健康、文档太乱、哪些文档该瘦身 | `workflow-router.md`, `scripts/doc-health-report.py` |
 | `docs/**` 业务文档 | reference | 用户、AI 工具 | as-needed | 用户允许或要求时读取的业务证据 | 默认写入 ForgeKit 治理模板 | 用户明确要求更新业务文档 | `.forgekit/project-boundary.yml` |
 
 写入前先做 5 步判断：

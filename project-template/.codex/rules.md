@@ -7,6 +7,7 @@
 - 修改前先阅读相关代码、文档和配置。
 - 不要默认全量读取 `.forgekit/docs/**`；先看 `.forgekit/docs/document-responsibility.md`、`.forgekit/docs/codebase-map.md` 和必要的 `.forgekit/docs/workflow-router.md`，再按任务触发读取相关文档。
 - 用户请求不明确时先做 intent routing：判断 Read Targets、Write Targets、Do Not Write 和 Required Output。
+- 文档混乱、过长、重复或职责错位时，先建议或运行 `scripts/doc-health-report.py`。它默认只生成 `.forgekit/doc-health-report.md`，不得自动按报告修改 managed docs。
 - 优先遵循本项目已有风格。
 - 只修改与当前任务相关的文件。
 - 大范围架构调整前必须先给出方案。
@@ -42,6 +43,7 @@
 - `.forgekit/archive-reference-report.md` 是 reference-check 生成产物，不是 current docs、active change 或发布证据。
 - `.forgekit/current-docs-sync-report.md` 是 sync-check 生成产物，不是 current docs、active change，也不等于 current docs 语义正确性证明。
 - `.forgekit/smart-archive-report.md` 是 smart-check 生成的 report-only 建议，不是归档许可，不替代用户确认，也不是 current truth。
+- `.forgekit/doc-health-report.md` 是文档健康 report-only 建议，不是长期 managed doc；没有用户明确授权时，不得自动瘦身、归档、重写或合并 managed docs。
 - `.forgekit/docs/task-intake.md` 是工作来源台账。领导任务、微信任务、计划表格子、会议任务、文档任务、个人规划、用户反馈、bug、技术债、测试失败和调研发现都先归并来源，再生成任务；补充、确认、改期或责任修正默认写入已有 Source 的 `Update Notes`，不要默认创建新任务。
 - `.forgekit/docs/task-board.md` 只接收可执行任务：必须有动作、owner 或待确认 owner、下一步、`Source ID`、完成标准或验证方式。过时任务必须标为 `Superseded` / `Dropped`，不要继续出现在当前重点。
 - `.forgekit/docs/work-log.md` 只记录推进过程、验证、提交/推送、阻塞和确认，并引用 `Task ID` / `Source ID`。工作日志里的后续跟进不自动成为任务；先回到 task-intake 做 Task Decision。

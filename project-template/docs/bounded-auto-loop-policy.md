@@ -54,6 +54,7 @@
 - 需要 commit、tag、push、issue、PR、MCP 写操作、connector 写操作、worktree orchestration 或自动调度。
 - AgentModeRequired 不满足。
 - native-only 要求下 native agent 不可用。
+- 需要根据 `.forgekit/doc-health-report.md` 自动瘦身、归档、重写或合并 managed docs。
 - 用户、负责人或 review 规则要求人工确认。
 
 ## Checkpoint Writeback
@@ -68,6 +69,8 @@
 - 阻塞、风险和下一步。
 
 `review-only` 不改文件；除非用户要求记录，否则只在聊天中输出结论。
+
+文档健康场景下，`bounded-auto` 最多生成 `.forgekit/doc-health-report.md` 并停止。报告只是 review 输入，不能自动触发文档瘦身、归档、链接重写或事实合并。
 
 ## Final Handoff
 

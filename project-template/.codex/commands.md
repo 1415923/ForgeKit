@@ -76,6 +76,18 @@ powershell -ExecutionPolicy Bypass -File .\scripts\check-doc-sync.ps1 -Strict
 ./scripts/check-doc-sync.sh --strict
 ```
 
+## 文档健康报告
+
+只生成或覆盖 `.forgekit/doc-health-report.md`，用于汇总 managed docs 是否过长、重复、职责错位或违反 workflow-router 边界。它是 report-only，不自动瘦身、不归档、不修改 current docs 或 business docs。
+
+```powershell
+python .\scripts\doc-health-report.py --project-root .
+```
+
+```bash
+python3 ./scripts/doc-health-report.py --project-root .
+```
+
 ## 归档计划 Dry Run
 
 只生成或覆盖 `.forgekit/archive-plan.md`，不移动文件、不改状态、不改链接、不写 current docs、不写 business docs、不改 lock、不提交。

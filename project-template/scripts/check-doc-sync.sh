@@ -35,7 +35,7 @@ changed_paths() {
   {
     git -C "$repo_root" diff --name-only HEAD -- .forgekit .codex governance 2>/dev/null || true
     git -C "$repo_root" diff --cached --name-only -- .forgekit .codex governance 2>/dev/null || true
-  } | awk 'NF' | grep -v '^.forgekit/upgrade-export/' | grep -v '^.forgekit/upgrade/' | grep -v '^.forgekit/archive/' | grep -v '^.forgekit/archive-plan.md$' | grep -v '^.forgekit/archive-apply-report.md$' | grep -v '^.forgekit/archive-reference-report.md$' | grep -v '^.forgekit/current-docs-sync-report.md$' | grep -v '^.forgekit/smart-archive-report.md$' | grep -v '^.forgekit/smart-archive-apply-report.md$' | grep -v '^.forgekit/codex-native-agent-report.md$' | sort -u
+  } | awk 'NF' | grep -v '^.forgekit/upgrade-export/' | grep -v '^.forgekit/upgrade/' | grep -v '^.forgekit/archive/' | grep -v '^.forgekit/archive-plan.md$' | grep -v '^.forgekit/archive-apply-report.md$' | grep -v '^.forgekit/archive-reference-report.md$' | grep -v '^.forgekit/current-docs-sync-report.md$' | grep -v '^.forgekit/smart-archive-report.md$' | grep -v '^.forgekit/smart-archive-apply-report.md$' | grep -v '^.forgekit/codex-native-agent-report.md$' | grep -v '^.forgekit/doc-health-report.md$' | sort -u
 }
 
 test_stale_phrases() {

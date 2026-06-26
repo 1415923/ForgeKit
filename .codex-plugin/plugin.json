@@ -1,7 +1,7 @@
 {
   "name": "forgekit",
-  "version": "0.32.0",
-  "description": "Project-level workflow harness for Codex, Claude Code, and adjacent AI coding tools, with intent routing, bounded loop policy, and opt-in native agent configuration templates.",
+  "version": "0.33.0",
+  "description": "Project-level workflow harness for Codex, Claude Code, and adjacent AI coding tools, with intent routing, report-only doc health checks, bounded loop policy, and opt-in native agent configuration templates.",
   "author": {
     "name": "ForgeKit Maintainers"
   },
@@ -18,7 +18,7 @@
   "interface": {
     "displayName": "ForgeKit",
     "shortDescription": "Project workflow harness for AI coding tools.",
-    "longDescription": "ForgeKit provides shared skills, project templates, read-only checks, intent routing, bounded loop policy templates, and opt-in reviewable native agent configuration templates for project initialization, handover, review, release, and safety gates across Codex and Claude Code. It does not provide automatic agent execution.",
+    "longDescription": "ForgeKit provides shared skills, project templates, read-only checks, intent routing, report-only doc health checks, bounded loop policy templates, and opt-in reviewable native agent configuration templates for project initialization, handover, review, release, and safety gates across Codex and Claude Code. It does not provide automatic agent execution or automatic document rewriting.",
     "developerName": "ForgeKit Maintainers",
     "category": "Productivity",
     "capabilities": [
@@ -26,6 +26,7 @@
       "Templates",
       "Local validation",
       "Intent routing templates",
+      "Report-only doc health checks",
       "Native agent config generation",
       "Bounded loop policy templates"
     ],
