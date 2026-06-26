@@ -83,6 +83,11 @@ When a task names a ForgeKit skill, read the project-local `.agents/skills/<skil
 - Treat `.forgekit/docs/maker-checker-protocol.md` as a review protocol, not multi-agent scheduling or automatic checker authorization.
 - Treat `.forgekit/docs/worktree-playbook.md` as a manual isolation guide, not automatic worktree scheduling or agent orchestration.
 - Treat `.forgekit/docs/native-agent-adapter.md` as an opt-in configuration adapter guide, not automatic agent execution, scheduling, merge, commit, push, or PR authorization.
+- Generated native agent config is not proof of runtime registration. Do not call fallback or simulated execution native success.
+- Native status has four layers: generated, installed, registered, invoked. Only invoked can be recorded as native available.
+- If Codex only exposes default, explorer, or worker, record `native_agent_status: unavailable`; do not call that native success.
+- Native-only verification is read-only by default. Do not write task-intake, work-log, or loop state unless the user explicitly asks to record it.
+- Fallback requires explicit user permission or a workflow rule that allows fallback.
 - A loop must have a state file, validation command, stop condition, and human escalation path before it runs.
 - A loop must not modify business docs, secrets, deploy files, or CI by default.
 - Do not enter loop mode unless the user explicitly asks for loop dry-run, one-step, continue, or stop/handoff.
@@ -90,6 +95,7 @@ When a task names a ForgeKit skill, read the project-local `.agents/skills/<skil
 - Loop continue must not run continuously; each round requires an explicit user trigger.
 - Stop and escalate on unclear scope, budget overrun, validation failure, or forbidden path contact.
 - Loop output must write back to `.forgekit/docs/work-log.md` or the specified state file.
+- Bounded-auto or loop execution must record `agent_mode`; native custom agents start as `native_agent_status: unverified` until observed.
 - Do not modify business docs, secrets, deploy files, CI, or `.forgekit/template-lock.json` by default.
 - Medium or high risk code changes should separate Maker phase and Checker phase.
 - Maker phase may say `ready for check`, but must not declare final pass.

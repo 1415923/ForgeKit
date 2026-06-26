@@ -180,6 +180,8 @@ function Test-ChangedDocsNeedVersionRecord {
         $_ -ne ".forgekit\smart-archive-report.md" -and
         $_ -ne ".forgekit/smart-archive-apply-report.md" -and
         $_ -ne ".forgekit\smart-archive-apply-report.md" -and
+        $_ -ne ".forgekit/codex-native-agent-report.md" -and
+        $_ -ne ".forgekit\codex-native-agent-report.md" -and
         $_ -notlike ".forgekit/archive/*" -and
         $_ -notlike ".forgekit\archive\*"
     })

@@ -10,6 +10,34 @@ sandbox_mode = "workspace-write"
 # 高级项目需要多 agent 角色时再启用。
 multi_agent = false
 
+[forgekit]
+adapter = "codex"
+status = "example"
+execution = "manual"
+
+[forgekit.native_agents]
+planner = ".codex/agents/forgekit-planner.toml"
+reviewer = ".codex/agents/forgekit-reviewer.toml"
+verifier = ".codex/agents/forgekit-verifier.toml"
+implementer = "not-generated"
+
+[forgekit.boundaries]
+automatic_runner = false
+daemon = false
+scheduler = false
+dispatcher = false
+worktree_automation = false
+auto_merge = false
+auto_commit = false
+auto_push = false
+auto_pr = false
+network_default = false
+mcp_default = false
+secrets_default = false
+
+[forgekit.usage]
+note = "Use these files as reviewable examples. Trigger planner, reviewer, or verifier manually according to your Codex version and project policy."
+
 # MCP 服务器示例：
 # - Context7：官方文档检索
 # - Playwright：浏览器自动化和 E2E 验证

@@ -33,6 +33,7 @@ EXCLUDED_SOURCE_PATHS = {
     ".forgekit/current-docs-sync-report.md",
     ".forgekit/smart-archive-report.md",
     ".forgekit/smart-archive-apply-report.md",
+    ".forgekit/codex-native-agent-report.md",
 }
 EXCLUDED_SOURCE_PREFIXES = (
     ".forgekit/upgrade-export/",

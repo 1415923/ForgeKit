@@ -554,9 +554,10 @@
       const stackText = selectedStacks().join(',');
       const lines = [
         'powershell -ExecutionPolicy Bypass -File ' + psQuote(scriptPath) + ' `',
-        '  -TargetPath ' + psQuote(targetPath.value.trim() || 'C:\\Projects\\demo') + ' `',
+        '  -TargetPath ' + psQuote(targetPath.value.trim() || 'C:\\Projects\\demo-workspace') + ' `',
         '  -ProjectName ' + psQuote(projectName.value.trim() || 'demo') + ' `',
-        '  -Mode ' + selectedMode()
+        '  -Mode ' + selectedMode() + ' `',
+        '  -NativeAgentAdapter all'
       ];
       if (stackText) {
         lines[lines.length - 1] += ' `';
@@ -602,8 +603,12 @@
 
     function buildStartupGuide() {
       return [
-        '1. 进入目标项目目录：',
-        '   cd ' + (targetPath.value.trim() || 'C:\\Projects\\demo'),
+        '1. 进入外层 ForgeKit 治理目录：',
+        '   cd ' + (targetPath.value.trim() || 'C:\\Projects\\demo-workspace'),
+        '',
+        '   内层业务代码目录：',
+        '   ' + joinWindowsPath(targetPath.value.trim() || 'C:\\Projects\\demo-workspace', projectName.value.trim() || 'demo'),
+        '   已有代码放进内层；新代码、测试、业务 README、构建文件也都在内层创建。Git 只在内层初始化和推送。',
         '',
         '2. Codex 先读：',
         '   AGENTS.md',
@@ -615,6 +620,7 @@
         '   .forgekit/docs/codex-next-work-order.md',
         '   .forgekit/docs/loop-readiness.md、.forgekit/docs/loop-blueprint.md（仅作为 loop 评估和设计图纸，不是自动执行授权）',
         '   .forgekit/docs/loop-operations.md（仅作为显式触发的 loop 操作协议，不是自动 runner）',
+        '   .forgekit/docs/native-agent-adapter.md（opt-in 原生 agent 配置适配；生成配置不等于 runtime 已注册，fallback 不能称为 native 成功）',
         '   .forgekit/docs/maker-checker-protocol.md（仅作为 Maker / Checker 审查协议，不是自动多 agent 调度）',
         '   .forgekit/docs/worktree-playbook.md（仅作为手动 worktree 隔离指南，不是自动调度器）',
         '   .forgekit/docs/task-intake.md（工作来源台账：统一记录公司派发、个人规划、用户反馈、bug、技术债等来源，再判断是否生成可执行任务）',

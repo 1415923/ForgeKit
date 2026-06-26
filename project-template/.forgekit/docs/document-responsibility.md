@@ -50,6 +50,7 @@
 | `.forgekit/docs/loop-readiness.md` | triggered | 用户、AI 工具 | no | 是否具备安全运行 loop 的条件 | loop runner 配置、daemon 设置 | loop 设计或操作前 | `loop-blueprint.md`, `loop-operations.md` |
 | `.forgekit/docs/loop-blueprint.md` | triggered | 用户、AI 工具 | no | 可审查的 loop 设计 | 自动执行授权 | 用户要求类似循环的重复工作 | `loop-readiness.md`, `work-log.md` |
 | `.forgekit/docs/loop-operations.md` | triggered | 用户、AI 工具 | no | 明确触发的 dry-run、one-step、continue、stop/handoff 协议 | 后台 runner、调度器、自动化代码 | 用户明确操作 loop | `loop-blueprint.md` |
+| `.forgekit/docs/native-agent-adapter.md` | triggered | 用户、AI 工具 | no | 原生 agent 配置适配、runtime 验证清单、native/fallback/simulated 记录规则 | 自动执行授权、运行器配置、把 fallback 称为 native 成功 | 用户选择生成或验证 Claude Code / Codex native agent 配置 | `loop-blueprint.md`, `loop-operations.md`, `maker-checker-protocol.md` |
 | `.forgekit/docs/maker-checker-protocol.md` | triggered | 用户、AI 工具 | no | Maker/Checker 复查协议 | 多 agent 调度器或最终人工批准 | 中高风险复查分离 | `changes/<id>/review.md` |
 | `.forgekit/docs/worktree-playbook.md` | triggered | 用户、AI 工具 | no | 手动 worktree 隔离指南 | 自动 worktree 编排 | 用户要求并行隔离工作 | `work-log.md` |
 | `.forgekit/changes/<id>/*` | triggered | 开发者、复查者 | no | 单次中高风险变更过程 | 当前态事实、无关历史 | 中高风险变更开始或收口 | `document-lifecycle.md` |

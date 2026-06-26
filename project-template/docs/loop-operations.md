@@ -14,6 +14,7 @@ Loop 默认关闭。本文只是操作协议，不是自动 loop runner、daemon
 - 停止条件
 - 人工升级路径
 - `.forgekit/docs/work-log.md` 或 loop 状态文件中的回写位置
+- agent_mode、native_agent_status、agent_runtime 和 fallback_reason 记录位置
 
 `loop-readiness.md` 和 `loop-blueprint.md` 仍然只是审查文档，不是自动执行授权。
 
@@ -47,10 +48,15 @@ Loop 默认关闭。本文只是操作协议，不是自动 loop runner、daemon
 - Human Escalation
 - Token / Scope Budget
 - 本轮是否会修改文件
+- agent_mode: native | fallback | simulated
+- native_agent_status: available | unavailable | unverified
+- fallback_reason
 
 规则：
 
 - 只执行一轮
+- 原生 custom agent 优先；如果未验证或不可用，只能在用户允许降级时使用 fallback，并在状态文件记录 `agent_mode: fallback`
+- 用户要求 native-only 时，native 不可用必须停止，不得 fallback
 - 保持在允许路径和预算内
 - 范围不清、预算耗尽、验证失败或触碰禁止路径时停止
 - 需要且可行时运行验证命令
@@ -68,6 +74,7 @@ Loop 默认关闭。本文只是操作协议，不是自动 loop runner、daemon
 - 只继续下一轮；如果还要再继续，必须等用户之后再次明确确认
 - 不推断用户允许重复或无人值守执行
 - 每轮结果都写入 `.forgekit/docs/work-log.md` 或 loop 状态文件
+- 每轮都记录 `agent_invocation_observed`，不得把 fallback 或 simulated 结果写成 native 成功
 - 状态不清、范围不清、预算耗尽、验证失败、触碰禁止路径或遇到需要人判断的节点时停止并升级
 
 `continue` 的含义是从状态恢复一次，不是一直循环。
@@ -84,6 +91,7 @@ Loop 默认关闭。本文只是操作协议，不是自动 loop runner、daemon
 - 验证结果
 - 已改文件或有意未改的文件
 - 风险和未验证项
+- agent_mode、native_agent_status、agent_runtime、agent_invocation_observed 和 fallback_reason
 - 建议下一步
 
 停止或交接期间不要启动另一轮 loop。
@@ -106,4 +114,4 @@ Loop 默认关闭。本文只是操作协议，不是自动 loop runner、daemon
 - `.forgekit/docs/work-log.md`
 - 明确指定的 loop 状态文件
 
-dry-run 只输出到聊天是可以的，除非用户要求写记录。one-step、continue、stop 和 handoff 不应把必要状态只留在聊天里。
+dry-run 只输出到聊天是可以的，除非用户要求写记录。one-step、continue、stop 和 handoff 不应把必要状态只留在聊天里。只要涉及 planner、reviewer 或 verifier，就必须写明 `agent_mode`；未观察到 native custom agent 时，`native_agent_status` 必须是 `unverified` 或 `unavailable`。

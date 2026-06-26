@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 import argparse
+import hashlib
 import json
 import os
 import re
@@ -57,8 +58,15 @@ REQUIRED_REPO_PATHS = [
     "project-template/docs/loop-blueprint.md",
     "project-template/docs/loop-operations.md",
     "project-template/docs/maker-checker-protocol.md",
+    "project-template/docs/native-agent-adapter.md",
     "project-template/docs/worktree-playbook.md",
     "project-template/docs/version-roadmap.md",
+    "project-template/.codex/config.toml",
+    "project-template/.codex/agents/forgekit-planner.toml",
+    "project-template/.codex/agents/forgekit-reviewer.toml",
+    "project-template/.codex/agents/forgekit-verifier.toml",
+    "project-template/scripts/check-codex-native-agents.py",
+    "scripts/check-codex-native-agents.py",
     ".codex-plugin/plugin.json",
     ".claude-plugin/plugin.json",
 ]
@@ -80,9 +88,14 @@ REQUIRED_GENERATED_PATHS = [
     ".forgekit/docs/loop-blueprint.md",
     ".forgekit/docs/loop-operations.md",
     ".forgekit/docs/maker-checker-protocol.md",
+    ".forgekit/docs/native-agent-adapter.md",
     ".forgekit/docs/worktree-playbook.md",
     ".forgekit/docs/version-roadmap.md",
     ".forgekit/docs/changelog.md",
+    ".codex/config.toml",
+    ".codex/agents/forgekit-planner.toml",
+    ".codex/agents/forgekit-reviewer.toml",
+    ".codex/agents/forgekit-verifier.toml",
     "governance/ai-engineering-loop.md",
     ".forgekit/changes/README.md",
     ".forgekit/changes/_template/proposal.md",
@@ -94,6 +107,7 @@ REQUIRED_GENERATED_PATHS = [
     ".forgekit/changes/_template/retro.md",
     "scripts/run-harness-check.ps1",
     "scripts/check-doc-sync.ps1",
+    "scripts/check-codex-native-agents.py",
     "scripts/archive-changes.py",
 ]
 
@@ -187,6 +201,10 @@ def assert_absent_paths(root, paths):
         fail("Unexpected paths found:\n" + "\n".join(present))
 
 
+def sha256_file(path):
+    return hashlib.sha256(path.read_bytes()).hexdigest()
+
+
 def assert_boundary_config(path):
     text = path.read_text(encoding="utf-8")
     required = [
@@ -235,6 +253,11 @@ def assert_loop_docs(root, readiness_path, blueprint_path):
         "MaxCommands:",
         "RequiresUserConfirmation: yes",
         "WritebackTarget:",
+        "agent_mode: native | fallback | simulated",
+        "native_agent_status: available | unavailable | unverified",
+        "agent_runtime: claude-code | codex | unknown",
+        "agent_invocation_observed:",
+        "fallback_reason:",
         "StopOnUnclearScope: yes",
         "StopOnValidationFailure: yes",
         "WorktreeStrategy: none | optional | required",
@@ -279,6 +302,9 @@ def assert_loop_operations(root, operations_path, blueprint_path, agents_path, c
         "不要启动另一轮 loop",
         "每一轮实际执行过的 loop 都必须回写",
         ".forgekit/docs/work-log.md",
+        "agent_mode: native | fallback | simulated",
+        "native_agent_status: available | unavailable | unverified",
+        "fallback_reason",
     ]
     blueprint_required = [
         "OperationMode: dry-run | one-step | continue | stop-handoff",
@@ -297,6 +323,8 @@ def assert_loop_operations(root, operations_path, blueprint_path, agents_path, c
         "Loop continue must not run continuously",
         "Stop and escalate on unclear scope, budget overrun, validation failure, or forbidden path contact.",
         "Loop output must write back",
+        "Generated native agent config is not proof of runtime registration.",
+        "Bounded-auto or loop execution must record `agent_mode`",
     ]
     rules_required = [
         "不得自行进入 loop mode",
@@ -304,6 +332,8 @@ def assert_loop_operations(root, operations_path, blueprint_path, agents_path, c
         "loop continue 不得自动连续运行",
         "scope 不清、预算超限、验证失败或触及 forbidden paths",
         "loop 输出必须写回",
+        "生成 native agent 配置不等于 runtime 已注册",
+        "bounded-auto 或 loop 执行必须写明 `agent_mode`",
     ]
     missing_operations = [item for item in operations_required if item not in operations]
     if missing_operations:
@@ -318,6 +348,100 @@ def assert_loop_operations(root, operations_path, blueprint_path, agents_path, c
     missing_rules = [item for item in rules_required if item not in rules]
     if missing_rules:
         fail(".codex/rules.md missing loop operation rules:\n" + "\n".join(missing_rules))
+
+
+def assert_native_agent_adapter(repo, root, adapter_path):
+    adapter = (root / adapter_path).read_text(encoding="utf-8")
+    skill = (repo / "native-adapters/claude-code/skills/forgekit-loop/SKILL.md").read_text(encoding="utf-8")
+    adapter_required = [
+        "RuntimeRegistration: generated | installed | registered | invoked",
+        "只有 `invoked` 才能写成 native 真正可用",
+        "native | fallback | simulated",
+        "native_agent_status",
+        "Native Agent Verification Checklist",
+        "/agents",
+        "developer_instructions",
+        "check-codex-native-agents.py",
+        "FallbackPolicy: fallback is downgrade mode, not native success",
+        "native-only",
+        "不得把 fallback 或 simulated 结果描述为 native agent 成功",
+    ]
+    skill_required = [
+        "Generated config is not proof of runtime registration.",
+        "Only invoked can be called native available.",
+        "agent_mode=fallback",
+        "fallback_reason",
+        "native-only",
+        "Native-only verification is read-only by default.",
+        "Never describe fallback or simulated execution as native agent success.",
+    ]
+    missing_adapter = [item for item in adapter_required if item not in adapter]
+    if missing_adapter:
+        fail("native-agent-adapter.md missing expected text:\n" + "\n".join(missing_adapter))
+    missing_skill = [item for item in skill_required if item not in skill]
+    if missing_skill:
+        fail("forgekit-loop skill missing fallback contract:\n" + "\n".join(missing_skill))
+
+
+def assert_codex_native_agents(target):
+    expected = {
+        "forgekit-planner": target / ".codex/agents/forgekit-planner.toml",
+        "forgekit-reviewer": target / ".codex/agents/forgekit-reviewer.toml",
+        "forgekit-verifier": target / ".codex/agents/forgekit-verifier.toml",
+    }
+    for name, path in expected.items():
+        if not path.is_file():
+            fail(f"missing Codex native agent: {path}")
+        text = path.read_text(encoding="utf-8")
+        required = [
+            f'name = "{name}"',
+            "description =",
+            "developer_instructions",
+        ]
+        missing = [item for item in required if item not in text]
+        if missing:
+            fail(f"{path} missing required TOML fields:\n" + "\n".join(missing))
+    config = target / ".codex/config.toml"
+    if not config.is_file():
+        fail("generated project missing .codex/config.toml")
+    config_text = config.read_text(encoding="utf-8")
+    for item in ["[agents]", "max_threads", "max_depth"]:
+        if item not in config_text:
+            fail(f".codex/config.toml missing {item}")
+    before_hashes = {
+        ".forgekit/template-lock.json": sha256_file(target / ".forgekit/template-lock.json"),
+        ".forgekit/docs/document-responsibility.md": sha256_file(target / ".forgekit/docs/document-responsibility.md"),
+        "README.md": sha256_file(target / "README.md"),
+        "AGENTS.md": sha256_file(target / "AGENTS.md"),
+        "CLAUDE.md": sha256_file(target / "CLAUDE.md"),
+    }
+    run([
+        sys.executable,
+        "scripts/check-codex-native-agents.py",
+        "--repo-root",
+        ".",
+        "--observed-agent",
+        "default,explorer,worker",
+    ], cwd=target)
+    report = target / ".forgekit/codex-native-agent-report.md"
+    if not report.is_file():
+        fail("Codex native doctor did not write .forgekit/codex-native-agent-report.md")
+    report_text = report.read_text(encoding="utf-8")
+    required_report = [
+        "Status: report-only",
+        "SchemaStatus: pass",
+        "NativeAgentStatus: unavailable",
+        "RuntimeRegistration: unavailable",
+        "Schema pass does not mean runtime registered.",
+        "default, explorer, worker",
+    ]
+    missing_report = [item for item in required_report if item not in report_text]
+    if missing_report:
+        fail("Codex native agent report missing expected text:\n" + "\n".join(missing_report))
+    for rel_path, before in before_hashes.items():
+        after = sha256_file(target / rel_path)
+        if after != before:
+            fail(f"Codex native doctor must not modify {rel_path}")
 
 
 def assert_maker_checker_protocol(root, protocol_path, review_path, agents_path, claude_path, rules_path):
@@ -614,8 +738,8 @@ def assert_json(path):
 def assert_manifest_lock(target):
     lock_path = target / ".forgekit" / "template-lock.json"
     lock = json.loads(lock_path.read_text(encoding="utf-8"))
-    if lock.get("installed_version") != "0.30.0":
-        fail("template-lock installed_version must be 0.30.0")
+    if lock.get("installed_version") != "0.30.1":
+        fail("template-lock installed_version must be 0.30.1")
     if lock.get("managed_docs_root") != ".forgekit/docs":
         fail("template-lock managed_docs_root must match boundary")
     if lock.get("change_root") != ".forgekit/changes":
@@ -668,7 +792,7 @@ def assert_upgrade_report(repo, target):
         fail("upgrade must not overwrite managed docs")
     assert_paths(target, [
         ".forgekit/upgrade-report.md",
-        ".forgekit/upgrade-export/0.30.0/.forgekit/docs/project-plan.md",
+        ".forgekit/upgrade-export/0.30.1/.forgekit/docs/project-plan.md",
     ])
 
 
@@ -705,7 +829,7 @@ def assert_guided_upgrade(repo, target):
         ".forgekit/upgrade/upgrade-plan.md",
         ".forgekit/upgrade/upgrade-actions.md",
         ".forgekit/upgrade/upgrade-inventory.json",
-        ".forgekit/upgrade/candidates/0.30.0/.forgekit/docs/project-plan.md",
+        ".forgekit/upgrade/candidates/0.30.1/.forgekit/docs/project-plan.md",
     ])
     plan = (target / ".forgekit" / "upgrade" / "upgrade-plan.md").read_text(encoding="utf-8")
     actions = (target / ".forgekit" / "upgrade" / "upgrade-actions.md").read_text(encoding="utf-8")
@@ -1339,6 +1463,7 @@ def main():
         "CLAUDE.md",
         ".codex/rules.md",
     )
+    assert_native_agent_adapter(repo, repo / "project-template", "docs/native-agent-adapter.md")
     assert_task_intake(
         repo / "project-template",
         "docs/task-intake.md",
@@ -1423,6 +1548,8 @@ def main():
             "CLAUDE.md",
             ".codex/rules.md",
         )
+        assert_native_agent_adapter(repo, target, ".forgekit/docs/native-agent-adapter.md")
+        assert_codex_native_agents(target)
         assert_task_intake(
             target,
             ".forgekit/docs/task-intake.md",

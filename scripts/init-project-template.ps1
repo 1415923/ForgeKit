@@ -9,6 +9,9 @@ param(
 
     [string[]]$Stacks = @(),
 
+    [ValidateSet("none", "claude-code", "codex", "all")]
+    [string]$NativeAgentAdapter = "none",
+
     [switch]$Upgrade,
 
     [switch]$ExportUpgradeTemplates,
@@ -128,6 +131,7 @@ function Write-BoundaryConfig {
     param(
         [string]$DestinationDir,
         [string]$ForgeKitRoot,
+        [string]$ProjectRoot,
         [string]$SelectedMode,
         [switch]$Overwrite
     )
@@ -145,12 +149,12 @@ function Write-BoundaryConfig {
 
     $lines = @(
         'forgekit:',
-        '  version: "0.29.0"',
+        '  version: "0.30.1"',
         "  mode: `"$SelectedMode`"",
         '',
         'roots:',
         "  forgekit_root: `"$relativeForgeKitRoot`"",
-        '  project_root: "."',
+        "  project_root: `"$ProjectRoot`"",
         '  managed_docs_root: ".forgekit/docs"',
         '  change_root: ".forgekit/changes"',
         '  business_docs_roots:',
@@ -213,6 +217,66 @@ function Invoke-TemplateVersioning {
     }
     if ($LASTEXITCODE -ne 0) {
         throw "Template versioning command failed: $Command"
+    }
+}
+
+function Initialize-CodeRoot {
+    param(
+        [string]$DestinationDir,
+        [string]$Name
+    )
+
+    if ([string]::IsNullOrWhiteSpace($Name)) {
+        return "."
+    }
+
+    $safeName = $Name.Trim()
+    if ($safeName -match '[\\/:*?"<>|]') {
+        throw "ProjectName contains characters that cannot be used as a folder name: $Name"
+    }
+
+    $codeRoot = Join-Path $DestinationDir $safeName
+    if (-not (Test-Path -LiteralPath $codeRoot)) {
+        New-Item -ItemType Directory -Force -Path $codeRoot | Out-Null
+        Write-Host "[copy] $safeName\"
+    } else {
+        Write-Host "[skip] $safeName\ already exists"
+    }
+    return "./$safeName"
+}
+
+function Invoke-NativeAgentAdapterGeneration {
+    param(
+        [string]$DestinationDir,
+        [string]$Target,
+        [switch]$Overwrite
+    )
+
+    if ($Target -eq "none") {
+        return
+    }
+
+    $script = Join-Path $templateRoot "scripts\generate-native-agent-adapter.py"
+    $python = Get-Command python -ErrorAction SilentlyContinue
+    if (-not $python) {
+        $python = Get-Command python3 -ErrorAction SilentlyContinue
+    }
+    if (-not $python) {
+        throw "Python is required to generate ForgeKit native agent adapter files."
+    }
+
+    $argsList = @(
+        $script,
+        "--target", $Target,
+        "--project-root", $DestinationDir
+    )
+    if ($Overwrite) {
+        $argsList += "--force"
+    }
+
+    & $python.Source @argsList
+    if ($LASTEXITCODE -ne 0) {
+        throw "Native agent adapter generation failed."
     }
 }
 
@@ -386,10 +450,12 @@ if ($Upgrade -and -not $Force) {
         Copy-DirectoryContent -SourceDir $stackDir -DestinationDir $destinationStackDir -Overwrite:$Force
     }
 
+    $projectRootRelative = Initialize-CodeRoot -DestinationDir $resolvedTarget -Name $ProjectName
     Write-InitMetadata -DestinationDir $resolvedTarget -Name $ProjectName -SelectedMode $Mode -SelectedStacks $normalizedStacks -Overwrite:$Force
     Write-ClaudeInitMetadata -DestinationDir $resolvedTarget -Name $ProjectName -SelectedMode $Mode -SelectedStacks $normalizedStacks -Overwrite:$Force
-    Write-BoundaryConfig -DestinationDir $resolvedTarget -ForgeKitRoot $templateRoot -SelectedMode $Mode -Overwrite
+    Write-BoundaryConfig -DestinationDir $resolvedTarget -ForgeKitRoot $templateRoot -ProjectRoot $projectRootRelative -SelectedMode $Mode -Overwrite
     Invoke-TemplateVersioning -Command "install-lock" -DestinationDir $resolvedTarget
+    Invoke-NativeAgentAdapterGeneration -DestinationDir $resolvedTarget -Target $NativeAgentAdapter -Overwrite:$Force
 }
 
 Write-Step "done"
@@ -406,10 +472,19 @@ Write-Host "   Claude Code: Read CLAUDE.md, prefer .agents/skills/project-init/S
 Write-Host ""
 Write-Host "Boundary:"
 Write-Host "- ForgeKitRoot is the toolkit/template source: $templateRoot"
-Write-Host "- ProjectRoot is the business repository and Git commit location: $resolvedTarget"
+if ([string]::IsNullOrWhiteSpace($ProjectName)) {
+    Write-Host "- ProjectRoot is the business repository and Git commit location: $resolvedTarget"
+} else {
+    Write-Host "- Outer workspace is ForgeKit governance: $resolvedTarget"
+    Write-Host "- ProjectRoot is the business code folder and Git commit location: $(Join-Path $resolvedTarget $ProjectName)"
+}
 Write-Host "- Managed ForgeKit docs default to .forgekit/docs; change artifacts default to .forgekit/changes."
 Write-Host "- Existing business docs/ is read-mostly by default; do not write ForgeKit governance templates there unless the user confirms."
 Write-Host "- Do not copy ForgeKit itself into ProjectRoot or commit ForgeKitRoot as part of the business repository."
+if ($NativeAgentAdapter -ne "none" -and -not $Upgrade) {
+    Write-Host "- Native Agent Adapter was generated for target: $NativeAgentAdapter. Generated config still needs runtime verification before it can be called native success."
+    Write-Host "- Codex schema check: python scripts\check-codex-native-agents.py --repo-root ."
+}
 Write-Host ""
 Write-Host "Do not choose a tech stack here. ForgeKit will confirm or infer it during the discovery interview."
 if ($Upgrade) {

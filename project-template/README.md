@@ -25,8 +25,9 @@ ForgeKit 在生成项目内提供轻量 AI Engineering Loop：澄清目标、判
 
 - `.agents/skills/`：项目本地 skills，内置项目初始化、代码审查、发布检查和安全审查；引用 skill 时优先读取 `.agents/skills/<skill>/SKILL.md`。
 - `.claude/skills/forgekit-project-workflow/`：Claude Code 轻量入口 skill，按 ECC 式薄入口思路路由到共享项目文档和治理规则，不复制全量 skills。
-- `.codex/agents/`：多 agent 角色设计，默认不启用。
-- `.codex/config.example.toml`：Codex 配置示例，默认不覆盖用户配置。
+- `.codex/agents/`：Codex native agent 模板；只有实际观察到 `forgekit-*` 被调用，才算 native 可用。
+- `.codex/config.toml`：项目级 agents 安全设置，只放 `max_threads` / `max_depth` 等轻量配置，不写全局认证、provider 或 profile。
+- `.codex/config.example.toml`：Codex 扩展配置示例，默认不覆盖用户真实配置。
 
 ## 项目级规则边界
 
@@ -49,13 +50,14 @@ ForgeKit 在生成项目内提供轻量 AI Engineering Loop：澄清目标、判
 - `.forgekit/docs/codex-next-work-order.md`：初始化后继续访谈、确认 MVP、落地条件和验证方式。
 - `.forgekit/docs/loop-readiness.md`、`.forgekit/docs/loop-blueprint.md`：判断项目是否适合安全运行 loop，并定义可审查的 loop 设计图纸；它们不是自动执行授权。
 - `.forgekit/docs/loop-operations.md`：定义用户显式触发的 loop dry-run、one-step、continue、stop/handoff；它不是后台自动化或无人值守 runner。
+- `.forgekit/docs/native-agent-adapter.md`：说明 Claude Code / Codex 原生 agent 配置适配、验证清单和 fallback 记录规则；生成配置不等于 runtime 已注册，只有 invoked 才能记录为 native 可用。
 - `.forgekit/docs/maker-checker-protocol.md`：定义 Maker 写代码、Checker 复核证据的审查协议；它不是自动多 agent 调度器。
 - `.forgekit/docs/worktree-playbook.md`：定义手动 worktree 并行隔离、命名、检查、Maker/Checker 用法和清理规则；它不是自动调度器。
 - `.forgekit/docs/task-intake.md`：记录工作来源原文或原始想法、Update Notes、Task Decision、Derived Task IDs 和人工确认状态；它不是需求文档、任务看板或 changelog。`.forgekit/docs/task-board.md` 只接收有动作、owner、下一步、Source ID 和验证方式的可执行任务。
 - `.codex/commands-catalog.md`、`.codex/hooks.md`：可选命令和 hook 候选，默认不自动启用。
 - `.codex/automation-decision.md`：判断重复流程应该做成 skill、command、hook、script、plugin、MCP 还是保留文档。
 - `.forgekit/changes/_template/`：proposal、design、tasks、verification、review、ship、retro 模板。
-- `scripts/detect-local-toolchain.ps1`、`scripts/run-harness-check.ps1`、`scripts/check-doc-sync.ps1`、`scripts/check-doc-sync.sh`：只读检测脚本，用于把 harness 从文档推进到可执行检查。
+- `scripts/detect-local-toolchain.ps1`、`scripts/run-harness-check.ps1`、`scripts/check-doc-sync.ps1`、`scripts/check-doc-sync.sh`、`scripts/check-codex-native-agents.py`：只读检测脚本，用于把 harness 和 native adapter 从文档推进到可执行检查。
 - `scripts/install-hooks.ps1`、`scripts/install-hooks.sh`：opt-in 安装、查看、卸载 Git hook，不默认启用。
 
 使用优先级：Codex 从 `AGENTS.md` 开始，Claude Code 从 `CLAUDE.md` 开始；如果任务命中 ForgeKit skill，优先读取项目内 `.agents/skills/<skill>/SKILL.md`，不要假设用户级或系统级 skill 路径存在；然后进入 `.forgekit/docs/document-responsibility.md` -> `.forgekit/docs/codebase-map.md` -> 必要的 `.forgekit/docs/local-toolchain.md` / `.forgekit/docs/codex-next-work-order.md` -> `.codex/` -> 相关 `.codex/stacks/<stack>/` -> 任务相关治理文件。不要默认读取全部 `.forgekit/docs/**` 或治理文档。

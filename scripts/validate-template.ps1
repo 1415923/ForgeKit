@@ -1,4 +1,4 @@
-param(
+﻿param(
     [switch]$SkipSkillValidation
 )
 
@@ -349,6 +349,7 @@ function Test-AIEngineeringLoop {
     Test-RequiredPath "project-template\docs\loop-blueprint.md"
     Test-RequiredPath "project-template\docs\loop-operations.md"
     Test-RequiredPath "project-template\docs\maker-checker-protocol.md"
+    Test-RequiredPath "project-template\docs\native-agent-adapter.md"
     Test-RequiredPath "project-template\docs\worktree-playbook.md"
     Test-RequiredPattern "project-template\docs\loop-readiness.md" "Readiness Status: not-ready `| partial `| ready" "Loop readiness status"
     Test-RequiredPattern "project-template\docs\loop-readiness.md" "Loop suitability: not-ready `| partial `| ready" "Loop readiness suitability"
@@ -365,6 +366,10 @@ function Test-AIEngineeringLoop {
     Test-RequiredPattern "project-template\docs\loop-operations.md" "Token / Scope Budget" "Loop blueprint token budget"
     Test-RequiredPattern "project-template\docs\loop-blueprint.md" "RequiresUserConfirmation: yes" "Loop blueprint comprehension check"
     Test-RequiredPattern "project-template\docs\loop-blueprint.md" "WritebackTarget:" "Loop blueprint output writeback"
+    Test-RequiredPattern "project-template\docs\loop-blueprint.md" "agent_mode:" "Loop blueprint agent mode"
+    Test-RequiredPattern "project-template\docs\loop-blueprint.md" "native_agent_status:" "Loop blueprint native status"
+    Test-RequiredPattern "project-template\docs\loop-blueprint.md" "agent_invocation_observed:" "Loop blueprint agent invocation"
+    Test-RequiredPattern "project-template\docs\loop-blueprint.md" "fallback_reason:" "Loop blueprint fallback reason"
     Test-RequiredPattern "project-template\docs\loop-blueprint.md" "OperationMode: dry-run `| one-step `| continue `| stop-handoff" "Loop blueprint operation mode"
     Test-RequiredPattern "project-template\docs\loop-blueprint.md" "MaxRounds:" "Loop blueprint max rounds"
     Test-RequiredPattern "project-template\docs\loop-blueprint.md" "MaxFilesRead:" "Loop blueprint max files read"
@@ -392,6 +397,18 @@ function Test-AIEngineeringLoop {
     Test-RequiredPattern "project-template\docs\loop-operations.md" "Loop One Step" "Loop one-step one round"
     Test-RequiredPattern "project-template\docs\loop-operations.md" "Loop Continue" "Loop continue one round"
     Test-RequiredPattern "project-template\docs\loop-operations.md" "State File" "Loop operations writeback"
+    Test-RequiredPattern "project-template\docs\loop-operations.md" "agent_mode:" "Loop operations agent mode"
+    Test-RequiredPattern "project-template\docs\loop-operations.md" "native-only" "Loop operations native-only stop"
+    Test-RequiredPattern "project-template\docs\native-agent-adapter.md" 'RuntimeRegistration: generated | installed | registered | invoked' "Native adapter runtime registration boundary"
+    Test-RequiredPattern "project-template\docs\native-agent-adapter.md" "只有 ``invoked`` 才能写成 native 真正可用" "Native adapter invoked-only boundary"
+    Test-RequiredPattern "project-template\docs\native-agent-adapter.md" "Native Agent Verification Checklist" "Native adapter verification checklist"
+    Test-RequiredPattern "project-template\docs\native-agent-adapter.md" "check-codex-native-agents.py" "Native adapter Codex doctor"
+    Test-RequiredPattern "project-template\docs\native-agent-adapter.md" "FallbackPolicy: fallback is downgrade mode, not native success" "Native adapter fallback boundary"
+    Test-RequiredPattern "project-template\docs\native-agent-adapter.md" "native-only verification 默认只读" "Native adapter native-only read-only"
+    Test-RequiredPattern "project-template\docs\native-agent-adapter.md" "不得把 fallback 或 simulated 结果描述为 native agent 成功" "Native adapter no false native claim"
+    Test-RequiredPattern "native-adapters\claude-code\skills\forgekit-loop\SKILL.md" "agent_mode=fallback" "Native adapter skill fallback record"
+    Test-RequiredPattern "native-adapters\claude-code\skills\forgekit-loop\SKILL.md" "Only invoked can be called native available." "Native adapter skill invoked-only boundary"
+    Test-RequiredPattern "native-adapters\claude-code\skills\forgekit-loop\SKILL.md" "native-only" "Native adapter skill native-only rule"
     Test-RequiredPattern "project-template\docs\loop-blueprint.md" "Maker / Checker" "Loop blueprint maker checker strategy"
     Test-RequiredPattern "project-template\docs\maker-checker-protocol.md" "ready-for-check" "Maker checker protocol boundary"
     Test-RequiredPattern "project-template\docs\maker-checker-protocol.md" "manual-review" "Maker checker no scheduler boundary"
@@ -440,6 +457,10 @@ function Test-AIEngineeringLoop {
     Test-RequiredPattern "project-template\AGENTS.md" "Loop output must write back" "AGENTS loop writeback rule"
     Test-RequiredPattern "project-template\CLAUDE.md" "Loop output must write back" "CLAUDE loop writeback rule"
     Test-RequiredPattern "project-template\.codex\rules.md" "work-log.md" "Rules loop writeback rule"
+    Test-RequiredPattern "project-template\AGENTS.md" "Generated native agent config is not proof of runtime registration" "AGENTS native adapter runtime boundary"
+    Test-RequiredPattern "project-template\CLAUDE.md" "Generated native agent config is not proof of runtime registration" "CLAUDE native adapter runtime boundary"
+    Test-RequiredPattern "project-template\.codex\rules.md" "生成 native agent 配置不等于 runtime 已注册" "Rules native adapter runtime boundary"
+    Test-RequiredPattern "project-template\.codex\rules.md" "agent_mode" "Rules loop agent mode record"
     Test-RequiredPattern "project-template\AGENTS.md" "Medium or high risk code changes should separate Maker phase and Checker phase" "AGENTS maker checker short rule"
     Test-RequiredPattern "project-template\CLAUDE.md" "Medium or high risk code changes should separate Maker phase and Checker phase" "CLAUDE maker checker short rule"
     Test-RequiredPattern "project-template\.codex\rules.md" "Maker phase" "Rules maker checker short rule"
@@ -457,6 +478,7 @@ function Test-AIEngineeringLoop {
     Test-RequiredPattern "project-template\.codex\rules.md" "push" "Rules worktree no automation rule"
     Test-RequiredPattern "project-template\.forgekit\docs\document-responsibility.md" "maker-checker-protocol.md" "Document responsibility maker checker"
     Test-RequiredPattern "project-template\.forgekit\docs\document-responsibility.md" "loop-operations.md" "Document responsibility loop operations"
+    Test-RequiredPattern "project-template\.forgekit\docs\document-responsibility.md" "native-agent-adapter.md" "Document responsibility native agent adapter"
     Test-RequiredPattern "project-template\.forgekit\docs\document-responsibility.md" "worktree-playbook.md" "Document responsibility worktree playbook"
     Test-RequiredPattern "project-template\docs\codebase-map.md" "ForgeKit" "Codebase map managed docs entry"
     Test-RequiredPattern "project-template\docs\codebase-map.md" ".forgekit/docs/" "Codebase map avoids full docs loading"
@@ -512,7 +534,7 @@ function Test-TemplateManifest {
     $manifestPath = Join-Path $repoRoot "project-template\.forgekit\template-manifest.json"
     if (Test-Path -LiteralPath $manifestPath) {
         $manifest = Get-Content -LiteralPath $manifestPath -Raw | ConvertFrom-Json
-        if ($manifest.template_version -ne "0.30.0") {
+        if ($manifest.template_version -ne "0.30.1") {
             Add-Error "Unexpected template manifest version: $($manifest.template_version)"
         }
         $sources = @($manifest.files | ForEach-Object { $_.source_path })
@@ -536,6 +558,9 @@ function Test-TemplateManifest {
         }
         if ($sources -contains ".forgekit/smart-archive-apply-report.md") {
             Add-Error "smart-archive-apply-report.md must not be listed in template manifest"
+        }
+        if ($sources -contains ".forgekit/codex-native-agent-report.md") {
+            Add-Error "codex-native-agent-report.md must not be listed in template manifest"
         }
         $dollarSign = [string][char]36
         $managedDocsRootPattern = $dollarSign + "{managed_docs_root}/*"
@@ -650,6 +675,28 @@ function Test-TeamToolingProtocol {
     Test-RequiredPattern "project-template\.codex\automation-decision.md" "docs-warn" "Automation decision hook profile"
     Test-RequiredPattern "project-template\.codex\automation-decision.md" "project-init" "Automation decision skill section"
     Test-RequiredPattern "project-template\.codex\config.example.toml" "team-agent-rollout.md" "MCP rollout reference"
+    Test-RequiredPattern "project-template\.codex\config.example.toml" "[forgekit.native_agents]" "Codex native agent config example"
+    Test-RequiredPattern "project-template\.codex\config.example.toml" 'implementer = "not-generated"' "Codex native adapter no implementer"
+    Test-RequiredPath "project-template\.codex\config.toml"
+    Test-RequiredPattern "project-template\.codex\config.toml" "[agents]" "Codex project agents config"
+    Test-RequiredPattern "project-template\.codex\config.toml" "max_threads" "Codex project agents max_threads"
+    Test-RequiredPattern "project-template\.codex\config.toml" "max_depth" "Codex project agents max_depth"
+    Test-RequiredPath "project-template\.codex\agents\forgekit-planner.toml"
+    Test-RequiredPath "project-template\.codex\agents\forgekit-reviewer.toml"
+    Test-RequiredPath "project-template\.codex\agents\forgekit-verifier.toml"
+    foreach ($agentName in @("forgekit-planner", "forgekit-reviewer", "forgekit-verifier")) {
+        $agentPath = "project-template\.codex\agents\$agentName.toml"
+        Test-RequiredPattern $agentPath "name = `"$agentName`"" "$agentName name"
+        Test-RequiredPattern $agentPath "description =" "$agentName description"
+        Test-RequiredPattern $agentPath "developer_instructions" "$agentName developer instructions"
+    }
+    Test-RequiredPath "scripts\check-codex-native-agents.py"
+    Test-RequiredPath "project-template\scripts\check-codex-native-agents.py"
+    Test-RequiredPattern "scripts\check-codex-native-agents.py" "Schema pass does not mean runtime registered." "Codex native doctor runtime boundary"
+    Test-RequiredPattern "project-template\scripts\check-codex-native-agents.py" "NativeAgentStatus: {native_status}" "Codex native doctor status output"
+    Test-RequiredPattern "project-template\scripts\check-doc-sync.ps1" ".forgekit/codex-native-agent-report.md" "PowerShell Codex native report exclusion"
+    Test-RequiredPattern "project-template\scripts\check-doc-sync.sh" ".forgekit/codex-native-agent-report.md" "Bash Codex native report exclusion"
+    Test-RequiredPattern "scripts\generate-native-agent-adapter.py" "present" "Native adapter generator present status"
     Test-RequiredPattern "project-template\AGENTS.md" "commands-catalog.md" "Commands catalog routing"
     Test-RequiredPattern "project-template\AGENTS.md" "hooks.md" "Hooks routing"
     Test-RequiredPattern "project-template\.codex\security.md" "config.example.toml" "Security MCP config guard"
@@ -803,11 +850,15 @@ function Test-HarnessEntryConsistency {
     Test-RequiredPattern "scripts\init-project-template.ps1" "CLAUDE.md" "Init script Claude startup guidance"
     Test-RequiredPattern "scripts\init-project-template.ps1" ".agents/skills/project-init/SKILL.md" "PowerShell init project-local startup skill"
     Test-RequiredPattern "scripts\init-project-template.ps1" "[ValidateSet(""Lite"", ""Standard"", ""Enterprise"")]" "Init script mode parameter"
+    Test-RequiredPattern "scripts\init-project-template.ps1" "NativeAgentAdapter" "Init script native adapter parameter"
+    Test-RequiredPattern "scripts\init-project-template.ps1" "Invoke-NativeAgentAdapterGeneration" "Init script native adapter generation"
     Test-RequiredPattern "scripts\init-project-template.ps1" "StackSelection: deferred" "Init script deferred stack guidance"
     Test-RequiredPattern "scripts\init-project-template.ps1" "Upgrade" "Init script upgrade mode"
     Test-RequiredPattern "scripts\init-project-template.ps1" "upgrade-report.md" "Init script upgrade report"
     Test-RequiredPattern "scripts\init-project-template.ps1" "ExportUpgradeTemplates" "Init script export upgrade templates"
     Test-RequiredPattern "scripts\init-project-template.sh" "--upgrade" "Bash init upgrade mode"
+    Test-RequiredPattern "scripts\init-project-template.sh" "--native-agent-adapter" "Bash init native adapter parameter"
+    Test-RequiredPattern "scripts\init-project-template.sh" "generate_native_agent_adapter" "Bash init native adapter generation"
     Test-RequiredPattern "scripts\init-project-template.sh" ".agents/skills/project-init/SKILL.md" "Bash init project-local startup skill"
     Test-RequiredPattern "scripts\init-project-template.sh" "upgrade-report.md" "Bash init upgrade report"
     Test-RequiredPattern "scripts\init-project-template.sh" "--export-upgrade-templates" "Bash init export upgrade templates"
@@ -821,9 +872,11 @@ function Test-HarnessEntryConsistency {
     Test-RequiredPattern "README.md" "upgrade-forgekit.ps1" "Root README guided upgrade PowerShell"
     Test-RequiredPattern "README.md" "upgrade-plan.md" "Root README guided upgrade plan"
     Test-RequiredPattern "README.md" ".agents/skills/project-init/SKILL.md" "Root README project-local startup skill"
+    Test-RequiredPattern "README.md" "-NativeAgentAdapter all" "Root README init native adapter example"
     Test-RequiredPattern "README.en.md" "upgrade-forgekit.ps1" "English README guided upgrade PowerShell"
     Test-RequiredPattern "README.en.md" "upgrade-plan.md" "English README guided upgrade plan"
     Test-RequiredPattern "README.en.md" ".agents/skills/project-init/SKILL.md" "English README project-local startup skill"
+    Test-RequiredPattern "README.en.md" "-NativeAgentAdapter all" "English README init native adapter example"
     Test-RequiredPattern "usage.html" "startupOutput" "HTML startup output"
     Test-RequiredPattern "usage.html" ".agents/skills/project-init/SKILL.md" "HTML project-local startup skill"
     Test-RequiredPattern "usage.html" "governance/agent-harness.md" "HTML harness prompt reference"
@@ -863,7 +916,7 @@ function Test-PluginDistribution {
     if ($codexPluginJson.name -ne "forgekit") {
         Add-Error "Unexpected Codex plugin name in root plugin.json: $($codexPluginJson.name)"
     }
-    if ($codexPluginJson.version -ne "0.30.0") {
+    if ($codexPluginJson.version -ne "0.30.1") {
         Add-Error "Unexpected Codex plugin version in root plugin.json: $($codexPluginJson.version)"
     }
     if ($codexPluginJson.skills -ne "./skills/") {
@@ -874,7 +927,7 @@ function Test-PluginDistribution {
     if ($claudePluginJson.name -ne "forgekit") {
         Add-Error "Unexpected Claude plugin name in root plugin.json: $($claudePluginJson.name)"
     }
-    if ($claudePluginJson.version -ne "0.30.0") {
+    if ($claudePluginJson.version -ne "0.30.1") {
         Add-Error "Unexpected Claude plugin version in root plugin.json: $($claudePluginJson.version)"
     }
     $claudeSkills = @($claudePluginJson.skills)

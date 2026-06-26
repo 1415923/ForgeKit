@@ -51,6 +51,12 @@
 - `.forgekit/docs/maker-checker-protocol.md` 是审查协议，不是多 agent 调度或自动 checker 授权。
 - `.forgekit/docs/worktree-playbook.md` 是手动隔离指南，不是自动 worktree 调度或 agent 编排。
 - `.forgekit/docs/native-agent-adapter.md` 是 opt-in 原生 agent 配置适配说明，不授权自动执行、调度、merge、commit、push 或 PR。
+- 生成 native agent 配置不等于 runtime 已注册；不得把 fallback 或 simulated 执行称为 native agent 成功。
+- native 状态分为 generated、installed、registered、invoked；只有 invoked 才能记录为 native available。
+- 如果 Codex 只暴露 default、explorer 或 worker，必须记录 `native_agent_status: unavailable`，不得称为 native 成功。
+- native-only verification 默认只读；除非用户明确要求“记录到文档”，不得自动写 task-intake、work-log 或 loop state。
+- fallback 必须有用户明确允许，或由 workflow 规则明确允许。
+- bounded-auto 或 loop 执行必须写明 `agent_mode`；native custom agent 未观察到前，`native_agent_status` 必须是 `unverified`。
 - loop 必须有状态文件、验证命令、停止条件和人工升级入口。
 - loop 不默认修改 business docs、secrets、deploy 或 CI。
 - 不得自行进入 loop mode；只有用户明确要求 loop dry-run、one-step、continue 或 stop/handoff 时才按 loop operation 规则执行。

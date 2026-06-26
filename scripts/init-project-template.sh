@@ -7,18 +7,21 @@ mode="Standard"
 force=0
 upgrade=0
 export_upgrade_templates=0
+native_agent_adapter="none"
 stacks=()
 
 usage() {
   cat <<'USAGE'
 Usage:
-  ./scripts/init-project-template.sh --target-path /path/to/project --project-name my-app [--mode Standard] [--upgrade] [--export-upgrade-templates] [--force] [--stacks java-springboot,vue]
+  ./scripts/init-project-template.sh --target-path /path/to/project --project-name my-app [--mode Standard] [--native-agent-adapter none|claude-code|codex|all] [--upgrade] [--export-upgrade-templates] [--force] [--stacks java-springboot,vue]
 
 Options:
   --target-path PATH     Required. Directory to generate the project template into.
   --project-name NAME    Optional project name written into init metadata.
   --mode MODE            Lite, Standard, or Enterprise. Default: Standard.
   --stacks LIST          Optional comma-separated stack templates to copy.
+  --native-agent-adapter TARGET
+                         Optional. none, claude-code, codex, or all. Default: none.
   --upgrade              Safe upgrade mode. Existing files are preserved.
   --export-upgrade-templates
                          Export newer candidate templates under .forgekit/upgrade-export/<version>/ for review.
@@ -42,6 +45,10 @@ while [[ $# -gt 0 ]]; do
       ;;
     --stacks)
       IFS=',' read -r -a stacks <<< "${2:-}"
+      shift 2
+      ;;
+    --native-agent-adapter)
+      native_agent_adapter="${2:-none}"
       shift 2
       ;;
     --force)
@@ -78,6 +85,14 @@ case "$mode" in
   Lite|Standard|Enterprise) ;;
   *)
     echo "Invalid --mode: $mode. Expected Lite, Standard, or Enterprise." >&2
+    exit 1
+    ;;
+esac
+
+case "$native_agent_adapter" in
+  none|claude-code|codex|all) ;;
+  *)
+    echo "Invalid --native-agent-adapter: $native_agent_adapter. Expected none, claude-code, codex, or all." >&2
     exit 1
     ;;
 esac
@@ -168,12 +183,12 @@ write_boundary_config() {
   mkdir -p "$(dirname "$boundary_file")"
   cat > "$boundary_file" <<EOF
 forgekit:
-  version: "0.29.0"
+  version: "0.30.1"
   mode: "$mode"
 
 roots:
   forgekit_root: "$relative_forgekit_root"
-  project_root: "."
+  project_root: "$project_root_relative"
   managed_docs_root: ".forgekit/docs"
   change_root: ".forgekit/changes"
   business_docs_roots:
@@ -211,6 +226,24 @@ EOF
   echo "[copy] .forgekit/project-boundary.yml"
 }
 
+init_code_root() {
+  if [[ -z "${project_name// }" ]]; then
+    project_root_relative="."
+    return 0
+  fi
+
+  case "$project_name" in
+    *[\\/:*?\"'<>|]*)
+      echo "ProjectName contains characters that cannot be used as a folder name: $project_name" >&2
+      exit 1
+      ;;
+  esac
+
+  mkdir -p "$resolved_target/$project_name"
+  project_root_relative="./$project_name"
+  echo "[copy] $project_name/"
+}
+
 python_cmd() {
   if command -v python3 >/dev/null 2>&1; then
     printf 'python3'
@@ -225,6 +258,22 @@ python_cmd() {
 template_versioning() {
   local command="$1"
   "$(python_cmd)" "$repo_root/scripts/update-template-manifest.py" "$command" --repo-root "$repo_root" --project-root "$resolved_target"
+}
+
+generate_native_agent_adapter() {
+  if [[ "$native_agent_adapter" == "none" ]]; then
+    return 0
+  fi
+
+  local args=(
+    "$repo_root/scripts/generate-native-agent-adapter.py"
+    --target "$native_agent_adapter"
+    --project-root "$resolved_target"
+  )
+  if [[ "$force" -eq 1 ]]; then
+    args+=(--force)
+  fi
+  "$(python_cmd)" "${args[@]}"
 }
 
 write_codex_metadata() {
@@ -339,10 +388,12 @@ else
     copy_tree "$stack_dir" "$resolved_target/.codex/stacks/$stack"
   done
 
+  init_code_root
   write_codex_metadata
   write_claude_metadata
   write_boundary_config
   template_versioning install-lock
+  generate_native_agent_adapter
 fi
 
 echo "[init] done"
@@ -359,10 +410,19 @@ echo "   Claude Code: Read CLAUDE.md, prefer .agents/skills/project-init/SKILL.m
 echo
 echo "Boundary:"
 echo "- ForgeKitRoot is the toolkit/template source: $repo_root"
-echo "- ProjectRoot is the business repository and Git commit location: $resolved_target"
+if [[ -z "${project_name// }" ]]; then
+  echo "- ProjectRoot is the business repository and Git commit location: $resolved_target"
+else
+  echo "- Outer workspace is ForgeKit governance: $resolved_target"
+  echo "- ProjectRoot is the business code folder and Git commit location: $resolved_target/$project_name"
+fi
 echo "- Managed ForgeKit docs default to .forgekit/docs; change artifacts default to .forgekit/changes."
 echo "- Existing business docs/ is read-mostly by default; do not write ForgeKit governance templates there unless the user confirms."
 echo "- Do not copy ForgeKit itself into ProjectRoot or commit ForgeKitRoot as part of the business repository."
+if [[ "$native_agent_adapter" != "none" && "$upgrade" -ne 1 ]]; then
+  echo "- Native Agent Adapter was generated for target: $native_agent_adapter. Generated config still needs runtime verification before it can be called native success."
+  echo "- Codex schema check: python3 scripts/check-codex-native-agents.py --repo-root ."
+fi
 echo
 echo "Do not choose a tech stack here. ForgeKit will confirm or infer it during the discovery interview."
 if [[ "$upgrade" -eq 1 ]]; then

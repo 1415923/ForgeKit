@@ -30,14 +30,25 @@ ForgeKit does not:
 Windows PowerShell:
 
 ```powershell
-powershell -ExecutionPolicy Bypass -File .\scripts\init-project-template.ps1 -TargetPath "D:\projects\my-app" -ProjectName "my-app" -Mode Standard
+powershell -ExecutionPolicy Bypass -File .\scripts\init-project-template.ps1 -TargetPath "D:\projects\my-app-workspace" -ProjectName "my-app" -Mode Standard -NativeAgentAdapter all
 ```
 
 Ubuntu / macOS:
 
 ```bash
-./scripts/init-project-template.sh --target-path "$HOME/projects/my-app" --project-name "my-app" --mode Standard
+./scripts/init-project-template.sh --target-path "$HOME/projects/my-app-workspace" --project-name "my-app" --mode Standard --native-agent-adapter all
 ```
+
+This single command initializes the project template and generates reviewable Native Agent Adapter configuration templates for Claude Code and Codex. Generated config is not runtime registration; verify the first real invocation with `.forgekit/docs/native-agent-adapter.md`.
+
+The generated workspace has two layers:
+
+```text
+my-app-workspace/        # outer layer: ForgeKit governance, AI entry files, .forgekit, .codex, scripts
+  my-app/                # inner layer: real business code and Git repository
+```
+
+If you already have code, put the whole business project inside `my-app/`. For a new project, create source code, tests, business README, and build files inside the inner directory. Initialize Git, commit, and push from `my-app/` only, so ForgeKit governance files in the outer layer are not pushed to the business repository.
 
 Modes are written to initialization metadata only; they do not crop copied files:
 
@@ -54,14 +65,14 @@ If unsure, use `Standard`. Do not rush stack selection during template generatio
 Codex:
 
 ```powershell
-cd D:\projects\my-app
+cd D:\projects\my-app-workspace
 codex
 ```
 
 Claude Code:
 
 ```powershell
-cd D:\projects\my-app
+cd D:\projects\my-app-workspace
 claude
 ```
 
@@ -93,6 +104,8 @@ New users do not need to read every file. Start with the scenario-specific entry
 | ForgeKit upgrade | `.forgekit/upgrade/upgrade-plan.md`, `.forgekit/upgrade/upgrade-actions.md`, `.forgekit/upgrade/candidates/<version>/` |
 
 Takeover audit docs are not the daily task entry point. Once a project is stable, daily work usually follows `task-intake -> task-board -> work-log`, with requirements, testing, architecture, and changelog updated only when their facts change.
+
+Business code lives under the inner `ProjectName/` directory by default. When AI needs code context, point it to the inner directory; keep ForgeKit managed docs, AGENTS, CLAUDE, and adapter config in the outer governance workspace.
 
 ## What Gets Generated
 
@@ -189,20 +202,23 @@ These scripts only check, copy templates, or install local opt-in hooks. They do
 
 Native Agent Adapter is an opt-in feature that exports ForgeKit loop / maker-checker / verification protocols into reviewable native agent configuration templates for Claude Code and Codex. It only generates configuration; it does not run loops, start agents, provide a runner or dispatcher, automate worktrees, merge, commit, push, or create PRs.
 
+Generated config is not proof that the runtime registered a native agent. Record native mode only after observing `forgekit-planner`, `forgekit-reviewer`, or `forgekit-verifier` being invoked. If execution uses a general-purpose / worker fallback with prompt injection, record fallback instead of calling it native success.
+
 Windows PowerShell:
 
 ```powershell
-powershell -ExecutionPolicy Bypass -File .\scripts\generate-native-agent-adapter.ps1 -Target claude-code -ProjectRoot "D:\projects\my-app" -DryRun
-powershell -ExecutionPolicy Bypass -File .\scripts\generate-native-agent-adapter.ps1 -Target all -ProjectRoot "D:\projects\my-app"
+powershell -ExecutionPolicy Bypass -File .\scripts\init-project-template.ps1 -TargetPath "D:\projects\my-app-workspace" -ProjectName "my-app" -Mode Standard -NativeAgentAdapter all
 ```
 
-Python:
+Bash:
 
 ```bash
-python scripts/generate-native-agent-adapter.py --target codex --project-root ./demo --dry-run
+./scripts/init-project-template.sh --target-path "$HOME/projects/my-app-workspace" --project-name "my-app" --mode Standard --native-agent-adapter all
 ```
 
-The Codex adapter is an example / reviewable template. After generation, review `.codex/config.example.toml` and `.codex/agents/*.toml` against your current Codex version.
+The old standalone `generate-native-agent-adapter.*` scripts remain for compatibility and maintenance, but they are no longer the recommended path for new users. Prefer the one-step initialization command.
+
+The Codex adapter generates `.codex/agents/*.toml` plus a minimal project-scoped `.codex/config.toml`. Run `python scripts/check-codex-native-agents.py --repo-root .` for schema checks; `SchemaStatus: pass` still does not mean runtime registration. Record native mode only after observing a `forgekit-*` agent invocation. If Codex only shows default / explorer / worker, record `native_agent_status=unavailable`.
 
 ## Change Archiving
 
@@ -302,6 +318,7 @@ ForgeKit can coexist with ECC: ECC enhances the AI tool; ForgeKit constrains the
 
 | Version | User-facing change |
 | --- | --- |
+| `0.30.1` | Native Agent Adapter Verification: clarifies that generated config is not runtime registration, and adds native / fallback / simulated state fields and verification checklists. |
 | `0.30.0` | Native Agent Adapter: adds opt-in native agent configuration generation, exporting ForgeKit loop / maker-checker / verification protocols as reviewable Claude Code / Codex templates without automatic execution. |
 | `0.29.0` | Guided Upgrade Workflow: adds standalone upgrade scripts that generate upgrade-plan, upgrade-actions, and candidate templates to reduce manual judgment and token cost. |
 | `0.28.5` | Work Source Unification: brings assigned work, self-planned work, user feedback, bugs, and technical debt into one Source ID -> Task ID -> Work Log chain. |

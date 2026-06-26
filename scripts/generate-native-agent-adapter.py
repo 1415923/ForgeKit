@@ -5,7 +5,7 @@ import sys
 from pathlib import Path
 
 
-VERSION = "0.30.0"
+VERSION = "0.30.1"
 
 TARGET_FILES = {
     "claude-code": [
@@ -99,16 +99,40 @@ def build_plan(repo_root, project_root, target):
     return plan
 
 
+def codex_config_has_native_adapter(path):
+    try:
+        return "[forgekit.native_agents]" in path.read_text(encoding="utf-8", errors="replace")
+    except OSError:
+        return False
+
+
+def file_matches_source(source, destination):
+    try:
+        return source.read_bytes() == destination.read_bytes()
+    except OSError:
+        return False
+
+
+def adapter_file_already_present(item):
+    if item["target_rel"] == ".codex/config.example.toml":
+        return codex_config_has_native_adapter(item["destination"])
+    return file_matches_source(item["source"], item["destination"])
+
+
 def apply_plan(plan, dry_run, force):
-    counts = {"planned": len(plan), "written": 0, "skipped": 0}
+    counts = {"planned": len(plan), "written": 0, "skipped": 0, "present": 0}
     rows = []
     for item in plan:
         exists = item["destination"].exists()
         if dry_run:
             action = "planned"
         elif exists and not force:
-            action = "skipped"
-            counts["skipped"] += 1
+            if adapter_file_already_present(item):
+                action = "present"
+                counts["present"] += 1
+            else:
+                action = "skipped"
+                counts["skipped"] += 1
         else:
             item["destination"].parent.mkdir(parents=True, exist_ok=True)
             shutil.copyfile(item["source"], item["destination"])
@@ -138,6 +162,7 @@ def print_report(args, project_root, counts, rows):
     print("Summary:")
     print(f"- planned: {counts['planned']}")
     print(f"- written: {counts['written']}")
+    print(f"- present: {counts['present']}")
     print(f"- skipped: {counts['skipped']}")
     print("")
     print("Files:")

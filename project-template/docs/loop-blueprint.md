@@ -15,6 +15,14 @@ MaxFilesChanged:
 MaxCommands:
 RequiresUserConfirmation: yes
 WritebackTarget:
+agent_mode: native | fallback | simulated
+native_agent_status: available | unavailable | unverified
+agent_runtime: claude-code | codex | unknown
+agent_invocation_observed:
+  planner: native | fallback | not-run
+  reviewer: native | fallback | not-run
+  verifier: native | fallback | not-run
+fallback_reason:
 StopOnUnclearScope: yes
 StopOnValidationFailure: yes
 WorktreeStrategy: none | optional | required
@@ -24,6 +32,8 @@ IsolationReason:
 CleanupRule:
 
 这些操作字段只是 `.forgekit/docs/loop-operations.md` 的审查字段，不是自动 runner 配置。
+
+Agent 字段只记录本轮 loop 是否真正调用到 native custom agent。`fallback` 和 `simulated` 都不能写成 native 成功；native 未验证时必须保持 `native_agent_status: unverified`。
 
 Worktree 字段只是 `.forgekit/docs/worktree-playbook.md` 的设计字段，不授权自动创建 worktree、启动 agent、merge、push、创建 PR、删除分支或清理目录。
 
@@ -64,8 +74,16 @@ Loop 默认关闭。只有用户明确要求 `dry-run`、`one-step`、`continue`
 Path:
 Owner:
 Write rule:
+agent_mode: native | fallback | simulated
+native_agent_status: available | unavailable | unverified
+agent_runtime: claude-code | codex | unknown
+agent_invocation_observed:
+  planner: native | fallback | not-run
+  reviewer: native | fallback | not-run
+  verifier: native | fallback | not-run
+fallback_reason:
 
-没有明确状态文件时不能运行 loop。状态文件必须记录当前步骤、上次验证结果、阻塞条件和下一步允许动作。
+没有明确状态文件时不能运行 loop。状态文件必须记录当前步骤、上次验证结果、阻塞条件、下一步允许动作、agent_mode、native_agent_status 和 fallback_reason。
 
 ## 允许路径
 
@@ -138,6 +156,7 @@ Max commands:
 - 人工升级路径
 - token 预算
 - 输出和回写位置
+- agent_mode、native_agent_status、agent_runtime 和 fallback_reason
 
 ## 输出 / 回写
 
