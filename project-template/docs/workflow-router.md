@@ -37,7 +37,7 @@
 | loop / bounded-auto 授权 | `bounded-auto-loop-policy.md`, `loop-blueprint.md`, `loop-operations.md`, `native-agent-adapter.md` | loop state or `work-log.md` only if executing | source/task/changelog docs unless their facts changed | authorization recap + stop conditions |
 | maker/checker review | `maker-checker-protocol.md`, `.forgekit/changes/<id>/review.md` | `.forgekit/changes/<id>/review.md` | `task-board.md` unless task status changes | `pass` / `needs-fix` / `manual-review` |
 | worktree 使用 | `worktree-playbook.md` | `work-log.md` only if user asks to execute or record | `task-board.md` unless task status changes | worktree plan / commands |
-| 阶段收口 / 给领导汇报 / handoff | `task-intake.md`, `task-board.md`, `work-log.md`, `testing.md`, `changelog.md`, `risk-register.md` | none by default | current docs unless user asks to update | human-readable summary |
+| 生成交付包 / 阶段收口 / 给领导汇报 / reviewer 审查 / handoff package | `task-intake.md`, `requirements.md`, `task-board.md`, `work-log.md`, `testing.md`, `changelog.md`, `risk-register.md`, `.forgekit/doc-health-report.md`, `.forgekit/source-trace-report.md`, `.forgekit/changes/<id>/*` | `.forgekit/handoff-package.md` or `.forgekit/changes/<id>/handoff.md` only when user asks to generate handoff | current docs, business docs, task status, changelog, Git, PR | review-ready handoff with TODO_REVIEW for missing evidence |
 
 ## Read Targets
 
@@ -82,6 +82,7 @@
 - 涉及 loop、bounded-auto、worktree、发布、风险、安全或业务 docs 写入时，先复述边界和停止条件。
 - 涉及文档健康、文档太长或职责混乱时，先生成或建议 `.forgekit/doc-health-report.md`；不要自动按报告修改 managed docs。
 - 涉及任务来源、完成证据或追溯链断裂时，先生成或建议 `.forgekit/source-trace-report.md`；不要自动补 Source ID 或改写任务状态。
+- 涉及阶段收口、领导汇报、reviewer 审查或测试交接时，可以生成 `.forgekit/handoff-package.md` 或 scoped change `handoff.md`；它只汇总已有信息，缺证据写 `TODO_REVIEW`，不得编造提交、验证、风险或文件列表。
 - 用户要求 native-only、bounded-auto、worktree 或发布收口时，必须按对应触发式文档确认前置条件。
 
 ## Examples

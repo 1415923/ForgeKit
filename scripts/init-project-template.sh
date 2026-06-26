@@ -183,7 +183,7 @@ write_boundary_config() {
   mkdir -p "$(dirname "$boundary_file")"
   cat > "$boundary_file" <<EOF
 forgekit:
-  version: "0.34.0"
+  version: "0.35.0"
   mode: "$mode"
 
 roots:
@@ -428,3 +428,4 @@ echo "Do not choose a tech stack here. ForgeKit will confirm or infer it during 
 if [[ "$upgrade" -eq 1 ]]; then
   echo "Upgrade note: report-only mode preserved existing files and lock. Review .forgekit/upgrade-report.md and candidate templates under .forgekit/upgrade-export manually."
 fi
+

@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "template_version": "0.34.0",
+  "template_version": "0.35.0",
   "boundary_aware": true,
   "files": [
     {
@@ -9,7 +9,7 @@
       "role": "agent_entry",
       "update_policy": "ask",
       "render_mode": "copy",
-      "checksum": "sha256:b7d3f49bd6e28322bf78eaf20d660d50e9fee2a097686961623e6b1e09feba4d"
+      "checksum": "sha256:94b57d62f7af821aad6d565edcdbb00c01b5f9bba0c7fabe228907a83d2c32ef"
     },
     {
       "source_path": "CLAUDE.md",
@@ -17,7 +17,7 @@
       "role": "agent_entry",
       "update_policy": "ask",
       "render_mode": "copy",
-      "checksum": "sha256:4886726b4b73378ce33a5e247e62551f63249fc6bb269a18d03c88c8b3411cc1"
+      "checksum": "sha256:4d16b0e4124031f66bc51dabc8aa397cf18ed1af2770756cfd86552f1a75b27a"
     },
     {
       "source_path": "README.md",
@@ -25,7 +25,7 @@
       "role": "readme",
       "update_policy": "ask",
       "render_mode": "copy",
-      "checksum": "sha256:c437afbbd6c1b51b1a782ba7517bc2d6f9a90b10ff7e3387c18c6c26e8d33c49"
+      "checksum": "sha256:b506cfcd4b6d6aaa5eb5100201fc504fbab12b9e4aa5901d503731dab34dde43"
     },
     {
       "source_path": ".forgekit/project-boundary.yml",
@@ -41,7 +41,7 @@
       "role": "managed_doc",
       "update_policy": "merge",
       "render_mode": "copy",
-      "checksum": "sha256:2e9eec31276d419cd3c3145726e0bcb16dc3ef0f0c409a6d06c545db17cb08f0"
+      "checksum": "sha256:1d0b500e3c8111a03e7fda7a9d1bda713a4ee2211ff9d961c30359526e1116e6"
     },
     {
       "source_path": ".forgekit/docs/document-lifecycle.md",
@@ -81,7 +81,7 @@
       "role": "codex_rule",
       "update_policy": "ask",
       "render_mode": "copy",
-      "checksum": "sha256:a3090a516630ebd27bbdc077ec79b9883ba1910498025f5c7d78938f2b10f42d"
+      "checksum": "sha256:29ce4a0225d33eb981cbf18b37e6cdd56549bfed88abed940c448354d26ef449"
     },
     {
       "source_path": ".codex/version-gates.md",
@@ -209,7 +209,7 @@
       "role": "managed_doc",
       "update_policy": "merge",
       "render_mode": "copy",
-      "checksum": "sha256:dc6fb3122e9b890379181fafed2ec530011e8677c75b92fd79dacc61294a2627"
+      "checksum": "sha256:4230ca1fc67cd2a729ab0e9af86145b4c13086555baec359c1451ae666eb7aa8"
     },
     {
       "source_path": "docs/workflow-router.md",
@@ -217,7 +217,7 @@
       "role": "managed_doc",
       "update_policy": "merge",
       "render_mode": "copy",
-      "checksum": "sha256:6e11813402b98af3e540c9d2bf2e8433a229add0dee8d118e48cdbb0a77cec0e"
+      "checksum": "sha256:d05959eee863a32614532c58cb6b76710dcfd3f0d9db65888824e5bec7fddd2d"
     },
     {
       "source_path": "docs/work-log.md",
@@ -273,7 +273,7 @@
       "role": "managed_doc",
       "update_policy": "merge",
       "render_mode": "copy",
-      "checksum": "sha256:f7eadbf3bc259a78684297cb6f7432a5eee57d583c0a6bbd4b460622428ea12d"
+      "checksum": "sha256:ea54601a7c680b588e3a5e41f9f9462020e5bae6d554392a4563e1eb47c52f9f"
     },
     {
       "source_path": "docs/maker-checker-protocol.md",
@@ -369,7 +369,7 @@
       "role": "script",
       "update_policy": "replace",
       "render_mode": "copy",
-      "checksum": "sha256:8382caa88fca396294890331771a316dc4e7855379a5c9700f627b80124d6eb0"
+      "checksum": "sha256:7674337b3ac6ab0249a8581bbf87a252f0a089b9fdc67699f3ac801630774afb"
     },
     {
       "source_path": "scripts/check-doc-sync.sh",
@@ -377,7 +377,7 @@
       "role": "script",
       "update_policy": "replace",
       "render_mode": "copy",
-      "checksum": "sha256:4f6e4ed8fb04dd5e920b604314676d0edcb4dd3a064e129cd7174582cb3d7d98"
+      "checksum": "sha256:684a35fb2fd118a7d643150c6a461ecd2dfe98c9473e1fb91c339a851b627f3f"
     },
     {
       "source_path": "scripts/archive-changes.py",
@@ -402,6 +402,14 @@
       "update_policy": "replace",
       "render_mode": "copy",
       "checksum": "sha256:d171e9342f8d6fed5358e661d98cfbcbb468d6c296b06b6b33bffa1a7b65e00c"
+    },
+    {
+      "source_path": "scripts/handoff-package.py",
+      "target_path": "scripts/handoff-package.py",
+      "role": "script",
+      "update_policy": "replace",
+      "render_mode": "copy",
+      "checksum": "sha256:85eab29a016bc7a1484981550dbc8aaa191fe1a0e43a48e7d12539e2ffb2a677"
     },
     {
       "source_path": "scripts/check-codex-native-agents.py",

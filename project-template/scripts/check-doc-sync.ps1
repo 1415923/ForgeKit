@@ -186,6 +186,10 @@ function Test-ChangedDocsNeedVersionRecord {
         $_ -ne ".forgekit\doc-health-report.md" -and
         $_ -ne ".forgekit/source-trace-report.md" -and
         $_ -ne ".forgekit\source-trace-report.md" -and
+        $_ -ne ".forgekit/handoff-package.md" -and
+        $_ -ne ".forgekit\handoff-package.md" -and
+        $_ -notlike ".forgekit/changes/*/handoff.md" -and
+        $_ -notlike ".forgekit\changes\*\handoff.md" -and
         $_ -notlike ".forgekit/archive/*" -and
         $_ -notlike ".forgekit\archive\*"
     })

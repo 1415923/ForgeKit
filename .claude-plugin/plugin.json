@@ -1,7 +1,7 @@
 {
   "name": "forgekit",
-  "version": "0.34.0",
-  "description": "Project-level workflow harness for Claude Code, Codex, and adjacent AI coding tools, with intent routing, report-only doc health and source trace checks, bounded loop policy, and opt-in native agent configuration templates.",
+  "version": "0.35.0",
+  "description": "Project-level workflow harness for Claude Code, Codex, and adjacent AI coding tools, with intent routing, report-only doc health, source trace, and handoff package reports, bounded loop policy, and opt-in native agent configuration templates.",
   "author": {
     "name": "ForgeKit Maintainers"
   },
@@ -19,3 +19,4 @@
     "./skills/"
   ]
 }
+

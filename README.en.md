@@ -121,6 +121,7 @@ Key files:
 | `.forgekit/docs/workflow-router.md` | User intent router: decide what to read, what to write, and what not to touch |
 | `.forgekit/doc-health-report.md` | Doc health report: checks long docs, duplicated facts, misplaced content, and workflow-router boundary risks; report-only |
 | `.forgekit/source-trace-report.md` | Source trace report: checks Source ID, requirement, task, change, verification, work-log, and changelog trace breaks; report-only |
+| `.forgekit/handoff-package.md` | Review-ready handoff package: summarizes source, tasks, changes, verification, risks, and TODO_REVIEW; report-only |
 | `.forgekit/docs/local-toolchain.md` | Local lint, test, build, LSP, and toolchain capability |
 | `.forgekit/docs/changelog.md` | Current version update record |
 | `.forgekit/docs/version-roadmap.md` | Version roadmap and delivery gates |
@@ -146,6 +147,7 @@ By default, ForgeKit governance docs are written under `.forgekit/docs/`, and me
 | `workflow-router` doc | Routes requests such as source text, current tasks, validation results, daily progress, handoff, loop continuation, or release closure to the right docs |
 | `doc-health-report.py` | Generates `.forgekit/doc-health-report.md` for long docs, duplicate facts, role drift, and workflow-router boundary risks without automatic fixes |
 | `source-trace-report.py` | Generates `.forgekit/source-trace-report.md` to check trace links from source to task, implementation, verification, and status records without automatic fixes |
+| `handoff-package.py` | Generates `.forgekit/handoff-package.md` or change-scoped `handoff.md` for leader / reviewer / tester handoff without inventing missing evidence |
 | `project-suitability` | Decide whether Lite, Standard, Enterprise, or Custom flow fits |
 | `document-backfill` | Read existing business docs one by one and backfill the ForgeKit managed docs root |
 | `handover-review` | Audit inherited projects and identify risks |
@@ -327,6 +329,7 @@ ForgeKit can coexist with ECC: ECC enhances the AI tool; ForgeKit constrains the
 
 | Version | User-facing change |
 | --- | --- |
+| `0.35.0` | Review-Ready Handoff Package: adds a report-only handoff package for source, requirement, task, change, verification, risk, and TODO_REVIEW summaries without automatic fixes, commits, or PRs. |
 | `0.34.0` | Source Trace Report v2: adds a report-only source trace report for Source ID -> requirement -> task -> change -> verification -> work-log/changelog breaks without automatic fixes. |
 | `0.33.0` | Doc Health Report v2: adds a report-only managed-docs health summary for long docs, duplicated facts, misplaced content, and workflow-router boundary risks without automatic fixes. |
 | `0.32.0` | Workflow Router: adds `.forgekit/docs/workflow-router.md` to route user intent to the right Read / Write / Do Not Write docs, reducing full-doc scans and duplicate writes. |

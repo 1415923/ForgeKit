@@ -100,6 +100,28 @@ python .\scripts\source-trace-report.py --project-root .
 python3 ./scripts/source-trace-report.py --project-root .
 ```
 
+## Review-Ready Handoff Package
+
+只生成或覆盖 `.forgekit/handoff-package.md`，用于把阶段成果整理成给领导、reviewer 或测试可读的交付包。它是 report-only，不自动修复 doc-health/source-trace 问题，不修改 current docs、business docs、任务状态、Git、PR 或 worktree。
+
+```powershell
+python .\scripts\handoff-package.py --project-root .
+```
+
+```bash
+python3 ./scripts/handoff-package.py --project-root .
+```
+
+按单个 change 生成时，只写 `.forgekit/changes/<change-id>/handoff.md`：
+
+```powershell
+python .\scripts\handoff-package.py --project-root . --change-id <change-id>
+```
+
+```bash
+python3 ./scripts/handoff-package.py --project-root . --change-id <change-id>
+```
+
 ## 归档计划 Dry Run
 
 只生成或覆盖 `.forgekit/archive-plan.md`，不移动文件、不改状态、不改链接、不写 current docs、不写 business docs、不改 lock、不提交。

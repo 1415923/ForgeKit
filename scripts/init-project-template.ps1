@@ -149,7 +149,7 @@ function Write-BoundaryConfig {
 
     $lines = @(
         'forgekit:',
-        '  version: "0.34.0"',
+        '  version: "0.35.0"',
         "  mode: `"$SelectedMode`"",
         '',
         'roots:',
@@ -490,3 +490,4 @@ Write-Host "Do not choose a tech stack here. ForgeKit will confirm or infer it d
 if ($Upgrade) {
     Write-Host "Upgrade note: report-only mode preserved existing files and lock. Review .forgekit/upgrade-report.md and candidate templates under .forgekit/upgrade-export manually."
 }
+

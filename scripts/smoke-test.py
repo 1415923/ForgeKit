@@ -70,9 +70,11 @@ REQUIRED_REPO_PATHS = [
     "project-template/scripts/check-codex-native-agents.py",
     "project-template/scripts/doc-health-report.py",
     "project-template/scripts/source-trace-report.py",
+    "project-template/scripts/handoff-package.py",
     "scripts/check-codex-native-agents.py",
     "scripts/doc-health-report.py",
     "scripts/source-trace-report.py",
+    "scripts/handoff-package.py",
     ".codex-plugin/plugin.json",
     ".claude-plugin/plugin.json",
 ]
@@ -118,6 +120,7 @@ REQUIRED_GENERATED_PATHS = [
     "scripts/check-codex-native-agents.py",
     "scripts/doc-health-report.py",
     "scripts/source-trace-report.py",
+    "scripts/handoff-package.py",
     "scripts/archive-changes.py",
 ]
 
@@ -592,6 +595,58 @@ def assert_source_trace_report(target):
             fail(f"source-trace-report.py must not modify managed doc: {rel_path}")
 
 
+def assert_handoff_package(target):
+    report_path = target / ".forgekit" / "handoff-package.md"
+    if report_path.exists():
+        report_path.unlink()
+
+    before_hashes = {}
+    for rel_path in [
+        ".forgekit/docs/task-intake.md",
+        ".forgekit/docs/requirements.md",
+        ".forgekit/docs/task-board.md",
+        ".forgekit/docs/work-log.md",
+        ".forgekit/docs/testing.md",
+        ".forgekit/docs/changelog.md",
+        ".forgekit/docs/risk-register.md",
+        ".forgekit/template-lock.json",
+    ]:
+        path = target / rel_path
+        if path.is_file():
+            before_hashes[rel_path] = sha256_file(path)
+
+    run([sys.executable, "scripts/handoff-package.py", "--project-root", "."], cwd=target)
+    if not report_path.is_file():
+        fail("handoff-package.py did not write .forgekit/handoff-package.md")
+
+    report = report_path.read_text(encoding="utf-8")
+    required = [
+        "Status: report-only",
+        "Mode: handoff-package",
+        "## Summary",
+        "## Scope",
+        "## Source / Requirement Trace",
+        "## What Changed",
+        "## What Did Not Change",
+        "## Verification Evidence",
+        "## Doc Health / Source Trace Status",
+        "## Risks / Blockers / TODO_REVIEW",
+        "## Files / Artifacts",
+        "## Human Review Checklist",
+        "## Report-only Notice",
+        "TODO_REVIEW",
+        "must not trigger automatic fixes",
+    ]
+    missing = [item for item in required if item not in report]
+    if missing:
+        fail("handoff-package.md missing expected content:\n" + "\n".join(missing))
+
+    for rel_path, before in before_hashes.items():
+        after = sha256_file(target / rel_path)
+        if after != before:
+            fail(f"handoff-package.py must not modify source doc or lock: {rel_path}")
+
+
 def assert_maker_checker_protocol(root, protocol_path, review_path, agents_path, claude_path, rules_path):
     protocol = (root / protocol_path).read_text(encoding="utf-8")
     review = (root / review_path).read_text(encoding="utf-8")
@@ -969,8 +1024,8 @@ def assert_json(path):
 def assert_manifest_lock(target):
     lock_path = target / ".forgekit" / "template-lock.json"
     lock = json.loads(lock_path.read_text(encoding="utf-8"))
-    if lock.get("installed_version") != "0.34.0":
-        fail("template-lock installed_version must be 0.34.0")
+    if lock.get("installed_version") != "0.35.0":
+        fail("template-lock installed_version must be 0.35.0")
     if lock.get("managed_docs_root") != ".forgekit/docs":
         fail("template-lock managed_docs_root must match boundary")
     if lock.get("change_root") != ".forgekit/changes":
@@ -1023,7 +1078,7 @@ def assert_upgrade_report(repo, target):
         fail("upgrade must not overwrite managed docs")
     assert_paths(target, [
         ".forgekit/upgrade-report.md",
-        ".forgekit/upgrade-export/0.34.0/.forgekit/docs/project-plan.md",
+        ".forgekit/upgrade-export/0.35.0/.forgekit/docs/project-plan.md",
     ])
 
 
@@ -1060,7 +1115,7 @@ def assert_guided_upgrade(repo, target):
         ".forgekit/upgrade/upgrade-plan.md",
         ".forgekit/upgrade/upgrade-actions.md",
         ".forgekit/upgrade/upgrade-inventory.json",
-        ".forgekit/upgrade/candidates/0.34.0/.forgekit/docs/project-plan.md",
+        ".forgekit/upgrade/candidates/0.35.0/.forgekit/docs/project-plan.md",
     ])
     plan = (target / ".forgekit" / "upgrade" / "upgrade-plan.md").read_text(encoding="utf-8")
     actions = (target / ".forgekit" / "upgrade" / "upgrade-actions.md").read_text(encoding="utf-8")
@@ -1792,6 +1847,7 @@ def main():
         assert_codex_native_agents(target)
         assert_doc_health_report(target)
         assert_source_trace_report(target)
+        assert_handoff_package(target)
         assert_task_intake(
             target,
             ".forgekit/docs/task-intake.md",
@@ -1854,3 +1910,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+
