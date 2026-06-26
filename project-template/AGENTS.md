@@ -80,6 +80,7 @@ When a task names a ForgeKit skill, read the project-local `.agents/skills/<skil
 - `.forgekit/docs/work-log.md` 是个人工作顺序记录，用于交接和中断会话恢复。用户要求更新 ForgeKit 文档且本轮包含阶段收口、验证、提交/推送、阻塞或领导/组长确认时，应同步它；用户明确要求同步工作日志时必须更新；仅稳定技术事实变化不强制更新。
 - Treat `.forgekit/docs/loop-readiness.md` and `.forgekit/docs/loop-blueprint.md` as reviewable loop design docs, not automatic execution authorization.
 - Treat `.forgekit/docs/loop-operations.md` as an explicit operation protocol, not an automatic runner or unattended loop authorization.
+- Treat `.forgekit/docs/bounded-auto-loop-policy.md` as bounded-auto policy only. Do not enter bounded-auto unless the user explicitly authorizes it.
 - Treat `.forgekit/docs/maker-checker-protocol.md` as a review protocol, not multi-agent scheduling or automatic checker authorization.
 - Treat `.forgekit/docs/worktree-playbook.md` as a manual isolation guide, not automatic worktree scheduling or agent orchestration.
 - Treat `.forgekit/docs/native-agent-adapter.md` as an opt-in configuration adapter guide, not automatic agent execution, scheduling, merge, commit, push, or PR authorization.
@@ -92,11 +93,13 @@ When a task names a ForgeKit skill, read the project-local `.agents/skills/<skil
 - Fallback requires explicit user permission or a workflow rule that allows fallback.
 - A loop must have a state file, validation command, stop condition, and human escalation path before it runs.
 - A loop must not modify business docs, secrets, deploy files, or CI by default.
-- Do not enter loop mode unless the user explicitly asks for loop dry-run, one-step, continue, or stop/handoff.
-- Before loop one-step, restate the blueprint fields: loop name, state file, allowed paths, forbidden paths, validation command, stop condition, human escalation, token/scope budget, and whether files will change.
+- Do not enter loop mode unless the user explicitly asks for loop dry-run, one-step, bounded-auto, review-only, continue, or stop/handoff.
+- Before one-step or bounded-auto, restate scope, stages, budget, forbidden actions, stop conditions, agent mode, and whether files will change.
+- Bounded-auto must stop on unclear scope, budget overrun, validation failure, forbidden action contact, or unmet agent mode.
+- One-step must stop after one round. Review-only must not modify files or run write operations.
 - Loop continue must not run continuously; each round requires an explicit user trigger.
 - Stop and escalate on unclear scope, budget overrun, validation failure, or forbidden path contact.
-- Loop output must write back to `.forgekit/docs/work-log.md` or the specified state file.
+- Loop output must write back to `.forgekit/docs/work-log.md` or the specified state file; bounded-auto must checkpoint each stage and end with handoff.
 - Bounded-auto or loop execution must record `agent_mode`; native custom agents start as `native_agent_status: unverified` until observed.
 - Do not modify business docs, secrets, deploy files, CI, or `.forgekit/template-lock.json` by default.
 - Medium or high risk code changes should separate Maker phase and Checker phase.

@@ -49,7 +49,8 @@ ForgeKit 在生成项目内提供轻量 AI Engineering Loop：澄清目标、判
 - `.forgekit/docs/project-suitability.md`、`.forgekit/docs/project-trial-record.md`：初始化前判断适用性，并把真实项目经验回灌。
 - `.forgekit/docs/codex-next-work-order.md`：初始化后继续访谈、确认 MVP、落地条件和验证方式。
 - `.forgekit/docs/loop-readiness.md`、`.forgekit/docs/loop-blueprint.md`：判断项目是否适合安全运行 loop，并定义可审查的 loop 设计图纸；它们不是自动执行授权。
-- `.forgekit/docs/loop-operations.md`：定义用户显式触发的 loop dry-run、one-step、continue、stop/handoff；它不是后台自动化或无人值守 runner。
+- `.forgekit/docs/loop-operations.md`：定义用户显式触发的 loop dry-run、one-step、bounded-auto、review-only、continue、stop/handoff；它不是后台自动化或无人值守 runner。
+- `.forgekit/docs/bounded-auto-loop-policy.md`：定义有限授权的多阶段推进边界、预算、停止条件和 handoff；它不是自动 runner。
 - `.forgekit/docs/native-agent-adapter.md`：说明 Claude Code / Codex 原生 agent 配置适配、验证清单和 fallback 记录规则；生成配置不等于 runtime 已注册，只有 invoked 才能记录为 native 可用。
 - `.forgekit/docs/maker-checker-protocol.md`：定义 Maker 写代码、Checker 复核证据的审查协议；它不是自动多 agent 调度器。
 - `.forgekit/docs/worktree-playbook.md`：定义手动 worktree 并行隔离、命名、检查、Maker/Checker 用法和清理规则；它不是自动调度器。

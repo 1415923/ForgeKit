@@ -1,16 +1,16 @@
 {
   "$schema": "https://json.schemastore.org/claude-code-marketplace.json",
   "name": "forgekit-local",
-  "version": "0.30.1",
-  "description": "Local ForgeKit marketplace with opt-in native agent configuration templates.",
+  "version": "0.31.0",
+  "description": "Local ForgeKit marketplace with bounded loop policy templates and opt-in native agent configuration templates.",
   "owner": {
     "name": "ForgeKit Maintainers"
   },
   "plugins": [
     {
       "name": "forgekit",
-      "description": "Project-level workflow harness for Claude Code, Codex, and adjacent AI coding tools, with opt-in reviewable native agent configuration templates.",
-      "version": "0.30.1",
+      "description": "Project-level workflow harness for Claude Code, Codex, and adjacent AI coding tools, with bounded loop policy templates and opt-in reviewable native agent configuration templates.",
+      "version": "0.31.0",
       "source": "./",
       "category": "productivity"
     }

@@ -63,6 +63,7 @@
 | 验证命令和测试策略 | `.forgekit/docs/testing.md` |
 | 用户可见版本变化 | `.forgekit/docs/changelog.md` |
 | 中高风险变更过程 | `.forgekit/changes/<change-id>/` |
+| 有限授权连续推进规则 | `.forgekit/docs/bounded-auto-loop-policy.md` |
 | 原生 agent 配置适配 | `.forgekit/docs/native-agent-adapter.md` |
 
 不要默认读取 `.forgekit/docs/**` 全量内容。先按本文件和 `document-responsibility.md` 判断需要哪些文档。

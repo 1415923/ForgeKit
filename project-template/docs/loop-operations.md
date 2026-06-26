@@ -13,10 +13,19 @@ Loop 默认关闭。本文只是操作协议，不是自动 loop runner、daemon
 - 验证命令
 - 停止条件
 - 人工升级路径
+- LoopMode、AuthorizationScope、AllowedStages、ForbiddenActions、StopConditions、EscalationConditions
 - `.forgekit/docs/work-log.md` 或 loop 状态文件中的回写位置
 - agent_mode、native_agent_status、native_agent_lifecycle、agent_runtime 和 fallback_reason 记录位置
 
-`loop-readiness.md` 和 `loop-blueprint.md` 仍然只是审查文档，不是自动执行授权。
+`loop-readiness.md`、`loop-blueprint.md` 和 `bounded-auto-loop-policy.md` 仍然只是审查文档，不是自动执行授权。
+
+## Loop Modes
+
+| LoopMode | 规则 |
+| --- | --- |
+| `one-step` | 每轮结束必须停，适合高风险或需要逐轮确认的任务 |
+| `bounded-auto` | 必须用户显式授权；只在 scope、stages、budget 和 stop conditions 内连续推进 |
+| `review-only` | 只审查/规划，不改文件，不运行写操作 |
 
 ## Loop Dry Run
 
@@ -65,6 +74,50 @@ Loop 默认关闭。本文只是操作协议，不是自动 loop runner、daemon
 
 默认操作只是一轮，不自动继续。
 
+## Loop Bounded Auto
+
+只在用户明确授权 `bounded-auto` 后使用。
+
+执行前必须复述：
+
+- AuthorizationScope
+- AgentModeRequired
+- RequiredAgents
+- AllowedStages
+- MaxRounds
+- MaxStageCount
+- MaxFixAttempts
+- MaxFilesChanged
+- MaxCommands
+- ForbiddenActions
+- StopConditions
+- EscalationConditions
+- CheckpointWriteback
+- FinalHandoffRequired
+- agent_mode / native_agent_status / native_agent_lifecycle / fallback_reason
+
+规则：
+
+- 不得自行进入 bounded-auto。
+- `AgentModeRequired: native` 且 `native_agent_status != available` 时必须停。
+- fallback-allowed 时可以降级，但必须记录 `agent_mode: fallback` 和 `fallback_reason`。
+- 每个阶段结束必须写回 `.forgekit/docs/work-log.md` 或 loop 状态文件。
+- 超预算、范围不清、验证失败、触及 forbidden actions、agent mode 不满足或需要人工判断时必须停。
+- 最终必须输出 handoff。
+
+本文不提供 runner；bounded-auto 仍然是会话内、用户授权、受限边界的执行政策。
+
+## Loop Review Only
+
+只在用户要求审查、规划、对比或总结时使用。
+
+规则：
+
+- 不改文件。
+- 不运行写操作。
+- 不启动服务、部署、提交、推送或创建 PR。
+- 输出结论、风险、问题和建议下一步。
+
 ## Loop Continue
 
 只在用户明确要求从状态文件继续时使用。
@@ -108,6 +161,8 @@ Loop 默认关闭。本文只是操作协议，不是自动 loop runner、daemon
 - 状态文件缺失、过期或矛盾
 - 允许路径和禁止路径冲突
 - 需要触碰 business docs、secrets、deploy、CI、`.forgekit/template-lock.json`、生成报告、Git 写入、外部写入、MCP、connector、自动 PR、sub-agent 调度或 worktree 自动化
+- `AgentModeRequired` 不满足
+- bounded-auto 超出授权 scope、stage、round、fix attempt、file 或 command 预算
 
 ## 回写
 
@@ -116,4 +171,4 @@ Loop 默认关闭。本文只是操作协议，不是自动 loop runner、daemon
 - `.forgekit/docs/work-log.md`
 - 明确指定的 loop 状态文件
 
-dry-run 只输出到聊天是可以的，除非用户要求写记录。one-step、continue、stop 和 handoff 不应把必要状态只留在聊天里。只要涉及 planner、reviewer 或 verifier，就必须写明 `agent_mode`、`native_agent_status` 和 `native_agent_lifecycle`；未观察到 native custom agent 时，`native_agent_status` 必须是 `unverified` 或 `unavailable`。
+dry-run 和 review-only 只输出到聊天是可以的，除非用户要求写记录。one-step、bounded-auto、continue、stop 和 handoff 不应把必要状态只留在聊天里。只要涉及 planner、reviewer 或 verifier，就必须写明 `agent_mode`、`native_agent_status` 和 `native_agent_lifecycle`；未观察到 native custom agent 时，`native_agent_status` 必须是 `unverified` 或 `unavailable`。

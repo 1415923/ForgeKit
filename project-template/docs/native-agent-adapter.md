@@ -74,6 +74,8 @@ Native Agent Adapter 有三种运行状态：
 
 Native Agent Adapter 只提供原生工具配置模板。即使生成了 planner、reviewer 或 verifier，也不代表 loop 自动开启，也不代表 runtime 已加载这些 agent。进入 loop 仍需要用户明确要求，并且必须遵守 loop 蓝图、允许路径、禁止路径、验证命令、停止条件和人工升级规则。
 
+如果 loop 使用 `bounded-auto`，必须先读取 `.forgekit/docs/bounded-auto-loop-policy.md`。`AgentModeRequired: native` 时，`native_agent_status != available` 必须停止；`fallback-allowed` 时可以降级，但必须记录 `agent_mode: fallback` 和 `fallback_reason`，不得把 fallback 称为 native。
+
 ## 与 Maker / Checker 的关系
 
 Maker / Checker 协议仍以 `.forgekit/docs/maker-checker-protocol.md` 为准。

@@ -124,7 +124,8 @@ Key files:
 | `.forgekit/docs/task-intake.md` | Work source ledger: record assigned work, self-planned work, user feedback, bugs, and technical debt before deciding whether to create executable tasks |
 | `.forgekit/docs/loop-readiness.md` | Whether the project has the state, validation, boundary, stop, and escalation conditions needed for a safe loop |
 | `.forgekit/docs/loop-blueprint.md` | Reviewable loop design blueprint, not automatic execution authorization |
-| `.forgekit/docs/loop-operations.md` | Explicitly triggered loop dry-run, one-step, continue, and stop/handoff operation protocol, not an automatic runner |
+| `.forgekit/docs/loop-operations.md` | Explicitly triggered loop dry-run, one-step, bounded-auto, review-only, continue, and stop/handoff operation protocol, not an automatic runner |
+| `.forgekit/docs/bounded-auto-loop-policy.md` | Scope, stages, budget, stop conditions, agent mode, and handoff rules for bounded user-authorized progress |
 | `.forgekit/docs/maker-checker-protocol.md` | Evidence protocol for Maker implementation and Checker review, not an automatic multi-agent system |
 | `.forgekit/docs/worktree-playbook.md` | Manual worktree isolation guide; no automatic creation, scheduling, merge, push, or PR |
 | `.forgekit/changes/_template/` | proposal, design, tasks, verification, review, ship, and retro templates |
@@ -149,7 +150,9 @@ By default, ForgeKit governance docs are written under `.forgekit/docs/`, and me
 
 Loop Readiness / Loop Blueprint provides managed docs templates and short entry rules only. It helps assess whether a project can safely run a loop; ForgeKit does not provide an automatic loop runner, daemon, cron, MCP, connector, automatic PR flow, sub-agent scheduler, or worktree automation.
 
-Optional Loop Operation Mode defines only explicitly triggered dry-run, one-step, continue, and stop/handoff protocols. Loop operation is off by default; ForgeKit does not provide background automation, unattended runners, or continuous looping.
+Bounded Auto Loop Policy defines three explicitly authorized modes only: `one-step` stops after each round, `bounded-auto` proceeds only within scope / stages / budget / stop conditions, and `review-only` plans or reviews without file edits. It does not provide a runner, daemon, cron, scheduler, automatic PR, or worktree orchestration.
+
+Optional Loop Operation Mode defines only explicitly triggered dry-run, one-step, bounded-auto, review-only, continue, and stop/handoff protocols. Loop operation is off by default; ForgeKit does not provide background automation, unattended runners, or continuous looping.
 
 Maker / Checker Protocol defines evidence separation for medium/high-risk code changes: Maker implements and marks ready for check; Checker reviews diff, validation, risks, and document sync, then recommends pass / needs-fix / manual-review. It is not an automatic multi-agent system.
 
@@ -318,6 +321,7 @@ ForgeKit can coexist with ECC: ECC enhances the AI tool; ForgeKit constrains the
 
 | Version | User-facing change |
 | --- | --- |
+| `0.31.0` | Bounded Auto Loop Policy: adds one-step / bounded-auto / review-only authorization boundaries, budgets, stop conditions, agent mode gates, and handoff rules without a runner. |
 | `0.30.1` | Native Agent Adapter Verification: clarifies that generated config is not runtime registration, and adds native / fallback / simulated state fields and verification checklists. |
 | `0.30.0` | Native Agent Adapter: adds opt-in native agent configuration generation, exporting ForgeKit loop / maker-checker / verification protocols as reviewable Claude Code / Codex templates without automatic execution. |
 | `0.29.0` | Guided Upgrade Workflow: adds standalone upgrade scripts that generate upgrade-plan, upgrade-actions, and candidate templates to reduce manual judgment and token cost. |

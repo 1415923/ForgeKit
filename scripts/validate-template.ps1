@@ -348,6 +348,7 @@ function Test-AIEngineeringLoop {
     Test-RequiredPath "project-template\docs\loop-readiness.md"
     Test-RequiredPath "project-template\docs\loop-blueprint.md"
     Test-RequiredPath "project-template\docs\loop-operations.md"
+    Test-RequiredPath "project-template\docs\bounded-auto-loop-policy.md"
     Test-RequiredPath "project-template\docs\maker-checker-protocol.md"
     Test-RequiredPath "project-template\docs\native-agent-adapter.md"
     Test-RequiredPath "project-template\docs\worktree-playbook.md"
@@ -372,10 +373,20 @@ function Test-AIEngineeringLoop {
     Test-RequiredPattern "project-template\docs\loop-blueprint.md" "agent_invocation_observed:" "Loop blueprint agent invocation"
     Test-RequiredPattern "project-template\docs\loop-blueprint.md" "fallback_reason:" "Loop blueprint fallback reason"
     Test-RequiredPattern "project-template\docs\loop-blueprint.md" "OperationMode: dry-run `| one-step `| continue `| stop-handoff" "Loop blueprint operation mode"
+    Test-RequiredPattern "project-template\docs\loop-blueprint.md" "LoopMode: one-step `| bounded-auto `| review-only" "Loop blueprint loop mode"
+    Test-RequiredPattern "project-template\docs\loop-blueprint.md" "AuthorizationScope:" "Loop blueprint authorization scope"
+    Test-RequiredPattern "project-template\docs\loop-blueprint.md" "AgentModeRequired: native `| fallback-allowed `| any" "Loop blueprint agent mode required"
+    Test-RequiredPattern "project-template\docs\loop-blueprint.md" "AllowedStages:" "Loop blueprint allowed stages"
     Test-RequiredPattern "project-template\docs\loop-blueprint.md" "MaxRounds:" "Loop blueprint max rounds"
+    Test-RequiredPattern "project-template\docs\loop-blueprint.md" "MaxStageCount:" "Loop blueprint max stage count"
+    Test-RequiredPattern "project-template\docs\loop-blueprint.md" "MaxFixAttempts:" "Loop blueprint max fix attempts"
     Test-RequiredPattern "project-template\docs\loop-blueprint.md" "MaxFilesRead:" "Loop blueprint max files read"
     Test-RequiredPattern "project-template\docs\loop-blueprint.md" "MaxFilesChanged:" "Loop blueprint max files changed"
     Test-RequiredPattern "project-template\docs\loop-blueprint.md" "MaxCommands:" "Loop blueprint max commands"
+    Test-RequiredPattern "project-template\docs\loop-blueprint.md" "ForbiddenActions:" "Loop blueprint forbidden actions"
+    Test-RequiredPattern "project-template\docs\loop-blueprint.md" "StopConditions:" "Loop blueprint stop conditions"
+    Test-RequiredPattern "project-template\docs\loop-blueprint.md" "CheckpointWriteback:" "Loop blueprint checkpoint writeback"
+    Test-RequiredPattern "project-template\docs\loop-blueprint.md" "FinalHandoffRequired: yes" "Loop blueprint final handoff"
     Test-RequiredPattern "project-template\docs\loop-blueprint.md" "RequiresUserConfirmation: yes" "Loop blueprint user confirmation"
     Test-RequiredPattern "project-template\docs\loop-blueprint.md" "WritebackTarget:" "Loop blueprint writeback target"
     Test-RequiredPattern "project-template\docs\loop-blueprint.md" "StopOnUnclearScope: yes" "Loop blueprint unclear scope stop"
@@ -392,6 +403,8 @@ function Test-AIEngineeringLoop {
     Test-RequiredPattern "project-template\docs\loop-operations.md" "loop runner" "Loop operations no runner boundary"
     Test-RequiredPattern "project-template\docs\loop-operations.md" "## Loop Dry Run" "Loop operations dry run"
     Test-RequiredPattern "project-template\docs\loop-operations.md" "## Loop One Step" "Loop operations one step"
+    Test-RequiredPattern "project-template\docs\loop-operations.md" "## Loop Bounded Auto" "Loop operations bounded auto"
+    Test-RequiredPattern "project-template\docs\loop-operations.md" "## Loop Review Only" "Loop operations review only"
     Test-RequiredPattern "project-template\docs\loop-operations.md" "## Loop Continue" "Loop operations continue"
     Test-RequiredPattern "project-template\docs\loop-operations.md" "## Loop Stop / Handoff" "Loop operations stop handoff"
     Test-RequiredPattern "project-template\docs\loop-operations.md" "Loop Dry Run" "Loop dry-run no modification"
@@ -400,6 +413,12 @@ function Test-AIEngineeringLoop {
     Test-RequiredPattern "project-template\docs\loop-operations.md" "State File" "Loop operations writeback"
     Test-RequiredPattern "project-template\docs\loop-operations.md" "agent_mode:" "Loop operations agent mode"
     Test-RequiredPattern "project-template\docs\loop-operations.md" "native-only" "Loop operations native-only stop"
+    Test-RequiredPattern "project-template\docs\bounded-auto-loop-policy.md" "LoopMode" "Bounded auto policy loop mode"
+    Test-RequiredPattern "project-template\docs\bounded-auto-loop-policy.md" "AgentModeRequired" "Bounded auto policy agent mode"
+    Test-RequiredPattern "project-template\docs\bounded-auto-loop-policy.md" "Stop Conditions" "Bounded auto policy stop conditions"
+    Test-RequiredPattern "project-template\docs\bounded-auto-loop-policy.md" "Checkpoint Writeback" "Bounded auto policy checkpoint"
+    Test-RequiredPattern "project-template\docs\bounded-auto-loop-policy.md" "Final Handoff" "Bounded auto policy handoff"
+    Test-RequiredPattern "project-template\docs\bounded-auto-loop-policy.md" "不是 runner、daemon、cron、scheduler、多 agent dispatcher、自动 PR 或 worktree orchestration" "Bounded auto no runner boundary"
     Test-RequiredPattern "project-template\docs\native-agent-adapter.md" 'native_agent_lifecycle: generated | installed | registered | invoked' "Native adapter runtime lifecycle boundary"
     Test-RequiredPattern "project-template\docs\native-agent-adapter.md" 'native_agent_status` 合法值只允许 `available | unavailable | unverified`' "Native adapter status value boundary"
     Test-RequiredPattern "project-template\docs\native-agent-adapter.md" "只有 ``invoked`` 才能写成 native 真正可用" "Native adapter invoked-only boundary"
@@ -454,8 +473,11 @@ function Test-AIEngineeringLoop {
     Test-RequiredPattern "project-template\AGENTS.md" "A loop must have a state file, validation command, stop condition, and human escalation path" "AGENTS loop short rule"
     Test-RequiredPattern "project-template\CLAUDE.md" "A loop must have a state file, validation command, stop condition, and human escalation path" "CLAUDE loop short rule"
     Test-RequiredPattern "project-template\.codex\rules.md" "loop" "Rules loop short rule"
-    Test-RequiredPattern "project-template\AGENTS.md" "Do not enter loop mode unless the user explicitly asks for loop dry-run, one-step, continue, or stop/handoff." "AGENTS loop operation trigger rule"
-    Test-RequiredPattern "project-template\CLAUDE.md" "Do not enter loop mode unless the user explicitly asks for loop dry-run, one-step, continue, or stop/handoff." "CLAUDE loop operation trigger rule"
+    Test-RequiredPattern "project-template\AGENTS.md" "Do not enter loop mode unless the user explicitly asks for loop dry-run, one-step, bounded-auto, review-only, continue, or stop/handoff." "AGENTS loop operation trigger rule"
+    Test-RequiredPattern "project-template\CLAUDE.md" "Do not enter loop mode unless the user explicitly asks for loop dry-run, one-step, bounded-auto, review-only, continue, or stop/handoff." "CLAUDE loop operation trigger rule"
+    Test-RequiredPattern "project-template\AGENTS.md" "Bounded-auto must stop" "AGENTS bounded auto stop rule"
+    Test-RequiredPattern "project-template\CLAUDE.md" "Bounded-auto must stop" "CLAUDE bounded auto stop rule"
+    Test-RequiredPattern "project-template\.codex\rules.md" "bounded-auto 遇到范围不清" "Rules bounded auto stop rule"
     Test-RequiredPattern "project-template\.codex\rules.md" "loop mode" "Rules loop operation trigger rule"
     Test-RequiredPattern "project-template\AGENTS.md" "Loop continue must not run continuously" "AGENTS loop continue rule"
     Test-RequiredPattern "project-template\CLAUDE.md" "Loop continue must not run continuously" "CLAUDE loop continue rule"
@@ -540,7 +562,7 @@ function Test-TemplateManifest {
     $manifestPath = Join-Path $repoRoot "project-template\.forgekit\template-manifest.json"
     if (Test-Path -LiteralPath $manifestPath) {
         $manifest = Get-Content -LiteralPath $manifestPath -Raw | ConvertFrom-Json
-        if ($manifest.template_version -ne "0.30.1") {
+        if ($manifest.template_version -ne "0.31.0") {
             Add-Error "Unexpected template manifest version: $($manifest.template_version)"
         }
         $sources = @($manifest.files | ForEach-Object { $_.source_path })
@@ -924,7 +946,7 @@ function Test-PluginDistribution {
     if ($codexPluginJson.name -ne "forgekit") {
         Add-Error "Unexpected Codex plugin name in root plugin.json: $($codexPluginJson.name)"
     }
-    if ($codexPluginJson.version -ne "0.30.1") {
+    if ($codexPluginJson.version -ne "0.31.0") {
         Add-Error "Unexpected Codex plugin version in root plugin.json: $($codexPluginJson.version)"
     }
     if ($codexPluginJson.skills -ne "./skills/") {
@@ -935,7 +957,7 @@ function Test-PluginDistribution {
     if ($claudePluginJson.name -ne "forgekit") {
         Add-Error "Unexpected Claude plugin name in root plugin.json: $($claudePluginJson.name)"
     }
-    if ($claudePluginJson.version -ne "0.30.1") {
+    if ($claudePluginJson.version -ne "0.31.0") {
         Add-Error "Unexpected Claude plugin version in root plugin.json: $($claudePluginJson.version)"
     }
     $claudeSkills = @($claudePluginJson.skills)

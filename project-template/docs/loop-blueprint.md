@@ -9,10 +9,22 @@ Owner:
 Status: draft | reviewed | retired
 Last Reviewed:
 OperationMode: dry-run | one-step | continue | stop-handoff
+LoopMode: one-step | bounded-auto | review-only
+AuthorizationScope:
+AgentModeRequired: native | fallback-allowed | any
+RequiredAgents:
+AllowedStages:
 MaxRounds:
+MaxStageCount:
+MaxFixAttempts:
 MaxFilesRead:
 MaxFilesChanged:
 MaxCommands:
+ForbiddenActions:
+StopConditions:
+EscalationConditions:
+CheckpointWriteback:
+FinalHandoffRequired: yes
 RequiresUserConfirmation: yes
 WritebackTarget:
 agent_mode: native | fallback | simulated
@@ -32,7 +44,13 @@ WorktreeBranch:
 IsolationReason:
 CleanupRule:
 
-这些操作字段只是 `.forgekit/docs/loop-operations.md` 的审查字段，不是自动 runner 配置。
+这些操作字段只是 `.forgekit/docs/loop-operations.md` 和 `.forgekit/docs/bounded-auto-loop-policy.md` 的审查字段，不是自动 runner 配置。
+
+LoopMode 定义：
+
+- `one-step`：每轮后停止，适合高风险或需要逐轮确认的任务。
+- `bounded-auto`：只在用户授权 scope、stages、budget 和 stop conditions 内连续推进，适合中低风险。
+- `review-only`：只审查或规划，不改文件，不运行写操作。
 
 Agent 字段只记录父运行时在本轮 loop 中观察到的状态。`native_agent_status` 只允许 `available | unavailable | unverified`，不能写 `invoked`；`invoked` 只能写到 `native_agent_lifecycle` 或 `agent_invocation_observed`。子 agent 不能自行判断 `native_agent_status`。
 
@@ -58,7 +76,7 @@ Default: manual only.
 - sub-agent 调度器
 - worktree 自动化
 
-Loop 默认关闭。只有用户明确要求 `dry-run`、`one-step`、`continue` 或 `stop-handoff` 时，才进入对应操作模式。
+Loop 默认关闭。只有用户明确要求 `dry-run`、`one-step`、`bounded-auto`、`review-only`、`continue` 或 `stop-handoff` 时，才进入对应操作模式。`bounded-auto` 必须有用户显式授权，不能由 AI 自行进入。
 
 ## 输入来源
 
@@ -77,6 +95,18 @@ Loop 默认关闭。只有用户明确要求 `dry-run`、`one-step`、`continue`
 Path:
 Owner:
 Write rule:
+LoopMode: one-step | bounded-auto | review-only
+AuthorizationScope:
+AgentModeRequired: native | fallback-allowed | any
+RequiredAgents:
+AllowedStages:
+MaxStageCount:
+MaxFixAttempts:
+ForbiddenActions:
+StopConditions:
+EscalationConditions:
+CheckpointWriteback:
+FinalHandoffRequired: yes
 agent_mode: native | fallback | simulated
 native_agent_status: available | unavailable | unverified
 native_agent_lifecycle: generated | installed | registered | invoked
@@ -87,7 +117,7 @@ agent_invocation_observed:
   verifier: native | fallback | not-run
 fallback_reason:
 
-没有明确状态文件时不能运行 loop。状态文件必须记录当前步骤、上次验证结果、阻塞条件、下一步允许动作、agent_mode、native_agent_status、native_agent_lifecycle 和 fallback_reason。
+没有明确状态文件时不能运行 loop。状态文件必须记录当前步骤、上次验证结果、阻塞条件、下一步允许动作、LoopMode、AuthorizationScope、预算、agent_mode、native_agent_status、native_agent_lifecycle 和 fallback_reason。
 
 ## 允许路径
 
@@ -133,6 +163,8 @@ Loop 启动前必须有可观察的停止条件。
 - 验证缺失、失败或超出预算
 - 必需项目事实缺失或互相矛盾
 - 需要触碰 secrets、deploy、CI、外部服务、Git push、自动 PR、MCP、connector、sub-agent 调度或 worktree 自动化
+- `AgentModeRequired` 不满足
+- `bounded-auto` 超出阶段、修复次数、文件数、命令数或授权范围
 
 Decision owner:
 Question format:
@@ -159,8 +191,10 @@ Max commands:
 - 停止条件
 - 人工升级路径
 - token 预算
+- LoopMode、AuthorizationScope、AllowedStages、MaxRounds、MaxStageCount、MaxFixAttempts、MaxFilesChanged、MaxCommands
+- ForbiddenActions、StopConditions、EscalationConditions
 - 输出和回写位置
-- agent_mode、native_agent_status、agent_runtime 和 fallback_reason
+- agent_mode、native_agent_status、native_agent_lifecycle、agent_runtime 和 fallback_reason
 
 ## 输出 / 回写
 
@@ -170,6 +204,8 @@ Max commands:
 - 如果 loop 属于中高风险变更，写入对应 `.forgekit/changes/<change-id>/` 工件
 
 需要用于交接、验证或中断恢复的 loop 结果，不要只留在聊天里。
+
+`bounded-auto` 每个阶段结束都必须 checkpoint writeback；最终必须输出 handoff。
 
 ## Maker / Checker 策略
 

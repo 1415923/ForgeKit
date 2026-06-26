@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "template_version": "0.30.1",
+  "template_version": "0.31.0",
   "boundary_aware": true,
   "files": [
     {
@@ -9,7 +9,7 @@
       "role": "agent_entry",
       "update_policy": "ask",
       "render_mode": "copy",
-      "checksum": "sha256:7353165c36833b4e9f5e7a31c70bb1892de7b90b16ef5b8432a0142a5c6fab1d"
+      "checksum": "sha256:17009d7b1e19bf26594d83b4b2db9f8ad32b0d31a078173232594ed69843ea04"
     },
     {
       "source_path": "CLAUDE.md",
@@ -17,7 +17,7 @@
       "role": "agent_entry",
       "update_policy": "ask",
       "render_mode": "copy",
-      "checksum": "sha256:e9fd2416d4a3a57175975d5e7944f0ebd97718298fd848b29debfef295f00703"
+      "checksum": "sha256:efb8e72505cd2ce67a31fe2de8bf085ceec03f1c52912fb2206069923bc7033d"
     },
     {
       "source_path": "README.md",
@@ -25,7 +25,7 @@
       "role": "readme",
       "update_policy": "ask",
       "render_mode": "copy",
-      "checksum": "sha256:279cef12d2bdd3ef428637b0b04da48b8561aeed55fb14faf4cc5957f7842b8f"
+      "checksum": "sha256:d81b5872663a0dd67aaead65a71eb2990c6fe4627116638dda67c15a309e364e"
     },
     {
       "source_path": ".forgekit/project-boundary.yml",
@@ -41,7 +41,7 @@
       "role": "managed_doc",
       "update_policy": "merge",
       "render_mode": "copy",
-      "checksum": "sha256:20faf79932dc341cff8f3a2cd6d06ed4b716225fc2fc8d81eb9358029c4cd3ff"
+      "checksum": "sha256:fe17b3c32a6106a14c7956811ed0a9ba41cb0461539563f0714365a58a11fe99"
     },
     {
       "source_path": ".forgekit/docs/document-lifecycle.md",
@@ -81,7 +81,7 @@
       "role": "codex_rule",
       "update_policy": "ask",
       "render_mode": "copy",
-      "checksum": "sha256:9822babe11bb077999bcf6e935e1ca01cc3c9710d7f27d34b81ce6bfcff2b0b9"
+      "checksum": "sha256:673477c1c238d6be1897cecad0a6ba1aee1654f7a5c8c0b27f4b25e320877f36"
     },
     {
       "source_path": ".codex/version-gates.md",
@@ -209,7 +209,7 @@
       "role": "managed_doc",
       "update_policy": "merge",
       "render_mode": "copy",
-      "checksum": "sha256:8d72ab00d24d3ac81e9869a9343ce11db7917c318aadc0db96e206e65309bc98"
+      "checksum": "sha256:e5aeacd6aac3a0c795a2a36151b2bd2e59f0ce48953b379c522e8dfd7006a19d"
     },
     {
       "source_path": "docs/work-log.md",
@@ -249,7 +249,7 @@
       "role": "managed_doc",
       "update_policy": "merge",
       "render_mode": "copy",
-      "checksum": "sha256:3644a363e1f7d98e914a7f31df0e9d7710f7c617364587bd17d5b5db47e09f59"
+      "checksum": "sha256:bb5e679ab40d7d0d1f1d62b3086eccbc72b97684af2679f17ca838c18845899d"
     },
     {
       "source_path": "docs/loop-operations.md",
@@ -257,7 +257,15 @@
       "role": "managed_doc",
       "update_policy": "merge",
       "render_mode": "copy",
-      "checksum": "sha256:52413a8b8d6901ea15a5dc75ffd993bed15bc3f55d16ed3ed6ab399dcf2e5bf1"
+      "checksum": "sha256:a7480d91e778e31441444c1626d132f681388fa1faffdf07e6d97036414ed0d3"
+    },
+    {
+      "source_path": "docs/bounded-auto-loop-policy.md",
+      "target_path": "${managed_docs_root}/bounded-auto-loop-policy.md",
+      "role": "managed_doc",
+      "update_policy": "merge",
+      "render_mode": "copy",
+      "checksum": "sha256:26fd0259c2d6329b3ae8514af3653d51400d531e82b7bc34ce23801041f309ae"
     },
     {
       "source_path": "docs/maker-checker-protocol.md",
@@ -273,7 +281,7 @@
       "role": "managed_doc",
       "update_policy": "merge",
       "render_mode": "copy",
-      "checksum": "sha256:87e0e9dd1caaa6adef2f2410a93d17e336f442e13e940cbb622f07294532d0fc"
+      "checksum": "sha256:2c037b245f967caab44cda22134c459fa1a3be5a18da8643103778a2f0dafbf1"
     },
     {
       "source_path": "docs/worktree-playbook.md",

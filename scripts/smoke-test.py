@@ -57,6 +57,7 @@ REQUIRED_REPO_PATHS = [
     "project-template/docs/loop-readiness.md",
     "project-template/docs/loop-blueprint.md",
     "project-template/docs/loop-operations.md",
+    "project-template/docs/bounded-auto-loop-policy.md",
     "project-template/docs/maker-checker-protocol.md",
     "project-template/docs/native-agent-adapter.md",
     "project-template/docs/worktree-playbook.md",
@@ -87,6 +88,7 @@ REQUIRED_GENERATED_PATHS = [
     ".forgekit/docs/loop-readiness.md",
     ".forgekit/docs/loop-blueprint.md",
     ".forgekit/docs/loop-operations.md",
+    ".forgekit/docs/bounded-auto-loop-policy.md",
     ".forgekit/docs/maker-checker-protocol.md",
     ".forgekit/docs/native-agent-adapter.md",
     ".forgekit/docs/worktree-playbook.md",
@@ -247,10 +249,20 @@ def assert_loop_docs(root, readiness_path, blueprint_path):
         "## 理解复述",
         "## 输出 / 回写",
         "OperationMode: dry-run | one-step | continue | stop-handoff",
+        "LoopMode: one-step | bounded-auto | review-only",
+        "AuthorizationScope:",
+        "AgentModeRequired: native | fallback-allowed | any",
+        "AllowedStages:",
         "MaxRounds:",
+        "MaxStageCount:",
+        "MaxFixAttempts:",
         "MaxFilesRead:",
         "MaxFilesChanged:",
         "MaxCommands:",
+        "ForbiddenActions:",
+        "StopConditions:",
+        "CheckpointWriteback:",
+        "FinalHandoffRequired: yes",
         "RequiresUserConfirmation: yes",
         "WritebackTarget:",
         "agent_mode: native | fallback | simulated",
@@ -293,6 +305,8 @@ def assert_loop_operations(root, operations_path, blueprint_path, agents_path, c
         "不是自动 loop runner",
         "## Loop Dry Run",
         "## Loop One Step",
+        "## Loop Bounded Auto",
+        "## Loop Review Only",
         "## Loop Continue",
         "## Loop Stop / Handoff",
         "只读取 loop 蓝图",
@@ -301,6 +315,8 @@ def assert_loop_operations(root, operations_path, blueprint_path, agents_path, c
         "只继续下一轮",
         "不要启动另一轮 loop",
         "每一轮实际执行过的 loop 都必须回写",
+        "AgentModeRequired",
+        "bounded-auto",
         ".forgekit/docs/work-log.md",
         "agent_mode: native | fallback | simulated",
         "native_agent_status: available | unavailable | unverified",
@@ -308,7 +324,12 @@ def assert_loop_operations(root, operations_path, blueprint_path, agents_path, c
     ]
     blueprint_required = [
         "OperationMode: dry-run | one-step | continue | stop-handoff",
+        "LoopMode: one-step | bounded-auto | review-only",
+        "AuthorizationScope:",
+        "AgentModeRequired: native | fallback-allowed | any",
         "MaxRounds:",
+        "MaxStageCount:",
+        "MaxFixAttempts:",
         "MaxFilesRead:",
         "MaxFilesChanged:",
         "MaxCommands:",
@@ -318,8 +339,10 @@ def assert_loop_operations(root, operations_path, blueprint_path, agents_path, c
         "StopOnValidationFailure: yes",
     ]
     entry_required = [
-        "Do not enter loop mode unless the user explicitly asks for loop dry-run, one-step, continue, or stop/handoff.",
-        "Before loop one-step, restate the blueprint fields",
+        "Do not enter loop mode unless the user explicitly asks for loop dry-run, one-step, bounded-auto, review-only, continue, or stop/handoff.",
+        "Before one-step or bounded-auto, restate scope",
+        "Bounded-auto must stop",
+        "Review-only must not modify files",
         "Loop continue must not run continuously",
         "Stop and escalate on unclear scope, budget overrun, validation failure, or forbidden path contact.",
         "Loop output must write back",
@@ -328,7 +351,9 @@ def assert_loop_operations(root, operations_path, blueprint_path, agents_path, c
     ]
     rules_required = [
         "不得自行进入 loop mode",
-        "loop one-step 前必须复述 blueprint",
+        "bounded-auto、review-only",
+        "one-step 或 bounded-auto 前必须复述",
+        "bounded-auto 遇到范围不清",
         "loop continue 不得自动连续运行",
         "scope 不清、预算超限、验证失败或触及 forbidden paths",
         "loop 输出必须写回",
@@ -348,6 +373,24 @@ def assert_loop_operations(root, operations_path, blueprint_path, agents_path, c
     missing_rules = [item for item in rules_required if item not in rules]
     if missing_rules:
         fail(".codex/rules.md missing loop operation rules:\n" + "\n".join(missing_rules))
+
+    policy = (root / operations_path).with_name("bounded-auto-loop-policy.md")
+    policy_text = policy.read_text(encoding="utf-8")
+    policy_required = [
+        "LoopMode",
+        "`one-step`",
+        "`bounded-auto`",
+        "`review-only`",
+        "AuthorizationScope",
+        "AgentModeRequired",
+        "Stop Conditions",
+        "Checkpoint Writeback",
+        "Final Handoff",
+        "不是 runner、daemon、cron、scheduler、多 agent dispatcher、自动 PR 或 worktree orchestration",
+    ]
+    missing_policy = [item for item in policy_required if item not in policy_text]
+    if missing_policy:
+        fail("bounded-auto-loop-policy.md missing expected text:\n" + "\n".join(missing_policy))
 
 
 def assert_native_agent_adapter(repo, root, adapter_path):
@@ -745,8 +788,8 @@ def assert_json(path):
 def assert_manifest_lock(target):
     lock_path = target / ".forgekit" / "template-lock.json"
     lock = json.loads(lock_path.read_text(encoding="utf-8"))
-    if lock.get("installed_version") != "0.30.1":
-        fail("template-lock installed_version must be 0.30.1")
+    if lock.get("installed_version") != "0.31.0":
+        fail("template-lock installed_version must be 0.31.0")
     if lock.get("managed_docs_root") != ".forgekit/docs":
         fail("template-lock managed_docs_root must match boundary")
     if lock.get("change_root") != ".forgekit/changes":
@@ -799,7 +842,7 @@ def assert_upgrade_report(repo, target):
         fail("upgrade must not overwrite managed docs")
     assert_paths(target, [
         ".forgekit/upgrade-report.md",
-        ".forgekit/upgrade-export/0.30.1/.forgekit/docs/project-plan.md",
+        ".forgekit/upgrade-export/0.31.0/.forgekit/docs/project-plan.md",
     ])
 
 
@@ -836,7 +879,7 @@ def assert_guided_upgrade(repo, target):
         ".forgekit/upgrade/upgrade-plan.md",
         ".forgekit/upgrade/upgrade-actions.md",
         ".forgekit/upgrade/upgrade-inventory.json",
-        ".forgekit/upgrade/candidates/0.30.1/.forgekit/docs/project-plan.md",
+        ".forgekit/upgrade/candidates/0.31.0/.forgekit/docs/project-plan.md",
     ])
     plan = (target / ".forgekit" / "upgrade" / "upgrade-plan.md").read_text(encoding="utf-8")
     actions = (target / ".forgekit" / "upgrade" / "upgrade-actions.md").read_text(encoding="utf-8")

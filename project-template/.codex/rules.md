@@ -48,6 +48,7 @@
 - `.forgekit/upgrade/**` 是升级引导生成物。先读 `upgrade-actions.md`，候选模板只用于对比，不是当前态文档。
 - `.forgekit/docs/loop-readiness.md` 和 `.forgekit/docs/loop-blueprint.md` 是可审查的 loop 设计文档，不是自动执行授权。
 - `.forgekit/docs/loop-operations.md` 是显式触发的操作协议，不是自动 runner 或无人值守 loop 授权。
+- `.forgekit/docs/bounded-auto-loop-policy.md` 只是 bounded-auto policy；用户未明确授权时不得进入 bounded-auto。
 - `.forgekit/docs/maker-checker-protocol.md` 是审查协议，不是多 agent 调度或自动 checker 授权。
 - `.forgekit/docs/worktree-playbook.md` 是手动隔离指南，不是自动 worktree 调度或 agent 编排。
 - `.forgekit/docs/native-agent-adapter.md` 是 opt-in 原生 agent 配置适配说明，不授权自动执行、调度、merge、commit、push 或 PR。
@@ -61,11 +62,13 @@
 - bounded-auto 或 loop 执行必须写明 `agent_mode`；native custom agent 未观察到前，`native_agent_status` 必须是 `unverified`。
 - loop 必须有状态文件、验证命令、停止条件和人工升级入口。
 - loop 不默认修改 business docs、secrets、deploy 或 CI。
-- 不得自行进入 loop mode；只有用户明确要求 loop dry-run、one-step、continue 或 stop/handoff 时才按 loop operation 规则执行。
-- loop one-step 前必须复述 blueprint 的 loop name、state file、allowed paths、forbidden paths、validation command、stop condition、human escalation、token/scope budget 和本轮是否会修改文件。
+- 不得自行进入 loop mode；只有用户明确要求 loop dry-run、one-step、bounded-auto、review-only、continue 或 stop/handoff 时才按 loop operation 规则执行。
+- one-step 或 bounded-auto 前必须复述 scope、stages、budget、forbidden actions、stop conditions、agent mode 和本轮是否会修改文件。
+- bounded-auto 遇到范围不清、超预算、验证失败、触及 forbidden actions 或 agent mode 不满足时必须停。
+- one-step 每轮结束必须停；review-only 绝不能改文件或运行写操作。
 - loop continue 不得自动连续运行，每一轮都需要用户明确触发。
 - scope 不清、预算超限、验证失败或触及 forbidden paths 时必须停止并升级给人。
-- loop 输出必须写回 `.forgekit/docs/work-log.md` 或指定 state file。
+- loop 输出必须写回 `.forgekit/docs/work-log.md` 或指定 state file；bounded-auto 每阶段必须 checkpoint，最终必须 handoff。
 - 不得默认修改 business docs、secrets、deploy、CI 或 `.forgekit/template-lock.json`。
 - 中高风险代码变更应区分 Maker phase 和 Checker phase。
 - Maker phase 可以声明 `ready for check`，但不得把自己的实现视为最终通过。
