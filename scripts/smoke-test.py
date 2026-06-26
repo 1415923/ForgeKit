@@ -51,6 +51,7 @@ REQUIRED_REPO_PATHS = [
     "project-template/changes/_template/ship.md",
     "project-template/changes/_template/retro.md",
     "project-template/docs/codebase-map.md",
+    "project-template/docs/workflow-router.md",
     "project-template/docs/work-log.md",
     "project-template/docs/task-intake.md",
     "project-template/docs/local-toolchain.md",
@@ -82,6 +83,7 @@ REQUIRED_GENERATED_PATHS = [
     ".forgekit/archive/changes/README.md",
     ".forgekit/archive/releases/README.md",
     ".forgekit/docs/codebase-map.md",
+    ".forgekit/docs/workflow-router.md",
     ".forgekit/docs/work-log.md",
     ".forgekit/docs/task-intake.md",
     ".forgekit/docs/local-toolchain.md",
@@ -778,6 +780,89 @@ def assert_managed_docs_responsibility_v2(root, responsibility_path, codebase_pa
         fail(".codex/rules.md missing managed-docs v2 rules:\n" + "\n".join(missing_rules))
 
 
+def assert_workflow_router(root, router_path, responsibility_path, codebase_path, agents_path, claude_path, rules_path):
+    router = (root / router_path).read_text(encoding="utf-8")
+    responsibility = (root / responsibility_path).read_text(encoding="utf-8")
+    codebase = (root / codebase_path).read_text(encoding="utf-8")
+    agents = (root / agents_path).read_text(encoding="utf-8")
+    claude = (root / claude_path).read_text(encoding="utf-8")
+    rules = (root / rules_path).read_text(encoding="utf-8")
+
+    router_required = [
+        "Purpose",
+        "How to Use",
+        "Intent Routing Table",
+        "Read Targets",
+        "Write Targets",
+        "Do Not Write",
+        "Required Output",
+        "Escalation Rules",
+        "Examples",
+        "task-intake.md",
+        "task-board.md",
+        "requirements.md",
+        "work-log.md",
+        "testing.md",
+        "changelog.md",
+        "risk-register.md",
+        "bounded-auto-loop-policy.md",
+        "loop-blueprint.md",
+        "loop-operations.md",
+        "native-agent-adapter.md",
+        "maker-checker-protocol.md",
+        "worktree-playbook.md",
+        "handoff",
+        "不要默认全量读取 `.forgekit/docs/**`",
+    ]
+    missing_router = [item for item in router_required if item not in router]
+    if missing_router:
+        fail("workflow-router.md missing expected routing content:\n" + "\n".join(missing_router))
+
+    matrix_required = [
+        "workflow-router.md",
+        "用户意图",
+        "不是任务看板",
+        "不授权自动执行",
+    ]
+    missing_matrix = [item for item in matrix_required if item not in responsibility]
+    if missing_matrix:
+        fail("document-responsibility.md missing workflow-router entry:\n" + "\n".join(missing_matrix))
+
+    codebase_required = [
+        "workflow-router.md",
+        "用户意图类问题先看",
+        "不复制路由表",
+    ]
+    missing_codebase = [item for item in codebase_required if item not in codebase]
+    if missing_codebase:
+        fail("codebase-map.md missing workflow-router index:\n" + "\n".join(missing_codebase))
+
+    entry_required = [
+        "workflow-router.md",
+        "intent routing",
+        "Read Targets",
+        "Write Targets",
+        "Do Not Write",
+        "没有写入触发条件",
+    ]
+    for label, text in [("AGENTS.md", agents), ("CLAUDE.md", claude)]:
+        missing_entry = [item for item in entry_required if item not in text]
+        if missing_entry:
+            fail(f"{label} missing workflow-router entry rules:\n" + "\n".join(missing_entry))
+
+    rules_required = [
+        "workflow-router.md",
+        "intent routing",
+        "Read Targets",
+        "Write Targets",
+        "Do Not Write",
+        "没有写入触发",
+    ]
+    missing_rules = [item for item in rules_required if item not in rules]
+    if missing_rules:
+        fail(".codex/rules.md missing workflow-router rules:\n" + "\n".join(missing_rules))
+
+
 def assert_json(path):
     try:
         json.loads(path.read_text(encoding="utf-8"))
@@ -788,8 +873,8 @@ def assert_json(path):
 def assert_manifest_lock(target):
     lock_path = target / ".forgekit" / "template-lock.json"
     lock = json.loads(lock_path.read_text(encoding="utf-8"))
-    if lock.get("installed_version") != "0.31.0":
-        fail("template-lock installed_version must be 0.31.0")
+    if lock.get("installed_version") != "0.32.0":
+        fail("template-lock installed_version must be 0.32.0")
     if lock.get("managed_docs_root") != ".forgekit/docs":
         fail("template-lock managed_docs_root must match boundary")
     if lock.get("change_root") != ".forgekit/changes":
@@ -842,7 +927,7 @@ def assert_upgrade_report(repo, target):
         fail("upgrade must not overwrite managed docs")
     assert_paths(target, [
         ".forgekit/upgrade-report.md",
-        ".forgekit/upgrade-export/0.31.0/.forgekit/docs/project-plan.md",
+        ".forgekit/upgrade-export/0.32.0/.forgekit/docs/project-plan.md",
     ])
 
 
@@ -879,7 +964,7 @@ def assert_guided_upgrade(repo, target):
         ".forgekit/upgrade/upgrade-plan.md",
         ".forgekit/upgrade/upgrade-actions.md",
         ".forgekit/upgrade/upgrade-inventory.json",
-        ".forgekit/upgrade/candidates/0.31.0/.forgekit/docs/project-plan.md",
+        ".forgekit/upgrade/candidates/0.32.0/.forgekit/docs/project-plan.md",
     ])
     plan = (target / ".forgekit" / "upgrade" / "upgrade-plan.md").read_text(encoding="utf-8")
     actions = (target / ".forgekit" / "upgrade" / "upgrade-actions.md").read_text(encoding="utf-8")
@@ -1532,6 +1617,15 @@ def main():
         "CLAUDE.md",
         ".codex/rules.md",
     )
+    assert_workflow_router(
+        repo / "project-template",
+        "docs/workflow-router.md",
+        ".forgekit/docs/document-responsibility.md",
+        "docs/codebase-map.md",
+        "AGENTS.md",
+        "CLAUDE.md",
+        ".codex/rules.md",
+    )
     assert_absent_paths(repo, [
         "scripts/maker-checker-runner.py",
         "scripts/checker-runner.py",
@@ -1612,6 +1706,15 @@ def main():
         )
         assert_managed_docs_responsibility_v2(
             target,
+            ".forgekit/docs/document-responsibility.md",
+            ".forgekit/docs/codebase-map.md",
+            "AGENTS.md",
+            "CLAUDE.md",
+            ".codex/rules.md",
+        )
+        assert_workflow_router(
+            target,
+            ".forgekit/docs/workflow-router.md",
             ".forgekit/docs/document-responsibility.md",
             ".forgekit/docs/codebase-map.md",
             "AGENTS.md",

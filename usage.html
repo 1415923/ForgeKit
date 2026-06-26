@@ -597,7 +597,7 @@
         'fpga-vivado-vitis': 'FPGA Vivado/Vitis：从硬件工程根目录启动，优先找 Vivado/Vitis 工程、HLS 工程和仿真脚本。'
       };
       const selected = selectedStacks();
-      if (selected.length === 0) return ['未选择技术栈：先从 AGENTS.md、.forgekit/docs/document-responsibility.md 和 .forgekit/docs/codebase-map.md 判断入口。'];
+      if (selected.length === 0) return ['未选择技术栈：先从 AGENTS.md、.forgekit/docs/document-responsibility.md、.forgekit/docs/codebase-map.md 和 .forgekit/docs/workflow-router.md 判断入口。'];
       return selected.map(stack => map[stack] || (stack + '：先补充推荐启动目录。'));
     }
 
@@ -616,6 +616,7 @@
         '   .forgekit/docs/document-responsibility.md',
         '   .forgekit/docs/project-suitability.md',
         '   .forgekit/docs/codebase-map.md',
+        '   .forgekit/docs/workflow-router.md（用户意图路由：判断该读什么、写什么、不要写什么）',
         '   .forgekit/docs/local-toolchain.md',
         '   .forgekit/docs/codex-next-work-order.md',
         '   .forgekit/docs/loop-readiness.md、.forgekit/docs/loop-blueprint.md（仅作为 loop 评估和设计图纸，不是自动执行授权）',
@@ -645,7 +646,7 @@
         '   python .\\scripts\\archive-changes.py --apply --plan .forgekit/archive-plan.md --confirm',
         '   python .\\scripts\\archive-changes.py --smart-apply --report .forgekit/smart-archive-report.md --confirm',
         '',
-        '7. 不要默认读取全部 governance/ 或 .forgekit/docs/**；先按 document-responsibility 判断需要哪些文档。工具链未知时先询问，不要默认安装或启动服务。'
+        '7. 不要默认读取全部 governance/ 或 .forgekit/docs/**；先按 document-responsibility、codebase-map 和 workflow-router 判断需要哪些文档。工具链未知时先询问，不要默认安装或启动服务。'
       ].join('\n');
     }
 
@@ -666,7 +667,7 @@
         '- 项目入口：' + getValue('entryMode', '待补充'),
         '- 项目类型：' + getValue('projectType', '待补充'),
         '- 技术栈模板：' + (selectedStacks().join(', ') || '待补充'),
-        '- 推荐启动入口：AGENTS.md -> .forgekit/docs/document-responsibility.md -> .forgekit/docs/codebase-map.md -> 必要的 .forgekit/docs/local-toolchain.md / .forgekit/docs/codex-next-work-order.md -> 相关 .codex/stacks/<stack>/',
+        '- 推荐启动入口：AGENTS.md -> .forgekit/docs/document-responsibility.md -> .forgekit/docs/codebase-map.md -> 必要的 .forgekit/docs/workflow-router.md / .forgekit/docs/local-toolchain.md / .forgekit/docs/codex-next-work-order.md -> 相关 .codex/stacks/<stack>/',
         '- 适用性已确认：' + (selectedSuitability().join(', ') || '待评估'),
         '',
         '## 项目目标',

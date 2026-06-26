@@ -231,6 +231,7 @@ function Test-AgentsHarness {
     Test-RequiredPath "project-template\.forgekit\docs\document-lifecycle.md"
     Test-RequiredPath "project-template\docs\work-log.md"
     Test-RequiredPath "project-template\docs\task-intake.md"
+    Test-RequiredPath "project-template\docs\workflow-router.md"
     Test-RequiredPath "project-template\.forgekit\archive\README.md"
     Test-RequiredPath "project-template\.forgekit\archive\changes\README.md"
     Test-RequiredPath "project-template\.forgekit\archive\releases\README.md"
@@ -299,10 +300,35 @@ function Test-AIEngineeringLoop {
     Test-RequiredPattern "project-template\.forgekit\docs\document-responsibility.md" "triggered" "Document responsibility triggered value"
     Test-RequiredPattern "project-template\.forgekit\docs\document-responsibility.md" "work-log.md" "Document responsibility work log entry"
     Test-RequiredPattern "project-template\.forgekit\docs\document-responsibility.md" "task-intake.md" "Document responsibility task intake entry"
+    Test-RequiredPattern "project-template\.forgekit\docs\document-responsibility.md" "workflow-router.md" "Document responsibility workflow router entry"
+    Test-RequiredPattern "project-template\.forgekit\docs\document-responsibility.md" "用户意图" "Document responsibility workflow router purpose"
     Test-RequiredPattern "project-template\docs\codebase-map.md" ".forgekit/docs/" "Codebase map search-entry boundary"
     Test-RequiredPattern "project-template\docs\codebase-map.md" ".forgekit/docs/" "Codebase map no full docs read rule"
     Test-RequiredPattern "project-template\docs\codebase-map.md" ".forgekit/docs/work-log.md" "Codebase map work log index"
     Test-RequiredPattern "project-template\docs\codebase-map.md" ".forgekit/docs/task-intake.md" "Codebase map task intake index"
+    Test-RequiredPattern "project-template\docs\codebase-map.md" ".forgekit/docs/workflow-router.md" "Codebase map workflow router index"
+    Test-RequiredPattern "project-template\docs\workflow-router.md" "Intent Routing Table" "Workflow router routing table"
+    Test-RequiredPattern "project-template\docs\workflow-router.md" "Read Targets" "Workflow router read targets"
+    Test-RequiredPattern "project-template\docs\workflow-router.md" "Write Targets" "Workflow router write targets"
+    Test-RequiredPattern "project-template\docs\workflow-router.md" "Do Not Write" "Workflow router do-not-write"
+    Test-RequiredPattern "project-template\docs\workflow-router.md" "Required Output" "Workflow router required output"
+    Test-RequiredPattern "project-template\docs\workflow-router.md" "task-intake.md" "Workflow router task intake coverage"
+    Test-RequiredPattern "project-template\docs\workflow-router.md" "task-board.md" "Workflow router task board coverage"
+    Test-RequiredPattern "project-template\docs\workflow-router.md" "requirements.md" "Workflow router requirements coverage"
+    Test-RequiredPattern "project-template\docs\workflow-router.md" "work-log.md" "Workflow router work log coverage"
+    Test-RequiredPattern "project-template\docs\workflow-router.md" "testing.md" "Workflow router testing coverage"
+    Test-RequiredPattern "project-template\docs\workflow-router.md" "changelog.md" "Workflow router changelog coverage"
+    Test-RequiredPattern "project-template\docs\workflow-router.md" "risk-register.md" "Workflow router risk coverage"
+    Test-RequiredPattern "project-template\docs\workflow-router.md" "bounded-auto-loop-policy.md" "Workflow router loop coverage"
+    Test-RequiredPattern "project-template\docs\workflow-router.md" "maker-checker-protocol.md" "Workflow router maker-checker coverage"
+    Test-RequiredPattern "project-template\docs\workflow-router.md" "worktree-playbook.md" "Workflow router worktree coverage"
+    Test-RequiredPattern "project-template\docs\workflow-router.md" "handoff" "Workflow router handoff coverage"
+    Test-RequiredPattern "project-template\AGENTS.md" "workflow-router.md" "AGENTS workflow router routing"
+    Test-RequiredPattern "project-template\AGENTS.md" "intent routing" "AGENTS intent routing rule"
+    Test-RequiredPattern "project-template\CLAUDE.md" "workflow-router.md" "CLAUDE workflow router routing"
+    Test-RequiredPattern "project-template\CLAUDE.md" "intent routing" "CLAUDE intent routing rule"
+    Test-RequiredPattern "project-template\.codex\rules.md" "workflow-router.md" "Rules workflow router routing"
+    Test-RequiredPattern "project-template\.codex\rules.md" "intent routing" "Rules intent routing rule"
     Test-RequiredPattern "project-template\docs\work-log.md" "Status:" "Work log recent window purpose"
     Test-RequiredPattern "project-template\docs\work-log.md" "Commit" "Work log commit status"
     Test-RequiredPattern "project-template\docs\work-log.md" "Push" "Work log push status"
@@ -562,7 +588,7 @@ function Test-TemplateManifest {
     $manifestPath = Join-Path $repoRoot "project-template\.forgekit\template-manifest.json"
     if (Test-Path -LiteralPath $manifestPath) {
         $manifest = Get-Content -LiteralPath $manifestPath -Raw | ConvertFrom-Json
-        if ($manifest.template_version -ne "0.31.0") {
+        if ($manifest.template_version -ne "0.32.0") {
             Add-Error "Unexpected template manifest version: $($manifest.template_version)"
         }
         $sources = @($manifest.files | ForEach-Object { $_.source_path })
@@ -946,7 +972,7 @@ function Test-PluginDistribution {
     if ($codexPluginJson.name -ne "forgekit") {
         Add-Error "Unexpected Codex plugin name in root plugin.json: $($codexPluginJson.name)"
     }
-    if ($codexPluginJson.version -ne "0.31.0") {
+    if ($codexPluginJson.version -ne "0.32.0") {
         Add-Error "Unexpected Codex plugin version in root plugin.json: $($codexPluginJson.version)"
     }
     if ($codexPluginJson.skills -ne "./skills/") {
@@ -957,7 +983,7 @@ function Test-PluginDistribution {
     if ($claudePluginJson.name -ne "forgekit") {
         Add-Error "Unexpected Claude plugin name in root plugin.json: $($claudePluginJson.name)"
     }
-    if ($claudePluginJson.version -ne "0.31.0") {
+    if ($claudePluginJson.version -ne "0.32.0") {
         Add-Error "Unexpected Claude plugin version in root plugin.json: $($claudePluginJson.version)"
     }
     $claudeSkills = @($claudePluginJson.skills)

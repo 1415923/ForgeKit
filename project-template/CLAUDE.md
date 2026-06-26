@@ -12,18 +12,19 @@ When a task names a ForgeKit skill, read the project-local `.agents/skills/<skil
 2. Read `.forgekit/project-boundary.yml` to identify ForgeKitRoot, ProjectRoot, managed docs root, change root, business docs roots, and write policy.
 3. Read `.forgekit/docs/document-responsibility.md` to choose the right managed docs and avoid duplicate writes.
 4. Read `.forgekit/docs/codebase-map.md` to find likely modules, entry files, and local validation commands.
-5. Read `.forgekit/docs/local-toolchain.md` when lint, test, build, or local validation commands matter.
-6. Read `.forgekit/docs/codex-next-work-order.md` after initialization or when project direction is unclear.
-7. Read `.codex/project.md`, `.codex/scope.md`, and `.codex/commands.md` only as needed.
-8. Read only the selected stack folder under `.codex/stacks/`.
-9. Use `.claude/skills/` for ForgeKit workflow skills.
-10. Read `governance/agent-harness.md` when the task involves context strategy, large code search, or unclear entry points.
-11. Read `governance/large-change-execution.md` for large, cross-module, high-risk, migration, or refactor work.
-12. Read `governance/ai-engineering-loop.md` when risk level, change artifacts, verification, review, ship, or retro expectations are unclear.
-13. Read `.forgekit/docs/document-lifecycle.md` when deciding whether material belongs in current docs, change process docs, or archive.
-14. Read `governance/team-agent-rollout.md` only when the task involves commands, hooks, plugins, MCP, CI, issue trackers, or team rollout.
-15. Read `governance/agent-suitability.md` for initialization, existing project handover, or when project fit is unclear.
-16. Read `.codex/automation-decision.md` before turning a repeated workflow into a skill, command, hook, script, plugin, or MCP.
+5. Read `.forgekit/docs/workflow-router.md` when the user intent is unclear or the request is about tasks, sources, status, verification, reports, loop, review, worktree, or handoff.
+6. Read `.forgekit/docs/local-toolchain.md` when lint, test, build, or local validation commands matter.
+7. Read `.forgekit/docs/codex-next-work-order.md` after initialization or when project direction is unclear.
+8. Read `.codex/project.md`, `.codex/scope.md`, and `.codex/commands.md` only as needed.
+9. Read only the selected stack folder under `.codex/stacks/`.
+10. Use `.claude/skills/` for ForgeKit workflow skills.
+11. Read `governance/agent-harness.md` when the task involves context strategy, large code search, or unclear entry points.
+12. Read `governance/large-change-execution.md` for large, cross-module, high-risk, migration, or refactor work.
+13. Read `governance/ai-engineering-loop.md` when risk level, change artifacts, verification, review, ship, or retro expectations are unclear.
+14. Read `.forgekit/docs/document-lifecycle.md` when deciding whether material belongs in current docs, change process docs, or archive.
+15. Read `governance/team-agent-rollout.md` only when the task involves commands, hooks, plugins, MCP, CI, issue trackers, or team rollout.
+16. Read `governance/agent-suitability.md` for initialization, existing project handover, or when project fit is unclear.
+17. Read `.codex/automation-decision.md` before turning a repeated workflow into a skill, command, hook, script, plugin, or MCP.
 
 ## Task Routing
 
@@ -50,7 +51,9 @@ When a task names a ForgeKit skill, read the project-local `.agents/skills/<skil
 ## Context Rules
 
 - Do not read every file in `governance/` by default.
-- 默认不要读取全部 `.forgekit/docs/**`。先读 `.forgekit/docs/document-responsibility.md` 和 `.forgekit/docs/codebase-map.md`，再按默认读取策略和任务触发条件读取相关文档。
+- 默认不要读取全部 `.forgekit/docs/**`。先读 `.forgekit/docs/document-responsibility.md`、`.forgekit/docs/codebase-map.md` 和必要的 `.forgekit/docs/workflow-router.md`，再按默认读取策略和任务触发条件读取相关文档。
+- 用户请求不明确时，先做 intent routing：判断 Read Targets、Write Targets、Do Not Write 和 Required Output。
+- 没有写入触发条件时，不要修改 managed docs；不要把同一事实写进多个文档。
 - Boundary first: ForgeKitRoot is the toolkit source and is read-only unless this task is maintaining ForgeKit itself; ProjectRoot is the business repository and Git commit location.
 - Use `.forgekit/docs` as the default ForgeKit-managed docs root and `.forgekit/changes` as the default change root.
 - Treat business `docs/` as read-mostly evidence. Read and cite it, but do not write ForgeKit governance templates there unless the user confirms target files and reasons.

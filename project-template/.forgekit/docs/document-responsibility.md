@@ -25,6 +25,7 @@
 | `.forgekit/project-boundary.yml` | core | AI 工具、维护者 | yes | ForgeKitRoot、ProjectRoot、managed docs root、change root、写入策略 | 产品计划、架构、任务状态 | 目录布局或写入策略变化 | `AGENTS.md`, `CLAUDE.md` |
 | `.forgekit/docs/document-responsibility.md` | core | 用户、AI 工具 | yes | 文档职责、更新触发、事实归属 | 项目事实、任务日志、发布说明 | managed docs 职责变化 | `document-lifecycle.md` |
 | `.forgekit/docs/codebase-map.md` | core | AI 工具、维护者 | yes | 代码搜索入口、模块入口、关键命令、谨慎读取路径 | 完整架构、API 百科、长扫描历史 | 模块入口、命令或归属变化 | `architecture.md`, `api.md`, `local-toolchain.md` |
+| `.forgekit/docs/workflow-router.md` | core | 用户、AI 工具 | yes | 用户意图到 Read / Write / Do Not Write / Required Output 的路由表 | 任务看板、执行器、自动 runner、业务事实正文 | 用户常见意图、文档读写边界或路由规则变化 | `document-responsibility.md`, `codebase-map.md` |
 | `.forgekit/docs/task-intake.md` | working | 用户、AI 工具 | as-needed | 工作来源原文或原始想法、Source ID、Update Notes、Task Decision、Derived Task IDs、人工确认状态 | 执行状态总表、工作流水、changelog、长分析 | 领导任务、微信任务、计划表格子、会议任务、个人规划、用户反馈、bug、技术债、测试失败；小补充默认更新已有 Source | `requirements.md`, `task-board.md`, `work-log.md` |
 | `.forgekit/docs/requirements.md` | current | 用户、产品、AI 工具 | as-needed | 已确认的需求事实、验收标准、范围边界、Source ID 引用 | 任务派发原文、长推理、执行状态 | 需求被确认、修正、拒绝或定界 | `task-intake.md`, `traceability.md` |
 | `.forgekit/docs/task-board.md` | working | 用户、AI 工具 | as-needed | 通过准入的可执行任务、状态、owner、下一步、验证方式、Source ID、Superseded/Dropped 结论 | 任务原文、聊天补充、纯确认、工作流水、长计划 | Task Gate ready、任务阻塞、复查、完成、取消或被替代 | `task-intake.md`, `work-log.md`, `changes/<id>/tasks.md` |
@@ -66,6 +67,8 @@
 3. 相关文档只放链接或 Source ID，不复制同一段内容。
 4. 给用户看的文档先写结论，再写必要证据，避免模板腔和长过程自述。
 5. 触发式文档只有事件真的发生时才读取或更新。
+
+用户意图不清楚时，先读 `workflow-router.md` 做 intent routing。它只负责把“我要看领导原文 / 当前任务 / 验证结果 / 今天做了什么 / 准备汇报 / 继续 loop / 收口版本”等请求映射到正确文档和输出；它不是任务看板，不替代 `task-board.md`，也不授权自动执行。
 
 ## Source-to-Task 链路
 

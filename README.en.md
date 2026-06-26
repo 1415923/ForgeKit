@@ -96,8 +96,8 @@ New users do not need to read every file. Start with the scenario-specific entry
 
 | Scenario | Main files |
 | --- | --- |
-| Personal greenfield project | `AGENTS.md` / `CLAUDE.md`, `.forgekit/docs/document-responsibility.md`, `.forgekit/docs/codebase-map.md`, `.forgekit/docs/task-intake.md`, `.forgekit/docs/task-board.md`, `.forgekit/docs/work-log.md` |
-| Company project takeover | `AGENTS.md` / `CLAUDE.md`, `.forgekit/docs/document-responsibility.md`, `.forgekit/docs/codebase-map.md`, `.forgekit/docs/local-toolchain.md`, `.forgekit/docs/handover-audit.md`, business `README` / `docs/` |
+| Personal greenfield project | `AGENTS.md` / `CLAUDE.md`, `.forgekit/docs/document-responsibility.md`, `.forgekit/docs/codebase-map.md`, `.forgekit/docs/workflow-router.md`, `.forgekit/docs/task-intake.md`, `.forgekit/docs/task-board.md`, `.forgekit/docs/work-log.md` |
+| Company project takeover | `AGENTS.md` / `CLAUDE.md`, `.forgekit/docs/document-responsibility.md`, `.forgekit/docs/codebase-map.md`, `.forgekit/docs/workflow-router.md`, `.forgekit/docs/local-toolchain.md`, `.forgekit/docs/handover-audit.md`, business `README` / `docs/` |
 | Daily task development | `.forgekit/docs/task-intake.md`, `.forgekit/docs/task-board.md`, `.forgekit/docs/work-log.md`; read `testing.md` / `requirements.md` / `architecture.md` as needed |
 | Medium/high-risk change | `.forgekit/changes/<change-id>/`, `.forgekit/docs/testing.md`, `.forgekit/docs/changelog.md`, and `architecture.md` when needed |
 | Release check | `.forgekit/docs/changelog.md`, `.forgekit/docs/testing.md`, `.forgekit/docs/task-board.md`, `.codex/version-gates.md` |
@@ -118,6 +118,7 @@ Key files:
 | `.forgekit/project-boundary.yml` | ForgeKitRoot, ProjectRoot, managed docs root, change root, and write policy |
 | `.forgekit/docs/document-responsibility.md` | Managed docs responsibility matrix: audience, triggers, write/do-not-write boundaries, and default-read policy |
 | `.forgekit/docs/codebase-map.md` | Code search entry points, module entry map, and local validation commands; not a project encyclopedia |
+| `.forgekit/docs/workflow-router.md` | User intent router: decide what to read, what to write, and what not to touch |
 | `.forgekit/docs/local-toolchain.md` | Local lint, test, build, LSP, and toolchain capability |
 | `.forgekit/docs/changelog.md` | Current version update record |
 | `.forgekit/docs/version-roadmap.md` | Version roadmap and delivery gates |
@@ -140,6 +141,7 @@ By default, ForgeKit governance docs are written under `.forgekit/docs/`, and me
 | Capability | Purpose |
 | --- | --- |
 | `project-init` | Discovery interview, project entry setup, and first project facts |
+| `workflow-router` doc | Routes requests such as source text, current tasks, validation results, daily progress, handoff, loop continuation, or release closure to the right docs |
 | `project-suitability` | Decide whether Lite, Standard, Enterprise, or Custom flow fits |
 | `document-backfill` | Read existing business docs one by one and backfill the ForgeKit managed docs root |
 | `handover-review` | Audit inherited projects and identify risks |
@@ -321,6 +323,7 @@ ForgeKit can coexist with ECC: ECC enhances the AI tool; ForgeKit constrains the
 
 | Version | User-facing change |
 | --- | --- |
+| `0.32.0` | Workflow Router: adds `.forgekit/docs/workflow-router.md` to route user intent to the right Read / Write / Do Not Write docs, reducing full-doc scans and duplicate writes. |
 | `0.31.0` | Bounded Auto Loop Policy: adds one-step / bounded-auto / review-only authorization boundaries, budgets, stop conditions, agent mode gates, and handoff rules without a runner. |
 | `0.30.1` | Native Agent Adapter Verification: clarifies that generated config is not runtime registration, and adds native / fallback / simulated state fields and verification checklists. |
 | `0.30.0` | Native Agent Adapter: adds opt-in native agent configuration generation, exporting ForgeKit loop / maker-checker / verification protocols as reviewable Claude Code / Codex templates without automatic execution. |

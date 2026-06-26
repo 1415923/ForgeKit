@@ -23,6 +23,8 @@
 | 业务文档 | `docs/` | 业务说明、既有方案、验收资料 | 默认只读 |
 | ForgeKit 管理文档 | `.forgekit/docs/` | 当前项目事实和工作状态 | 按职责矩阵读取 |
 
+用户意图类问题先看 `.forgekit/docs/workflow-router.md`。本文只指向入口，不复制路由表。
+
 ## 当前主要模块
 
 | 模块 | 路径 | 关键文件 | 什么时候读 | 验证方式 |
@@ -56,6 +58,7 @@
 | 需要了解 | 读取 |
 | --- | --- |
 | 文档该写到哪里 | `.forgekit/docs/document-responsibility.md` |
+| 用户一句话该读/写哪些文档 | `.forgekit/docs/workflow-router.md` |
 | 当前项目目标和范围 | `.forgekit/docs/project-plan.md` |
 | 工作来源原文、补充记录和 Task Decision | `.forgekit/docs/task-intake.md` |
 | 可执行任务、Task ID、状态和 Source ID 反链 | `.forgekit/docs/task-board.md` |
@@ -66,7 +69,7 @@
 | 有限授权连续推进规则 | `.forgekit/docs/bounded-auto-loop-policy.md` |
 | 原生 agent 配置适配 | `.forgekit/docs/native-agent-adapter.md` |
 
-不要默认读取 `.forgekit/docs/**` 全量内容。先按本文件和 `document-responsibility.md` 判断需要哪些文档。
+不要默认读取 `.forgekit/docs/**` 全量内容。先按本文件、`document-responsibility.md` 和 `workflow-router.md` 判断需要哪些文档。
 
 任务链路按 `task-intake.md -> task-board.md -> work-log.md` 处理：先归并工作来源，再进入看板，最后记录推进过程。公司派发、个人规划、用户反馈、bug、技术债、测试失败都走同一条链路。补充和确认默认更新已有 Source 或 Task，不默认创建新任务。
 

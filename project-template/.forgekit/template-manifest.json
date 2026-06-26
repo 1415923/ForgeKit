@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "template_version": "0.31.0",
+  "template_version": "0.32.0",
   "boundary_aware": true,
   "files": [
     {
@@ -9,7 +9,7 @@
       "role": "agent_entry",
       "update_policy": "ask",
       "render_mode": "copy",
-      "checksum": "sha256:17009d7b1e19bf26594d83b4b2db9f8ad32b0d31a078173232594ed69843ea04"
+      "checksum": "sha256:54a8450f622d236139e7e8cd7afb2d9d777f882db41a76c3a106b7b077018570"
     },
     {
       "source_path": "CLAUDE.md",
@@ -17,7 +17,7 @@
       "role": "agent_entry",
       "update_policy": "ask",
       "render_mode": "copy",
-      "checksum": "sha256:efb8e72505cd2ce67a31fe2de8bf085ceec03f1c52912fb2206069923bc7033d"
+      "checksum": "sha256:b3dc95ba52fd480d94b6654938a4d06ba46bf0f6009f10fe87abddd31d793dfe"
     },
     {
       "source_path": "README.md",
@@ -25,7 +25,7 @@
       "role": "readme",
       "update_policy": "ask",
       "render_mode": "copy",
-      "checksum": "sha256:d81b5872663a0dd67aaead65a71eb2990c6fe4627116638dda67c15a309e364e"
+      "checksum": "sha256:6b02914ca6653c442aa64be5f69edac394d99f6046bfe42971f269183d1f2c5a"
     },
     {
       "source_path": ".forgekit/project-boundary.yml",
@@ -41,7 +41,7 @@
       "role": "managed_doc",
       "update_policy": "merge",
       "render_mode": "copy",
-      "checksum": "sha256:fe17b3c32a6106a14c7956811ed0a9ba41cb0461539563f0714365a58a11fe99"
+      "checksum": "sha256:094ed9d1b751f2f979ab3b6c4e83198b9ea71a7c410b73fed416937337107c2b"
     },
     {
       "source_path": ".forgekit/docs/document-lifecycle.md",
@@ -81,7 +81,7 @@
       "role": "codex_rule",
       "update_policy": "ask",
       "render_mode": "copy",
-      "checksum": "sha256:673477c1c238d6be1897cecad0a6ba1aee1654f7a5c8c0b27f4b25e320877f36"
+      "checksum": "sha256:98f637622f5e774190aec03d129aa92a48113091fdc27a923568dfb35a606c4c"
     },
     {
       "source_path": ".codex/version-gates.md",
@@ -209,7 +209,15 @@
       "role": "managed_doc",
       "update_policy": "merge",
       "render_mode": "copy",
-      "checksum": "sha256:e5aeacd6aac3a0c795a2a36151b2bd2e59f0ce48953b379c522e8dfd7006a19d"
+      "checksum": "sha256:528e1f7bcb6f663df6637deabb292b619679e4107e315b01c04f73dfad795c8c"
+    },
+    {
+      "source_path": "docs/workflow-router.md",
+      "target_path": "${managed_docs_root}/workflow-router.md",
+      "role": "managed_doc",
+      "update_policy": "merge",
+      "render_mode": "copy",
+      "checksum": "sha256:441837c400e6cdca27dba4869dc1da81d718d1beeae0663e9562bbf1edb54ce7"
     },
     {
       "source_path": "docs/work-log.md",

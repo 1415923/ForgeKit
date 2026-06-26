@@ -9,11 +9,12 @@ ForgeKit 在生成项目内提供轻量 AI Engineering Loop：澄清目标、判
 1. Codex 读取 `AGENTS.md`；Claude Code 读取 `CLAUDE.md`，确认任务路由和禁止动作。
 2. 读取 `.forgekit/docs/document-responsibility.md`，判断哪些 managed docs 需要读、哪些不应更新。
 3. 读取 `.forgekit/docs/codebase-map.md`，找到代码搜索起点、模块入口和局部验证命令。
-4. 需要验证时读取 `.forgekit/docs/local-toolchain.md`；方向不清时读取 `.forgekit/docs/codex-next-work-order.md`。
-5. 工作来自领导、微信、计划表、会议、个人规划、用户反馈、bug、技术债或测试失败时，先写 `.forgekit/docs/task-intake.md`；补充和确认默认归并到已有 Source，只有满足任务准入时才进入 `task-board.md`。
-6. 中高风险变更使用 `.forgekit/changes/<id>/`；低风险改动保持轻流程。
-7. 触发式文档只在事件发生时更新：缺陷复盘、事故复盘、依赖审查、威胁建模、发布流水线、traceability、loop、maker-checker、worktree 等都不是日常必填。
-8. 编码前确认范围和验证方式；完成后只更新真正负责的文档，不把同一事实重复写入多个文件。
+4. 用户意图不清楚，或问题涉及任务来源、当前任务、验证结果、工作日志、汇报、loop、review、worktree、handoff 时，读取 `.forgekit/docs/workflow-router.md`。
+5. 需要验证时读取 `.forgekit/docs/local-toolchain.md`；方向不清时读取 `.forgekit/docs/codex-next-work-order.md`。
+6. 工作来自领导、微信、计划表、会议、个人规划、用户反馈、bug、技术债或测试失败时，先写 `.forgekit/docs/task-intake.md`；补充和确认默认归并到已有 Source，只有满足任务准入时才进入 `task-board.md`。
+7. 中高风险变更使用 `.forgekit/changes/<id>/`；低风险改动保持轻流程。
+8. 触发式文档只在事件发生时更新：缺陷复盘、事故复盘、依赖审查、威胁建模、发布流水线、traceability、loop、maker-checker、worktree 等都不是日常必填。
+9. 编码前确认范围和验证方式；完成后只更新真正负责的文档，不把同一事实重复写入多个文件。
 
 ## 升级兼容
 
@@ -39,6 +40,7 @@ ForgeKit 在生成项目内提供轻量 AI Engineering Loop：澄清目标、判
 - `CLAUDE.md`：Claude Code 第一入口，只放任务路由、上下文规则和禁止动作。
 - `.forgekit/docs/document-responsibility.md`：管理文档职责矩阵，记录读者、默认读取策略、触发条件、写什么和不写什么。
 - `.forgekit/docs/codebase-map.md`：代码搜索起点，记录模块入口、常用关键词和局部验证命令，不做项目百科。
+- `.forgekit/docs/workflow-router.md`：用户意图路由表，决定一句话该读什么、写什么、不要写什么。
 - `.forgekit/docs/local-toolchain.md`：记录各技术栈 LSP、lint、test、build 和局部验证能力。
 - `governance/agent-harness.md`：说明 AGENTS 分层、agentic search、停止编码条件和输出要求。
 - `governance/ai-engineering-loop.md`：说明 low / medium / high 风险分级、change 工件和交付闭环。
@@ -61,7 +63,7 @@ ForgeKit 在生成项目内提供轻量 AI Engineering Loop：澄清目标、判
 - `scripts/detect-local-toolchain.ps1`、`scripts/run-harness-check.ps1`、`scripts/check-doc-sync.ps1`、`scripts/check-doc-sync.sh`、`scripts/check-codex-native-agents.py`：只读检测脚本，用于把 harness 和 native adapter 从文档推进到可执行检查。
 - `scripts/install-hooks.ps1`、`scripts/install-hooks.sh`：opt-in 安装、查看、卸载 Git hook，不默认启用。
 
-使用优先级：Codex 从 `AGENTS.md` 开始，Claude Code 从 `CLAUDE.md` 开始；如果任务命中 ForgeKit skill，优先读取项目内 `.agents/skills/<skill>/SKILL.md`，不要假设用户级或系统级 skill 路径存在；然后进入 `.forgekit/docs/document-responsibility.md` -> `.forgekit/docs/codebase-map.md` -> 必要的 `.forgekit/docs/local-toolchain.md` / `.forgekit/docs/codex-next-work-order.md` -> `.codex/` -> 相关 `.codex/stacks/<stack>/` -> 任务相关治理文件。不要默认读取全部 `.forgekit/docs/**` 或治理文档。
+使用优先级：Codex 从 `AGENTS.md` 开始，Claude Code 从 `CLAUDE.md` 开始；如果任务命中 ForgeKit skill，优先读取项目内 `.agents/skills/<skill>/SKILL.md`，不要假设用户级或系统级 skill 路径存在；然后进入 `.forgekit/docs/document-responsibility.md` -> `.forgekit/docs/codebase-map.md` -> 必要的 `.forgekit/docs/workflow-router.md` / `.forgekit/docs/local-toolchain.md` / `.forgekit/docs/codex-next-work-order.md` -> `.codex/` -> 相关 `.codex/stacks/<stack>/` -> 任务相关治理文件。不要默认读取全部 `.forgekit/docs/**` 或治理文档。
 
 常见 stack 名称：`java-springboot`、`vue`、`react`、`python-fastapi`、`node-express`、`csharp-dotnet`、`go-service`、`php-laravel`、`rust-cli-service`、`flutter-dart`、`cpp-cmake`、`kotlin-spring`、`swift-ios`、`ruby-rails`、`r-data-analysis`、`fpga-vivado-vitis`。只读取当前项目实际选择的 stack，避免把无关语言规则混入上下文。
 
