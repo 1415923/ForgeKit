@@ -327,16 +327,24 @@ function Test-AIEngineeringLoop {
     Test-RequiredPattern "project-template\AGENTS.md" "intent routing" "AGENTS intent routing rule"
     Test-RequiredPattern "project-template\AGENTS.md" "doc-health-report.py" "AGENTS doc health report rule"
     Test-RequiredPattern "project-template\AGENTS.md" ".forgekit/doc-health-report.md" "AGENTS doc health generated report rule"
+    Test-RequiredPattern "project-template\AGENTS.md" "source-trace-report.py" "AGENTS source trace report rule"
+    Test-RequiredPattern "project-template\AGENTS.md" ".forgekit/source-trace-report.md" "AGENTS source trace generated report rule"
     Test-RequiredPattern "project-template\CLAUDE.md" "workflow-router.md" "CLAUDE workflow router routing"
     Test-RequiredPattern "project-template\CLAUDE.md" "intent routing" "CLAUDE intent routing rule"
     Test-RequiredPattern "project-template\CLAUDE.md" "doc-health-report.py" "CLAUDE doc health report rule"
+    Test-RequiredPattern "project-template\CLAUDE.md" "source-trace-report.py" "CLAUDE source trace report rule"
     Test-RequiredPattern "project-template\.codex\rules.md" "workflow-router.md" "Rules workflow router routing"
     Test-RequiredPattern "project-template\.codex\rules.md" "intent routing" "Rules intent routing rule"
     Test-RequiredPattern "project-template\.codex\rules.md" "doc-health-report.py" "Rules doc health report rule"
+    Test-RequiredPattern "project-template\.codex\rules.md" "source-trace-report.py" "Rules source trace report rule"
     Test-RequiredPattern "project-template\.forgekit\docs\document-responsibility.md" ".forgekit/doc-health-report.md" "Document responsibility doc health generated report"
+    Test-RequiredPattern "project-template\.forgekit\docs\document-responsibility.md" ".forgekit/source-trace-report.md" "Document responsibility source trace generated report"
     Test-RequiredPattern "project-template\docs\codebase-map.md" "doc-health-report.py" "Codebase map doc health entry"
+    Test-RequiredPattern "project-template\docs\codebase-map.md" "source-trace-report.py" "Codebase map source trace entry"
     Test-RequiredPattern "project-template\docs\workflow-router.md" "检查文档健康" "Workflow router doc health intent"
+    Test-RequiredPattern "project-template\docs\workflow-router.md" "检查任务来源追溯" "Workflow router source trace intent"
     Test-RequiredPattern "project-template\docs\bounded-auto-loop-policy.md" ".forgekit/doc-health-report.md" "Bounded auto doc health stop boundary"
+    Test-RequiredPattern "project-template\docs\bounded-auto-loop-policy.md" ".forgekit/source-trace-report.md" "Bounded auto source trace stop boundary"
     Test-RequiredPattern "project-template\docs\work-log.md" "Status:" "Work log recent window purpose"
     Test-RequiredPattern "project-template\docs\work-log.md" "Commit" "Work log commit status"
     Test-RequiredPattern "project-template\docs\work-log.md" "Push" "Work log push status"
@@ -596,7 +604,7 @@ function Test-TemplateManifest {
     $manifestPath = Join-Path $repoRoot "project-template\.forgekit\template-manifest.json"
     if (Test-Path -LiteralPath $manifestPath) {
         $manifest = Get-Content -LiteralPath $manifestPath -Raw | ConvertFrom-Json
-        if ($manifest.template_version -ne "0.33.0") {
+        if ($manifest.template_version -ne "0.34.0") {
             Add-Error "Unexpected template manifest version: $($manifest.template_version)"
         }
         $sources = @($manifest.files | ForEach-Object { $_.source_path })
@@ -627,8 +635,14 @@ function Test-TemplateManifest {
         if ($sources -contains ".forgekit/doc-health-report.md") {
             Add-Error "doc-health-report.md must not be listed in template manifest"
         }
+        if ($sources -contains ".forgekit/source-trace-report.md") {
+            Add-Error "source-trace-report.md must not be listed in template manifest"
+        }
         if ($sources -notcontains "scripts/doc-health-report.py") {
             Add-Error "doc-health-report.py script must be listed in template manifest"
+        }
+        if ($sources -notcontains "scripts/source-trace-report.py") {
+            Add-Error "source-trace-report.py script must be listed in template manifest"
         }
         $dollarSign = [string][char]36
         $managedDocsRootPattern = $dollarSign + "{managed_docs_root}/*"
@@ -804,6 +818,8 @@ function Test-ExecutableHarness {
     Test-RequiredPath "project-template\scripts\archive-changes.py"
     Test-RequiredPath "project-template\scripts\doc-health-report.py"
     Test-RequiredPath "scripts\doc-health-report.py"
+    Test-RequiredPath "project-template\scripts\source-trace-report.py"
+    Test-RequiredPath "scripts\source-trace-report.py"
     Test-RequiredPath "project-template\scripts\install-hooks.ps1"
     Test-RequiredPath "project-template\scripts\install-hooks.sh"
     Test-RequiredPath (Get-CodexNextWorkOrderPath)
@@ -820,6 +836,8 @@ function Test-ExecutableHarness {
     Test-RequiredPattern "project-template\.codex\commands.md" "archive-changes.py --smart-apply" "Commands smart archive apply"
     Test-RequiredPattern "project-template\.codex\commands.md" "doc-health-report.py" "Commands doc health report"
     Test-RequiredPattern "project-template\.codex\commands.md" ".forgekit/doc-health-report.md" "Commands doc health output"
+    Test-RequiredPattern "project-template\.codex\commands.md" "source-trace-report.py" "Commands source trace report"
+    Test-RequiredPattern "project-template\.codex\commands.md" ".forgekit/source-trace-report.md" "Commands source trace output"
     Test-RequiredPattern "project-template\.codex\commands.md" "install-hooks.ps1" "Commands hook installer"
     Test-RequiredPattern "project-template\.codex\commands.md" "install-hooks.sh" "Commands hook installer bash"
     Test-RequiredPattern "project-template\.codex\commands-catalog.md" "detect-local-toolchain" "Commands catalog toolchain detector"
@@ -854,6 +872,15 @@ function Test-ExecutableHarness {
     Test-RequiredPattern "project-template\scripts\doc-health-report.py" "workflow-router.md" "Doc health router boundary"
     Test-RequiredPattern "project-template\scripts\doc-health-report.py" "doc-health-report.md is listed in template manifest" "Doc health manifest guard"
     Test-RequiredPattern "scripts\doc-health-report.py" "Status: report-only" "Root doc health report-only status"
+    Test-RequiredPattern "project-template\scripts\source-trace-report.py" "Status: report-only" "Source trace report-only status"
+    Test-RequiredPattern "project-template\scripts\source-trace-report.py" "Mode: source-trace" "Source trace mode"
+    Test-RequiredPattern "project-template\scripts\source-trace-report.py" "Trace Chain Overview" "Source trace chain overview"
+    Test-RequiredPattern "project-template\scripts\source-trace-report.py" "Findings by Trace Stage" "Source trace stage findings"
+    Test-RequiredPattern "project-template\scripts\source-trace-report.py" "Orphan Records" "Source trace orphan records"
+    Test-RequiredPattern "project-template\scripts\source-trace-report.py" "Status Consistency" "Source trace status consistency"
+    Test-RequiredPattern "project-template\scripts\source-trace-report.py" "No automatic Source ID creation" "Source trace no auto source ID"
+    Test-RequiredPattern "project-template\scripts\source-trace-report.py" "source-trace-report.md is listed in template manifest" "Source trace manifest guard"
+    Test-RequiredPattern "scripts\source-trace-report.py" "Status: report-only" "Root source trace report-only status"
     Test-RequiredPattern "project-template\scripts\check-doc-sync.ps1" ".forgekit/archive-plan.md" "PowerShell archive plan exclusion"
     Test-RequiredPattern "project-template\scripts\check-doc-sync.ps1" ".forgekit/archive-apply-report.md" "PowerShell archive apply report exclusion"
     Test-RequiredPattern "project-template\scripts\check-doc-sync.ps1" ".forgekit/archive-reference-report.md" "PowerShell archive reference report exclusion"
@@ -861,6 +888,7 @@ function Test-ExecutableHarness {
     Test-RequiredPattern "project-template\scripts\check-doc-sync.ps1" ".forgekit/smart-archive-report.md" "PowerShell smart archive report exclusion"
     Test-RequiredPattern "project-template\scripts\check-doc-sync.ps1" ".forgekit/smart-archive-apply-report.md" "PowerShell smart archive apply report exclusion"
     Test-RequiredPattern "project-template\scripts\check-doc-sync.ps1" ".forgekit/doc-health-report.md" "PowerShell doc health report exclusion"
+    Test-RequiredPattern "project-template\scripts\check-doc-sync.ps1" ".forgekit/source-trace-report.md" "PowerShell source trace report exclusion"
     Test-RequiredPattern "project-template\scripts\check-doc-sync.ps1" ".forgekit/upgrade/*" "PowerShell guided upgrade exclusion"
     Test-RequiredPattern "project-template\scripts\check-doc-sync.sh" ".forgekit/archive-plan.md" "Bash archive plan exclusion"
     Test-RequiredPattern "project-template\scripts\check-doc-sync.sh" ".forgekit/archive-apply-report.md" "Bash archive apply report exclusion"
@@ -869,12 +897,18 @@ function Test-ExecutableHarness {
     Test-RequiredPattern "project-template\scripts\check-doc-sync.sh" ".forgekit/smart-archive-report.md" "Bash smart archive report exclusion"
     Test-RequiredPattern "project-template\scripts\check-doc-sync.sh" ".forgekit/smart-archive-apply-report.md" "Bash smart archive apply report exclusion"
     Test-RequiredPattern "project-template\scripts\check-doc-sync.sh" ".forgekit/doc-health-report.md" "Bash doc health report exclusion"
+    Test-RequiredPattern "project-template\scripts\check-doc-sync.sh" ".forgekit/source-trace-report.md" "Bash source trace report exclusion"
     Test-RequiredPattern "project-template\scripts\check-doc-sync.sh" ".forgekit/upgrade/" "Bash guided upgrade exclusion"
 
     $rootDocHealth = Get-Content -LiteralPath (Join-Path $repoRoot "scripts\doc-health-report.py") -Raw
     $templateDocHealth = Get-Content -LiteralPath (Join-Path $repoRoot "project-template\scripts\doc-health-report.py") -Raw
     if ($rootDocHealth -ne $templateDocHealth) {
         Add-Error "Root and project-template doc-health-report.py must stay identical"
+    }
+    $rootSourceTrace = Get-Content -LiteralPath (Join-Path $repoRoot "scripts\source-trace-report.py") -Raw
+    $templateSourceTrace = Get-Content -LiteralPath (Join-Path $repoRoot "project-template\scripts\source-trace-report.py") -Raw
+    if ($rootSourceTrace -ne $templateSourceTrace) {
+        Add-Error "Root and project-template source-trace-report.py must stay identical"
     }
 }
 
@@ -1007,7 +1041,7 @@ function Test-PluginDistribution {
     if ($codexPluginJson.name -ne "forgekit") {
         Add-Error "Unexpected Codex plugin name in root plugin.json: $($codexPluginJson.name)"
     }
-    if ($codexPluginJson.version -ne "0.33.0") {
+    if ($codexPluginJson.version -ne "0.34.0") {
         Add-Error "Unexpected Codex plugin version in root plugin.json: $($codexPluginJson.version)"
     }
     if ($codexPluginJson.skills -ne "./skills/") {
@@ -1018,7 +1052,7 @@ function Test-PluginDistribution {
     if ($claudePluginJson.name -ne "forgekit") {
         Add-Error "Unexpected Claude plugin name in root plugin.json: $($claudePluginJson.name)"
     }
-    if ($claudePluginJson.version -ne "0.33.0") {
+    if ($claudePluginJson.version -ne "0.34.0") {
         Add-Error "Unexpected Claude plugin version in root plugin.json: $($claudePluginJson.version)"
     }
     $claudeSkills = @($claudePluginJson.skills)

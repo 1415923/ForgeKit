@@ -55,6 +55,7 @@
 - AgentModeRequired 不满足。
 - native-only 要求下 native agent 不可用。
 - 需要根据 `.forgekit/doc-health-report.md` 自动瘦身、归档、重写或合并 managed docs。
+- 需要根据 `.forgekit/source-trace-report.md` 自动补 Source ID、改写任务状态、补验证记录或合并 changelog。
 - 用户、负责人或 review 规则要求人工确认。
 
 ## Checkpoint Writeback
@@ -71,6 +72,8 @@
 `review-only` 不改文件；除非用户要求记录，否则只在聊天中输出结论。
 
 文档健康场景下，`bounded-auto` 最多生成 `.forgekit/doc-health-report.md` 并停止。报告只是 review 输入，不能自动触发文档瘦身、归档、链接重写或事实合并。
+
+来源追溯场景下，`bounded-auto` 最多生成 `.forgekit/source-trace-report.md` 并停止。报告只是人工修链输入，不能自动补 Source ID、创建任务、改任务状态、补验证记录或重写 changelog。
 
 ## Final Handoff
 

@@ -66,6 +66,7 @@
 | 验证命令和测试策略 | `.forgekit/docs/testing.md` |
 | 用户可见版本变化 | `.forgekit/docs/changelog.md` |
 | 文档健康检查 | `scripts/doc-health-report.py`，输出 `.forgekit/doc-health-report.md` |
+| 来源追溯检查 | `scripts/source-trace-report.py`，输出 `.forgekit/source-trace-report.md` |
 | 中高风险变更过程 | `.forgekit/changes/<change-id>/` |
 | 有限授权连续推进规则 | `.forgekit/docs/bounded-auto-loop-policy.md` |
 | 原生 agent 配置适配 | `.forgekit/docs/native-agent-adapter.md` |

@@ -88,6 +88,18 @@ python .\scripts\doc-health-report.py --project-root .
 python3 ./scripts/doc-health-report.py --project-root .
 ```
 
+## 来源追溯报告
+
+只生成或覆盖 `.forgekit/source-trace-report.md`，用于检查“原始来源 -> 需求事实 -> 任务拆解 -> change/实现 -> 验证记录 -> work-log/changelog 状态”的链路是否断裂。它是 report-only，不自动补 Source ID、不修改 task-intake / requirements / task-board / work-log / changelog。
+
+```powershell
+python .\scripts\source-trace-report.py --project-root .
+```
+
+```bash
+python3 ./scripts/source-trace-report.py --project-root .
+```
+
 ## 归档计划 Dry Run
 
 只生成或覆盖 `.forgekit/archive-plan.md`，不移动文件、不改状态、不改链接、不写 current docs、不写 business docs、不改 lock、不提交。

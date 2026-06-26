@@ -58,6 +58,7 @@ When a task names a ForgeKit skill, read the project-local `.agents/skills/<skil
 - 用户请求不明确时，先做 intent routing：判断 Read Targets、Write Targets、Do Not Write 和 Required Output。
 - 没有写入触发条件时，不要修改 managed docs；不要把同一事实写进多个文档。
 - 文档混乱、过长、重复或职责错位时，先建议或运行 `scripts/doc-health-report.py`。它只生成 `.forgekit/doc-health-report.md`，不得自动按报告修改 managed docs。
+- 任务来源、完成证据或追溯链路不清时，先建议或运行 `scripts/source-trace-report.py`。它只生成 `.forgekit/source-trace-report.md`，不得自动补 Source ID、改任务状态或补验证记录。
 - Boundary first: ForgeKitRoot is the toolkit source and is read-only unless this task is maintaining ForgeKit itself; ProjectRoot is the business repository and Git commit location.
 - Use `.forgekit/docs` as the default ForgeKit-managed docs root and `.forgekit/changes` as the default change root.
 - Treat business `docs/` as read-mostly evidence. Read and cite it, but do not write ForgeKit governance templates there unless the user confirms target files and reasons.
@@ -78,6 +79,7 @@ When a task names a ForgeKit skill, read the project-local `.agents/skills/<skil
 - Treat `.forgekit/current-docs-sync-report.md` as generated report-only output. It is not current-state docs, an active change, or proof that current docs are semantically correct.
 - Treat `.forgekit/smart-archive-report.md` as generated report-only advice. It is not permission to archive, does not replace user confirmation, and is not current-state truth.
 - Treat `.forgekit/doc-health-report.md` as generated report-only advice. It is not a long-term managed doc and must not trigger automatic doc slimming, archive, rewrite, or merge without explicit user authorization.
+- Treat `.forgekit/source-trace-report.md` as generated report-only advice. It is not a long-term managed doc and must not trigger automatic Source ID creation, status changes, verification edits, or changelog rewrites without explicit user authorization.
 - `.forgekit/docs/task-intake.md` 是工作来源台账。领导任务、微信任务、计划表格子、会议任务、文档任务、个人规划、用户反馈、bug、技术债、测试失败和调研发现都先归并来源，再生成任务；补充、确认、改期或责任修正默认写入已有 Source 的 `Update Notes`，不要默认创建新任务。
 - `.forgekit/docs/task-board.md` 只接收可执行任务：必须有动作、owner 或待确认 owner、下一步、`Source ID`、完成标准或验证方式。过时任务必须标为 `Superseded` / `Dropped`，不要继续出现在当前重点。
 - `.forgekit/docs/work-log.md` 只记录推进过程、验证、提交/推送、阻塞和确认，并引用 `Task ID` / `Source ID`。工作日志里的后续跟进不自动成为任务；先回到 task-intake 做 Task Decision。

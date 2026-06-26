@@ -33,6 +33,7 @@
 | 查看版本变化 / 生成 changelog | `changelog.md`, `work-log.md`, `.forgekit/changes/*` | `changelog.md` only for user/version-visible changes | `task-intake.md`, `task-board.md` | changelog summary |
 | 风险 / 阻塞 / 待确认 | `risk-register.md`, `task-board.md`, `work-log.md` | `risk-register.md` for open risks | `changelog.md` unless user-visible | risk summary |
 | 检查文档健康 / 文档太乱了 / 哪些文档该瘦身 | `document-responsibility.md`, `workflow-router.md`, `task-intake.md`, `task-board.md`, `work-log.md`, `requirements.md`, `testing.md`, `changelog.md` | `.forgekit/doc-health-report.md` only | managed docs unless user explicitly authorizes manual fixes | doc health summary |
+| 检查任务来源追溯 / 任务从哪来 / 完成状态有没有证据 | `task-intake.md`, `requirements.md`, `task-board.md`, `work-log.md`, `testing.md`, `changelog.md`, `.forgekit/changes/*` | `.forgekit/source-trace-report.md` only | Source ID / Task ID / requirements / task-board unless user explicitly authorizes manual fixes | source trace summary |
 | loop / bounded-auto 授权 | `bounded-auto-loop-policy.md`, `loop-blueprint.md`, `loop-operations.md`, `native-agent-adapter.md` | loop state or `work-log.md` only if executing | source/task/changelog docs unless their facts changed | authorization recap + stop conditions |
 | maker/checker review | `maker-checker-protocol.md`, `.forgekit/changes/<id>/review.md` | `.forgekit/changes/<id>/review.md` | `task-board.md` unless task status changes | `pass` / `needs-fix` / `manual-review` |
 | worktree 使用 | `worktree-playbook.md` | `work-log.md` only if user asks to execute or record | `task-board.md` unless task status changes | worktree plan / commands |
@@ -80,6 +81,7 @@
 - 同一事实可能落入多个文档时，优先写入职责最窄的文档，其他文档只引用。
 - 涉及 loop、bounded-auto、worktree、发布、风险、安全或业务 docs 写入时，先复述边界和停止条件。
 - 涉及文档健康、文档太长或职责混乱时，先生成或建议 `.forgekit/doc-health-report.md`；不要自动按报告修改 managed docs。
+- 涉及任务来源、完成证据或追溯链断裂时，先生成或建议 `.forgekit/source-trace-report.md`；不要自动补 Source ID 或改写任务状态。
 - 用户要求 native-only、bounded-auto、worktree 或发布收口时，必须按对应触发式文档确认前置条件。
 
 ## Examples

@@ -5,7 +5,7 @@ import sys
 from pathlib import Path
 
 
-VERSION = "0.33.0"
+VERSION = "0.34.0"
 
 TARGET_FILES = {
     "claude-code": [
