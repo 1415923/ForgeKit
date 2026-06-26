@@ -81,8 +81,10 @@ When a task names a ForgeKit skill, read the project-local `.agents/skills/<skil
 - Treat `.forgekit/docs/worktree-playbook.md` as a manual isolation guide, not automatic worktree scheduling or agent orchestration.
 - Treat `.forgekit/docs/native-agent-adapter.md` as an opt-in configuration adapter guide, not automatic agent execution, scheduling, merge, commit, push, or PR authorization.
 - Generated native agent config is not proof of runtime registration. Do not call fallback or simulated execution native success.
-- Native status has four layers: generated, installed, registered, invoked. Only invoked can be recorded as native available.
+- Native lifecycle has four layers: generated, installed, registered, invoked. Keep `native_agent_status` limited to available/unavailable/unverified; record invoked in `native_agent_lifecycle` or `agent_invocation_observed`.
+- Parent runtime records native invocation evidence. Child agents must not decide `native_agent_status` themselves.
 - If Codex only exposes default, explorer, or worker, record `native_agent_status: unavailable`; do not call that native success.
+- If spawn fails because of thread limit, `max_threads`, or open completed agents, record capacity blocked rather than native unavailable.
 - Native-only verification is read-only by default. Do not write task-intake, work-log, or loop state unless the user explicitly asks to record it.
 - Fallback requires explicit user permission or a workflow rule that allows fallback.
 - A loop must have a state file, validation command, stop condition, and human escalation path before it runs.

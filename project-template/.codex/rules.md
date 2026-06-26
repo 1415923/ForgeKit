@@ -52,8 +52,10 @@
 - `.forgekit/docs/worktree-playbook.md` 是手动隔离指南，不是自动 worktree 调度或 agent 编排。
 - `.forgekit/docs/native-agent-adapter.md` 是 opt-in 原生 agent 配置适配说明，不授权自动执行、调度、merge、commit、push 或 PR。
 - 生成 native agent 配置不等于 runtime 已注册；不得把 fallback 或 simulated 执行称为 native agent 成功。
-- native 状态分为 generated、installed、registered、invoked；只有 invoked 才能记录为 native available。
+- native lifecycle 分为 generated、installed、registered、invoked；`native_agent_status` 只允许 available/unavailable/unverified，invoked 写入 `native_agent_lifecycle` 或 `agent_invocation_observed`。
+- 原生调用证据由父运行时记录，子 agent 不自行判断 `native_agent_status`。
 - 如果 Codex 只暴露 default、explorer 或 worker，必须记录 `native_agent_status: unavailable`，不得称为 native 成功。
+- 如果 spawn 因 thread limit、`max_threads` 或已完成 agent 未关闭而失败，记录为容量阻塞，不得写成 native unavailable。
 - native-only verification 默认只读；除非用户明确要求“记录到文档”，不得自动写 task-intake、work-log 或 loop state。
 - fallback 必须有用户明确允许，或由 workflow 规则明确允许。
 - bounded-auto 或 loop 执行必须写明 `agent_mode`；native custom agent 未观察到前，`native_agent_status` 必须是 `unverified`。

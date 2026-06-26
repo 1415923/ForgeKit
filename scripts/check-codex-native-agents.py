@@ -133,17 +133,17 @@ def runtime_status(observed_agents, invoked_agents):
     if invoked & expected:
         return "available", "invoked", "native agent invocation was observed"
     if observed and not (observed & expected):
-        return "unavailable", "unavailable", "only non-ForgeKit agents were observed"
+        return "unavailable", "installed", "only non-ForgeKit agents were observed"
     if observed & expected:
         return "unverified", "registered", "ForgeKit agents were listed but not invoked"
-    return "unverified", "unverified", "no runtime agent list was provided"
+    return "unverified", "installed", "no runtime agent list was provided"
 
 
 def write_report(project_root, mode, checks, config_exists, observed, invoked):
     report_path = ensure_inside(project_root, project_root / ".forgekit" / "codex-native-agent-report.md")
     report_path.parent.mkdir(parents=True, exist_ok=True)
     schema_status = "pass" if config_exists and all(item["schema_status"] == "pass" for item in checks) else "fail"
-    native_status, runtime_registration, reason = runtime_status(observed, invoked)
+    native_status, native_lifecycle, reason = runtime_status(observed, invoked)
     lines = [
         "# Codex Native Agent Report",
         "",
@@ -154,8 +154,10 @@ def write_report(project_root, mode, checks, config_exists, observed, invoked):
         f"ProjectRoot: {project_root}",
         f"SchemaStatus: {schema_status}",
         f"NativeAgentStatus: {native_status}",
-        f"RuntimeRegistration: {runtime_registration}",
+        f"NativeAgentLifecycle: {native_lifecycle}",
+        f"RuntimeRegistration: {native_lifecycle}",
         "RuntimeRegistrationDefault: unverified",
+        "NativeAgentStatusAllowed: available | unavailable | unverified",
         "Schema pass does not mean runtime registered.",
         "Only observed invocation of forgekit-planner, forgekit-reviewer, or forgekit-verifier means native is usable.",
         "",
@@ -191,10 +193,11 @@ def write_report(project_root, mode, checks, config_exists, observed, invoked):
             "- This doctor does not spawn agents.",
             "- This doctor does not modify task-intake.md, work-log.md, loop-state, current docs, business docs, or template-lock.",
             "- If Codex only exposes default, explorer, or worker, record native_agent_status=unavailable and do not call fallback native success.",
+            "- If spawn fails because of thread limit, max_threads, or open completed agents, record capacity blocked instead of native unavailable.",
         ]
     )
     report_path.write_text("\n".join(lines) + "\n", encoding="utf-8")
-    return report_path, schema_status, native_status, runtime_registration
+    return report_path, schema_status, native_status, native_lifecycle
 
 
 def parse_args(argv):
@@ -224,14 +227,14 @@ def main(argv=None):
     invoked = split_names(args.invoked_agent)
     checks = [check_agent(project_root, name, rel_path) for name, rel_path in EXPECTED_AGENTS.items()]
     config_exists = (project_root / ".codex" / "config.toml").is_file()
-    report_path, schema_status, native_status, runtime_registration = write_report(
+    report_path, schema_status, native_status, native_lifecycle = write_report(
         project_root, mode, checks, config_exists, observed, invoked
     )
     print("# ForgeKit Codex Native Agent Doctor")
     print(f"Report: {report_path}")
     print(f"SchemaStatus: {schema_status}")
     print(f"NativeAgentStatus: {native_status}")
-    print(f"RuntimeRegistration: {runtime_registration}")
+    print(f"NativeAgentLifecycle: {native_lifecycle}")
     if schema_status != "pass":
         raise SystemExit(1)
 

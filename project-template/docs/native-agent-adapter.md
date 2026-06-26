@@ -6,7 +6,7 @@
 
 生成配置不等于运行时已经注册。Claude Code / Codex 是否真正加载 custom agents，取决于路径、格式、工具版本、session 启动方式，以及是否重启或按官方方式重新加载。没有观察到 `forgekit-planner`、`forgekit-reviewer` 或 `forgekit-verifier` 被实际调用前，不能把结果称为 native agent 成功。
 
-RuntimeRegistration: generated | installed | registered | invoked
+native_agent_lifecycle: generated | installed | registered | invoked
 agent_mode: native | fallback | simulated
 FallbackPolicy: fallback is downgrade mode, not native success
 
@@ -39,12 +39,12 @@ v0.30.x 不生成 implementer agent。实现仍默认由主会话完成，避免
 
 Native Agent Adapter 必须区分四层状态：
 
-| 状态 | 含义 | 能否称为 native 可用 |
+| 状态 | 含义 | 对应字段 |
 | --- | --- | --- |
-| `generated` | ForgeKit 已生成配置文件 | 否 |
-| `installed` | 配置文件位于目标项目预期路径且 schema 通过 | 否 |
-| `registered` | 工具 runtime 的 agent 列表能看到 `forgekit-*` | 还不能，只能说 runtime 已识别 |
-| `invoked` | 本次执行中明确观察到 `forgekit-*` 被调用 | 是 |
+| `generated` | ForgeKit 已生成配置文件 | `native_agent_lifecycle: generated` |
+| `installed` | 配置文件位于目标项目预期路径且 schema 通过 | `native_agent_lifecycle: installed` |
+| `registered` | 工具 runtime 的 agent 列表能看到 `forgekit-*` | `native_agent_lifecycle: registered` |
+| `invoked` | 父运行时明确观察到 `forgekit-*` 被调用 | `native_agent_lifecycle: invoked` 或 `agent_invocation_observed.<role>: native` |
 
 只有 `invoked` 才能写成 native 真正可用。`generated`、`installed` 和 `registered` 都不能替代真实调用证据。
 
@@ -58,7 +58,13 @@ Native Agent Adapter 有三种运行状态：
 | `fallback` | native agent 不可用，改用 general-purpose / worker 加 prompt injection | 写明 fallback_reason，不能称为 native 成功 |
 | `simulated` | 仅由主会话按 planner / reviewer / verifier 角色模拟执行 | 写明没有调用 native agent |
 
-`native_agent_status` 默认为 `unverified`。只有明确观察到 `forgekit-*` 被调用，才可记录为 `available`；确认 runtime 只暴露 default / explorer / worker 时记录为 `unavailable`。
+`native_agent_status` 合法值只允许 `available | unavailable | unverified`。它不记录 `invoked`；`invoked` 只能写入 `native_agent_lifecycle` 或 `agent_invocation_observed`。
+
+原生调用证据由父运行时记录。子 agent 可以报告“我看到的角色、命令、输出和限制”，但不能自行判断或改写 `native_agent_status`。
+
+`native_agent_status` 默认为 `unverified`。只有父运行时明确观察到 `forgekit-*` 被调用，才可记录为 `available`；确认 runtime 只暴露 default / explorer / worker 时记录为 `unavailable`。
+
+如果 spawn 因 thread limit、`max_threads`、agent 数量上限或未关闭已完成 agent 而失败，这不是 native unavailable，应记录为容量阻塞。关闭已完成 agent 或降低并发后可以重试。
 
 ## 与 ForgeKit Loop 的关系
 
@@ -105,6 +111,7 @@ Codex：
 - 当前 Codex 版本支持 custom agents。
 - 可先运行 `python scripts/check-codex-native-agents.py --repo-root .` 做静态检查；报告中的 `SchemaStatus: pass` 不等于 runtime 已注册。
 - 如果 Codex 只显示 default / explorer / worker，应记录 `native_agent_status: unavailable`。
+- 如果 Codex 因 thread limit / `max_threads` 拒绝 spawn，应记录容量阻塞，不要写成 native unavailable。
 - 显式 spawn 时能观察到 `forgekit-*` 被调用，而不是 default / worker / explorer fallback。
 
 ## Fallback 规则

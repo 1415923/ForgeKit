@@ -354,8 +354,11 @@ def assert_native_agent_adapter(repo, root, adapter_path):
     adapter = (root / adapter_path).read_text(encoding="utf-8")
     skill = (repo / "native-adapters/claude-code/skills/forgekit-loop/SKILL.md").read_text(encoding="utf-8")
     adapter_required = [
-        "RuntimeRegistration: generated | installed | registered | invoked",
+        "native_agent_lifecycle: generated | installed | registered | invoked",
+        "native_agent_status` 合法值只允许 `available | unavailable | unverified`",
         "只有 `invoked` 才能写成 native 真正可用",
+        "子 agent 可以报告",
+        "容量阻塞",
         "native | fallback | simulated",
         "native_agent_status",
         "Native Agent Verification Checklist",
@@ -369,6 +372,8 @@ def assert_native_agent_adapter(repo, root, adapter_path):
     skill_required = [
         "Generated config is not proof of runtime registration.",
         "Only invoked can be called native available.",
+        "Keep native_agent_status limited to available, unavailable, or unverified.",
+        "capacity blocked rather than native unavailable",
         "agent_mode=fallback",
         "fallback_reason",
         "native-only",
@@ -431,7 +436,9 @@ def assert_codex_native_agents(target):
         "Status: report-only",
         "SchemaStatus: pass",
         "NativeAgentStatus: unavailable",
-        "RuntimeRegistration: unavailable",
+        "NativeAgentLifecycle: installed",
+        "RuntimeRegistration: installed",
+        "NativeAgentStatusAllowed: available | unavailable | unverified",
         "Schema pass does not mean runtime registered.",
         "default, explorer, worker",
     ]

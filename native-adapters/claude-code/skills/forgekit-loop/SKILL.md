@@ -11,9 +11,15 @@ This skill is an adapter. It does not start a runner, daemon, scheduler, dispatc
 
 Prefer native custom agents when the runtime shows that forgekit-planner, forgekit-reviewer, or forgekit-verifier are invoked. Generated config is not proof of runtime registration.
 
-Native adapter status has four layers: generated, installed, registered, invoked. Only invoked can be called native available.
+Native adapter lifecycle has four layers: generated, installed, registered, invoked. Only invoked can be called native available.
+
+Keep native_agent_status limited to available, unavailable, or unverified. Do not write invoked into native_agent_status; record invoked in native_agent_lifecycle or agent_invocation_observed.
+
+Native invocation evidence is recorded by the parent runtime. A child agent must not decide native_agent_status by itself.
 
 If native custom agents are unavailable, you may fall back to a general-purpose or worker subagent with prompt injection only when the user did not request native-only mode and the workflow allows fallback. Record agent_mode=fallback and fallback_reason in the loop state or work log only when the user asked to record the run. If the user requested native-only mode, stop when native agents are unavailable.
+
+If spawn fails because of a thread limit, max_threads, or completed agents that remain open, treat it as capacity blocked rather than native unavailable. Close completed agents or reduce concurrency before retrying.
 
 Never describe fallback or simulated execution as native agent success. When native status has not been verified, record native_agent_status=unverified.
 

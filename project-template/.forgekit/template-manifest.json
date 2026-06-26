@@ -9,7 +9,7 @@
       "role": "agent_entry",
       "update_policy": "ask",
       "render_mode": "copy",
-      "checksum": "sha256:0048939ff83a60ad05609ea8fe3122d121312851b1a91de6603630530b291ff9"
+      "checksum": "sha256:7353165c36833b4e9f5e7a31c70bb1892de7b90b16ef5b8432a0142a5c6fab1d"
     },
     {
       "source_path": "CLAUDE.md",
@@ -17,7 +17,7 @@
       "role": "agent_entry",
       "update_policy": "ask",
       "render_mode": "copy",
-      "checksum": "sha256:0cc2e9ac0cda637d2c966c070860dae83a67ea61a9a75026cd191869922c1704"
+      "checksum": "sha256:e9fd2416d4a3a57175975d5e7944f0ebd97718298fd848b29debfef295f00703"
     },
     {
       "source_path": "README.md",
@@ -81,7 +81,7 @@
       "role": "codex_rule",
       "update_policy": "ask",
       "render_mode": "copy",
-      "checksum": "sha256:1c7434c6f9b7fbfc4402745c0d0567fc2a2df5b5ad694a4fbba44ab88cfda8a6"
+      "checksum": "sha256:9822babe11bb077999bcf6e935e1ca01cc3c9710d7f27d34b81ce6bfcff2b0b9"
     },
     {
       "source_path": ".codex/version-gates.md",
@@ -249,7 +249,7 @@
       "role": "managed_doc",
       "update_policy": "merge",
       "render_mode": "copy",
-      "checksum": "sha256:afa92f7315e698242c1397ba9c69c84f6d7a5ce4a4212092dab81a5af741cb23"
+      "checksum": "sha256:3644a363e1f7d98e914a7f31df0e9d7710f7c617364587bd17d5b5db47e09f59"
     },
     {
       "source_path": "docs/loop-operations.md",
@@ -257,7 +257,7 @@
       "role": "managed_doc",
       "update_policy": "merge",
       "render_mode": "copy",
-      "checksum": "sha256:80892e585ff619e9cbdb7f6a2eb5ca92da2645c999281f9b1861cdc3ef7492a9"
+      "checksum": "sha256:52413a8b8d6901ea15a5dc75ffd993bed15bc3f55d16ed3ed6ab399dcf2e5bf1"
     },
     {
       "source_path": "docs/maker-checker-protocol.md",
@@ -273,7 +273,7 @@
       "role": "managed_doc",
       "update_policy": "merge",
       "render_mode": "copy",
-      "checksum": "sha256:ef720f6d863c0692369457088b24996c3f161e554ce4e93d25a617609c06a276"
+      "checksum": "sha256:87e0e9dd1caaa6adef2f2410a93d17e336f442e13e940cbb622f07294532d0fc"
     },
     {
       "source_path": "docs/worktree-playbook.md",
@@ -377,7 +377,7 @@
       "role": "script",
       "update_policy": "replace",
       "render_mode": "copy",
-      "checksum": "sha256:cc4d00242c4fb04392caf57e31302152403fb005c704d8d0a37161d5538194c9"
+      "checksum": "sha256:fead7c8e322c57b89551d99933ada7135390872615a43d6c151d30679d463c36"
     },
     {
       "source_path": "scripts/run-harness-check.ps1",

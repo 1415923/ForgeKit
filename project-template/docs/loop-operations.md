@@ -14,7 +14,7 @@ Loop 默认关闭。本文只是操作协议，不是自动 loop runner、daemon
 - 停止条件
 - 人工升级路径
 - `.forgekit/docs/work-log.md` 或 loop 状态文件中的回写位置
-- agent_mode、native_agent_status、agent_runtime 和 fallback_reason 记录位置
+- agent_mode、native_agent_status、native_agent_lifecycle、agent_runtime 和 fallback_reason 记录位置
 
 `loop-readiness.md` 和 `loop-blueprint.md` 仍然只是审查文档，不是自动执行授权。
 
@@ -50,6 +50,7 @@ Loop 默认关闭。本文只是操作协议，不是自动 loop runner、daemon
 - 本轮是否会修改文件
 - agent_mode: native | fallback | simulated
 - native_agent_status: available | unavailable | unverified
+- native_agent_lifecycle: generated | installed | registered | invoked
 - fallback_reason
 
 规则：
@@ -74,7 +75,8 @@ Loop 默认关闭。本文只是操作协议，不是自动 loop runner、daemon
 - 只继续下一轮；如果还要再继续，必须等用户之后再次明确确认
 - 不推断用户允许重复或无人值守执行
 - 每轮结果都写入 `.forgekit/docs/work-log.md` 或 loop 状态文件
-- 每轮都记录 `agent_invocation_observed`，不得把 fallback 或 simulated 结果写成 native 成功
+- 每轮都由父运行时记录 `agent_invocation_observed`，不得把 fallback 或 simulated 结果写成 native 成功；子 agent 不自行判断 `native_agent_status`
+- spawn 因 thread limit、`max_threads` 或已完成 agent 未关闭而失败时，记录为容量阻塞，不等于 native unavailable
 - 状态不清、范围不清、预算耗尽、验证失败、触碰禁止路径或遇到需要人判断的节点时停止并升级
 
 `continue` 的含义是从状态恢复一次，不是一直循环。
@@ -91,7 +93,7 @@ Loop 默认关闭。本文只是操作协议，不是自动 loop runner、daemon
 - 验证结果
 - 已改文件或有意未改的文件
 - 风险和未验证项
-- agent_mode、native_agent_status、agent_runtime、agent_invocation_observed 和 fallback_reason
+- agent_mode、native_agent_status、native_agent_lifecycle、agent_runtime、agent_invocation_observed 和 fallback_reason
 - 建议下一步
 
 停止或交接期间不要启动另一轮 loop。
@@ -114,4 +116,4 @@ Loop 默认关闭。本文只是操作协议，不是自动 loop runner、daemon
 - `.forgekit/docs/work-log.md`
 - 明确指定的 loop 状态文件
 
-dry-run 只输出到聊天是可以的，除非用户要求写记录。one-step、continue、stop 和 handoff 不应把必要状态只留在聊天里。只要涉及 planner、reviewer 或 verifier，就必须写明 `agent_mode`；未观察到 native custom agent 时，`native_agent_status` 必须是 `unverified` 或 `unavailable`。
+dry-run 只输出到聊天是可以的，除非用户要求写记录。one-step、continue、stop 和 handoff 不应把必要状态只留在聊天里。只要涉及 planner、reviewer 或 verifier，就必须写明 `agent_mode`、`native_agent_status` 和 `native_agent_lifecycle`；未观察到 native custom agent 时，`native_agent_status` 必须是 `unverified` 或 `unavailable`。
