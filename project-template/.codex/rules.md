@@ -35,6 +35,9 @@
 - `.forgekit/docs/**` 是 current state docs，只保留当前事实和稳定结论，不堆长期过程流水。
 - 更新 managed docs 前先判断内容类型：任务来源、需求事实、任务状态、验证方法、工作顺序、版本变化、风险、设计决策或历史证据。
 - 更新 managed docs 前先按 `.forgekit/docs/workflow-router.md` 判断是否有写入触发；没有写入触发时不要改文档。
+- 区分 `Implementation Scope` 与 `Governance Writeback Scope`；“只改这些业务文件”默认不关闭 ForgeKit managed docs 的最小写回，只有用户明确禁写文档时才关闭。
+- 默认 `ManagedDocsWriteback: minimal`：实际进展写 `work-log.md`，真实状态变化写 `task-board.md`，用户/版本可见变化写 `changelog.md`，当前 change 按流程写回。
+- 最小写回不得修改 `task-intake.md` 原文、`requirements.md` 事实源或 business docs；`review-only` 不写，report-only 报告不得触发自动修复。
 - 同一事实只写到负责的文档；其他文档只做引用，不复制长段内容。
 - 触发式文档只有事件发生才更新；不要把缺陷复盘、事故复盘、依赖审查、威胁建模、发布流水线、traceability、loop、maker-checker 或 worktree 文档当作日常必填项。
 - 给用户看的文档要短、自然、可确认；先写结论，再写必要证据，避免模板腔和长篇 AI 过程叙述。

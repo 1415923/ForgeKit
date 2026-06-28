@@ -54,6 +54,9 @@ When a task names a ForgeKit skill, read the project-local `.agents/skills/<skil
 - 默认不要读取全部 `.forgekit/docs/**`。先读 `.forgekit/docs/document-responsibility.md`、`.forgekit/docs/codebase-map.md` 和必要的 `.forgekit/docs/workflow-router.md`，再按默认读取策略和任务触发条件读取相关文档。
 - 用户请求不明确时，先做 intent routing：判断 Read Targets、Write Targets、Do Not Write 和 Required Output。
 - 没有写入触发条件时，不要修改 managed docs；不要把同一事实写进多个文档。
+- Separate Implementation Scope from Governance Writeback Scope. A business-file-only implementation scope does not disable ForgeKit managed docs writeback unless the user explicitly forbids docs or ForgeKit writes.
+- Default to `ManagedDocsWriteback: minimal`: update work-log for actual progress, task-board only for real status changes, changelog only for user/version-visible changes, and current change artifacts only when required.
+- Do not use minimal writeback to edit task-intake source text, requirements facts, or business docs without explicit authorization. Review-only writes nothing, and report-only outputs never trigger automatic fixes.
 - 文档混乱、过长、重复或职责错位时，先建议或运行 `scripts/doc-health-report.py`。它只生成 `.forgekit/doc-health-report.md`，不得自动按报告修改 managed docs。
 - 任务来源、完成证据或追溯链路不清时，先建议或运行 `scripts/source-trace-report.py`。它只生成 `.forgekit/source-trace-report.md`，不得自动补 Source ID、改任务状态或补验证记录。
 - 阶段收口、领导汇报、reviewer 审查或测试交接时，可以建议或运行 `scripts/handoff-package.py`。它只生成 `.forgekit/handoff-package.md` 或 `.forgekit/changes/<id>/handoff.md`，不得编造 commit、验证、风险或文件列表，缺证据必须写 `TODO_REVIEW`。

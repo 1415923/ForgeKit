@@ -1,7 +1,7 @@
 {
   "$schema": "https://json.schemastore.org/claude-code-marketplace.json",
   "name": "forgekit-local",
-  "version": "0.35.1",
+  "version": "0.35.2",
   "description": "Local ForgeKit marketplace with intent routing, report-only doc health, source trace, and handoff package reports, bounded loop policy templates, and opt-in native agent configuration templates.",
   "owner": {
     "name": "ForgeKit Maintainers"
@@ -10,7 +10,7 @@
     {
       "name": "forgekit",
       "description": "Project-level workflow harness for Claude Code, Codex, and adjacent AI coding tools, with intent routing, report-only doc health, source trace, and handoff package reports, bounded loop policy templates, and opt-in reviewable native agent configuration templates.",
-      "version": "0.35.1",
+      "version": "0.35.2",
       "source": "./",
       "category": "productivity"
     }

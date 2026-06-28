@@ -15,8 +15,9 @@
 1. 先识别用户意图。
 2. 按 Intent Routing Table 选择 Read Targets。
 3. 写入前确认 Write Targets、Do Not Write 和触发条件。
-4. 没有明确写入触发时，只输出 Required Output，不改 managed docs。
+4. 没有写入触发且项目事实、任务状态、验证结果或用户可见变化都未改变时，只输出 Required Output，不改 managed docs。
 5. 同一事实只写到一个负责文档，其他文档用 `Source ID`、`Task ID` 或链接引用。
+6. 分开判断 `Implementation Scope` 和 `Governance Writeback Scope`；用户只限制业务文件时，默认仍保留 `ManagedDocsWriteback: minimal`。
 
 ## Intent Routing Table
 
@@ -37,7 +38,8 @@
 | loop / bounded-auto 授权 | `bounded-auto-loop-policy.md`, `loop-blueprint.md`, `loop-operations.md`, `native-agent-adapter.md` | loop state or `work-log.md` only if executing | source/task/changelog docs unless their facts changed | authorization recap + stop conditions |
 | maker/checker review | `maker-checker-protocol.md`, `.forgekit/changes/<id>/review.md` | `.forgekit/changes/<id>/review.md` | `task-board.md` unless task status changes | `pass` / `needs-fix` / `manual-review` |
 | worktree 使用 | `worktree-playbook.md` | `work-log.md` only if user asks to execute or record | `task-board.md` unless task status changes | worktree plan / commands |
-| 生成交付包 / 阶段收口 / 给领导汇报 / reviewer 审查 / handoff package | `task-intake.md`, `requirements.md`, `task-board.md`, `work-log.md`, `testing.md`, `changelog.md`, `risk-register.md`, `.forgekit/doc-health-report.md`, `.forgekit/source-trace-report.md`, `.forgekit/changes/<id>/*` | `.forgekit/handoff-package.md` or `.forgekit/changes/<id>/handoff.md` only when user asks to generate handoff | current docs, business docs, task status, changelog, Git, PR | review-ready handoff with TODO_REVIEW for missing evidence |
+| 实现完成 / 阶段收口 / 版本推进 | `task-board.md`, `work-log.md`, `changelog.md`, current change files | `work-log.md`; conditional `task-board.md`, `changelog.md`, `.forgekit/changes/<id>/*` | `task-intake.md`, `requirements.md`, business docs unless explicitly authorized | completion summary + minimal managed docs writeback |
+| 生成交付包 / 阶段收口交付包 / 给领导汇报 / reviewer 审查 / handoff package | `task-intake.md`, `requirements.md`, `task-board.md`, `work-log.md`, `testing.md`, `changelog.md`, `risk-register.md`, `.forgekit/doc-health-report.md`, `.forgekit/source-trace-report.md`, `.forgekit/changes/<id>/*` | `.forgekit/handoff-package.md` or `.forgekit/changes/<id>/handoff.md` only when user asks to generate handoff | current docs, business docs, task status, changelog, Git, PR | review-ready handoff with TODO_REVIEW for missing evidence |
 
 ## Read Targets
 
@@ -56,12 +58,16 @@
 - `changelog.md`：只记录用户或版本可见变化。
 - `risk-register.md`：只记录仍开放、仍影响交付的风险。
 
+默认 `ManagedDocsWriteback: minimal`：完成实现、阶段收口或版本推进后，检查 `work-log.md`、`task-board.md`、`changelog.md` 和当前 change 是否发生各自负责的事实变化，只更新命中的文档。
+
 ## Do Not Write
 
 - 不要把任务原文复制到 `requirements.md`、`task-board.md` 或 `changelog.md`。
 - 不要把验证运行日志写进 `testing.md`，除非验证方法改变。
 - 不要把工作流水写进 `changelog.md`。
 - 不要为了“同步 ForgeKit 文档”而更新所有 managed docs。
+- 不要把“只改这些业务文件”解释成自动禁止最小 managed docs 写回；只有用户明确禁写文档时才设为 `ManagedDocsWriteback: off`。
+- 不要在最小写回中修改 `task-intake.md` 原文、`requirements.md` 事实源或 business docs。
 - 不要把敏感信息、账号、密码、token、证书、真实环境地址原样写进 managed docs。
 
 ## Required Output
@@ -78,6 +84,7 @@
 
 - 用户意图不明确时，先给出 1-3 个可能路由并追问。
 - 写入目标不明确时，不改 managed docs。
+- `review-only` 不写任何文件；report-only 报告不触发自动修复或 managed docs 写回。
 - 同一事实可能落入多个文档时，优先写入职责最窄的文档，其他文档只引用。
 - 涉及 loop、bounded-auto、worktree、发布、风险、安全或业务 docs 写入时，先复述边界和停止条件。
 - 涉及文档健康、文档太长或职责混乱时，先生成或建议 `.forgekit/doc-health-report.md`；不要自动按报告修改 managed docs。

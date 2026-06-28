@@ -170,6 +170,8 @@ Work Source Intake requires assigned work, self-planned work, user feedback, bug
 
 Managed Docs Responsibility Matrix v2 classifies `.forgekit/docs/**` as core, current, working, triggered, reference, generated, or archive. AI should start with `document-responsibility.md` and `codebase-map.md`, then read only docs triggered by the task; do not read all docs by default or duplicate the same fact across documents.
 
+Managed Docs Writeback Policy defaults to `minimal` and separates business Implementation Scope from ForgeKit Governance Writeback Scope. A request to edit only named business files still permits factual updates to `work-log.md`, status changes in `task-board.md`, user/version-visible changes in `changelog.md`, and the current change artifacts. Writeback is disabled only when the user explicitly forbids documentation writes. Review-only and report-only tools remain non-writing and non-fixing.
+
 The AI Engineering Loop scales artifacts by risk:
 
 | Risk | Suggested artifacts |
@@ -329,6 +331,7 @@ ForgeKit can coexist with ECC: ECC enhances the AI tool; ForgeKit constrains the
 
 | Version | User-facing change |
 | --- | --- |
+| `0.35.2` | Managed Docs Writeback Policy: separates implementation scope from governance writeback and restores minimal work-log / task-board / changelog / change updates while preserving review-only and report-only boundaries. |
 | `0.35.1` | Codex Custom Agent Schema Hotfix: fixes and validates Codex custom agent TOML so `name`, `description`, and `developer_instructions` are strings, avoiding table/map schema errors. |
 | `0.35.0` | Review-Ready Handoff Package: adds a report-only handoff package for source, requirement, task, change, verification, risk, and TODO_REVIEW summaries without automatic fixes, commits, or PRs. |
 | `0.34.0` | Source Trace Report v2: adds a report-only source trace report for Source ID -> requirement -> task -> change -> verification -> work-log/changelog breaks without automatic fixes. |

@@ -149,7 +149,7 @@ function Write-BoundaryConfig {
 
     $lines = @(
         'forgekit:',
-        '  version: "0.35.1"',
+        '  version: "0.35.2"',
         "  mode: `"$SelectedMode`"",
         '',
         'roots:',

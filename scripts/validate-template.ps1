@@ -467,6 +467,14 @@ function Test-AIEngineeringLoop {
     Test-RequiredPattern "project-template\docs\bounded-auto-loop-policy.md" "Stop Conditions" "Bounded auto policy stop conditions"
     Test-RequiredPattern "project-template\docs\bounded-auto-loop-policy.md" "Checkpoint Writeback" "Bounded auto policy checkpoint"
     Test-RequiredPattern "project-template\docs\bounded-auto-loop-policy.md" "Final Handoff" "Bounded auto policy handoff"
+    Test-RequiredPattern "project-template\docs\bounded-auto-loop-policy.md" "ManagedDocsWriteback: off `| minimal `| full-review" "Managed docs writeback modes"
+    Test-RequiredPattern "project-template\docs\bounded-auto-loop-policy.md" "Implementation Scope" "Implementation scope boundary"
+    Test-RequiredPattern "project-template\docs\bounded-auto-loop-policy.md" "Governance Writeback Scope" "Governance writeback scope boundary"
+    Test-RequiredPattern "project-template\docs\bounded-auto-loop-policy.md" "只改这些业务文件" "Business file scope does not disable writeback"
+    Test-RequiredPattern "project-template\docs\bounded-auto-loop-policy.md" "``review-only`` 绝不写文件" "Review-only no writeback"
+    Test-RequiredPattern "project-template\docs\bounded-auto-loop-policy.md" "report-only 脚本仍然只生成报告" "Report-only no automatic fixes"
+    Test-RequiredPattern "project-template\docs\workflow-router.md" "实现完成 / 阶段收口 / 版本推进" "Workflow router completion writeback"
+    Test-RequiredPattern "project-template\.forgekit\docs\document-responsibility.md" "ManagedDocsWriteback: minimal" "Responsibility matrix minimal writeback"
     Test-RequiredPattern "project-template\docs\bounded-auto-loop-policy.md" "不是 runner、daemon、cron、scheduler、多 agent dispatcher、自动 PR 或 worktree orchestration" "Bounded auto no runner boundary"
     Test-RequiredPattern "project-template\docs\native-agent-adapter.md" 'native_agent_lifecycle: generated | installed | registered | invoked' "Native adapter runtime lifecycle boundary"
     Test-RequiredPattern "project-template\docs\native-agent-adapter.md" 'native_agent_status` 合法值只允许 `available | unavailable | unverified`' "Native adapter status value boundary"
@@ -534,6 +542,9 @@ function Test-AIEngineeringLoop {
     Test-RequiredPattern "project-template\AGENTS.md" "Loop output must write back" "AGENTS loop writeback rule"
     Test-RequiredPattern "project-template\CLAUDE.md" "Loop output must write back" "CLAUDE loop writeback rule"
     Test-RequiredPattern "project-template\.codex\rules.md" "work-log.md" "Rules loop writeback rule"
+    Test-RequiredPattern "project-template\AGENTS.md" "Implementation Scope from Governance Writeback Scope" "AGENTS writeback scope separation"
+    Test-RequiredPattern "project-template\CLAUDE.md" "Implementation Scope from Governance Writeback Scope" "CLAUDE writeback scope separation"
+    Test-RequiredPattern "project-template\.codex\rules.md" "ManagedDocsWriteback: minimal" "Rules minimal writeback"
     Test-RequiredPattern "project-template\AGENTS.md" "Generated native agent config is not proof of runtime registration" "AGENTS native adapter runtime boundary"
     Test-RequiredPattern "project-template\CLAUDE.md" "Generated native agent config is not proof of runtime registration" "CLAUDE native adapter runtime boundary"
     Test-RequiredPattern "project-template\.codex\rules.md" "生成 native agent 配置不等于 runtime 已注册" "Rules native adapter runtime boundary"
@@ -611,7 +622,7 @@ function Test-TemplateManifest {
     $manifestPath = Join-Path $repoRoot "project-template\.forgekit\template-manifest.json"
     if (Test-Path -LiteralPath $manifestPath) {
         $manifest = Get-Content -LiteralPath $manifestPath -Raw | ConvertFrom-Json
-        if ($manifest.template_version -ne "0.35.1") {
+        if ($manifest.template_version -ne "0.35.2") {
             Add-Error "Unexpected template manifest version: $($manifest.template_version)"
         }
         $sources = @($manifest.files | ForEach-Object { $_.source_path })
@@ -1089,7 +1100,7 @@ function Test-PluginDistribution {
     if ($codexPluginJson.name -ne "forgekit") {
         Add-Error "Unexpected Codex plugin name in root plugin.json: $($codexPluginJson.name)"
     }
-    if ($codexPluginJson.version -ne "0.35.1") {
+    if ($codexPluginJson.version -ne "0.35.2") {
         Add-Error "Unexpected Codex plugin version in root plugin.json: $($codexPluginJson.version)"
     }
     if ($codexPluginJson.skills -ne "./skills/") {
@@ -1100,7 +1111,7 @@ function Test-PluginDistribution {
     if ($claudePluginJson.name -ne "forgekit") {
         Add-Error "Unexpected Claude plugin name in root plugin.json: $($claudePluginJson.name)"
     }
-    if ($claudePluginJson.version -ne "0.35.1") {
+    if ($claudePluginJson.version -ne "0.35.2") {
         Add-Error "Unexpected Claude plugin version in root plugin.json: $($claudePluginJson.version)"
     }
     $claudeSkills = @($claudePluginJson.skills)

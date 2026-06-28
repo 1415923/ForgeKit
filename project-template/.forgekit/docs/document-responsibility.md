@@ -18,6 +18,15 @@
 - `as-needed`：任务指向该主题时读取。
 - `no`：默认不读取。
 
+## 最小写回策略
+
+- 默认 `ManagedDocsWriteback: minimal`。实现完成、阶段收口或版本推进后，只检查并更新真正发生变化的负责文档。
+- `Implementation Scope` 限制业务实现文件；`Governance Writeback Scope` 单独控制 ForgeKit managed docs。用户只说“只改这些业务文件”不等于禁写治理文档。
+- 最小写回限于：实际进展写 `work-log.md`；任务状态变化写 `task-board.md`；用户/版本可见变化写 `changelog.md`；当前 change 流程需要时写 `.forgekit/changes/<id>/*`。
+- 用户明确说不改文档、不改 ForgeKit 或不写 managed docs 时，使用 `ManagedDocsWriteback: off`。
+- `task-intake.md` 原文、`requirements.md` 事实源和 business docs 需要明确授权；generated report 仍是 report-only，不能自动修复或触发写回。
+- `review-only` 不写文件；`one-step` 结束前检查一次；`bounded-auto` 每个 checkpoint 检查一次。
+
 | 文档 | 文档分类 | 读者 | 默认读取 | 写什么 | 不写什么 | 更新触发 | 相关文档 |
 | --- | --- | --- | --- | --- | --- | --- | --- |
 | `README.md` | core | 用户 | yes | 项目是什么、快速开始、基础用法 | 内部过程、长历史、任务流水 | 用户入口或启动方式变化 | `AGENTS.md`, `CLAUDE.md` |

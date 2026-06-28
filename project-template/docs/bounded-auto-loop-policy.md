@@ -14,6 +14,27 @@
 
 默认不得自行进入 `bounded-auto`。用户必须明确授权，并给出范围、阶段、预算、禁止动作、停止条件和 agent mode 要求。
 
+## Scope 与 Managed Docs Writeback
+
+执行前必须区分两层范围：
+
+- `Implementation Scope`：业务代码、配置和测试允许修改的路径。
+- `Governance Writeback Scope`：任务结束或 checkpoint 时允许最小写回的 ForgeKit managed docs。
+
+使用以下字段声明写回策略：
+
+```text
+ManagedDocsWriteback: off | minimal | full-review
+```
+
+- 默认值是 `minimal`。
+- `minimal` 只允许按实际事件更新 `work-log.md`；任务状态确实变化时更新 `task-board.md`；出现用户或版本可见变化时更新 `changelog.md`；当前 change 流程需要时更新 `.forgekit/changes/<id>/*`。
+- `full-review` 仍需逐项遵守 `workflow-router.md` 和 `document-responsibility.md`，不表示可以全量改文档。
+- `off` 只在用户明确说“不改文档”“不改 ForgeKit”“不写 managed docs”，或明确限定允许文件且同时禁止文档写入时使用。
+- 用户说“只改这些业务文件”默认只限制 `Implementation Scope`，不等于关闭 `Governance Writeback Scope`。
+- `task-intake.md` 原文、`requirements.md` 事实源和 business `docs/` 不属于默认最小写回；修改它们需要用户明确授权。
+- report-only 脚本仍然只生成报告；本策略不能授权它们自动修复 doc-health、source-trace、handoff 或其他报告发现。
+
 ## 启动前复述
 
 进入 `bounded-auto` 前必须复述并等待用户确认：
@@ -31,6 +52,9 @@
 - AgentModeRequired
 - RequiredAgents
 - CheckpointWriteback
+- ManagedDocsWriteback
+- Implementation Scope
+- Governance Writeback Scope
 - FinalHandoffRequired
 
 ## Agent Mode Gate
@@ -61,7 +85,7 @@
 
 ## Checkpoint Writeback
 
-每个阶段结束后必须写回 `.forgekit/docs/work-log.md` 或明确指定的 loop state，至少记录：
+每个阶段结束后先执行 writeback check，按 `ManagedDocsWriteback` 决定是否写回。`minimal` 模式至少把实际完成进展写入 `.forgekit/docs/work-log.md` 或明确指定的 loop state，并只在状态或用户可见事实确实变化时更新其他允许目标：
 
 - 阶段名称。
 - 已做事项。
@@ -70,7 +94,7 @@
 - agent_mode / native_agent_status / native_agent_lifecycle。
 - 阻塞、风险和下一步。
 
-`review-only` 不改文件；除非用户要求记录，否则只在聊天中输出结论。
+`one-step` 在结束前执行一次最小 writeback check；`bounded-auto` 每个 checkpoint 都执行；`review-only` 绝不写文件，即使 `ManagedDocsWriteback` 不是 `off`，也只在聊天中输出结论。
 
 文档健康场景下，`bounded-auto` 最多生成 `.forgekit/doc-health-report.md` 并停止。报告只是 review 输入，不能自动触发文档瘦身、归档、链接重写或事实合并。
 

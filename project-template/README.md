@@ -14,7 +14,7 @@ ForgeKit 在生成项目内提供轻量 AI Engineering Loop：澄清目标、判
 6. 工作来自领导、微信、计划表、会议、个人规划、用户反馈、bug、技术债或测试失败时，先写 `.forgekit/docs/task-intake.md`；补充和确认默认归并到已有 Source，只有满足任务准入时才进入 `task-board.md`。
 7. 中高风险变更使用 `.forgekit/changes/<id>/`；低风险改动保持轻流程。
 8. 触发式文档只在事件发生时更新：缺陷复盘、事故复盘、依赖审查、威胁建模、发布流水线、traceability、loop、maker-checker、worktree 等都不是日常必填。
-9. 编码前确认范围和验证方式；完成后只更新真正负责的文档，不把同一事实重复写入多个文件。
+9. 编码前分别确认业务 `Implementation Scope` 与 `Governance Writeback Scope`。默认 `ManagedDocsWriteback: minimal`：完成后最小更新实际进展、真实任务状态、用户/版本可见变化和当前 change；只有用户明确禁写文档时才关闭，不把同一事实重复写入多个文件。
 
 ## 升级兼容
 
@@ -53,6 +53,7 @@ ForgeKit 在生成项目内提供轻量 AI Engineering Loop：澄清目标、判
 - `.forgekit/docs/loop-readiness.md`、`.forgekit/docs/loop-blueprint.md`：判断项目是否适合安全运行 loop，并定义可审查的 loop 设计图纸；它们不是自动执行授权。
 - `.forgekit/docs/loop-operations.md`：定义用户显式触发的 loop dry-run、one-step、bounded-auto、review-only、continue、stop/handoff；它不是后台自动化或无人值守 runner。
 - `.forgekit/docs/bounded-auto-loop-policy.md`：定义有限授权的多阶段推进边界、预算、停止条件和 handoff；它不是自动 runner。
+- Managed docs 写回默认是 `minimal`：业务文件范围不会隐式禁止 `work-log.md`、必要的 `task-board.md` / `changelog.md` / 当前 change 写回；`review-only` 和 report-only 报告仍不写或自动修复文档。
 - `.forgekit/docs/native-agent-adapter.md`：说明 Claude Code / Codex 原生 agent 配置适配、验证清单和 fallback 记录规则；生成配置不等于 runtime 已注册，只有 invoked 才能记录为 native 可用。
 - `.forgekit/docs/maker-checker-protocol.md`：定义 Maker 写代码、Checker 复核证据的审查协议；它不是自动多 agent 调度器。
 - `.forgekit/docs/worktree-playbook.md`：定义手动 worktree 并行隔离、命名、检查、Maker/Checker 用法和清理规则；它不是自动调度器。

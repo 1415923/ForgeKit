@@ -622,6 +622,7 @@
         '   .forgekit/docs/loop-readiness.md、.forgekit/docs/loop-blueprint.md（仅作为 loop 评估和设计图纸，不是自动执行授权）',
         '   .forgekit/docs/loop-operations.md（仅作为显式触发的 loop 操作协议，不是自动 runner）',
         '   .forgekit/docs/bounded-auto-loop-policy.md（仅作为 one-step / bounded-auto / review-only 授权边界，不是自动 runner）',
+        '   默认 ManagedDocsWriteback=minimal：业务实现文件范围与 ForgeKit 治理写回范围分开；任务完成后只更新实际命中的 work-log / task-board / changelog / current change，明确禁写文档时才关闭。',
         '   .forgekit/docs/native-agent-adapter.md（opt-in 原生 agent 配置适配；生成配置不等于 runtime 已注册，fallback 不能称为 native 成功）',
         '   .forgekit/docs/maker-checker-protocol.md（仅作为 Maker / Checker 审查协议，不是自动多 agent 调度）',
         '   .forgekit/docs/worktree-playbook.md（仅作为手动 worktree 隔离指南，不是自动调度器）',
@@ -649,7 +650,7 @@
         '   python .\\scripts\\archive-changes.py --apply --plan .forgekit/archive-plan.md --confirm',
         '   python .\\scripts\\archive-changes.py --smart-apply --report .forgekit/smart-archive-report.md --confirm',
         '',
-        '7. 不要默认读取全部 governance/ 或 .forgekit/docs/**；先按 document-responsibility、codebase-map 和 workflow-router 判断需要哪些文档。工具链未知时先询问，不要默认安装或启动服务。'
+        '7. 不要默认读取全部 governance/ 或 .forgekit/docs/**；先按 document-responsibility、codebase-map 和 workflow-router 判断需要哪些文档。只限制业务文件不等于禁止最小 managed docs 写回；review-only 和 report-only 仍不得写入或自动修复。工具链未知时先询问，不要默认安装或启动服务。'
       ].join('\n');
     }
 

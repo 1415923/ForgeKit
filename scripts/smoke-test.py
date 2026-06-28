@@ -359,6 +359,9 @@ def assert_loop_operations(root, operations_path, blueprint_path, agents_path, c
         "Loop output must write back",
         "Generated native agent config is not proof of runtime registration.",
         "Bounded-auto or loop execution must record `agent_mode`",
+        "Implementation Scope from Governance Writeback Scope",
+        "ManagedDocsWriteback: minimal",
+        "Review-only writes nothing, and report-only outputs never trigger automatic fixes.",
     ]
     rules_required = [
         "不得自行进入 loop mode",
@@ -370,6 +373,9 @@ def assert_loop_operations(root, operations_path, blueprint_path, agents_path, c
         "loop 输出必须写回",
         "生成 native agent 配置不等于 runtime 已注册",
         "bounded-auto 或 loop 执行必须写明 `agent_mode`",
+        "Implementation Scope` 与 `Governance Writeback Scope",
+        "ManagedDocsWriteback: minimal",
+        "`review-only` 不写，report-only 报告不得触发自动修复",
     ]
     missing_operations = [item for item in operations_required if item not in operations]
     if missing_operations:
@@ -397,6 +403,12 @@ def assert_loop_operations(root, operations_path, blueprint_path, agents_path, c
         "Stop Conditions",
         "Checkpoint Writeback",
         "Final Handoff",
+        "ManagedDocsWriteback: off | minimal | full-review",
+        "Implementation Scope",
+        "Governance Writeback Scope",
+        "只改这些业务文件",
+        "`review-only` 绝不写文件",
+        "report-only 脚本仍然只生成报告",
         "不是 runner、daemon、cron、scheduler、多 agent dispatcher、自动 PR 或 worktree orchestration",
     ]
     missing_policy = [item for item in policy_required if item not in policy_text]
@@ -1044,8 +1056,8 @@ def assert_json(path):
 def assert_manifest_lock(target):
     lock_path = target / ".forgekit" / "template-lock.json"
     lock = json.loads(lock_path.read_text(encoding="utf-8"))
-    if lock.get("installed_version") != "0.35.1":
-        fail("template-lock installed_version must be 0.35.1")
+    if lock.get("installed_version") != "0.35.2":
+        fail("template-lock installed_version must be 0.35.2")
     if lock.get("managed_docs_root") != ".forgekit/docs":
         fail("template-lock managed_docs_root must match boundary")
     if lock.get("change_root") != ".forgekit/changes":
@@ -1098,7 +1110,7 @@ def assert_upgrade_report(repo, target):
         fail("upgrade must not overwrite managed docs")
     assert_paths(target, [
         ".forgekit/upgrade-report.md",
-        ".forgekit/upgrade-export/0.35.1/.forgekit/docs/project-plan.md",
+        ".forgekit/upgrade-export/0.35.2/.forgekit/docs/project-plan.md",
     ])
 
 
@@ -1135,7 +1147,7 @@ def assert_guided_upgrade(repo, target):
         ".forgekit/upgrade/upgrade-plan.md",
         ".forgekit/upgrade/upgrade-actions.md",
         ".forgekit/upgrade/upgrade-inventory.json",
-        ".forgekit/upgrade/candidates/0.35.1/.forgekit/docs/project-plan.md",
+        ".forgekit/upgrade/candidates/0.35.2/.forgekit/docs/project-plan.md",
     ])
     plan = (target / ".forgekit" / "upgrade" / "upgrade-plan.md").read_text(encoding="utf-8")
     actions = (target / ".forgekit" / "upgrade" / "upgrade-actions.md").read_text(encoding="utf-8")
