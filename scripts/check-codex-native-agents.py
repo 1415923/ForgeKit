@@ -117,8 +117,14 @@ def check_agent(project_root, name, rel_path):
         return result
     for field in ("name", "description", "developer_instructions"):
         value = data.get(field)
-        if not isinstance(value, str) or not value.strip():
+        if value is None:
             result["issues"].append(f"missing {field}")
+            continue
+        if not isinstance(value, str):
+            result["issues"].append(f"{field} must be string, got {type(value).__name__}")
+            continue
+        if not value.strip():
+            result["issues"].append(f"empty {field}")
     if data.get("name") != name:
         result["issues"].append(f"name mismatch: expected {name}, got {data.get('name')}")
     if not result["issues"]:

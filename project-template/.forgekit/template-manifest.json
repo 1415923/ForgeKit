@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "template_version": "0.35.0",
+  "template_version": "0.35.1",
   "boundary_aware": true,
   "files": [
     {
@@ -417,7 +417,7 @@
       "role": "script",
       "update_policy": "replace",
       "render_mode": "copy",
-      "checksum": "sha256:fead7c8e322c57b89551d99933ada7135390872615a43d6c151d30679d463c36"
+      "checksum": "sha256:d94489c344effee06b63838b4dac82fd313d75d36b0c32d64de9f28c8470064b"
     },
     {
       "source_path": "scripts/run-harness-check.ps1",

@@ -611,7 +611,7 @@ function Test-TemplateManifest {
     $manifestPath = Join-Path $repoRoot "project-template\.forgekit\template-manifest.json"
     if (Test-Path -LiteralPath $manifestPath) {
         $manifest = Get-Content -LiteralPath $manifestPath -Raw | ConvertFrom-Json
-        if ($manifest.template_version -ne "0.35.0") {
+        if ($manifest.template_version -ne "0.35.1") {
             Add-Error "Unexpected template manifest version: $($manifest.template_version)"
         }
         $sources = @($manifest.files | ForEach-Object { $_.source_path })
@@ -788,7 +788,16 @@ function Test-TeamToolingProtocol {
         $agentPath = "project-template\.codex\agents\$agentName.toml"
         Test-RequiredPattern $agentPath "name = `"$agentName`"" "$agentName name"
         Test-RequiredPattern $agentPath "description =" "$agentName description"
-        Test-RequiredPattern $agentPath "developer_instructions" "$agentName developer instructions"
+        Test-RequiredPattern $agentPath 'developer_instructions = """' "$agentName developer instructions string"
+        Test-NoPattern $agentPath "[developer_instructions]" "$agentName developer_instructions table"
+        Test-NoPattern $agentPath "developer_instructions = {" "$agentName developer_instructions inline map"
+        $nativeAdapterPath = "native-adapters\codex\agents\$agentName.toml"
+        Test-RequiredPath $nativeAdapterPath
+        Test-RequiredPattern $nativeAdapterPath "name = `"$agentName`"" "$agentName native adapter name"
+        Test-RequiredPattern $nativeAdapterPath "description =" "$agentName native adapter description"
+        Test-RequiredPattern $nativeAdapterPath 'developer_instructions = """' "$agentName native adapter developer instructions string"
+        Test-NoPattern $nativeAdapterPath "[developer_instructions]" "$agentName native adapter developer_instructions table"
+        Test-NoPattern $nativeAdapterPath "developer_instructions = {" "$agentName native adapter developer_instructions inline map"
     }
     Test-RequiredPath "scripts\check-codex-native-agents.py"
     Test-RequiredPath "project-template\scripts\check-codex-native-agents.py"
@@ -796,6 +805,7 @@ function Test-TeamToolingProtocol {
     Test-RequiredPattern "project-template\scripts\check-codex-native-agents.py" "NativeAgentStatus: {native_status}" "Codex native doctor status output"
     Test-RequiredPattern "project-template\scripts\check-codex-native-agents.py" "NativeAgentLifecycle: {native_lifecycle}" "Codex native doctor lifecycle output"
     Test-RequiredPattern "project-template\scripts\check-codex-native-agents.py" "NativeAgentStatusAllowed: available | unavailable | unverified" "Codex native doctor status values"
+    Test-RequiredPattern "project-template\scripts\check-codex-native-agents.py" "must be string" "Codex native doctor type validation"
     Test-RequiredPattern "project-template\scripts\check-doc-sync.ps1" ".forgekit/codex-native-agent-report.md" "PowerShell Codex native report exclusion"
     Test-RequiredPattern "project-template\scripts\check-doc-sync.sh" ".forgekit/codex-native-agent-report.md" "Bash Codex native report exclusion"
     Test-RequiredPattern "scripts\generate-native-agent-adapter.py" "present" "Native adapter generator present status"
@@ -1079,7 +1089,7 @@ function Test-PluginDistribution {
     if ($codexPluginJson.name -ne "forgekit") {
         Add-Error "Unexpected Codex plugin name in root plugin.json: $($codexPluginJson.name)"
     }
-    if ($codexPluginJson.version -ne "0.35.0") {
+    if ($codexPluginJson.version -ne "0.35.1") {
         Add-Error "Unexpected Codex plugin version in root plugin.json: $($codexPluginJson.version)"
     }
     if ($codexPluginJson.skills -ne "./skills/") {
@@ -1090,7 +1100,7 @@ function Test-PluginDistribution {
     if ($claudePluginJson.name -ne "forgekit") {
         Add-Error "Unexpected Claude plugin name in root plugin.json: $($claudePluginJson.name)"
     }
-    if ($claudePluginJson.version -ne "0.35.0") {
+    if ($claudePluginJson.version -ne "0.35.1") {
         Add-Error "Unexpected Claude plugin version in root plugin.json: $($claudePluginJson.version)"
     }
     $claudeSkills = @($claudePluginJson.skills)
@@ -1188,4 +1198,5 @@ if ($errors.Count -gt 0) {
 }
 
 Write-Host "[ok] Template validation passed"
+
 

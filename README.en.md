@@ -329,6 +329,7 @@ ForgeKit can coexist with ECC: ECC enhances the AI tool; ForgeKit constrains the
 
 | Version | User-facing change |
 | --- | --- |
+| `0.35.1` | Codex Custom Agent Schema Hotfix: fixes and validates Codex custom agent TOML so `name`, `description`, and `developer_instructions` are strings, avoiding table/map schema errors. |
 | `0.35.0` | Review-Ready Handoff Package: adds a report-only handoff package for source, requirement, task, change, verification, risk, and TODO_REVIEW summaries without automatic fixes, commits, or PRs. |
 | `0.34.0` | Source Trace Report v2: adds a report-only source trace report for Source ID -> requirement -> task -> change -> verification -> work-log/changelog breaks without automatic fixes. |
 | `0.33.0` | Doc Health Report v2: adds a report-only managed-docs health summary for long docs, duplicated facts, misplaced content, and workflow-router boundary risks without automatic fixes. |

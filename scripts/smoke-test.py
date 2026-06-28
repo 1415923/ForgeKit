@@ -504,6 +504,26 @@ def assert_codex_native_agents(target):
         if after != before:
             fail(f"Codex native doctor must not modify {rel_path}")
 
+    malformed_agent = target / ".codex/agents/forgekit-planner.toml"
+    original_agent = malformed_agent.read_text(encoding="utf-8")
+    try:
+        malformed_agent.write_text(
+            'name = "forgekit-planner"\n'
+            'description = "malformed schema smoke test"\n'
+            "\n"
+            "[developer_instructions]\n"
+            'text = "this table must be rejected; Codex expects a string"\n',
+            encoding="utf-8",
+        )
+        malformed = run([sys.executable, "scripts/check-codex-native-agents.py", "--repo-root", "."], cwd=target, check=False)
+        combined = malformed.stdout + malformed.stderr
+        if malformed.returncode == 0:
+            fail("Codex native doctor must reject developer_instructions table schema")
+        if "developer_instructions must be string" not in combined and "developer_instructions must be string" not in report.read_text(encoding="utf-8"):
+            fail("Codex native doctor must report developer_instructions type errors")
+    finally:
+        malformed_agent.write_text(original_agent, encoding="utf-8")
+
 
 def assert_doc_health_report(target):
     report_path = target / ".forgekit" / "doc-health-report.md"
@@ -1024,8 +1044,8 @@ def assert_json(path):
 def assert_manifest_lock(target):
     lock_path = target / ".forgekit" / "template-lock.json"
     lock = json.loads(lock_path.read_text(encoding="utf-8"))
-    if lock.get("installed_version") != "0.35.0":
-        fail("template-lock installed_version must be 0.35.0")
+    if lock.get("installed_version") != "0.35.1":
+        fail("template-lock installed_version must be 0.35.1")
     if lock.get("managed_docs_root") != ".forgekit/docs":
         fail("template-lock managed_docs_root must match boundary")
     if lock.get("change_root") != ".forgekit/changes":
@@ -1078,7 +1098,7 @@ def assert_upgrade_report(repo, target):
         fail("upgrade must not overwrite managed docs")
     assert_paths(target, [
         ".forgekit/upgrade-report.md",
-        ".forgekit/upgrade-export/0.35.0/.forgekit/docs/project-plan.md",
+        ".forgekit/upgrade-export/0.35.1/.forgekit/docs/project-plan.md",
     ])
 
 
@@ -1115,7 +1135,7 @@ def assert_guided_upgrade(repo, target):
         ".forgekit/upgrade/upgrade-plan.md",
         ".forgekit/upgrade/upgrade-actions.md",
         ".forgekit/upgrade/upgrade-inventory.json",
-        ".forgekit/upgrade/candidates/0.35.0/.forgekit/docs/project-plan.md",
+        ".forgekit/upgrade/candidates/0.35.1/.forgekit/docs/project-plan.md",
     ])
     plan = (target / ".forgekit" / "upgrade" / "upgrade-plan.md").read_text(encoding="utf-8")
     actions = (target / ".forgekit" / "upgrade" / "upgrade-actions.md").read_text(encoding="utf-8")
@@ -1910,4 +1930,5 @@ def main():
 
 if __name__ == "__main__":
     main()
+
 
