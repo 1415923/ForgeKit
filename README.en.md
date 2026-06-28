@@ -101,7 +101,7 @@ New users do not need to read every file. Start with the scenario-specific entry
 | Daily task development | `.forgekit/docs/task-intake.md`, `.forgekit/docs/task-board.md`, `.forgekit/docs/work-log.md`; read `testing.md` / `requirements.md` / `architecture.md` as needed |
 | Medium/high-risk change | `.forgekit/changes/<change-id>/`, `.forgekit/docs/testing.md`, `.forgekit/docs/changelog.md`, and `architecture.md` when needed |
 | Release check | `.forgekit/docs/changelog.md`, `.forgekit/docs/testing.md`, `.forgekit/docs/task-board.md`, `.codex/version-gates.md` |
-| ForgeKit upgrade | `.forgekit/upgrade/upgrade-plan.md`, `.forgekit/upgrade/upgrade-actions.md`, `.forgekit/upgrade/candidates/<version>/` |
+| ForgeKit upgrade | `.forgekit/state.json`; run `forgekit-upgrade.py check`, `plan`, then `apply --safe` |
 
 Takeover audit docs are not the daily task entry point. Once a project is stable, daily work usually follows `task-intake -> task-board -> work-log`, with requirements, testing, architecture, and changelog updated only when their facts change.
 
@@ -255,29 +255,21 @@ python3 scripts/archive-changes.py --smart-apply --report .forgekit/smart-archiv
 
 ## Upgrade An Existing Project
 
-When upgrading from an older ForgeKit version, prefer guided upgrade and do not use `-Force` / `--force`:
-
-```powershell
-powershell -ExecutionPolicy Bypass -File .\scripts\upgrade-forgekit.ps1 -ProjectPath "D:\projects\my-app"
-```
+Starting with v0.36.0, ForgeKit uses the Versioned Migration Upgrade Model. New projects need only three commands:
 
 ```bash
-./scripts/upgrade-forgekit.sh --project-path "$HOME/projects/my-app"
+python scripts/forgekit-upgrade.py check --repo-root <project>
+python scripts/forgekit-upgrade.py plan --repo-root <project>
+python scripts/forgekit-upgrade.py apply --safe --repo-root <project>
 ```
 
-Guided upgrade generates plans and candidate templates only; it does not overwrite project files:
+- `check` verifies `.forgekit/state.json` and migration eligibility without writing files.
+- `plan` prints a one-screen version migration plan without writing files.
+- `apply --safe` runs only actions explicitly marked safe; it does not perform three-way merge, edit business docs, or create commits.
 
-- Preserves project facts, `.forgekit/template-lock.json`, business `docs/`, source code, `.codex/`, `AGENTS.md`, and `CLAUDE.md`.
-- Writes `.forgekit/upgrade/upgrade-plan.md` with must_review / merge_carefully / can_add / can_ignore / template_only classifications.
-- Writes `.forgekit/upgrade/upgrade-actions.md` as a short AI merge work order.
-- Exports newer candidate templates by expanded target path under `.forgekit/upgrade/candidates/<version>/`.
-- If an old project has no `.forgekit/template-lock.json`, ForgeKit writes `.forgekit/upgrade/legacy-inventory.md` and does not create a lock automatically.
+Only projects initialized at v0.36.0 or later with `.forgekit/state.json` use this model. Pre-v0.36 projects (v0.35.x and earlier) are treated as existing projects for adoption: inventory current facts, optionally generate handoff/doc-health/source-trace reports, and create a new v0.36+ state only after explicit user confirmation. ForgeKit does not migrate old docs automatically or claim that an old project was automatically upgraded.
 
-After upgrading, ask the assistant:
-
-```text
-Read .forgekit/upgrade/upgrade-actions.md and merge ForgeKit upgrade content according to .forgekit/upgrade/upgrade-plan.md. Inspect only must_review, merge_carefully, and needed can_add files; do not overwrite project facts, business docs, source code, or template-lock, and do not treat candidates as current-state docs.
-```
+The old `upgrade-forgekit.ps1` / `.sh` / `.py` entry points remain only for legacy report-only compatibility and are no longer recommended. Do not read or export all candidates / upgrade-export content by default.
 
 ## Inherited Projects
 
@@ -331,6 +323,7 @@ ForgeKit can coexist with ECC: ECC enhances the AI tool; ForgeKit constrains the
 
 | Version | User-facing change |
 | --- | --- |
+| `0.36.0` | Versioned Migration Upgrade Model: new projects use state + migrations with check / plan / apply --safe; v0.35.x and earlier projects use existing-project adoption. |
 | `0.35.2` | Managed Docs Writeback Policy: separates implementation scope from governance writeback and restores minimal work-log / task-board / changelog / change updates while preserving review-only and report-only boundaries. |
 | `0.35.1` | Codex Custom Agent Schema Hotfix: fixes and validates Codex custom agent TOML so `name`, `description`, and `developer_instructions` are strings, avoiding table/map schema errors. |
 | `0.35.0` | Review-Ready Handoff Package: adds a report-only handoff package for source, requirement, task, change, verification, risk, and TODO_REVIEW summaries without automatic fixes, commits, or PRs. |

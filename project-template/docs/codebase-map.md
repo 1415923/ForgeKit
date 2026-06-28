@@ -71,6 +71,7 @@
 | 中高风险变更过程 | `.forgekit/changes/<change-id>/` |
 | 有限授权连续推进规则 | `.forgekit/docs/bounded-auto-loop-policy.md` |
 | 原生 agent 配置适配 | `.forgekit/docs/native-agent-adapter.md` |
+| ForgeKit 版本迁移 | `scripts/forgekit-upgrade.py check -> plan -> apply --safe`；状态见 `.forgekit/state.json` |
 
 不要默认读取 `.forgekit/docs/**` 全量内容。先按本文件、`document-responsibility.md` 和 `workflow-router.md` 判断需要哪些文档。
 

@@ -30,8 +30,10 @@
 - ForgeKit 治理文档默认写入 `.forgekit/docs`。
 - 中高风险 change 工件默认写入 `.forgekit/changes`。
 - 业务 `docs/` 默认是 read-mostly 证据源：允许读取、引用和抽取事实，不写 ForgeKit 治理模板。
-- `.forgekit/template-lock.json` 是安装基线；report-only upgrade 期间不要写回 lock。
-- `.forgekit/upgrade-export/**` 是候选模板对比材料，不是当前态文档、活跃 change、发布证据或 changelog 内容。
+- `.forgekit/state.json` 是 v0.36+ versioned migration 状态。升级按 `forgekit-upgrade.py check -> plan -> apply --safe` 执行。
+- 缺少 state 或版本低于 v0.36 的项目按既有项目 adoption 处理；未经用户确认不得创建 state，不得声称已自动升级。
+- `upgrade-forgekit.*`、`.forgekit/upgrade-export/**` 和 `.forgekit/upgrade/**` 仅为 legacy 兼容；不得默认读取或导出全量 candidates，不得把它们当当前事实。
+- `.forgekit/template-lock.json` 是 legacy 安装基线；v0.36 migration 模型不更新它。
 - `.forgekit/docs/**` 是 current state docs，只保留当前事实和稳定结论，不堆长期过程流水。
 - 更新 managed docs 前先判断内容类型：任务来源、需求事实、任务状态、验证方法、工作顺序、版本变化、风险、设计决策或历史证据。
 - 更新 managed docs 前先按 `.forgekit/docs/workflow-router.md` 判断是否有写入触发；没有写入触发时不要改文档。
@@ -56,7 +58,6 @@
 - `.forgekit/docs/work-log.md` 只记录推进过程、验证、提交/推送、阻塞和确认，并引用 `Task ID` / `Source ID`。工作日志里的后续跟进不自动成为任务；先回到 task-intake 做 Task Decision。
 - 拆解任务必须引用 Source ID；未经人工确认的派发内容必须保持 `Human Review: pending`，不得视为最终事实；不得把账号、密码、token、证书、环境地址或敏感配置原样写入 managed docs。
 - `.forgekit/docs/work-log.md` 是个人工作顺序记录，用于交接上下文和中断会话恢复；用户要求“更新 ForgeKit 文档”且本轮包含阶段收口、验证、提交/推送、阻塞、领导/组长确认时应同步，用户明确要求“同步工作日志”时必须同步；仅更新稳定技术事实时不强制同步。
-- `.forgekit/upgrade/**` 是升级引导生成物。先读 `upgrade-actions.md`，候选模板只用于对比，不是当前态文档。
 - `.forgekit/docs/loop-readiness.md` 和 `.forgekit/docs/loop-blueprint.md` 是可审查的 loop 设计文档，不是自动执行授权。
 - `.forgekit/docs/loop-operations.md` 是显式触发的操作协议，不是自动 runner 或无人值守 loop 授权。
 - `.forgekit/docs/bounded-auto-loop-policy.md` 只是 bounded-auto policy；用户未明确授权时不得进入 bounded-auto。

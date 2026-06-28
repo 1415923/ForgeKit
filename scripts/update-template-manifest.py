@@ -26,6 +26,7 @@ VALID_ROLES = {
 EXCLUDED_SOURCE_PATHS = {
     ".forgekit/template-manifest.json",
     ".forgekit/template-lock.json",
+    ".forgekit/state.json",
     ".forgekit/upgrade-report.md",
     ".forgekit/archive-plan.md",
     ".forgekit/archive-apply-report.md",

@@ -41,6 +41,11 @@ REQUIRED_REPO_PATHS = [
     "project-template/.forgekit/archive/changes/README.md",
     "project-template/.forgekit/archive/releases/README.md",
     "project-template/.forgekit/template-manifest.json",
+    "project-template/.forgekit/state.json",
+    "project-template/migrations/0.36.0/migration.json",
+    "project-template/scripts/forgekit-upgrade.py",
+    "migrations/0.36.0/migration.json",
+    "scripts/forgekit-upgrade.py",
     "project-template/governance/ai-engineering-loop.md",
     "project-template/changes/README.md",
     "project-template/changes/_template/proposal.md",
@@ -83,6 +88,7 @@ REQUIRED_GENERATED_PATHS = [
     "CLAUDE.md",
     ".forgekit/project-boundary.yml",
     ".forgekit/template-lock.json",
+    ".forgekit/state.json",
     ".forgekit/docs/document-responsibility.md",
     ".forgekit/docs/document-lifecycle.md",
     ".forgekit/archive/README.md",
@@ -121,6 +127,8 @@ REQUIRED_GENERATED_PATHS = [
     "scripts/doc-health-report.py",
     "scripts/source-trace-report.py",
     "scripts/handoff-package.py",
+    "scripts/forgekit-upgrade.py",
+    "migrations/0.36.0/migration.json",
     "scripts/archive-changes.py",
 ]
 
@@ -922,6 +930,8 @@ def assert_managed_docs_responsibility_v2(root, responsibility_path, codebase_pa
         "triggered",
         "generated",
         "archive",
+        ".forgekit/state.json",
+        "versioned migration",
     ]
     missing = [item for item in responsibility_required if item not in responsibility]
     if missing:
@@ -995,6 +1005,9 @@ def assert_workflow_router(root, router_path, responsibility_path, codebase_path
         "maker-checker-protocol.md",
         "worktree-playbook.md",
         "handoff",
+        "ForgeKit 版本升级",
+        "forgekit-upgrade.py",
+        "adoption guidance",
         "不要默认全量读取 `.forgekit/docs/**`",
     ]
     missing_router = [item for item in router_required if item not in router]
@@ -1056,8 +1069,8 @@ def assert_json(path):
 def assert_manifest_lock(target):
     lock_path = target / ".forgekit" / "template-lock.json"
     lock = json.loads(lock_path.read_text(encoding="utf-8"))
-    if lock.get("installed_version") != "0.35.2":
-        fail("template-lock installed_version must be 0.35.2")
+    if lock.get("installed_version") != "0.36.0":
+        fail("template-lock installed_version must be 0.36.0")
     if lock.get("managed_docs_root") != ".forgekit/docs":
         fail("template-lock managed_docs_root must match boundary")
     if lock.get("change_root") != ".forgekit/changes":
@@ -1069,6 +1082,103 @@ def assert_manifest_lock(target):
         target_path = item.get("target_path", "")
         if target_path.startswith("docs/") or target_path.startswith("changes/"):
             fail(f"template-lock contains unmanaged root target: {target_path}")
+
+
+def assert_versioned_migration_upgrade(repo, target, temp_parent):
+    state_path = target / ".forgekit" / "state.json"
+    state = json.loads(state_path.read_text(encoding="utf-8-sig"))
+    expected = {
+        "schema_version": 1,
+        "forgekit_version": "0.36.0",
+        "managed_docs_root": ".forgekit/docs",
+        "change_root": ".forgekit/changes",
+        "mode": "Standard",
+        "last_upgrade": None,
+    }
+    for key, value in expected.items():
+        if state.get(key) != value:
+            fail(f"state.json {key} mismatch: {state.get(key)!r}")
+    if state.get("features", {}).get("versioned_migrations") is not True:
+        fail("state.json must enable versioned_migrations")
+
+    script = target / "scripts" / "forgekit-upgrade.py"
+    before_state = state_path.read_bytes()
+    before_docs = {
+        path.relative_to(target).as_posix(): path.read_bytes()
+        for path in (target / ".forgekit" / "docs").rglob("*")
+        if path.is_file()
+    }
+    check = run([sys.executable, str(script), "check", "--repo-root", "."], cwd=target)
+    if "Status: current" not in check.stdout or "Current version: 0.36.0" not in check.stdout:
+        fail("versioned migration check did not report current v0.36.0 state")
+    plan = run([sys.executable, str(script), "plan", "--repo-root", "."], cwd=target)
+    for marker in ["Status: report-only", "Mode: versioned-migration-plan", "No files were changed."]:
+        if marker not in plan.stdout:
+            fail(f"versioned migration plan missing marker: {marker}")
+    refused = run([sys.executable, str(script), "apply", "--repo-root", "."], cwd=target, check=False)
+    if refused.returncode == 0 or "apply requires --safe" not in (refused.stdout + refused.stderr):
+        fail("versioned migration apply must refuse without --safe")
+    run([sys.executable, str(script), "apply", "--safe", "--repo-root", "."], cwd=target)
+    if state_path.read_bytes() != before_state:
+        fail("no-op apply --safe must not rewrite state.json")
+    after_docs = {
+        path.relative_to(target).as_posix(): path.read_bytes()
+        for path in (target / ".forgekit" / "docs").rglob("*")
+        if path.is_file()
+    }
+    if after_docs != before_docs:
+        fail("check/plan/no-op apply modified managed docs")
+
+    legacy = temp_parent / "pre-v036-adoption"
+    (legacy / ".forgekit").mkdir(parents=True)
+    (legacy / "README.md").write_text("# Existing project\n", encoding="utf-8")
+    legacy_check = run(
+        [sys.executable, str(repo / "scripts" / "forgekit-upgrade.py"), "check", "--repo-root", str(legacy)],
+        cwd=repo,
+    )
+    if "Status: adoption-required" not in legacy_check.stdout or "No automatic upgrade" not in legacy_check.stdout:
+        fail("pre-v0.36 project must receive adoption guidance")
+    if (legacy / ".forgekit" / "state.json").exists():
+        fail("pre-v0.36 check must not create state.json")
+
+    apply_target = temp_parent / "versioned-apply"
+    shutil.copytree(target, apply_target)
+    migration_root = temp_parent / "migration-packages"
+    package = migration_root / "0.36.1"
+    package.mkdir(parents=True)
+    (package / "proof.txt").write_text("safe migration\n", encoding="utf-8")
+    migration = {
+        "id": "0.36.1-smoke",
+        "title": "Smoke safe migration",
+        "from": "0.36.0",
+        "to": "0.36.1",
+        "risk": "low",
+        "actions": [{
+            "id": "copy-proof",
+            "type": "copy_file_if_missing",
+            "safety": "safe",
+            "source": "proof.txt",
+            "target": ".forgekit/migration-proof.txt",
+            "description": "Copy an isolated smoke proof file",
+        }],
+        "manual_review": [],
+        "non_goals": ["No business docs changes"],
+    }
+    (package / "migration.json").write_text(json.dumps(migration, indent=2) + "\n", encoding="utf-8")
+    apply_script = apply_target / "scripts" / "forgekit-upgrade.py"
+    apply_plan = run([
+        sys.executable, str(apply_script), "plan", "--repo-root", ".", "--migration-root", str(migration_root)
+    ], cwd=apply_target)
+    if "To: 0.36.1" not in apply_plan.stdout or (apply_target / ".forgekit" / "migration-proof.txt").exists():
+        fail("plan must show the safe migration without applying it")
+    run([
+        sys.executable, str(apply_script), "apply", "--safe", "--repo-root", ".", "--migration-root", str(migration_root)
+    ], cwd=apply_target)
+    applied_state = json.loads((apply_target / ".forgekit" / "state.json").read_text(encoding="utf-8"))
+    if applied_state.get("forgekit_version") != "0.36.1":
+        fail("safe migration did not update state version")
+    if not (apply_target / ".forgekit" / "migration-proof.txt").is_file():
+        fail("safe migration did not apply the declared safe action")
 
 
 def assert_upgrade_report(repo, target):
@@ -1110,7 +1220,7 @@ def assert_upgrade_report(repo, target):
         fail("upgrade must not overwrite managed docs")
     assert_paths(target, [
         ".forgekit/upgrade-report.md",
-        ".forgekit/upgrade-export/0.35.2/.forgekit/docs/project-plan.md",
+        ".forgekit/upgrade-export/0.36.0/.forgekit/docs/project-plan.md",
     ])
 
 
@@ -1147,7 +1257,7 @@ def assert_guided_upgrade(repo, target):
         ".forgekit/upgrade/upgrade-plan.md",
         ".forgekit/upgrade/upgrade-actions.md",
         ".forgekit/upgrade/upgrade-inventory.json",
-        ".forgekit/upgrade/candidates/0.35.2/.forgekit/docs/project-plan.md",
+        ".forgekit/upgrade/candidates/0.36.0/.forgekit/docs/project-plan.md",
     ])
     plan = (target / ".forgekit" / "upgrade" / "upgrade-plan.md").read_text(encoding="utf-8")
     actions = (target / ".forgekit" / "upgrade" / "upgrade-actions.md").read_text(encoding="utf-8")
@@ -1755,6 +1865,9 @@ def main():
     assert_json(repo / ".codex-plugin" / "plugin.json")
     assert_json(repo / ".claude-plugin" / "plugin.json")
     assert_json(repo / "project-template" / ".forgekit" / "template-manifest.json")
+    assert_json(repo / "project-template" / ".forgekit" / "state.json")
+    assert_json(repo / "migrations" / "0.36.0" / "migration.json")
+    assert_json(repo / "project-template" / "migrations" / "0.36.0" / "migration.json")
     assert_loop_docs(repo / "project-template", "docs/loop-readiness.md", "docs/loop-blueprint.md")
     assert_loop_operations(
         repo / "project-template",
@@ -1922,6 +2035,7 @@ def main():
             ".codex/agents/worktree-runner.md",
         ])
         assert_manifest_lock(target)
+        assert_versioned_migration_upgrade(repo, target, temp_parent)
         assert_no_escaped_filenames(target)
         assert_no_noise_files(target)
         assert_no_forbidden_text(target, FORBIDDEN_LEGACY_REFS, "Forbidden legacy path text found in generated project")

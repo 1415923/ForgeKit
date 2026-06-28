@@ -319,6 +319,9 @@ def write_inventory(project_root, manifest, boundary, entries):
 
 
 def run(args):
+    print("[legacy] Guided template-diff upgrade is retained for compatibility only.")
+    print("[legacy] For v0.36+ projects use scripts/forgekit-upgrade.py check, plan, and apply --safe.")
+    print("[legacy] Pre-v0.36 projects should use existing-project adoption instead of automatic upgrade.")
     repo_root = Path(args.repo_root).resolve()
     project_root = safe_project_path(args.project_path)
     manifest = versioning.load_manifest(repo_root)

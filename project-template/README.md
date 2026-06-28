@@ -18,9 +18,15 @@ ForgeKit 在生成项目内提供轻量 AI Engineering Loop：澄清目标、判
 
 ## 升级兼容
 
-从旧版本 ForgeKit 升级到新版本时，优先使用模板仓库里的 guided upgrade 脚本，不要使用 `-Force` / `--force`。guided upgrade 是 report-only：只生成 `.forgekit/upgrade/upgrade-plan.md`、`.forgekit/upgrade/upgrade-actions.md` 和 `.forgekit/upgrade/candidates/<version>/` 候选模板，不覆盖项目文件、不更新 `.forgekit/template-lock.json`、不写 business `docs/`。
+v0.36.0 及以后初始化的项目使用 `.forgekit/state.json` 和 `migrations/` 做版本迁移：
 
-升级后先查看 `.forgekit/upgrade/upgrade-actions.md` 和 `.forgekit/upgrade/upgrade-plan.md`，再人工或让 AI 判断是否需要合并到当前项目流程。不要把 `.forgekit/upgrade/candidates/**` 当作当前态文档、活跃 change、发布证据或 changelog 内容。
+```bash
+python scripts/forgekit-upgrade.py check --repo-root .
+python scripts/forgekit-upgrade.py plan --repo-root .
+python scripts/forgekit-upgrade.py apply --safe --repo-root .
+```
+
+`check` 和 `plan` 不改文件；`apply --safe` 只执行 migration 明确标记为 safe 的动作。v0.35.x 及更早项目不自动升级，统一按接手既有项目做 adoption inventory，并在用户确认后建立新 state。旧 guided upgrade 脚本仅作为 legacy report-only 兼容入口保留；不要默认读取全量 candidates 或 upgrade-export。
 
 ## 可选增强
 

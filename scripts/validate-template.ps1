@@ -622,7 +622,7 @@ function Test-TemplateManifest {
     $manifestPath = Join-Path $repoRoot "project-template\.forgekit\template-manifest.json"
     if (Test-Path -LiteralPath $manifestPath) {
         $manifest = Get-Content -LiteralPath $manifestPath -Raw | ConvertFrom-Json
-        if ($manifest.template_version -ne "0.35.2") {
+        if ($manifest.template_version -ne "0.36.0") {
             Add-Error "Unexpected template manifest version: $($manifest.template_version)"
         }
         $sources = @($manifest.files | ForEach-Object { $_.source_path })
@@ -646,6 +646,9 @@ function Test-TemplateManifest {
         }
         if ($sources -contains ".forgekit/smart-archive-apply-report.md") {
             Add-Error "smart-archive-apply-report.md must not be listed in template manifest"
+        }
+        if ($sources -contains ".forgekit/state.json") {
+            Add-Error "state.json is runtime migration state and must not be listed in template manifest"
         }
         if ($sources -contains ".forgekit/codex-native-agent-report.md") {
             Add-Error "codex-native-agent-report.md must not be listed in template manifest"
@@ -672,6 +675,12 @@ function Test-TemplateManifest {
         }
         if ($sources -notcontains "scripts/handoff-package.py") {
             Add-Error "handoff-package.py script must be listed in template manifest"
+        }
+        if ($sources -notcontains "scripts/forgekit-upgrade.py") {
+            Add-Error "forgekit-upgrade.py script must be listed in template manifest"
+        }
+        if ($sources -notcontains "migrations/0.36.0/migration.json") {
+            Add-Error "v0.36.0 migration descriptor must be listed in template manifest"
         }
         $dollarSign = [string][char]36
         $managedDocsRootPattern = $dollarSign + "{managed_docs_root}/*"
@@ -1036,6 +1045,7 @@ function Test-HarnessEntryConsistency {
     Test-RequiredPattern "scripts\init-project-template.ps1" "[ValidateSet(""Lite"", ""Standard"", ""Enterprise"")]" "Init script mode parameter"
     Test-RequiredPattern "scripts\init-project-template.ps1" "NativeAgentAdapter" "Init script native adapter parameter"
     Test-RequiredPattern "scripts\init-project-template.ps1" "Invoke-NativeAgentAdapterGeneration" "Init script native adapter generation"
+    Test-RequiredPattern "scripts\init-project-template.ps1" "Write-ForgeKitState" "PowerShell init versioned migration state"
     Test-RequiredPattern "scripts\init-project-template.ps1" "StackSelection: deferred" "Init script deferred stack guidance"
     Test-RequiredPattern "scripts\init-project-template.ps1" "Upgrade" "Init script upgrade mode"
     Test-RequiredPattern "scripts\init-project-template.ps1" "upgrade-report.md" "Init script upgrade report"
@@ -1043,6 +1053,7 @@ function Test-HarnessEntryConsistency {
     Test-RequiredPattern "scripts\init-project-template.sh" "--upgrade" "Bash init upgrade mode"
     Test-RequiredPattern "scripts\init-project-template.sh" "--native-agent-adapter" "Bash init native adapter parameter"
     Test-RequiredPattern "scripts\init-project-template.sh" "generate_native_agent_adapter" "Bash init native adapter generation"
+    Test-RequiredPattern "scripts\init-project-template.sh" "write_forgekit_state" "Bash init versioned migration state"
     Test-RequiredPattern "scripts\init-project-template.sh" ".agents/skills/project-init/SKILL.md" "Bash init project-local startup skill"
     Test-RequiredPattern "scripts\init-project-template.sh" "upgrade-report.md" "Bash init upgrade report"
     Test-RequiredPattern "scripts\init-project-template.sh" "--export-upgrade-templates" "Bash init export upgrade templates"
@@ -1053,17 +1064,41 @@ function Test-HarnessEntryConsistency {
     Test-RequiredPattern "scripts\upgrade-forgekit.py" "upgrade-plan.md" "Guided upgrade plan"
     Test-RequiredPattern "scripts\upgrade-forgekit.py" "upgrade-actions.md" "Guided upgrade actions"
     Test-RequiredPattern "scripts\upgrade-forgekit.py" "legacy-inventory.md" "Guided upgrade legacy inventory"
-    Test-RequiredPattern "README.md" "upgrade-forgekit.ps1" "Root README guided upgrade PowerShell"
-    Test-RequiredPattern "README.md" "upgrade-plan.md" "Root README guided upgrade plan"
+    Test-RequiredPattern "scripts\upgrade-forgekit.py" "[legacy]" "Guided upgrade legacy warning"
+    Test-RequiredPath "scripts\forgekit-upgrade.py"
+    Test-RequiredPath "project-template\scripts\forgekit-upgrade.py"
+    Test-RequiredPath "migrations\0.36.0\migration.json"
+    Test-RequiredPath "project-template\migrations\0.36.0\migration.json"
+    Test-RequiredPath "project-template\.forgekit\state.json"
+    Test-RequiredPattern "project-template\.forgekit\state.json" '"schema_version": 1' "State schema version"
+    Test-RequiredPattern "project-template\.forgekit\state.json" '"forgekit_version": "0.36.0"' "State ForgeKit version"
+    Test-RequiredPattern "project-template\.forgekit\state.json" '"managed_docs_root": ".forgekit/docs"' "State managed docs root"
+    Test-RequiredPattern "project-template\.forgekit\state.json" '"change_root": ".forgekit/changes"' "State change root"
+    Test-RequiredPattern "project-template\.forgekit\state.json" '"last_upgrade": null' "State last upgrade"
+    Test-RequiredPattern "migrations\0.36.0\migration.json" '"actions": []' "Migration actions"
+    Test-RequiredPattern "scripts\forgekit-upgrade.py" "Status: adoption-required" "Upgrade adoption guidance"
+    Test-RequiredPattern "scripts\forgekit-upgrade.py" "apply requires --safe" "Upgrade safe apply gate"
+    Test-RequiredPattern "scripts\forgekit-upgrade.py" "Status: report-only" "Upgrade plan report-only status"
+    Test-NoPattern "scripts\forgekit-upgrade.py" "candidates" "New upgrade model must not export candidates"
+    Test-NoPattern "scripts\forgekit-upgrade.py" "upgrade-export" "New upgrade model must not use upgrade-export"
+    Test-RequiredPattern "README.md" "forgekit-upgrade.py check" "Root README versioned upgrade check"
+    Test-RequiredPattern "README.md" "Pre-v0.36" "Root README pre-v0.36 adoption"
     Test-RequiredPattern "README.md" ".agents/skills/project-init/SKILL.md" "Root README project-local startup skill"
     Test-RequiredPattern "README.md" "-NativeAgentAdapter all" "Root README init native adapter example"
-    Test-RequiredPattern "README.en.md" "upgrade-forgekit.ps1" "English README guided upgrade PowerShell"
-    Test-RequiredPattern "README.en.md" "upgrade-plan.md" "English README guided upgrade plan"
+    Test-RequiredPattern "README.en.md" "forgekit-upgrade.py check" "English README versioned upgrade check"
+    Test-RequiredPattern "README.en.md" "Pre-v0.36" "English README pre-v0.36 adoption"
     Test-RequiredPattern "README.en.md" ".agents/skills/project-init/SKILL.md" "English README project-local startup skill"
     Test-RequiredPattern "README.en.md" "-NativeAgentAdapter all" "English README init native adapter example"
     Test-RequiredPattern "usage.html" "startupOutput" "HTML startup output"
     Test-RequiredPattern "usage.html" ".agents/skills/project-init/SKILL.md" "HTML project-local startup skill"
     Test-RequiredPattern "usage.html" "governance/agent-harness.md" "HTML harness prompt reference"
+    Test-RequiredPattern "usage.html" "apply --safe" "HTML versioned upgrade entry"
+
+    $rootUpgrade = Get-Content -LiteralPath (Join-Path $repoRoot "scripts\forgekit-upgrade.py") -Raw
+    $templateUpgrade = Get-Content -LiteralPath (Join-Path $repoRoot "project-template\scripts\forgekit-upgrade.py") -Raw
+    if ($rootUpgrade -ne $templateUpgrade) {
+        Add-Error "Root and project-template forgekit-upgrade.py must stay identical"
+    }
 }
 
 function Test-PluginDistribution {
@@ -1100,7 +1135,7 @@ function Test-PluginDistribution {
     if ($codexPluginJson.name -ne "forgekit") {
         Add-Error "Unexpected Codex plugin name in root plugin.json: $($codexPluginJson.name)"
     }
-    if ($codexPluginJson.version -ne "0.35.2") {
+    if ($codexPluginJson.version -ne "0.36.0") {
         Add-Error "Unexpected Codex plugin version in root plugin.json: $($codexPluginJson.version)"
     }
     if ($codexPluginJson.skills -ne "./skills/") {
@@ -1111,7 +1146,7 @@ function Test-PluginDistribution {
     if ($claudePluginJson.name -ne "forgekit") {
         Add-Error "Unexpected Claude plugin name in root plugin.json: $($claudePluginJson.name)"
     }
-    if ($claudePluginJson.version -ne "0.35.2") {
+    if ($claudePluginJson.version -ne "0.36.0") {
         Add-Error "Unexpected Claude plugin version in root plugin.json: $($claudePluginJson.version)"
     }
     $claudeSkills = @($claudePluginJson.skills)

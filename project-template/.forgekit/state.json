@@ -1,0 +1,13 @@
+{
+  "schema_version": 1,
+  "forgekit_version": "0.36.0",
+  "managed_docs_root": ".forgekit/docs",
+  "change_root": ".forgekit/changes",
+  "mode": "Standard",
+  "features": {
+    "versioned_migrations": true,
+    "managed_docs_writeback": "minimal",
+    "native_agent_adapter": "none"
+  },
+  "last_upgrade": null
+}

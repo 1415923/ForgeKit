@@ -384,6 +384,9 @@
 
           <h3>Plugin 分发</h3>
           <p class="muted">v0.12.0 起仓库根目录就是统一 plugin 表面：<code>.codex-plugin/plugin.json</code>、<code>.claude-plugin/plugin.json</code> 和共享 <code>skills/</code> 同时服务 Codex 与 Claude Code。plugin 不包含 <code>user-rules/</code> 或外部开发记录，也不默认启用 hook、MCP 或外部写操作。</p>
+
+          <h3>v0.36+ 升级</h3>
+          <p class="muted">新项目使用 <code>.forgekit/state.json</code> 和 versioned migrations，按 <code>check → plan → apply --safe</code> 三步升级。v0.35.x 及更早项目按既有项目接手，不自动迁移；旧 guided upgrade 只保留为 legacy 兼容。</p>
         </div>
       </div>
     </section>
@@ -645,6 +648,9 @@
         '   python .\\scripts\\doc-health-report.py --project-root .（只生成 .forgekit/doc-health-report.md，不自动修复文档）',
         '   python .\\scripts\\source-trace-report.py --project-root .（只生成 .forgekit/source-trace-report.md，不自动补 Source ID 或改任务状态）',
         '   python .\\scripts\\handoff-package.py --project-root .（只生成 .forgekit/handoff-package.md，不自动修复、不提交、不创建 PR）',
+        '   python .\\scripts\\forgekit-upgrade.py check --repo-root .',
+        '   python .\\scripts\\forgekit-upgrade.py plan --repo-root .',
+        '   python .\\scripts\\forgekit-upgrade.py apply --safe --repo-root .（只执行 migration 中明确标记为 safe 的动作）',
         '',
         '6. 归档 apply 不是只读操作，仅在 review plan 且 git clean 后执行：',
         '   python .\\scripts\\archive-changes.py --apply --plan .forgekit/archive-plan.md --confirm',

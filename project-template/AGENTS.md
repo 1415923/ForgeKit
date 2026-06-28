@@ -67,9 +67,10 @@ When a task names a ForgeKit skill, read the project-local `.agents/skills/<skil
 - Use `.forgekit/docs` as the default ForgeKit-managed docs root and `.forgekit/changes` as the default change root.
 - Treat business `docs/` as read-mostly evidence. Read and cite it, but do not write ForgeKit governance templates there unless the user confirms target files and reasons.
 - Do not read all business `docs/` by default; use `.forgekit/docs/codebase-map.md` to choose what matters.
-- Treat `.forgekit/template-lock.json` as an installation baseline. Do not edit it during report-only upgrade checks.
-- Treat `.forgekit/upgrade-export/**` as candidate comparison material, not current-state docs, active changes, release evidence, or changelog content.
-- Treat `.forgekit/upgrade/**` as guided upgrade output. Read `upgrade-actions.md` first; do not treat candidates as current-state docs.
+- Treat `.forgekit/state.json` as the v0.36+ versioned migration state. For upgrades, use `scripts/forgekit-upgrade.py check`, then `plan`, then explicit `apply --safe`.
+- Projects without state or below v0.36 are existing-project adoption cases. Do not create state or claim an automatic upgrade without explicit user confirmation.
+- Treat `upgrade-forgekit.*`, `.forgekit/upgrade-export/**`, and `.forgekit/upgrade/**` as legacy compatibility. Do not read or export all candidates by default, and never treat them as current truth.
+- Treat `.forgekit/template-lock.json` as a legacy installation baseline; the v0.36 migration model does not update it.
 - Treat `.forgekit/docs/**` as current state docs: keep stable facts, not long process history.
 - Before updating managed docs, classify the content type: source record, requirement fact, task status, validation method, work sequence, release change, risk, design decision, or history.
 - 不要把同一事实重复写进多个文档。只写到负责文档，相关文档用链接或 Source ID 交叉引用。

@@ -32,6 +32,7 @@
 | `README.md` | core | 用户 | yes | 项目是什么、快速开始、基础用法 | 内部过程、长历史、任务流水 | 用户入口或启动方式变化 | `AGENTS.md`, `CLAUDE.md` |
 | `AGENTS.md` / `CLAUDE.md` | core | AI 工具 | yes | 简短启动顺序、边界规则、任务路由 | 长清单、模板正文、技术栈手册 | 启动顺序、写入边界或路由变化 | `.codex/rules.md`, skills |
 | `.forgekit/project-boundary.yml` | core | AI 工具、维护者 | yes | ForgeKitRoot、ProjectRoot、managed docs root、change root、写入策略 | 产品计划、架构、任务状态 | 目录布局或写入策略变化 | `AGENTS.md`, `CLAUDE.md` |
+| `.forgekit/state.json` | core | 升级脚本、维护者 | as-needed | versioned migration schema、当前 ForgeKit 版本、根目录、mode、features、最近迁移 | 项目事实、任务状态、人工伪造的升级结果 | v0.36+ 初始化或 safe migration 成功 | `migrations/`, `scripts/forgekit-upgrade.py` |
 | `.forgekit/docs/document-responsibility.md` | core | 用户、AI 工具 | yes | 文档职责、更新触发、事实归属 | 项目事实、任务日志、发布说明 | managed docs 职责变化 | `document-lifecycle.md` |
 | `.forgekit/docs/codebase-map.md` | core | AI 工具、维护者 | yes | 代码搜索入口、模块入口、关键命令、谨慎读取路径 | 完整架构、API 百科、长扫描历史 | 模块入口、命令或归属变化 | `architecture.md`, `api.md`, `local-toolchain.md` |
 | `.forgekit/docs/workflow-router.md` | core | 用户、AI 工具 | yes | 用户意图到 Read / Write / Do Not Write / Required Output 的路由表 | 任务看板、执行器、自动 runner、业务事实正文 | 用户常见意图、文档读写边界或路由规则变化 | `document-responsibility.md`, `codebase-map.md` |

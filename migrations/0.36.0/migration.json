@@ -1,0 +1,18 @@
+{
+  "id": "0.36.0-versioned-migration-baseline",
+  "title": "Versioned migration model baseline",
+  "from": "0.36.0",
+  "to": "0.36.0",
+  "risk": "low",
+  "actions": [],
+  "manual_review": [
+    "Pre-v0.36 projects require existing-project adoption and explicit user confirmation before state.json is created."
+  ],
+  "non_goals": [
+    "No pre-v0.36 automatic upgrade",
+    "No three-way merge",
+    "No business docs migration",
+    "No full candidate export",
+    "No automatic commit or PR"
+  ]
+}

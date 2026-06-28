@@ -122,7 +122,7 @@ map_template_path() {
 skip_template_path() {
   local relative_path="${1//\\//}"
   case "$relative_path" in
-    .forgekit/template-manifest.json|.forgekit/template-lock.json|.forgekit/upgrade-report.md|.forgekit/archive-plan.md|.forgekit/archive-apply-report.md|.forgekit/archive-reference-report.md|.forgekit/current-docs-sync-report.md|.forgekit/smart-archive-report.md|.forgekit/smart-archive-apply-report.md|.forgekit/upgrade-export/*|.forgekit/upgrade/*)
+    .forgekit/template-manifest.json|.forgekit/template-lock.json|.forgekit/state.json|.forgekit/upgrade-report.md|.forgekit/archive-plan.md|.forgekit/archive-apply-report.md|.forgekit/archive-reference-report.md|.forgekit/current-docs-sync-report.md|.forgekit/smart-archive-report.md|.forgekit/smart-archive-apply-report.md|.forgekit/upgrade-export/*|.forgekit/upgrade/*)
       return 0
       ;;
     *)
@@ -183,7 +183,7 @@ write_boundary_config() {
   mkdir -p "$(dirname "$boundary_file")"
   cat > "$boundary_file" <<EOF
 forgekit:
-  version: "0.35.2"
+  version: "0.36.0"
   mode: "$mode"
 
 roots:
@@ -224,6 +224,31 @@ write_policy:
     - "build/**"
 EOF
   echo "[copy] .forgekit/project-boundary.yml"
+}
+
+write_forgekit_state() {
+  local state_file="$resolved_target/.forgekit/state.json"
+  if [[ -e "$state_file" && "$force" -ne 1 ]]; then
+    echo "[skip] .forgekit/state.json already exists"
+    return 0
+  fi
+  mkdir -p "$(dirname "$state_file")"
+  cat > "$state_file" <<EOF
+{
+  "schema_version": 1,
+  "forgekit_version": "0.36.0",
+  "managed_docs_root": ".forgekit/docs",
+  "change_root": ".forgekit/changes",
+  "mode": "$mode",
+  "features": {
+    "versioned_migrations": true,
+    "managed_docs_writeback": "minimal",
+    "native_agent_adapter": "$native_agent_adapter"
+  },
+  "last_upgrade": null
+}
+EOF
+  echo "[copy] .forgekit/state.json"
 }
 
 init_code_root() {
@@ -361,7 +386,7 @@ if [[ "$upgrade" -eq 1 ]]; then
     echo "Error: --upgrade cannot be combined with --force. Upgrade mode must preserve existing project facts." >&2
     exit 2
   fi
-  echo "[init] mode: report-only upgrade; existing files, lock, and business docs are preserved"
+  echo "[init] mode: legacy report-only upgrade; prefer scripts/forgekit-upgrade.py for v0.36+ projects"
   if [[ "$export_upgrade_templates" -eq 1 ]]; then
     echo "[init] export newer templates for review under .forgekit/upgrade-export"
   fi
@@ -392,6 +417,7 @@ else
   write_codex_metadata
   write_claude_metadata
   write_boundary_config
+  write_forgekit_state
   template_versioning install-lock
   generate_native_agent_adapter
 fi

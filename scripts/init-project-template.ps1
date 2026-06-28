@@ -42,6 +42,7 @@ function Test-SkipTemplatePath {
     $normalized = $RelativePath.Replace('\', '/')
     if ($normalized -eq ".forgekit/template-manifest.json") { return $true }
     if ($normalized -eq ".forgekit/template-lock.json") { return $true }
+    if ($normalized -eq ".forgekit/state.json") { return $true }
     if ($normalized -eq ".forgekit/upgrade-report.md") { return $true }
     if ($normalized -eq ".forgekit/archive-plan.md") { return $true }
     if ($normalized -eq ".forgekit/archive-apply-report.md") { return $true }
@@ -149,7 +150,7 @@ function Write-BoundaryConfig {
 
     $lines = @(
         'forgekit:',
-        '  version: "0.35.2"',
+        '  version: "0.36.0"',
         "  mode: `"$SelectedMode`"",
         '',
         'roots:',
@@ -218,6 +219,38 @@ function Invoke-TemplateVersioning {
     if ($LASTEXITCODE -ne 0) {
         throw "Template versioning command failed: $Command"
     }
+}
+
+function Write-ForgeKitState {
+    param(
+        [string]$DestinationDir,
+        [string]$SelectedMode,
+        [string]$NativeAdapter,
+        [switch]$Overwrite
+    )
+
+    $stateFile = Join-Path $DestinationDir ".forgekit\state.json"
+    if ((Test-Path -LiteralPath $stateFile) -and -not $Overwrite) {
+        Write-Host "[skip] .forgekit\state.json already exists"
+        return
+    }
+    $state = [ordered]@{
+        schema_version = 1
+        forgekit_version = "0.36.0"
+        managed_docs_root = ".forgekit/docs"
+        change_root = ".forgekit/changes"
+        mode = $SelectedMode
+        features = [ordered]@{
+            versioned_migrations = $true
+            managed_docs_writeback = "minimal"
+            native_agent_adapter = $NativeAdapter
+        }
+        last_upgrade = $null
+    }
+    $stateParent = Split-Path -Parent $stateFile
+    New-Item -ItemType Directory -Force -Path $stateParent | Out-Null
+    $state | ConvertTo-Json -Depth 4 | Set-Content -LiteralPath $stateFile -Encoding UTF8
+    Write-Host "[copy] .forgekit\state.json"
 }
 
 function Initialize-CodeRoot {
@@ -415,7 +448,7 @@ if ($Upgrade) {
     if ($Force) {
         throw "-Upgrade cannot be combined with -Force. Upgrade mode must preserve existing project facts; run a non-upgrade initialization separately if you intentionally want overwrites."
     }
-    Write-Step "mode: report-only upgrade; existing files, lock, and business docs are preserved"
+    Write-Step "mode: legacy report-only upgrade; prefer scripts/forgekit-upgrade.py for v0.36+ projects"
     if ($ExportUpgradeTemplates) {
         Write-Step "export newer templates for review under .forgekit\upgrade-export"
     }
@@ -454,6 +487,7 @@ if ($Upgrade -and -not $Force) {
     Write-InitMetadata -DestinationDir $resolvedTarget -Name $ProjectName -SelectedMode $Mode -SelectedStacks $normalizedStacks -Overwrite:$Force
     Write-ClaudeInitMetadata -DestinationDir $resolvedTarget -Name $ProjectName -SelectedMode $Mode -SelectedStacks $normalizedStacks -Overwrite:$Force
     Write-BoundaryConfig -DestinationDir $resolvedTarget -ForgeKitRoot $templateRoot -ProjectRoot $projectRootRelative -SelectedMode $Mode -Overwrite
+    Write-ForgeKitState -DestinationDir $resolvedTarget -SelectedMode $Mode -NativeAdapter $NativeAgentAdapter -Overwrite:$Force
     Invoke-TemplateVersioning -Command "install-lock" -DestinationDir $resolvedTarget
     Invoke-NativeAgentAdapterGeneration -DestinationDir $resolvedTarget -Target $NativeAgentAdapter -Overwrite:$Force
 }
