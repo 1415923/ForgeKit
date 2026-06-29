@@ -162,7 +162,7 @@ Bounded Auto Loop Policy defines three explicitly authorized modes only: `one-st
 
 Optional Loop Operation Mode defines only explicitly triggered dry-run, one-step, bounded-auto, review-only, continue, and stop/handoff protocols. Loop operation is off by default; ForgeKit does not provide background automation, unattended runners, or continuous looping.
 
-Maker / Checker Protocol defines evidence separation for medium/high-risk code changes: Maker implements and marks ready for check; Checker reviews diff, validation, risks, and document sync, then recommends pass / needs-fix / manual-review. It is not an automatic multi-agent system.
+Maker / Checker now uses the Independent Code Review Protocol: the maker uses `forgekit-request-code-review` to send only the task summary, diff/stat, changed files, validation output, and known risks; the independent read-only `forgekit-code-reviewer` returns pass / needs-fix / manual-review. Self-review cannot impersonate independent review, and an unavailable reviewer requires manual-review. The protocol does not auto-fix code, call PR APIs, or provide an automatic multi-agent system.
 
 Worktree Playbook provides only manual worktree isolation guidance for parallel tasks, experiment branches, and AI multi-session collaboration. ForgeKit does not automatically create worktrees, start agents, merge, push, or create PRs.
 
@@ -215,7 +215,7 @@ These scripts only check, copy templates, or install local opt-in hooks. They do
 
 Native Agent Adapter is an opt-in feature that exports ForgeKit loop / maker-checker / verification protocols into reviewable native agent configuration templates for Claude Code and Codex. It only generates configuration; it does not run loops, start agents, provide a runner or dispatcher, automate worktrees, merge, commit, push, or create PRs.
 
-Generated config is not proof that the runtime registered a native agent. Record native mode only after observing `forgekit-planner`, `forgekit-reviewer`, or `forgekit-verifier` being invoked. If execution uses a general-purpose / worker fallback with prompt injection, record fallback instead of calling it native success.
+Generated config is not proof that the runtime registered a native agent. Record native mode only after observing the corresponding `forgekit-*` agent, including `forgekit-code-reviewer`, being invoked. If execution uses a general-purpose / worker fallback with prompt injection, record fallback instead of calling it native success.
 
 Windows PowerShell:
 
@@ -323,6 +323,7 @@ ForgeKit can coexist with ECC: ECC enhances the AI tool; ForgeKit constrains the
 
 | Version | User-facing change |
 | --- | --- |
+| `0.37.0` | Independent Code Review Protocol: adds an independent read-only reviewer, request/review skills, a minimal context packet, and pass / needs-fix / manual-review gates. |
 | `0.36.0` | Versioned Migration Upgrade Model: new projects use state + migrations with check / plan / apply --safe; v0.35.x and earlier projects use existing-project adoption. |
 | `0.35.2` | Managed Docs Writeback Policy: separates implementation scope from governance writeback and restores minimal work-log / task-board / changelog / change updates while preserving review-only and report-only boundaries. |
 | `0.35.1` | Codex Custom Agent Schema Hotfix: fixes and validates Codex custom agent TOML so `name`, `description`, and `developer_instructions` are strings, avoiding table/map schema errors. |

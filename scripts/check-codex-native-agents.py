@@ -14,6 +14,7 @@ EXPECTED_AGENTS = {
     "forgekit-planner": ".codex/agents/forgekit-planner.toml",
     "forgekit-reviewer": ".codex/agents/forgekit-reviewer.toml",
     "forgekit-verifier": ".codex/agents/forgekit-verifier.toml",
+    "forgekit-code-reviewer": ".codex/agents/forgekit-code-reviewer.toml",
 }
 
 
@@ -82,6 +83,8 @@ def resolve_root(path):
     if not root.is_dir():
         fail(f"repo-root is not a directory: {root}")
     template_root = root / "project-template"
+    if (root / ".codex-plugin").is_dir() and (template_root / ".codex").is_dir():
+        return template_root, "project-template"
     if (root / ".codex").is_dir():
         return root, "project"
     if (template_root / ".codex").is_dir():
@@ -165,7 +168,7 @@ def write_report(project_root, mode, checks, config_exists, observed, invoked):
         "RuntimeRegistrationDefault: unverified",
         "NativeAgentStatusAllowed: available | unavailable | unverified",
         "Schema pass does not mean runtime registered.",
-        "Only observed invocation of forgekit-planner, forgekit-reviewer, or forgekit-verifier means native is usable.",
+        "Only observed invocation of a configured forgekit-* agent means native is usable.",
         "",
         "## Summary",
         "",

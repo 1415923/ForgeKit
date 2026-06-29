@@ -61,7 +61,8 @@ python scripts/forgekit-upgrade.py apply --safe --repo-root .
 - `.forgekit/docs/bounded-auto-loop-policy.md`：定义有限授权的多阶段推进边界、预算、停止条件和 handoff；它不是自动 runner。
 - Managed docs 写回默认是 `minimal`：业务文件范围不会隐式禁止 `work-log.md`、必要的 `task-board.md` / `changelog.md` / 当前 change 写回；`review-only` 和 report-only 报告仍不写或自动修复文档。
 - `.forgekit/docs/native-agent-adapter.md`：说明 Claude Code / Codex 原生 agent 配置适配、验证清单和 fallback 记录规则；生成配置不等于 runtime 已注册，只有 invoked 才能记录为 native 可用。
-- `.forgekit/docs/maker-checker-protocol.md`：定义 Maker 写代码、Checker 复核证据的审查协议；它不是自动多 agent 调度器。
+- `.forgekit/docs/maker-checker-protocol.md`：定义 Maker 与独立只读 Checker 的审查协议；代码默认 independent review，self-review 不能冒充独立审查。
+- `.claude/skills/forgekit-request-code-review/`：Maker 组装最小 review packet 并请求 `forgekit-code-reviewer`；`.claude/skills/forgekit-code-review/`：Reviewer 的只读流程和按需 references。
 - `.forgekit/docs/worktree-playbook.md`：定义手动 worktree 并行隔离、命名、检查、Maker/Checker 用法和清理规则；它不是自动调度器。
 - `.forgekit/docs/task-intake.md`：记录工作来源原文或原始想法、Update Notes、Task Decision、Derived Task IDs 和人工确认状态；它不是需求文档、任务看板或 changelog。`.forgekit/docs/task-board.md` 只接收有动作、owner、下一步、Source ID 和验证方式的可执行任务。
 - `.codex/commands-catalog.md`、`.codex/hooks.md`：可选命令和 hook 候选，默认不自动启用。

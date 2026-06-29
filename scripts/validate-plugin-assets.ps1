@@ -1,4 +1,4 @@
-param()
+﻿param()
 
 $ErrorActionPreference = "Stop"
 
@@ -63,7 +63,7 @@ function Test-PluginManifest {
     if ($codexManifest.name -ne "forgekit") {
         Add-Error "Unexpected Codex plugin name: $($codexManifest.name)"
     }
-    if ($codexManifest.version -ne "0.36.0") {
+    if ($codexManifest.version -ne "0.37.0") {
         Add-Error "Unexpected Codex plugin version: $($codexManifest.version)"
     }
     if ($codexManifest.skills -ne "./skills/") {
@@ -74,7 +74,7 @@ function Test-PluginManifest {
     if ($claudeManifest.name -ne "forgekit") {
         Add-Error "Unexpected Claude plugin name: $($claudeManifest.name)"
     }
-    if ($claudeManifest.version -ne "0.36.0") {
+    if ($claudeManifest.version -ne "0.37.0") {
         Add-Error "Unexpected Claude plugin version: $($claudeManifest.version)"
     }
     $claudeSkills = @($claudeManifest.skills)
@@ -132,5 +132,3 @@ if ($errors.Count -gt 0) {
 }
 
 Write-Host "[ok] Unified plugin asset validation passed"
-
-

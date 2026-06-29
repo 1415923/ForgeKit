@@ -1,4 +1,4 @@
-param(
+﻿param(
     [Parameter(Mandatory = $true)]
     [string]$TargetPath,
 
@@ -150,7 +150,7 @@ function Write-BoundaryConfig {
 
     $lines = @(
         'forgekit:',
-        '  version: "0.36.0"',
+        '  version: "0.37.0"',
         "  mode: `"$SelectedMode`"",
         '',
         'roots:',
@@ -236,13 +236,14 @@ function Write-ForgeKitState {
     }
     $state = [ordered]@{
         schema_version = 1
-        forgekit_version = "0.36.0"
+        forgekit_version = "0.37.0"
         managed_docs_root = ".forgekit/docs"
         change_root = ".forgekit/changes"
         mode = $SelectedMode
         features = [ordered]@{
             versioned_migrations = $true
             managed_docs_writeback = "minimal"
+            independent_code_review = $true
             native_agent_adapter = $NativeAdapter
         }
         last_upgrade = $null
@@ -524,5 +525,3 @@ Write-Host "Do not choose a tech stack here. ForgeKit will confirm or infer it d
 if ($Upgrade) {
     Write-Host "Upgrade note: report-only mode preserved existing files and lock. Review .forgekit/upgrade-report.md and candidate templates under .forgekit/upgrade-export manually."
 }
-
-

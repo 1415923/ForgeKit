@@ -13,6 +13,7 @@
 | handover-review | 接手既有项目、现状审计、兼容边界、缺陷修复计划 | 已内置于 `.agents/skills/handover-review/` |
 | large-change-planning | 大任务、跨模块、高风险、迁移或重构前的探索和实施计划 | 已内置于 `.agents/skills/large-change-planning/` |
 | code-review | 审查 diff、查找 bug、回归、安全风险、测试缺口 | 已内置于 `.agents/skills/code-review/` |
+| `forgekit-request-code-review` / `forgekit-code-review` | Claude Code 中由 Maker 组装最小上下文，并由独立只读 reviewer 执行 gate | 位于 `.claude/skills/`；不替代通用 `.agents/skills/code-review/` |
 | release-check | 发布前检查、版本记录、测试构建、部署风险 | 已内置于 `.agents/skills/release-check/` |
 | security-review | 权限、鉴权、凭据、外部输入、依赖变化 | 已内置于 `.agents/skills/security-review/` |
 

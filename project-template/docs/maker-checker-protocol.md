@@ -9,7 +9,7 @@
 | 角色 | 负责什么 | 不负责什么 |
 | --- | --- | --- |
 | Maker | 理解任务、修改代码、运行基础验证、记录实现证据 | 宣布变更最终通过 |
-| Checker | 从干净复查视角审查 diff、验证证据、风险、文档同步和未决问题 | 扩大范围或新增功能，除非用户明确要求 |
+| Checker | 在独立上下文中只读审查 diff、验证证据、风险、文档同步和未决问题 | 修改文件、自动修复、扩大范围或新增功能 |
 | User | 接受最终产品、业务、发布和风险决定 | 事后补充缺失的实现证据 |
 
 ## Maker 阶段
@@ -24,31 +24,41 @@ Maker 应该：
 
 Maker 不能把自己的实现视为最终批准。Maker 能给出的最强结论是 `ready-for-check`。
 
+Maker 使用 `.claude/skills/forgekit-request-code-review/SKILL.md` 组装最小 review packet。只传任务摘要、review range、diff/stat、changed files、验证输出、已知风险和 `TODO_REVIEW`；不要传完整会话历史、长篇自我解释或“我已经修好了”的结论。
+
 ## Checker 阶段
 
-Checker 应该：
+Checker 使用 `forgekit-code-reviewer` 和 `.claude/skills/forgekit-code-review/SKILL.md`，应该：
 
-- 从当前 diff 和已记录的 Maker 证据开始
+- 从新的独立上下文、当前 diff 和最小 Maker 证据开始
 - 审查代码行为、验证结果、风险说明和文档同步
 - 检查是否意外修改了敏感信息、业务文档、secrets、deploy 文件或 CI
 - 尽量用文件和行号报告发现的问题
 - 给出 `pass`、`needs-fix` 或 `manual-review` 建议
 
-Checker 不应扩大请求范围、重写无关代码或新增功能，除非用户明确要求。
+Checker 必须保持 read-only，不修改文件、不修代码、不扩大范围。不得因为 Maker 声称“已修复”就默认相信；必须以 diff 和验证证据为准。
+
+## 默认触发
+
+- 只改文档：independent review 可选，除非风险或用户规则要求。
+- 修改代码：默认 independent review。
+- 修改核心逻辑、API、数据、权限或脚本：mandatory independent review。
+- 发版或 tag 前：mandatory independent review。
+- bounded-auto 收口前：mandatory independent review。
 
 ## 单 agent 使用
 
-单个 agent 也可以通过分离上下文和输出使用本协议：
+单个 agent 可以做 self-review，但只能作为补充：
 
 1. Maker 阶段：实现并写下 Maker 证据。
 2. 上下文重置或明确切换阶段。
 3. Checker 阶段：像复查另一个贡献者一样审查 diff 和 Maker 证据。
 
-单 agent 使用仍然只是流程分离，不代表真正独立；高风险决定仍可能需要人工复查。
+`ReviewType: self-review` 不得冒充或满足 independent review gate。需要 independent review 而 reviewer agent 不可用时，必须返回 `manual-review` 并交给用户或人工 reviewer。
 
 ## 多 agent 使用
 
-多个 agent、sub-agent 或人工 reviewer 可以使用同一协议，但它们只是可选实现方式。ForgeKit v0.26 不生成 sub-agent 配置、runner 代码、worktree 自动化或自动审查派发。
+ForgeKit 提供 Claude Code 和 Codex 的 `forgekit-code-reviewer` 配置，但不提供 runner、自动派发、并行审查、worktree 自动化或自动 PR。原生 agent 是否实际执行必须由父运行时观察；不可用时不能假装 independent review 成功。
 
 ## Worktree 隔离
 
@@ -79,6 +89,17 @@ Checker status:
 - `manual-review`：需要用户或领域负责人判断
 - `not-run`：尚未运行 checker 阶段
 
+Review type:
+
+- `independent`：独立 reviewer agent 或人工 reviewer 使用最小 review packet 完成复查
+- `self-review`：Maker 当前上下文中的自查；不能满足 mandatory independent review
+
+Gate:
+
+- `pass`：可以进入 handoff 或 commit 准备。
+- `needs-fix`：Maker 必须修复，或由用户明确接受风险；之后重新请求 review。
+- `manual-review`：不得自动通过，必须人工确认。
+
 ## 最小复查重点
 
 Checker 优先检查：
@@ -94,7 +115,7 @@ Checker 优先检查：
 
 Maker 输出应以明确的 `ready for check`、`blocked` 或 `partial` 结论结束。
 
-Checker 输出应以且只以一个建议结束：
+Checker 按 `forgekit-code-review` 的结构输出 `ReviewDecision`、`ReviewType`、`ReviewerAgent`、`ReviewedRange`、结构化 Findings、`VerificationGaps`、`TODO_REVIEW` 和 `FinalVerdict`，并以且只以一个建议结束：
 
 - `pass`
 - `needs-fix`

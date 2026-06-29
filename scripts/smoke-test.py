@@ -8,6 +8,7 @@ import shutil
 import subprocess
 import sys
 import tempfile
+import tomllib
 from pathlib import Path
 
 
@@ -72,6 +73,15 @@ REQUIRED_REPO_PATHS = [
     "project-template/.codex/agents/forgekit-planner.toml",
     "project-template/.codex/agents/forgekit-reviewer.toml",
     "project-template/.codex/agents/forgekit-verifier.toml",
+    "project-template/.codex/agents/forgekit-code-reviewer.toml",
+    "project-template/.claude/agents/forgekit-code-reviewer.md",
+    "project-template/.claude/skills/forgekit-request-code-review/SKILL.md",
+    "project-template/.claude/skills/forgekit-code-review/SKILL.md",
+    "project-template/.claude/skills/forgekit-code-review/references/universal-review.md",
+    "project-template/.claude/skills/forgekit-code-review/references/security-review.md",
+    "project-template/.claude/skills/forgekit-code-review/references/testing-review.md",
+    "project-template/migrations/0.37.0/migration.json",
+    "migrations/0.37.0/migration.json",
     "project-template/scripts/check-codex-native-agents.py",
     "project-template/scripts/doc-health-report.py",
     "project-template/scripts/source-trace-report.py",
@@ -112,6 +122,14 @@ REQUIRED_GENERATED_PATHS = [
     ".codex/agents/forgekit-planner.toml",
     ".codex/agents/forgekit-reviewer.toml",
     ".codex/agents/forgekit-verifier.toml",
+    ".codex/agents/forgekit-code-reviewer.toml",
+    ".claude/agents/forgekit-code-reviewer.md",
+    ".claude/skills/forgekit-request-code-review/SKILL.md",
+    ".claude/skills/forgekit-code-review/SKILL.md",
+    ".claude/skills/forgekit-code-review/references/universal-review.md",
+    ".claude/skills/forgekit-code-review/references/security-review.md",
+    ".claude/skills/forgekit-code-review/references/testing-review.md",
+    "migrations/0.37.0/migration.json",
     "governance/ai-engineering-loop.md",
     ".forgekit/changes/README.md",
     ".forgekit/changes/_template/proposal.md",
@@ -467,6 +485,7 @@ def assert_codex_native_agents(target):
         "forgekit-planner": target / ".codex/agents/forgekit-planner.toml",
         "forgekit-reviewer": target / ".codex/agents/forgekit-reviewer.toml",
         "forgekit-verifier": target / ".codex/agents/forgekit-verifier.toml",
+        "forgekit-code-reviewer": target / ".codex/agents/forgekit-code-reviewer.toml",
     }
     for name, path in expected.items():
         if not path.is_file():
@@ -669,6 +688,7 @@ def assert_handoff_package(target):
         "## What Changed",
         "## What Did Not Change",
         "## Verification Evidence",
+        "## Independent Code Review",
         "## Doc Health / Source Trace Status",
         "## Risks / Blockers / TODO_REVIEW",
         "## Files / Artifacts",
@@ -704,7 +724,7 @@ def assert_maker_checker_protocol(root, protocol_path, review_path, agents_path,
         "needs-fix",
         "manual-review",
         "单 agent 使用",
-        "不生成 sub-agent 配置",
+        "不提供 runner、自动派发",
         "## Worktree 隔离",
         "不会自动创建 worktree",
     ]
@@ -753,6 +773,58 @@ def assert_maker_checker_protocol(root, protocol_path, review_path, agents_path,
     if missing_rules:
         fail(".codex/rules.md missing Maker/Checker rules:\n" + "\n".join(missing_rules))
 
+
+def assert_independent_code_review(root):
+    paths = {
+        "claude_agent": root / ".claude/agents/forgekit-code-reviewer.md",
+        "codex_agent": root / ".codex/agents/forgekit-code-reviewer.toml",
+        "request_skill": root / ".claude/skills/forgekit-request-code-review/SKILL.md",
+        "review_skill": root / ".claude/skills/forgekit-code-review/SKILL.md",
+        "universal": root / ".claude/skills/forgekit-code-review/references/universal-review.md",
+        "security": root / ".claude/skills/forgekit-code-review/references/security-review.md",
+        "testing": root / ".claude/skills/forgekit-code-review/references/testing-review.md",
+    }
+    assert_paths(root, [path.relative_to(root).as_posix() for path in paths.values()])
+
+    codex = tomllib.loads(paths["codex_agent"].read_text(encoding="utf-8"))
+    for field in ("name", "description", "developer_instructions"):
+        if not isinstance(codex.get(field), str) or not codex[field].strip():
+            fail(f"Codex code reviewer {field} must be a non-empty string")
+    if codex["name"] != "forgekit-code-reviewer":
+        fail("Codex code reviewer name is incorrect")
+
+    claude = paths["claude_agent"].read_text(encoding="utf-8")
+    for marker in ("name: forgekit-code-reviewer", "tools: Read, Grep, Glob, Bash", "permissionMode: plan", "ReviewDecision"):
+        if marker not in claude:
+            fail(f"Claude code reviewer missing marker: {marker}")
+
+    request = paths["request_skill"].read_text(encoding="ascii")
+    review = paths["review_skill"].read_text(encoding="ascii")
+    for marker in ("Do not provide the maker's full conversation history", "forgekit-code-reviewer", "manual-review"):
+        if marker not in request:
+            fail(f"Request code review skill missing marker: {marker}")
+    for marker in ("read-only", "ReviewDecision", "needs-fix", "manual-review", "Do not modify files"):
+        if marker not in review:
+            fail(f"Code review skill missing marker: {marker}")
+    for path in paths.values():
+        raw = path.read_bytes()
+        if any(byte > 127 for byte in raw):
+            fail(f"Independent review agent/skill must be ASCII-only: {path}")
+        if len(raw.splitlines()) > 180:
+            fail(f"Independent review agent/skill is too large: {path}")
+
+    protocol_path = root / ".forgekit/docs/maker-checker-protocol.md"
+    if not protocol_path.is_file():
+        protocol_path = root / "docs/maker-checker-protocol.md"
+    protocol = protocol_path.read_text(encoding="utf-8")
+    for marker in ("mandatory independent review", "ReviewType: self-review", "reviewer agent 不可用时", "read-only"):
+        if marker not in protocol:
+            fail(f"Independent review protocol missing marker: {marker}")
+    for entry in ("AGENTS.md", "CLAUDE.md", ".codex/rules.md"):
+        entry_text = (root / entry).read_text(encoding="utf-8")
+        for marker in ("self-review", "manual-review", "needs-fix"):
+            if marker not in entry_text:
+                fail(f"{entry} missing independent review rule: {marker}")
 
 def assert_worktree_playbook(root, playbook_path, blueprint_path, maker_checker_path, agents_path, claude_path, rules_path):
     playbook = (root / playbook_path).read_text(encoding="utf-8")
@@ -1069,8 +1141,8 @@ def assert_json(path):
 def assert_manifest_lock(target):
     lock_path = target / ".forgekit" / "template-lock.json"
     lock = json.loads(lock_path.read_text(encoding="utf-8"))
-    if lock.get("installed_version") != "0.36.0":
-        fail("template-lock installed_version must be 0.36.0")
+    if lock.get("installed_version") != "0.37.0":
+        fail("template-lock installed_version must be 0.37.0")
     if lock.get("managed_docs_root") != ".forgekit/docs":
         fail("template-lock managed_docs_root must match boundary")
     if lock.get("change_root") != ".forgekit/changes":
@@ -1089,7 +1161,7 @@ def assert_versioned_migration_upgrade(repo, target, temp_parent):
     state = json.loads(state_path.read_text(encoding="utf-8-sig"))
     expected = {
         "schema_version": 1,
-        "forgekit_version": "0.36.0",
+        "forgekit_version": "0.37.0",
         "managed_docs_root": ".forgekit/docs",
         "change_root": ".forgekit/changes",
         "mode": "Standard",
@@ -1100,6 +1172,8 @@ def assert_versioned_migration_upgrade(repo, target, temp_parent):
             fail(f"state.json {key} mismatch: {state.get(key)!r}")
     if state.get("features", {}).get("versioned_migrations") is not True:
         fail("state.json must enable versioned_migrations")
+    if state.get("features", {}).get("independent_code_review") is not True:
+        fail("state.json must enable independent_code_review")
 
     script = target / "scripts" / "forgekit-upgrade.py"
     before_state = state_path.read_bytes()
@@ -1109,8 +1183,8 @@ def assert_versioned_migration_upgrade(repo, target, temp_parent):
         if path.is_file()
     }
     check = run([sys.executable, str(script), "check", "--repo-root", "."], cwd=target)
-    if "Status: current" not in check.stdout or "Current version: 0.36.0" not in check.stdout:
-        fail("versioned migration check did not report current v0.36.0 state")
+    if "Status: current" not in check.stdout or "Current version: 0.37.0" not in check.stdout:
+        fail("versioned migration check did not report current v0.37.0 state")
     plan = run([sys.executable, str(script), "plan", "--repo-root", "."], cwd=target)
     for marker in ["Status: report-only", "Mode: versioned-migration-plan", "No files were changed."]:
         if marker not in plan.stdout:
@@ -1128,6 +1202,19 @@ def assert_versioned_migration_upgrade(repo, target, temp_parent):
     }
     if after_docs != before_docs:
         fail("check/plan/no-op apply modified managed docs")
+    v036_target = temp_parent / "v036-to-v037"
+    shutil.copytree(target, v036_target)
+    v036_state_path = v036_target / ".forgekit/state.json"
+    v036_state = json.loads(v036_state_path.read_text(encoding="utf-8-sig"))
+    v036_state["forgekit_version"] = "0.36.0"
+    v036_state.setdefault("features", {}).pop("independent_code_review", None)
+    v036_state_path.write_text(json.dumps(v036_state, indent=2) + "\n", encoding="utf-8")
+    run([sys.executable, str(v036_target / "scripts/forgekit-upgrade.py"), "apply", "--safe", "--repo-root", "."], cwd=v036_target)
+    migrated = json.loads(v036_state_path.read_text(encoding="utf-8"))
+    if migrated.get("forgekit_version") != "0.37.0":
+        fail("v0.37 migration did not update state version")
+    if migrated.get("features", {}).get("independent_code_review") is not True:
+        fail("v0.37 migration did not enable independent_code_review")
 
     legacy = temp_parent / "pre-v036-adoption"
     (legacy / ".forgekit").mkdir(parents=True)
@@ -1144,14 +1231,14 @@ def assert_versioned_migration_upgrade(repo, target, temp_parent):
     apply_target = temp_parent / "versioned-apply"
     shutil.copytree(target, apply_target)
     migration_root = temp_parent / "migration-packages"
-    package = migration_root / "0.36.1"
+    package = migration_root / "0.37.1"
     package.mkdir(parents=True)
     (package / "proof.txt").write_text("safe migration\n", encoding="utf-8")
     migration = {
-        "id": "0.36.1-smoke",
+        "id": "0.37.1-smoke",
         "title": "Smoke safe migration",
-        "from": "0.36.0",
-        "to": "0.36.1",
+        "from": "0.37.0",
+        "to": "0.37.1",
         "risk": "low",
         "actions": [{
             "id": "copy-proof",
@@ -1169,13 +1256,13 @@ def assert_versioned_migration_upgrade(repo, target, temp_parent):
     apply_plan = run([
         sys.executable, str(apply_script), "plan", "--repo-root", ".", "--migration-root", str(migration_root)
     ], cwd=apply_target)
-    if "To: 0.36.1" not in apply_plan.stdout or (apply_target / ".forgekit" / "migration-proof.txt").exists():
+    if "To: 0.37.1" not in apply_plan.stdout or (apply_target / ".forgekit" / "migration-proof.txt").exists():
         fail("plan must show the safe migration without applying it")
     run([
         sys.executable, str(apply_script), "apply", "--safe", "--repo-root", ".", "--migration-root", str(migration_root)
     ], cwd=apply_target)
     applied_state = json.loads((apply_target / ".forgekit" / "state.json").read_text(encoding="utf-8"))
-    if applied_state.get("forgekit_version") != "0.36.1":
+    if applied_state.get("forgekit_version") != "0.37.1":
         fail("safe migration did not update state version")
     if not (apply_target / ".forgekit" / "migration-proof.txt").is_file():
         fail("safe migration did not apply the declared safe action")
@@ -1220,7 +1307,7 @@ def assert_upgrade_report(repo, target):
         fail("upgrade must not overwrite managed docs")
     assert_paths(target, [
         ".forgekit/upgrade-report.md",
-        ".forgekit/upgrade-export/0.36.0/.forgekit/docs/project-plan.md",
+        ".forgekit/upgrade-export/0.37.0/.forgekit/docs/project-plan.md",
     ])
 
 
@@ -1257,7 +1344,7 @@ def assert_guided_upgrade(repo, target):
         ".forgekit/upgrade/upgrade-plan.md",
         ".forgekit/upgrade/upgrade-actions.md",
         ".forgekit/upgrade/upgrade-inventory.json",
-        ".forgekit/upgrade/candidates/0.36.0/.forgekit/docs/project-plan.md",
+        ".forgekit/upgrade/candidates/0.37.0/.forgekit/docs/project-plan.md",
     ])
     plan = (target / ".forgekit" / "upgrade" / "upgrade-plan.md").read_text(encoding="utf-8")
     actions = (target / ".forgekit" / "upgrade" / "upgrade-actions.md").read_text(encoding="utf-8")
@@ -1868,6 +1955,8 @@ def main():
     assert_json(repo / "project-template" / ".forgekit" / "state.json")
     assert_json(repo / "migrations" / "0.36.0" / "migration.json")
     assert_json(repo / "project-template" / "migrations" / "0.36.0" / "migration.json")
+    assert_json(repo / "migrations" / "0.37.0" / "migration.json")
+    assert_json(repo / "project-template" / "migrations" / "0.37.0" / "migration.json")
     assert_loop_docs(repo / "project-template", "docs/loop-readiness.md", "docs/loop-blueprint.md")
     assert_loop_operations(
         repo / "project-template",
@@ -1885,6 +1974,7 @@ def main():
         "CLAUDE.md",
         ".codex/rules.md",
     )
+    assert_independent_code_review(repo / "project-template")
     assert_worktree_playbook(
         repo / "project-template",
         "docs/worktree-playbook.md",
@@ -1979,6 +2069,7 @@ def main():
             "CLAUDE.md",
             ".codex/rules.md",
         )
+        assert_independent_code_review(target)
         assert_worktree_playbook(
             target,
             ".forgekit/docs/worktree-playbook.md",
@@ -2056,5 +2147,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-
-

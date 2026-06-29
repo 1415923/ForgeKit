@@ -1,4 +1,4 @@
-param(
+﻿param(
     [switch]$KeepTemp
 )
 
@@ -10,3 +10,4 @@ if ($KeepTemp) {
     $argsList += "--keep-temp"
 }
 python (Join-Path $scriptRoot "smoke-test.py") @argsList
+if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }

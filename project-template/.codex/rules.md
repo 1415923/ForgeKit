@@ -86,6 +86,10 @@
 - Maker phase 可以声明 `ready for check`，但不得把自己的实现视为最终通过。
 - Checker phase 应优先复核 diff、验证结果、风险和文档同步，并输出 `pass`、`needs-fix` 或 `manual-review`。
 - Checker 不应扩大需求范围，不应顺手实现新功能，除非用户明确要求。
+- 修改代码默认需要 independent review；核心逻辑、API、数据、权限、脚本、发版/tag 和 bounded-auto 收口必须 independent review。
+- Maker 只向 `forgekit-code-reviewer` 传任务摘要、diff/stat、changed files、验证输出和已知风险，不传完整会话历史或自我评价。
+- self-review 必须标为 `ReviewType: self-review`，不能冒充 independent review；reviewer 不可用时必须 `manual-review`，不得写 `pass`。
+- reviewer 必须 read-only；`needs-fix` 阻断 handoff/commit，除非修复或用户明确接受风险；`manual-review` 必须人工确认。
 - 对公司或业务项目，Checker 必须检查是否误写敏感信息、业务 docs、secrets、deploy 或 CI。
 - 不得自行创建 worktree，除非用户明确要求。
 - 创建 worktree 前必须确认 `git status --short` 干净，并说明 base branch、worktree path、branch name、allowed paths、validation command 和 cleanup plan。

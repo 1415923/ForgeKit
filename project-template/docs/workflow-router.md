@@ -36,7 +36,7 @@
 | 检查文档健康 / 文档太乱了 / 哪些文档该瘦身 | `document-responsibility.md`, `workflow-router.md`, `task-intake.md`, `task-board.md`, `work-log.md`, `requirements.md`, `testing.md`, `changelog.md` | `.forgekit/doc-health-report.md` only | managed docs unless user explicitly authorizes manual fixes | doc health summary |
 | 检查任务来源追溯 / 任务从哪来 / 完成状态有没有证据 | `task-intake.md`, `requirements.md`, `task-board.md`, `work-log.md`, `testing.md`, `changelog.md`, `.forgekit/changes/*` | `.forgekit/source-trace-report.md` only | Source ID / Task ID / requirements / task-board unless user explicitly authorizes manual fixes | source trace summary |
 | loop / bounded-auto 授权 | `bounded-auto-loop-policy.md`, `loop-blueprint.md`, `loop-operations.md`, `native-agent-adapter.md` | loop state or `work-log.md` only if executing | source/task/changelog docs unless their facts changed | authorization recap + stop conditions |
-| maker/checker review | `maker-checker-protocol.md`, `.forgekit/changes/<id>/review.md` | `.forgekit/changes/<id>/review.md` | `task-board.md` unless task status changes | `pass` / `needs-fix` / `manual-review` |
+| 请求独立代码审查 / maker-checker review | `maker-checker-protocol.md`, task summary, diff/stat, changed files, validation output, known risks | `.forgekit/changes/<id>/review.md` when active change exists | maker session history, unrelated docs, code fixes | structured `pass` / `needs-fix` / `manual-review` with ReviewType |
 | worktree 使用 | `worktree-playbook.md` | `work-log.md` only if user asks to execute or record | `task-board.md` unless task status changes | worktree plan / commands |
 | 实现完成 / 阶段收口 / 版本推进 | `task-board.md`, `work-log.md`, `changelog.md`, current change files | `work-log.md`; conditional `task-board.md`, `changelog.md`, `.forgekit/changes/<id>/*` | `task-intake.md`, `requirements.md`, business docs unless explicitly authorized | completion summary + minimal managed docs writeback |
 | ForgeKit 版本升级 | `.forgekit/state.json`, applicable `migrations/*/migration.json`, `scripts/forgekit-upgrade.py` | none for `check` / `plan`; state and safe action targets only for explicit `apply --safe` | business docs, source code, legacy candidates, template-lock | eligibility result or one-screen migration plan |
@@ -90,7 +90,8 @@
 - 涉及 loop、bounded-auto、worktree、发布、风险、安全或业务 docs 写入时，先复述边界和停止条件。
 - 涉及文档健康、文档太长或职责混乱时，先生成或建议 `.forgekit/doc-health-report.md`；不要自动按报告修改 managed docs。
 - 涉及任务来源、完成证据或追溯链断裂时，先生成或建议 `.forgekit/source-trace-report.md`；不要自动补 Source ID 或改写任务状态。
-- 涉及阶段收口、领导汇报、reviewer 审查或测试交接时，可以生成 `.forgekit/handoff-package.md` 或 scoped change `handoff.md`；它只汇总已有信息，缺证据写 `TODO_REVIEW`，不得编造提交、验证、风险或文件列表。
+- 涉及代码审查时，Maker 用 `forgekit-request-code-review` 构造最小 review packet，并调用独立 `forgekit-code-reviewer`；self-review 不得冒充 independent review，reviewer 不可用时使用 `manual-review`。
+- 涉及阶段收口、领导汇报、reviewer 审查或测试交接时，可以生成 `.forgekit/handoff-package.md` 或 scoped change `handoff.md`；它只汇总已有信息和 independent review 证据，缺证据写 `TODO_REVIEW`，不得编造提交、验证、风险或文件列表。
 - 涉及 ForgeKit 升级时先运行 `check`。缺 state 或低于 v0.36 时只输出 adoption guidance；未经用户确认不得创建 state，也不要读取全量 legacy candidates。
 - 用户要求 native-only、bounded-auto、worktree 或发布收口时，必须按对应触发式文档确认前置条件。
 

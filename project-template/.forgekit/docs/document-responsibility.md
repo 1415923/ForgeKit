@@ -63,14 +63,14 @@
 | `.forgekit/docs/loop-operations.md` | triggered | 用户、AI 工具 | no | 明确触发的 dry-run、one-step、continue、stop/handoff 协议 | 后台 runner、调度器、自动化代码 | 用户明确操作 loop | `loop-blueprint.md` |
 | `.forgekit/docs/bounded-auto-loop-policy.md` | triggered | 用户、AI 工具 | no | one-step、bounded-auto、review-only 的授权边界、预算、停止条件和交接规则 | runner、daemon、scheduler、自动 PR、worktree 编排 | 用户要求一次授权多阶段推进或审查 loop policy | `loop-blueprint.md`, `loop-operations.md`, `work-log.md` |
 | `.forgekit/docs/native-agent-adapter.md` | triggered | 用户、AI 工具 | no | 原生 agent 配置适配、runtime 验证清单、native/fallback/simulated 记录规则 | 自动执行授权、运行器配置、把 fallback 称为 native 成功 | 用户选择生成或验证 Claude Code / Codex native agent 配置 | `loop-blueprint.md`, `loop-operations.md`, `maker-checker-protocol.md` |
-| `.forgekit/docs/maker-checker-protocol.md` | triggered | 用户、AI 工具 | no | Maker/Checker 复查协议 | 多 agent 调度器或最终人工批准 | 中高风险复查分离 | `changes/<id>/review.md` |
+| `.forgekit/docs/maker-checker-protocol.md` | triggered | 用户、AI 工具 | no | Maker/独立 Checker、最小 review packet、ReviewType 和 gate 规则 | 自动修复、PR API、多 agent 调度器或最终人工批准 | 代码变更、核心/API/数据/权限/脚本变更、发版/tag 或 bounded-auto 收口 | `changes/<id>/review.md`, `forgekit-request-code-review`, `forgekit-code-review` |
 | `.forgekit/docs/worktree-playbook.md` | triggered | 用户、AI 工具 | no | 手动 worktree 隔离指南 | 自动 worktree 编排 | 用户要求并行隔离工作 | `work-log.md` |
 | `.forgekit/changes/<id>/*` | triggered | 开发者、复查者 | no | 单次中高风险变更过程 | 当前态事实、无关历史 | 中高风险变更开始或收口 | `document-lifecycle.md` |
 | `.forgekit/archive/*` | archive | 审计者、维护者 | no | 历史证据和旧变更材料 | 当前事实、活跃变更上下文 | 用户要求历史、审计、回归、复盘 | `document-lifecycle.md` |
 | `.forgekit/*-report.md` | generated | 用户、AI 工具 | no | 脚本生成的报告 | 当前事实或可编辑项目文档 | 脚本运行生成或覆盖 | 对应脚本文档 |
 | `.forgekit/doc-health-report.md` | generated | 用户、AI 工具 | no | managed docs 健康汇总：过长、重复、职责错位、router 边界风险 | 长期 managed doc、修复结果、事实来源 | 用户要求检查文档健康、文档太乱、哪些文档该瘦身 | `workflow-router.md`, `scripts/doc-health-report.py` |
 | `.forgekit/source-trace-report.md` | generated | 用户、AI 工具 | no | 来源追溯链路断点：source、requirement、task、change、verification、work-log、changelog 的引用关系 | 长期 managed doc、自动补 Source ID、修复结果 | 用户要求检查任务来源、完成证据、追溯链路或状态冲突 | `task-intake.md`, `task-board.md`, `work-log.md`, `scripts/source-trace-report.py` |
-| `.forgekit/handoff-package.md` / `.forgekit/changes/<id>/handoff.md` | generated | 用户、领导、reviewer、测试 | no | review-ready 交付包：范围、来源追溯、变更、不变范围、验证证据、风险和人工复查清单 | 当前事实源、正式 changelog、自动修复记录、自动 PR/commit 证据 | 用户要求阶段收口、领导汇报、reviewer 审查、测试交接或生成 handoff package | `workflow-router.md`, `scripts/handoff-package.py`, `.forgekit/doc-health-report.md`, `.forgekit/source-trace-report.md` |
+| `.forgekit/handoff-package.md` / `.forgekit/changes/<id>/handoff.md` | generated | 用户、领导、reviewer、测试 | no | review-ready 交付包：范围、来源追溯、变更、验证、独立审查证据、风险和人工复查清单 | 当前事实源、正式 changelog、自动修复记录、自动 PR/commit 证据 | 用户要求阶段收口、领导汇报、reviewer 审查、测试交接或生成 handoff package | `workflow-router.md`, `scripts/handoff-package.py`, `changes/<id>/review.md` |
 | `docs/**` 业务文档 | reference | 用户、AI 工具 | as-needed | 用户允许或要求时读取的业务证据 | 默认写入 ForgeKit 治理模板 | 用户明确要求更新业务文档 | `.forgekit/project-boundary.yml` |
 
 写入前先做 5 步判断：

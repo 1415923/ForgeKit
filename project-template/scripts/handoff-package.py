@@ -19,6 +19,7 @@ RISK_TERMS = ("risk", "blocked", "blocker", "todo_review", "todo-review", "风�
 CHANGED_TERMS = ("changed", "added", "fixed", "done", "completed", "完成", "修复", "新增", "变更")
 NOT_CHANGED_TERMS = ("non-goal", "not changed", "out of scope", "未改", "不变", "非目标", "不包含")
 WARNING_TERMS = ("warning", "error", "TODO_REVIEW", "manual_review", "blocked", "缺失", "风险")
+REVIEW_TERMS = ("ReviewDecision:", "ReviewType:", "ReviewerAgent:", "ReviewedRange:", "FinalVerdict:")
 
 
 def utc_now():
@@ -163,6 +164,17 @@ def collect_risks(docs, change_files):
     return risks
 
 
+def collect_review_evidence(change_files):
+    review = change_files.get("review.md")
+    if not review:
+        return []
+    evidence = []
+    for idx, line in enumerate(review["text"].splitlines(), start=1):
+        if any(line.strip().startswith(term) for term in REVIEW_TERMS):
+            evidence.append(f"{review['path'].as_posix()}:{idx}: {line.strip()}")
+    return evidence
+
+
 def summarize_report(path):
     if not path.is_file():
         return [f"- {path.as_posix()}: missing"]
@@ -185,6 +197,7 @@ def build_report(project_root, docs_root, change_root, change_id=None):
     scope = collect_scope(docs, change_files)
     verification = collect_verification(docs, change_files)
     risks = collect_risks(docs, change_files)
+    review_evidence = collect_review_evidence(change_files)
 
     changed = []
     for name in ("changelog", "work-log", "task-board"):
@@ -213,6 +226,8 @@ def build_report(project_root, docs_root, change_root, change_id=None):
         todo.append("TODO_REVIEW: verification evidence is missing or not machine-detectable.")
     if not risks:
         todo.append("TODO_REVIEW: risk/blocker status is not explicit; confirm whether there are open risks.")
+    if change_id and not review_evidence:
+        todo.append("TODO_REVIEW: independent code review evidence is missing from change review.md.")
 
     doc_health_path = project_root / ".forgekit" / "doc-health-report.md"
     source_trace_path = project_root / ".forgekit" / "source-trace-report.md"
@@ -271,6 +286,10 @@ def build_report(project_root, docs_root, change_root, change_id=None):
         "",
         *bullet_lines(verification, "- TODO_REVIEW: verification evidence missing."),
         "",
+        "## Independent Code Review",
+        "",
+        *bullet_lines(review_evidence, "- TODO_REVIEW: independent review evidence is not available for this handoff scope."),
+        "",
         "## Doc Health / Source Trace Status",
         "",
         *summarize_report(doc_health_path),
@@ -290,6 +309,7 @@ def build_report(project_root, docs_root, change_root, change_id=None):
         "- [ ] What Changed matches the actual implementation and user-visible behavior.",
         "- [ ] What Did Not Change is explicit enough for reviewer / tester / leader review.",
         "- [ ] Verification Evidence is enough for the current risk level.",
+        "- [ ] Independent Review is pass, or needs-fix/manual-review has explicit human risk acceptance.",
         "- [ ] Doc Health / Source Trace warnings are acknowledged or intentionally deferred.",
         "- [ ] Risks / Blockers are accepted, assigned, or closed.",
         "",

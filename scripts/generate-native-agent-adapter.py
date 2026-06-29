@@ -5,7 +5,7 @@ import sys
 from pathlib import Path
 
 
-VERSION = "0.36.0"
+VERSION = "0.37.0"
 
 TARGET_FILES = {
     "claude-code": [
@@ -218,5 +218,3 @@ def main(argv=None):
 
 if __name__ == "__main__":
     main()
-
-

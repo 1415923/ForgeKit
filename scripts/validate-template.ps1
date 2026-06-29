@@ -622,7 +622,7 @@ function Test-TemplateManifest {
     $manifestPath = Join-Path $repoRoot "project-template\.forgekit\template-manifest.json"
     if (Test-Path -LiteralPath $manifestPath) {
         $manifest = Get-Content -LiteralPath $manifestPath -Raw | ConvertFrom-Json
-        if ($manifest.template_version -ne "0.36.0") {
+        if ($manifest.template_version -ne "0.37.0") {
             Add-Error "Unexpected template manifest version: $($manifest.template_version)"
         }
         $sources = @($manifest.files | ForEach-Object { $_.source_path })
@@ -1071,7 +1071,7 @@ function Test-HarnessEntryConsistency {
     Test-RequiredPath "project-template\migrations\0.36.0\migration.json"
     Test-RequiredPath "project-template\.forgekit\state.json"
     Test-RequiredPattern "project-template\.forgekit\state.json" '"schema_version": 1' "State schema version"
-    Test-RequiredPattern "project-template\.forgekit\state.json" '"forgekit_version": "0.36.0"' "State ForgeKit version"
+    Test-RequiredPattern "project-template\.forgekit\state.json" '"forgekit_version": "0.37.0"' "State ForgeKit version"
     Test-RequiredPattern "project-template\.forgekit\state.json" '"managed_docs_root": ".forgekit/docs"' "State managed docs root"
     Test-RequiredPattern "project-template\.forgekit\state.json" '"change_root": ".forgekit/changes"' "State change root"
     Test-RequiredPattern "project-template\.forgekit\state.json" '"last_upgrade": null' "State last upgrade"
@@ -1135,7 +1135,7 @@ function Test-PluginDistribution {
     if ($codexPluginJson.name -ne "forgekit") {
         Add-Error "Unexpected Codex plugin name in root plugin.json: $($codexPluginJson.name)"
     }
-    if ($codexPluginJson.version -ne "0.36.0") {
+    if ($codexPluginJson.version -ne "0.37.0") {
         Add-Error "Unexpected Codex plugin version in root plugin.json: $($codexPluginJson.version)"
     }
     if ($codexPluginJson.skills -ne "./skills/") {
@@ -1146,7 +1146,7 @@ function Test-PluginDistribution {
     if ($claudePluginJson.name -ne "forgekit") {
         Add-Error "Unexpected Claude plugin name in root plugin.json: $($claudePluginJson.name)"
     }
-    if ($claudePluginJson.version -ne "0.36.0") {
+    if ($claudePluginJson.version -ne "0.37.0") {
         Add-Error "Unexpected Claude plugin version in root plugin.json: $($claudePluginJson.version)"
     }
     $claudeSkills = @($claudePluginJson.skills)
@@ -1165,6 +1165,65 @@ function Test-ClaudePluginDistribution {
     Test-RequiredPattern "project-template\.claude\skills\forgekit-project-workflow\SKILL.md" "Discovery State" "Claude thin entry skill"
 }
 
+function Test-IndependentCodeReviewProtocol {
+    $paths = @(
+        "project-template\.claude\agents\forgekit-code-reviewer.md",
+        "project-template\.codex\agents\forgekit-code-reviewer.toml",
+        "project-template\.claude\skills\forgekit-request-code-review\SKILL.md",
+        "project-template\.claude\skills\forgekit-code-review\SKILL.md",
+        "project-template\.claude\skills\forgekit-code-review\references\universal-review.md",
+        "project-template\.claude\skills\forgekit-code-review\references\security-review.md",
+        "project-template\.claude\skills\forgekit-code-review\references\testing-review.md",
+        "migrations\0.37.0\migration.json",
+        "project-template\migrations\0.37.0\migration.json"
+    )
+    foreach ($item in $paths) { Test-RequiredPath $item }
+
+    Test-RequiredPattern "project-template\.claude\agents\forgekit-code-reviewer.md" "permissionMode: plan" "Claude code reviewer read-only permission"
+    Test-RequiredPattern "project-template\.claude\agents\forgekit-code-reviewer.md" "ReviewDecision" "Claude code reviewer output"
+    Test-RequiredPattern "project-template\.codex\agents\forgekit-code-reviewer.toml" 'name = "forgekit-code-reviewer"' "Codex code reviewer name"
+    Test-RequiredPattern "project-template\.codex\agents\forgekit-code-reviewer.toml" 'description = "' "Codex code reviewer description string"
+    Test-RequiredPattern "project-template\.codex\agents\forgekit-code-reviewer.toml" 'developer_instructions = """' "Codex code reviewer instructions string"
+    Test-NoPattern "project-template\.codex\agents\forgekit-code-reviewer.toml" "[developer_instructions]" "Codex code reviewer instructions table"
+    Test-RequiredPattern "project-template\.claude\skills\forgekit-request-code-review\SKILL.md" "Do not provide the maker's full conversation history" "Request review context isolation"
+    Test-RequiredPattern "project-template\.claude\skills\forgekit-code-review\SKILL.md" "Read-only" "Code review skill read-only"
+    Test-RequiredPattern "project-template\.claude\skills\forgekit-code-review\SKILL.md" "needs-fix" "Code review blocking decision"
+    Test-RequiredPattern "project-template\docs\maker-checker-protocol.md" "self-review" "Self-review distinction"
+    Test-RequiredPattern "project-template\docs\maker-checker-protocol.md" "mandatory independent review" "Independent review trigger"
+    Test-RequiredPattern "project-template\docs\bounded-auto-loop-policy.md" "Independent Review Gate" "Bounded-auto independent review gate"
+    Test-RequiredPattern "project-template\changes\_template\review.md" "ReviewType: independent | self-review" "Review type field"
+    Test-RequiredPattern "project-template\changes\_template\review.md" "ReviewerAgent:" "Reviewer agent field"
+    Test-RequiredPattern "scripts\handoff-package.py" "Independent Code Review" "Handoff review evidence"
+    Test-RequiredPattern "scripts\check-codex-native-agents.py" "forgekit-code-reviewer" "Codex doctor reviewer coverage"
+    Test-RequiredPattern "migrations\0.37.0\migration.json" '"from": "0.36.0"' "v0.37 migration source"
+    Test-RequiredPattern "migrations\0.37.0\migration.json" '"to": "0.37.0"' "v0.37 migration target"
+
+    $skillFiles = @(
+        "project-template\.claude\skills\forgekit-request-code-review\SKILL.md",
+        "project-template\.claude\skills\forgekit-code-review\SKILL.md",
+        "project-template\.claude\skills\forgekit-code-review\references\universal-review.md",
+        "project-template\.claude\skills\forgekit-code-review\references\security-review.md",
+        "project-template\.claude\skills\forgekit-code-review\references\testing-review.md"
+    )
+    foreach ($relative in $skillFiles) {
+        $full = Join-Path $repoRoot $relative
+        $bytes = [System.IO.File]::ReadAllBytes($full)
+        if ($bytes | Where-Object { $_ -gt 127 }) { Add-Error "Independent review skill must be ASCII-only: $relative" }
+        if ((Get-Content -LiteralPath $full).Count -gt 180) { Add-Error "Independent review skill/reference is too large: $relative" }
+    }
+
+    $manifest = Get-Content -LiteralPath (Join-Path $repoRoot "project-template\.forgekit\template-manifest.json") -Raw | ConvertFrom-Json
+    $sources = @($manifest.files | ForEach-Object { $_.source_path })
+    foreach ($source in @(
+        ".claude/agents/forgekit-code-reviewer.md",
+        ".codex/agents/forgekit-code-reviewer.toml",
+        ".claude/skills/forgekit-request-code-review/SKILL.md",
+        ".claude/skills/forgekit-code-review/SKILL.md",
+        "migrations/0.37.0/migration.json"
+    )) {
+        if ($sources -notcontains $source) { Add-Error "Independent review template missing from manifest: $source" }
+    }
+}
 Test-RequiredPath "README.md"
 Test-RequiredPath "AGENTS.md"
 Test-RequiredPath "scripts\init-project-template.ps1"
@@ -1211,6 +1270,7 @@ Test-HarnessEntryConsistency
 Test-StackHarnessDetails
 Test-LargeChangeProtocol
 Test-TeamToolingProtocol
+Test-IndependentCodeReviewProtocol
 Test-AgentSuitability
 Test-ExecutableHarness
 Test-PluginDistribution
@@ -1244,5 +1304,3 @@ if ($errors.Count -gt 0) {
 }
 
 Write-Host "[ok] Template validation passed"
-
-

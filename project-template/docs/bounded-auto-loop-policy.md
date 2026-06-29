@@ -65,6 +65,15 @@ ManagedDocsWriteback: off | minimal | full-review
 - 不得把 fallback、worker、explorer、general-purpose 或 simulated 执行说成 native。
 - thread limit、`max_threads` 或已完成 agent 未关闭导致 spawn 失败时，记录为容量阻塞，不等于 native unavailable。
 
+## Independent Review Gate
+
+- bounded-auto 收口前必须调用独立 `forgekit-code-reviewer`；self-review 不能满足该 gate。
+- Maker 只传任务摘要、diff/stat、changed files、验证输出和已知风险，不传完整会话历史。
+- reviewer 必须 read-only，不自动修复。
+- `ReviewDecision: pass` 才能进入最终 handoff。
+- `needs-fix` 必须停止并回到 Maker 修复，或等待用户明确接受风险。
+- `manual-review`、reviewer 不可用或独立执行无法确认时必须停止并升级给人。
+
 ## Stop Conditions
 
 命中以下任一条件必须停止：
@@ -77,6 +86,7 @@ ManagedDocsWriteback: off | minimal | full-review
 - 需要修改 business docs、deploy、CI、release、migration、外部系统或 `.forgekit/template-lock.json`。
 - 需要 commit、tag、push、issue、PR、MCP 写操作、connector 写操作、worktree orchestration 或自动调度。
 - AgentModeRequired 不满足。
+- mandatory independent review 未执行、reviewer 不可用、`ReviewDecision: needs-fix` 或 `manual-review`。
 - native-only 要求下 native agent 不可用。
 - 需要根据 `.forgekit/doc-health-report.md` 自动瘦身、归档、重写或合并 managed docs。
 - 需要根据 `.forgekit/source-trace-report.md` 自动补 Source ID、改写任务状态、补验证记录或合并 changelog。

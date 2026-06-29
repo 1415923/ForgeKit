@@ -119,6 +119,10 @@ When a task names a ForgeKit skill, read the project-local `.agents/skills/<skil
 - Maker phase may say `ready for check`, but must not declare final pass.
 - Checker phase should review diff, validation, risks, and document sync; it should output `pass`, `needs-fix`, or `manual-review`.
 - Checker should not expand scope or implement new features unless the user explicitly asks.
+- Code changes require independent review by default; core logic, API, data, permissions, scripts, release/tag, and bounded-auto closure require it.
+- Use `forgekit-request-code-review` to send only the task summary, diff/stat, changed files, validation output, and known risks to `forgekit-code-reviewer`; never pass the maker's full session history.
+- Self-review must be labeled `ReviewType: self-review` and cannot satisfy an independent-review gate. If the reviewer is unavailable, use `manual-review`, never `pass`.
+- The reviewer is read-only. `needs-fix` blocks handoff/commit unless the maker fixes it or the user explicitly accepts the risk; `manual-review` requires human confirmation.
 - For company or business projects, Checker must check for accidental writes to sensitive information, business docs, secrets, deploy files, and CI.
 - Do not create a worktree unless the user explicitly asks.
 - Before creating a worktree, confirm `git status --short` is clean and state base branch, worktree path, branch name, allowed paths, validation command, and cleanup plan.

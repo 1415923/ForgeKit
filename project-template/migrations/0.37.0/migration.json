@@ -1,0 +1,76 @@
+{
+  "id": "0.37.0-independent-code-review",
+  "title": "Independent code review protocol",
+  "from": "0.36.0",
+  "to": "0.37.0",
+  "risk": "medium",
+  "actions": [
+    {
+      "id": "install-claude-code-reviewer",
+      "type": "copy_file_if_missing",
+      "safety": "safe",
+      "source": "files/.claude/agents/forgekit-code-reviewer.md",
+      "target": ".claude/agents/forgekit-code-reviewer.md"
+    },
+    {
+      "id": "install-codex-code-reviewer",
+      "type": "copy_file_if_missing",
+      "safety": "safe",
+      "source": "files/.codex/agents/forgekit-code-reviewer.toml",
+      "target": ".codex/agents/forgekit-code-reviewer.toml"
+    },
+    {
+      "id": "install-request-code-review-skill",
+      "type": "copy_file_if_missing",
+      "safety": "safe",
+      "source": "files/.claude/skills/forgekit-request-code-review/SKILL.md",
+      "target": ".claude/skills/forgekit-request-code-review/SKILL.md"
+    },
+    {
+      "id": "install-code-review-skill",
+      "type": "copy_file_if_missing",
+      "safety": "safe",
+      "source": "files/.claude/skills/forgekit-code-review/SKILL.md",
+      "target": ".claude/skills/forgekit-code-review/SKILL.md"
+    },
+    {
+      "id": "install-universal-review-reference",
+      "type": "copy_file_if_missing",
+      "safety": "safe",
+      "source": "files/.claude/skills/forgekit-code-review/references/universal-review.md",
+      "target": ".claude/skills/forgekit-code-review/references/universal-review.md"
+    },
+    {
+      "id": "install-security-review-reference",
+      "type": "copy_file_if_missing",
+      "safety": "safe",
+      "source": "files/.claude/skills/forgekit-code-review/references/security-review.md",
+      "target": ".claude/skills/forgekit-code-review/references/security-review.md"
+    },
+    {
+      "id": "install-testing-review-reference",
+      "type": "copy_file_if_missing",
+      "safety": "safe",
+      "source": "files/.claude/skills/forgekit-code-review/references/testing-review.md",
+      "target": ".claude/skills/forgekit-code-review/references/testing-review.md"
+    },
+    {
+      "id": "enable-independent-code-review",
+      "type": "set_state_feature",
+      "safety": "safe",
+      "name": "independent_code_review",
+      "value": true
+    }
+  ],
+  "manual_review": [
+    "Merge the v0.37 independent review gate into AGENTS.md, CLAUDE.md, and .codex/rules.md without replacing local rules.",
+    "Review maker-checker, workflow-router, bounded-auto, handoff, and document responsibility updates before adopting them.",
+    "Runtime availability of a generated reviewer agent must still be verified; generated configuration is not invocation evidence."
+  ],
+  "non_goals": [
+    "No automatic code fixes",
+    "No automatic review dispatch",
+    "No PR comments or GitHub API integration",
+    "No automatic commit, push, PR, runner, daemon, or worktree orchestration"
+  ]
+}

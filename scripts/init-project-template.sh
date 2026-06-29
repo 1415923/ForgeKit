@@ -183,7 +183,7 @@ write_boundary_config() {
   mkdir -p "$(dirname "$boundary_file")"
   cat > "$boundary_file" <<EOF
 forgekit:
-  version: "0.36.0"
+  version: "0.37.0"
   mode: "$mode"
 
 roots:
@@ -236,13 +236,14 @@ write_forgekit_state() {
   cat > "$state_file" <<EOF
 {
   "schema_version": 1,
-  "forgekit_version": "0.36.0",
+  "forgekit_version": "0.37.0",
   "managed_docs_root": ".forgekit/docs",
   "change_root": ".forgekit/changes",
   "mode": "$mode",
   "features": {
     "versioned_migrations": true,
     "managed_docs_writeback": "minimal",
+    "independent_code_review": true,
     "native_agent_adapter": "$native_agent_adapter"
   },
   "last_upgrade": null
@@ -258,7 +259,7 @@ init_code_root() {
   fi
 
   case "$project_name" in
-    *[\\/:*?\"'<>|]*)
+    *\\*|*/*|*:*|*\**|*\?*|*\"*|*"'"*|*\<*|*\>*|*\|*)
       echo "ProjectName contains characters that cannot be used as a folder name: $project_name" >&2
       exit 1
       ;;
@@ -310,7 +311,10 @@ write_codex_metadata() {
 
   local stack_text="deferred"
   if [[ ${#stacks[@]} -gt 0 && -n "${stacks[*]// /}" ]]; then
-    stack_text="$(IFS=', '; echo "${stacks[*]}")"
+    local previous_ifs="$IFS"
+    IFS=", "
+    stack_text="${stacks[*]}"
+    IFS="$previous_ifs"
   fi
 
   mkdir -p "$(dirname "$metadata_file")"
@@ -349,7 +353,10 @@ write_claude_metadata() {
 
   local stack_text="deferred"
   if [[ ${#stacks[@]} -gt 0 && -n "${stacks[*]// /}" ]]; then
-    stack_text="$(IFS=', '; echo "${stacks[*]}")"
+    local previous_ifs="$IFS"
+    IFS=", "
+    stack_text="${stacks[*]}"
+    IFS="$previous_ifs"
   fi
 
   mkdir -p "$(dirname "$metadata_file")"
@@ -454,5 +461,3 @@ echo "Do not choose a tech stack here. ForgeKit will confirm or infer it during 
 if [[ "$upgrade" -eq 1 ]]; then
   echo "Upgrade note: report-only mode preserved existing files and lock. Review .forgekit/upgrade-report.md and candidate templates under .forgekit/upgrade-export manually."
 fi
-
-

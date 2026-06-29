@@ -12,13 +12,21 @@ NotVerified:
 ## Checker 复查
 
 CheckerStatus: pass | needs-fix | manual-review | not-run
+ReviewDecision: pass | needs-fix | manual-review
+ReviewType: independent | self-review
+ReviewerAgent:
+ReviewedRange:
 DiffReviewed: yes | no
 ValidationReviewed: yes | no
 DocsReviewed: yes | no
 RisksReviewed: yes | no
 Findings:
 RequiredFixes:
+VerificationGaps:
+TODO_REVIEW:
 FinalRecommendation:
+
+`self-review` 不能满足 mandatory independent review。reviewer agent 不可用或独立执行无法确认时，使用 `manual-review`，不得写 `pass`。
 
 ## 自查
 
