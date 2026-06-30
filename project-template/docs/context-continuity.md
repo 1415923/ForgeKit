@@ -85,6 +85,10 @@ ForgeKit upgrade 后旧会话只用于收口，不继续承担新版本后的新
 
 如果无法确认当前工具是否已重新加载，将会话状态视为 stale，停止新任务并要求刷新会话。
 
+## Maintenance Checkpoint
+
+upgrade sync、Archive Capsule、handoff 或其他维护动作前，先记录当前范围、状态、未完成项和计划路径；操作后记录实际动作、验证、summary/index 路径和下一步。Archive Capsule 的 `archive-summary.md` 是恢复历史上下文的入口，但不是 current truth；默认先通过 `.forgekit/archive/index.md` 定位，不读取全量 archive。升级完成后继续遵守 Post-Upgrade Session Refresh。
+
 ## Subagent Output Handling
 
 - 父运行时负责判断和记录子 agent 输出，不要求子 agent自行修改 managed docs。

@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
 import argparse
 import hashlib
-import importlib.util
 import json
 import os
 import re
@@ -10,7 +9,10 @@ import subprocess
 import sys
 import tempfile
 import tomllib
+import types
 from pathlib import Path
+
+sys.dont_write_bytecode = True
 
 
 LEGACY_NAME_RE = re.compile(r"#U[0-9a-fA-F]{4}")
@@ -67,6 +69,8 @@ REQUIRED_REPO_PATHS = [
     "project-template/docs/loop-operations.md",
     "project-template/docs/bounded-auto-loop-policy.md",
     "project-template/docs/context-continuity.md",
+    "project-template/docs/project-maintenance.md",
+    "project-template/docs/archive-capsule.md",
     "project-template/docs/maker-checker-protocol.md",
     "project-template/docs/native-agent-adapter.md",
     "project-template/docs/worktree-playbook.md",
@@ -82,18 +86,24 @@ REQUIRED_REPO_PATHS = [
     "project-template/.claude/skills/forgekit-code-review/references/universal-review.md",
     "project-template/.claude/skills/forgekit-code-review/references/security-review.md",
     "project-template/.claude/skills/forgekit-code-review/references/testing-review.md",
+    "project-template/.claude/skills/forgekit-maintenance/SKILL.md",
     "project-template/migrations/0.37.0/migration.json",
     "project-template/migrations/0.38.0/migration.json",
+    "project-template/migrations/0.39.0/migration.json",
     "migrations/0.37.0/migration.json",
     "migrations/0.38.0/migration.json",
+    "migrations/0.39.0/migration.json",
     "project-template/scripts/check-codex-native-agents.py",
     "project-template/scripts/doc-health-report.py",
     "project-template/scripts/source-trace-report.py",
     "project-template/scripts/handoff-package.py",
+    "project-template/scripts/archive-capsule.py",
     "scripts/check-codex-native-agents.py",
     "scripts/doc-health-report.py",
     "scripts/source-trace-report.py",
     "scripts/handoff-package.py",
+    "scripts/archive-capsule.py",
+    "scripts/forgekit-project.py",
     ".codex-plugin/plugin.json",
     ".claude-plugin/plugin.json",
 ]
@@ -118,6 +128,8 @@ REQUIRED_GENERATED_PATHS = [
     ".forgekit/docs/loop-operations.md",
     ".forgekit/docs/bounded-auto-loop-policy.md",
     ".forgekit/docs/context-continuity.md",
+    ".forgekit/docs/project-maintenance.md",
+    ".forgekit/docs/archive-capsule.md",
     ".forgekit/docs/maker-checker-protocol.md",
     ".forgekit/docs/native-agent-adapter.md",
     ".forgekit/docs/worktree-playbook.md",
@@ -134,8 +146,10 @@ REQUIRED_GENERATED_PATHS = [
     ".claude/skills/forgekit-code-review/references/universal-review.md",
     ".claude/skills/forgekit-code-review/references/security-review.md",
     ".claude/skills/forgekit-code-review/references/testing-review.md",
+    ".claude/skills/forgekit-maintenance/SKILL.md",
     "migrations/0.37.0/migration.json",
     "migrations/0.38.0/migration.json",
+    "migrations/0.39.0/migration.json",
     "governance/ai-engineering-loop.md",
     ".forgekit/changes/README.md",
     ".forgekit/changes/_template/proposal.md",
@@ -151,20 +165,29 @@ REQUIRED_GENERATED_PATHS = [
     "scripts/doc-health-report.py",
     "scripts/source-trace-report.py",
     "scripts/handoff-package.py",
+    "scripts/archive-capsule.py",
     "scripts/forgekit-upgrade.py",
     "migrations/0.36.0/migration.json",
     "scripts/archive-changes.py",
 ]
 
 
-def run(cmd, cwd, check=True):
+def run(cmd, cwd, check=True, input_text=None):
+    environment = os.environ.copy()
+    environment["GIT_CONFIG_GLOBAL"] = os.devnull
+    environment["GIT_CONFIG_NOSYSTEM"] = "1"
+    environment["PYTHONDONTWRITEBYTECODE"] = "1"
+    environment["HOME"] = str(Path(cwd).resolve())
+    environment["XDG_CONFIG_HOME"] = str(Path(cwd).resolve() / ".config")
     result = subprocess.run(
         cmd,
         cwd=cwd,
+        env=environment,
         text=True,
         encoding="utf-8",
         errors="replace",
         capture_output=True,
+        input=input_text,
         shell=False,
     )
     if check and result.returncode != 0:
@@ -252,12 +275,9 @@ def sha256_file(path):
 
 def load_manifest_tool(repo):
     script = repo / "scripts" / "update-template-manifest.py"
-    spec = importlib.util.spec_from_file_location("forgekit_template_manifest", script)
-    if spec is None or spec.loader is None:
-        fail("Unable to load update-template-manifest.py for checksum regression test")
-    module = importlib.util.module_from_spec(spec)
-    spec.loader.exec_module(module)
-    return module
+    namespace = {"__name__": "forgekit_template_manifest", "__file__": str(script)}
+    exec(compile(script.read_text(encoding="utf-8"), str(script), "exec"), namespace)
+    return types.SimpleNamespace(sha256_file=namespace["sha256_file"])
 
 
 def assert_manifest_checksum_stability(repo):
@@ -929,6 +949,33 @@ def assert_context_continuity(root, doc_path):
     if "Context Checkpoint" not in policy or "长工具输出只保留摘要" not in policy:
         fail("bounded-auto policy missing context checkpoint boundary")
 
+
+def assert_project_maintenance(root):
+    docs_root = root / "docs" if (root / "docs/project-maintenance.md").is_file() else root / ".forgekit/docs"
+    maintenance = (docs_root / "project-maintenance.md").read_text(encoding="utf-8")
+    capsule = (docs_root / "archive-capsule.md").read_text(encoding="utf-8")
+    skill = (root / ".claude/skills/forgekit-maintenance/SKILL.md").read_text(encoding="ascii")
+    for marker in [
+        "Maintenance Intents", "Unified Project Bootstrap / Install-or-Upgrade Entry", "Upgrade Sync", "Archive Capsule", "Plan before Apply",
+        "Confirmation Rules", "Post-Operation Summary", "intent -> plan -> confirm/apply -> summary/index",
+    ]:
+        if marker not in maintenance:
+            fail(f"project-maintenance.md missing marker: {marker}")
+    for marker in [
+        "Archive is not deletion", "Capsule structure", "Archive index", "Archived items log",
+        "Legacy archive handling", "Plan / apply boundary",
+    ]:
+        if marker not in capsule:
+            fail(f"archive-capsule.md missing marker: {marker}")
+    for marker in ["project-bootstrap", "upgrade-sync", "archive-capsule", "context-checkpoint", "handoff", "doc-health", "source-trace"]:
+        if marker not in skill:
+            fail(f"forgekit-maintenance skill missing intent: {marker}")
+    for entry in ["AGENTS.md", "CLAUDE.md", ".codex/rules.md"]:
+        text = (root / entry).read_text(encoding="utf-8")
+        for marker in ["MaintenanceIntent", "plan", "归档不是删除"]:
+            if marker not in text:
+                fail(f"{entry} missing project maintenance rule: {marker}")
+
 def assert_worktree_playbook(root, playbook_path, blueprint_path, maker_checker_path, agents_path, claude_path, rules_path):
     playbook = (root / playbook_path).read_text(encoding="utf-8")
     blueprint = (root / blueprint_path).read_text(encoding="utf-8")
@@ -1244,8 +1291,8 @@ def assert_json(path):
 def assert_manifest_lock(target):
     lock_path = target / ".forgekit" / "template-lock.json"
     lock = json.loads(lock_path.read_text(encoding="utf-8"))
-    if lock.get("installed_version") != "0.38.0":
-        fail("template-lock installed_version must be 0.38.0")
+    if lock.get("installed_version") != "0.39.0":
+        fail("template-lock installed_version must be 0.39.0")
     if lock.get("managed_docs_root") != ".forgekit/docs":
         fail("template-lock managed_docs_root must match boundary")
     if lock.get("change_root") != ".forgekit/changes":
@@ -1264,7 +1311,7 @@ def assert_versioned_migration_upgrade(repo, target, temp_parent):
     state = json.loads(state_path.read_text(encoding="utf-8-sig"))
     expected = {
         "schema_version": 1,
-        "forgekit_version": "0.38.0",
+        "forgekit_version": "0.39.0",
         "managed_docs_root": ".forgekit/docs",
         "change_root": ".forgekit/changes",
         "mode": "Standard",
@@ -1279,6 +1326,8 @@ def assert_versioned_migration_upgrade(repo, target, temp_parent):
         fail("state.json must enable independent_code_review")
     if state.get("features", {}).get("context_continuity") is not True:
         fail("state.json must enable context_continuity")
+    if state.get("features", {}).get("project_maintenance_operations") is not True:
+        fail("state.json must enable project_maintenance_operations")
 
     script = target / "scripts" / "forgekit-upgrade.py"
     before_state = state_path.read_bytes()
@@ -1288,8 +1337,8 @@ def assert_versioned_migration_upgrade(repo, target, temp_parent):
         if path.is_file()
     }
     check = run([sys.executable, str(script), "check", "--repo-root", "."], cwd=target)
-    if "Status: current" not in check.stdout or "Current version: 0.38.0" not in check.stdout:
-        fail("versioned migration check did not report current v0.38.0 state")
+    if "Status: current" not in check.stdout or "Current version: 0.39.0" not in check.stdout:
+        fail("versioned migration check did not report current v0.39.0 state")
     plan = run([sys.executable, str(script), "plan", "--repo-root", "."], cwd=target)
     for marker in ["Status: report-only", "Mode: versioned-migration-plan", "No files were changed."]:
         if marker not in plan.stdout:
@@ -1314,15 +1363,30 @@ def assert_versioned_migration_upgrade(repo, target, temp_parent):
     v036_state["forgekit_version"] = "0.36.0"
     v036_state.setdefault("features", {}).pop("independent_code_review", None)
     v036_state.setdefault("features", {}).pop("context_continuity", None)
+    v036_state.setdefault("features", {}).pop("project_maintenance_operations", None)
     v036_state_path.write_text(json.dumps(v036_state, indent=2) + "\n", encoding="utf-8")
+    for introduced_file in [
+        ".forgekit/docs/context-continuity.md",
+        ".forgekit/docs/project-maintenance.md",
+        ".forgekit/docs/archive-capsule.md",
+        "scripts/archive-capsule.py",
+    ]:
+        path = v036_target / introduced_file
+        if path.is_file():
+            path.unlink()
+    maintenance_skill = v036_target / ".claude/skills/forgekit-maintenance"
+    if maintenance_skill.is_dir():
+        shutil.rmtree(maintenance_skill)
     run([sys.executable, str(v036_target / "scripts/forgekit-upgrade.py"), "apply", "--safe", "--repo-root", "."], cwd=v036_target)
     migrated = json.loads(v036_state_path.read_text(encoding="utf-8"))
-    if migrated.get("forgekit_version") != "0.38.0":
-        fail("version chain did not update state to v0.38.0")
+    if migrated.get("forgekit_version") != "0.39.0":
+        fail("version chain did not update state to v0.39.0")
     if migrated.get("features", {}).get("independent_code_review") is not True:
         fail("v0.37 migration did not enable independent_code_review")
     if migrated.get("features", {}).get("context_continuity") is not True:
         fail("v0.38 migration did not enable context_continuity")
+    if migrated.get("features", {}).get("project_maintenance_operations") is not True:
+        fail("v0.39 migration did not enable project_maintenance_operations")
 
     legacy = temp_parent / "pre-v036-adoption"
     (legacy / ".forgekit").mkdir(parents=True)
@@ -1339,14 +1403,14 @@ def assert_versioned_migration_upgrade(repo, target, temp_parent):
     apply_target = temp_parent / "versioned-apply"
     shutil.copytree(target, apply_target)
     migration_root = temp_parent / "migration-packages"
-    package = migration_root / "0.38.1"
+    package = migration_root / "0.39.1"
     package.mkdir(parents=True)
     (package / "proof.txt").write_text("safe migration\n", encoding="utf-8")
     migration = {
-        "id": "0.38.1-smoke",
+        "id": "0.39.1-smoke",
         "title": "Smoke safe migration",
-        "from": "0.38.0",
-        "to": "0.38.1",
+        "from": "0.39.0",
+        "to": "0.39.1",
         "risk": "low",
         "actions": [{
             "id": "copy-proof",
@@ -1364,16 +1428,127 @@ def assert_versioned_migration_upgrade(repo, target, temp_parent):
     apply_plan = run([
         sys.executable, str(apply_script), "plan", "--repo-root", ".", "--migration-root", str(migration_root)
     ], cwd=apply_target)
-    if "To: 0.38.1" not in apply_plan.stdout or (apply_target / ".forgekit" / "migration-proof.txt").exists():
+    if "To: 0.39.1" not in apply_plan.stdout or (apply_target / ".forgekit" / "migration-proof.txt").exists():
         fail("plan must show the safe migration without applying it")
     run([
         sys.executable, str(apply_script), "apply", "--safe", "--repo-root", ".", "--migration-root", str(migration_root)
     ], cwd=apply_target)
     applied_state = json.loads((apply_target / ".forgekit" / "state.json").read_text(encoding="utf-8"))
-    if applied_state.get("forgekit_version") != "0.38.1":
+    if applied_state.get("forgekit_version") != "0.39.1":
         fail("safe migration did not update state version")
     if not (apply_target / ".forgekit" / "migration-proof.txt").is_file():
         fail("safe migration did not apply the declared safe action")
+
+
+def assert_unified_project_entry(repo, current_target, temp_parent):
+    script = repo / "scripts/forgekit-project.py"
+
+    uninstalled = temp_parent / "unified-uninstalled"
+    dry_run = run(
+        [sys.executable, str(script), "--target", str(uninstalled), "--dry-run"],
+        cwd=repo,
+    )
+    for marker in ["Detected action: init", "Check result: uninstalled", "No files were changed"]:
+        if marker not in dry_run.stdout:
+            fail(f"unified uninstalled dry-run missing marker: {marker}")
+    if uninstalled.exists():
+        fail("unified init dry-run must not create the target directory")
+
+    preserved_init = temp_parent / "unified-existing-workspace"
+    preserved_init.mkdir()
+    existing_readme = preserved_init / "README.md"
+    existing_readme.write_text("existing project file\n", encoding="utf-8")
+    existing_before = existing_readme.read_bytes()
+    initialized = run([
+        sys.executable, str(script), "--target", str(preserved_init), "--force-init", "--yes",
+    ], cwd=repo)
+    if "ForgeKit initialization completed through the existing init entry point" not in initialized.stdout:
+        fail("unified --force-init --yes did not delegate to the existing init script")
+    if existing_readme.read_bytes() != existing_before:
+        fail("unified --force-init must preserve existing target files")
+    if not (preserved_init / ".forgekit/state.json").is_file():
+        fail("unified initialization did not create state.json")
+    if not (preserved_init / "unified-existing").is_dir():
+        fail("unified initialization did not create the derived inner project directory")
+
+    current_state = current_target / ".forgekit/state.json"
+    current_before = current_state.read_bytes()
+    current = run([sys.executable, str(script), "--target", str(current_target)], cwd=repo, input_text="\n")
+    if "Detected action: up-to-date" not in current.stdout or "No files were changed" not in current.stdout:
+        fail("unified entry must report an up-to-date project without writes")
+    if current_state.read_bytes() != current_before:
+        fail("unified up-to-date check must not rewrite state.json")
+
+    def write_state(root, version):
+        state_path = root / ".forgekit/state.json"
+        state_path.parent.mkdir(parents=True, exist_ok=True)
+        state = json.loads((repo / "project-template/.forgekit/state.json").read_text(encoding="utf-8"))
+        state["forgekit_version"] = version
+        state_path.write_text(json.dumps(state, indent=2) + "\n", encoding="utf-8")
+        return state_path
+
+    old = temp_parent / "unified-old-no-confirm"
+    old_state = write_state(old, "0.38.0")
+    business = old / "docs/business.md"
+    business.parent.mkdir(parents=True)
+    business.write_text("business truth\n", encoding="utf-8")
+    old_state_before = old_state.read_bytes()
+    business_before = business.read_bytes()
+    old_plan = run([sys.executable, str(script), "--target", str(old)], cwd=repo, input_text="\n")
+    for marker in [
+        "Detected action: upgrade-sync", "Check result: update-available",
+        "Status: report-only", "Safe actions count:", "Manual actions count:",
+        "Safe apply was not executed",
+    ]:
+        if marker not in old_plan.stdout:
+            fail(f"unified old-version plan missing marker: {marker}")
+    if old_state.read_bytes() != old_state_before or business.read_bytes() != business_before:
+        fail("unified upgrade without explicit yes must not modify project files")
+
+    apply_target = temp_parent / "unified-old-apply"
+    apply_state = write_state(apply_target, "0.38.0")
+    apply_business = apply_target / "docs/business.md"
+    apply_business.parent.mkdir(parents=True)
+    apply_business.write_text("business truth\n", encoding="utf-8")
+    apply_business_before = apply_business.read_bytes()
+    applied = run([sys.executable, str(script), "--target", str(apply_target), "--yes"], cwd=repo)
+    if "Safe migration apply completed through forgekit-upgrade.py" not in applied.stdout:
+        fail("unified --yes must delegate to forgekit-upgrade.py apply --safe")
+    applied_state = json.loads(apply_state.read_text(encoding="utf-8"))
+    if applied_state.get("forgekit_version") != "0.39.0":
+        fail("unified --yes did not advance state through safe migrations")
+    if apply_business.read_bytes() != apply_business_before:
+        fail("unified safe apply must not modify business docs")
+
+    legacy = temp_parent / "unified-legacy"
+    (legacy / ".forgekit").mkdir(parents=True)
+    legacy_result = run([sys.executable, str(script), "--target", str(legacy), "--yes"], cwd=repo)
+    if "Detected action: legacy-adoption" not in legacy_result.stdout or "No automatic upgrade" not in legacy_result.stdout:
+        fail("unified legacy project must receive adoption guidance")
+    if (legacy / ".forgekit/state.json").exists():
+        fail("unified legacy handling must not create state.json")
+    force_legacy = run(
+        [sys.executable, str(script), "--target", str(legacy), "--force-init", "--yes"],
+        cwd=repo,
+        check=False,
+    )
+    if force_legacy.returncode == 0 or "only valid when ForgeKit is not installed" not in (force_legacy.stdout + force_legacy.stderr):
+        fail("--force-init must refuse legacy or installed ForgeKit projects")
+
+    early_legacy = temp_parent / "unified-early-legacy"
+    (early_legacy / "governance").mkdir(parents=True)
+    (early_legacy / ".codex").mkdir()
+    early_result = run([sys.executable, str(script), "--target", str(early_legacy)], cwd=repo)
+    if "Detected action: legacy-adoption" not in early_result.stdout:
+        fail("unified entry must recognize pre-boundary ForgeKit markers as legacy adoption")
+    if (early_legacy / ".forgekit/state.json").exists():
+        fail("early legacy detection must not create state.json")
+
+    future = temp_parent / "unified-future"
+    write_state(future, "0.40.0")
+    future_result = run([sys.executable, str(script), "--target", str(future)], cwd=repo, check=False)
+    if future_result.returncode == 0 or "Detected action: stop-toolkit-too-old" not in (future_result.stdout + future_result.stderr):
+        fail("unified entry must stop when the project version is newer than ForgeKitRoot")
 
 
 def assert_upgrade_report(repo, target):
@@ -1415,7 +1590,7 @@ def assert_upgrade_report(repo, target):
         fail("upgrade must not overwrite managed docs")
     assert_paths(target, [
         ".forgekit/upgrade-report.md",
-        ".forgekit/upgrade-export/0.38.0/.forgekit/docs/project-plan.md",
+        ".forgekit/upgrade-export/0.39.0/.forgekit/docs/project-plan.md",
     ])
 
 
@@ -1452,7 +1627,7 @@ def assert_guided_upgrade(repo, target):
         ".forgekit/upgrade/upgrade-plan.md",
         ".forgekit/upgrade/upgrade-actions.md",
         ".forgekit/upgrade/upgrade-inventory.json",
-        ".forgekit/upgrade/candidates/0.38.0/.forgekit/docs/project-plan.md",
+        ".forgekit/upgrade/candidates/0.39.0/.forgekit/docs/project-plan.md",
     ])
     plan = (target / ".forgekit" / "upgrade" / "upgrade-plan.md").read_text(encoding="utf-8")
     actions = (target / ".forgekit" / "upgrade" / "upgrade-actions.md").read_text(encoding="utf-8")
@@ -1959,6 +2134,88 @@ def assert_archive_flow(target):
             fail(f"archive apply must not modify current docs: {relative}")
 
 
+def assert_archive_capsule(target):
+    script = target / "scripts/archive-capsule.py"
+    change = target / ".forgekit/changes/capsule-phase"
+    change.mkdir(parents=True, exist_ok=True)
+    (change / "proposal.md").write_text("Status: done\nRisk: medium\n", encoding="utf-8")
+    legacy = target / ".forgekit/archive/legacy-v1/keep.md"
+    legacy.parent.mkdir(parents=True, exist_ok=True)
+    legacy.write_text("legacy archive stays in place\n", encoding="utf-8")
+    business = target / "docs/business-capsule-marker.md"
+    business.parent.mkdir(parents=True, exist_ok=True)
+    business.write_text("business docs stay unchanged\n", encoding="utf-8")
+
+    current_docs_before = {
+        path.relative_to(target).as_posix(): path.read_bytes()
+        for path in (target / ".forgekit/docs").rglob("*")
+        if path.is_file()
+    }
+    protected_before = {
+        "legacy": legacy.read_bytes(),
+        "business": business.read_bytes(),
+        "state": (target / ".forgekit/state.json").read_bytes(),
+        "lock": (target / ".forgekit/template-lock.json").read_bytes(),
+    }
+    run([
+        sys.executable, str(script), "plan", "--repo-root", ".",
+        "--name", "phase-close", "--phase", "Phase Close", "--reason", "phase complete",
+        "--item", ".forgekit/changes/capsule-phase",
+    ], cwd=target)
+    plan_path = target / ".forgekit/archive-capsule-plan.md"
+    if not plan_path.is_file() or not change.is_dir():
+        fail("archive capsule plan must exist without moving the source")
+    plan_text = plan_path.read_text(encoding="utf-8")
+    for marker in ["Status: report-only", "Mode: archive-capsule-plan", "Archive-Status: candidate"]:
+        if marker not in plan_text:
+            fail(f"archive capsule plan missing marker: {marker}")
+
+    refused = run([
+        sys.executable, str(script), "apply", "--repo-root", ".",
+        "--plan", ".forgekit/archive-capsule-plan.md",
+    ], cwd=target, check=False)
+    if refused.returncode == 0 or "requires --confirm" not in (refused.stdout + refused.stderr):
+        fail("archive capsule apply without --confirm must refuse")
+    if not change.is_dir():
+        fail("refused archive capsule apply must not move the source")
+
+    run([
+        sys.executable, str(script), "apply", "--repo-root", ".",
+        "--plan", ".forgekit/archive-capsule-plan.md", "--confirm",
+    ], cwd=target)
+    target_match = re.search(r"(?m)^Archive-Target:\s*(.+)$", plan_text)
+    if not target_match:
+        fail("archive capsule plan missing Archive-Target")
+    capsule = target / target_match.group(1).strip()
+    if change.exists():
+        fail("archive capsule apply must move the planned source")
+    for relative in ["archive-summary.md", "archived-items.md", "items/changes/capsule-phase/proposal.md"]:
+        if not (capsule / relative).is_file():
+            fail(f"archive capsule output missing: {relative}")
+    index = target / ".forgekit/archive/index.md"
+    if not index.is_file() or "phase-close" not in index.read_text(encoding="utf-8"):
+        fail("archive capsule apply must create/update archive index")
+    summary = (capsule / "archive-summary.md").read_text(encoding="utf-8")
+    for marker in ["Archive ID", "Verification Evidence", "Related Source IDs", "How to Find This Later"]:
+        if marker not in summary:
+            fail(f"archive summary missing marker: {marker}")
+    if protected_before["legacy"] != legacy.read_bytes():
+        fail("archive capsule must not rewrite legacy archive")
+    if protected_before["business"] != business.read_bytes():
+        fail("archive capsule must not modify business docs")
+    if protected_before["state"] != (target / ".forgekit/state.json").read_bytes():
+        fail("archive capsule must not modify state.json")
+    if protected_before["lock"] != (target / ".forgekit/template-lock.json").read_bytes():
+        fail("archive capsule must not modify template-lock.json")
+    current_docs_after = {
+        path.relative_to(target).as_posix(): path.read_bytes()
+        for path in (target / ".forgekit/docs").rglob("*")
+        if path.is_file()
+    }
+    if current_docs_before != current_docs_after:
+        fail("archive capsule must not modify current docs")
+
+
 def assert_legacy_upgrade_no_lock(repo, target):
     target.mkdir(parents=True, exist_ok=True)
     (target / ".forgekit").mkdir(parents=True, exist_ok=True)
@@ -2068,6 +2325,8 @@ def main():
     assert_json(repo / "project-template" / "migrations" / "0.37.0" / "migration.json")
     assert_json(repo / "migrations" / "0.38.0" / "migration.json")
     assert_json(repo / "project-template" / "migrations" / "0.38.0" / "migration.json")
+    assert_json(repo / "migrations" / "0.39.0" / "migration.json")
+    assert_json(repo / "project-template" / "migrations" / "0.39.0" / "migration.json")
     assert_loop_docs(repo / "project-template", "docs/loop-readiness.md", "docs/loop-blueprint.md")
     assert_loop_operations(
         repo / "project-template",
@@ -2087,6 +2346,7 @@ def main():
     )
     assert_independent_code_review(repo / "project-template")
     assert_context_continuity(repo / "project-template", "docs/context-continuity.md")
+    assert_project_maintenance(repo / "project-template")
     assert_worktree_playbook(
         repo / "project-template",
         "docs/worktree-playbook.md",
@@ -2190,6 +2450,7 @@ def main():
         )
         assert_independent_code_review(target)
         assert_context_continuity(target, ".forgekit/docs/context-continuity.md")
+        assert_project_maintenance(target)
         assert_worktree_playbook(
             target,
             ".forgekit/docs/worktree-playbook.md",
@@ -2232,6 +2493,7 @@ def main():
             ".codex/rules.md",
         )
         assert_absent_paths(target, [
+            "scripts/forgekit-project.py",
             "scripts/maker-checker-runner.py",
             "scripts/checker-runner.py",
             "scripts/loop-runner.py",
@@ -2247,11 +2509,13 @@ def main():
         ])
         assert_manifest_lock(target)
         assert_versioned_migration_upgrade(repo, target, temp_parent)
+        assert_unified_project_entry(repo, target, temp_parent)
         assert_no_escaped_filenames(target)
         assert_no_noise_files(target)
         assert_no_forbidden_text(target, FORBIDDEN_LEGACY_REFS, "Forbidden legacy path text found in generated project")
         run_generated_checks(target)
         assert_archive_flow(target)
+        assert_archive_capsule(target)
         assert_guided_upgrade(repo, target)
         assert_upgrade_report(repo, target)
         run_generated_checks(target)

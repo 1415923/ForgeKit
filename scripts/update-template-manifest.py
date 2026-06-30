@@ -29,6 +29,7 @@ EXCLUDED_SOURCE_PATHS = {
     ".forgekit/state.json",
     ".forgekit/upgrade-report.md",
     ".forgekit/archive-plan.md",
+    ".forgekit/archive-capsule-plan.md",
     ".forgekit/archive-apply-report.md",
     ".forgekit/archive-reference-report.md",
     ".forgekit/current-docs-sync-report.md",

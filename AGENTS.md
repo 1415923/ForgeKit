@@ -37,6 +37,7 @@ This repository maintains a reusable Codex CLI workflow template.
 - Managed docs should stay lean: define audience, trigger, and "do not write here" boundaries before adding or expanding a document.
 - Critical engineering conclusions must survive chat compaction, clearing, and delegation through narrow managed-doc or change-artifact checkpoints; never copy full chats or long tool output into project docs.
 - After a ForgeKit upgrade changes entry rules, skills, or agents, use the current session only for checkpoint, minimal writeback, and closure; start a new session or restart the tool before new work.
+- Route install/init/update/sync through the ForgeKitRoot `forgekit-project.py` unified entry; it detects init, current, upgrade, toolkit-too-old, or legacy adoption. Other maintenance still uses `project-maintenance.md`: plan before apply, require confirmation, and produce summary/index. Archive is not deletion.
 - Keep independent code review split into maker request, fresh read-only reviewer context, structured gate result, and explicit human escalation; self-review must not satisfy an independent-review gate.
 
 ## Validation

@@ -1,5 +1,17 @@
 # 脚本
 
+## forgekit-project.py（推荐入口）
+
+从 ForgeKitRoot 自动判断目标目录应初始化、无需更新、生成升级计划、停止等待工具更新，还是进入 legacy adoption：
+
+```powershell
+python .\scripts\forgekit-project.py --target "D:\projects\demo-api-workspace"
+```
+
+默认确认是 No，非交互环境只展示计划；显式 `--yes` 才初始化或调用 `forgekit-upgrade.py apply --safe`。`--force-init` 只允许在未安装但非空目录中做保留式初始化，不会透传为覆盖已有文件。
+
+下面的 init、versioned upgrade 和 legacy guided upgrade 脚本继续作为底层或高级入口。
+
 ## init-project-template.ps1
 
 把 `project-template/` 初始化到目标项目目录，复制项目初始化问答表，并按需复制技术栈模板到目标项目的 `.codex/stacks/`。
@@ -98,7 +110,7 @@ powershell -ExecutionPolicy Bypass -File .\scripts\init-project-template.ps1 `
 | `ProjectName` | 否 | 项目名；填写后会创建同名内层代码目录，并写入 boundary 的 `project_root` |
 | `Stacks` | 否 | 技术栈模板列表，支持 `java-springboot,vue` 形式 |
 | `NativeAgentAdapter` | 否 | 初始化时生成原生 agent 配置模板：`none`、`claude-code`、`codex`、`all`；默认 `none` |
-| `Upgrade` | 否 | 兼容旧升级入口；新项目升级优先使用 `upgrade-forgekit.ps1` / `.sh` |
+| `Upgrade` | 否 | 兼容旧升级入口；v0.36+ 新项目升级优先使用 `forgekit-project.py` 或 `forgekit-upgrade.py` |
 | `ExportUpgradeTemplates` | 否 | 兼容参数；guided upgrade 会导出候选模板到 `.forgekit/upgrade/candidates/<version>/` |
 | `Force` | 否 | 覆盖已有文件；默认不覆盖 |
 

@@ -37,6 +37,8 @@
 | `.forgekit/docs/codebase-map.md` | core | AI 工具、维护者 | yes | 代码搜索入口、模块入口、关键命令、谨慎读取路径 | 完整架构、API 百科、长扫描历史 | 模块入口、命令或归属变化 | `architecture.md`, `api.md`, `local-toolchain.md` |
 | `.forgekit/docs/context-continuity.md` | reference | 用户、AI 工具 | as-needed | 关键事实、checkpoint 触发、存活位置和最小写回边界 | 完整聊天、长工具输出、临时推理、自动 compact/clear | 阶段边界、compact/clear 前、子 agent 关键结论、handoff/commit/tag 前 | `workflow-router.md`, `work-log.md`, current change |
 | `.forgekit/docs/workflow-router.md` | core | 用户、AI 工具 | yes | 用户意图到 Read / Write / Do Not Write / Required Output 的路由表 | 任务看板、执行器、自动 runner、业务事实正文 | 用户常见意图、文档读写边界或路由规则变化 | `document-responsibility.md`, `codebase-map.md` |
+| `.forgekit/docs/project-maintenance.md` | triggered | 用户、AI 工具 | no | MaintenanceIntent、upgrade sync、archive capsule 和 plan/confirm/summary 维护流程 | 自动执行器、业务事实、无确认 apply | 用户提出同步、整理、归档、checkpoint、handoff 或报告维护请求 | `workflow-router.md`, `archive-capsule.md`, `context-continuity.md` |
+| `.forgekit/docs/archive-capsule.md` | triggered | 用户、AI 工具 | no | capsule 结构、命名、summary/items/index 和 legacy archive 边界 | current truth、删除策略、自动整理旧 archive | 阶段归档计划或 apply | `project-maintenance.md`, `.forgekit/archive/index.md` |
 | `.forgekit/docs/task-intake.md` | working | 用户、AI 工具 | as-needed | 工作来源原文或原始想法、Source ID、Update Notes、Task Decision、Derived Task IDs、人工确认状态 | 执行状态总表、工作流水、changelog、长分析 | 领导任务、微信任务、计划表格子、会议任务、个人规划、用户反馈、bug、技术债、测试失败；小补充默认更新已有 Source | `requirements.md`, `task-board.md`, `work-log.md` |
 | `.forgekit/docs/requirements.md` | current | 用户、产品、AI 工具 | as-needed | 已确认的需求事实、验收标准、范围边界、Source ID 引用 | 任务派发原文、长推理、执行状态 | 需求被确认、修正、拒绝或定界 | `task-intake.md`, `traceability.md` |
 | `.forgekit/docs/task-board.md` | working | 用户、AI 工具 | as-needed | 通过准入的可执行任务、状态、owner、下一步、验证方式、Source ID、Superseded/Dropped 结论 | 任务原文、聊天补充、纯确认、工作流水、长计划 | Task Gate ready、任务阻塞、复查、完成、取消或被替代 | `task-intake.md`, `work-log.md`, `changes/<id>/tasks.md` |
@@ -68,6 +70,7 @@
 | `.forgekit/docs/worktree-playbook.md` | triggered | 用户、AI 工具 | no | 手动 worktree 隔离指南 | 自动 worktree 编排 | 用户要求并行隔离工作 | `work-log.md` |
 | `.forgekit/changes/<id>/*` | triggered | 开发者、复查者 | no | 单次中高风险变更过程 | 当前态事实、无关历史 | 中高风险变更开始或收口 | `document-lifecycle.md` |
 | `.forgekit/archive/*` | archive | 审计者、维护者 | no | 历史证据和旧变更材料 | 当前事实、活跃变更上下文 | 用户要求历史、审计、回归、复盘 | `document-lifecycle.md` |
+| `.forgekit/archive/index.md` / `*/archive-summary.md` / `*/archived-items.md` | archive generated | 用户、审计者、维护者 | no | 历史检索入口、capsule 摘要和移动审计记录 | current docs、业务事实源、自动归档授权 | confirmed Archive Capsule apply | `archive-capsule.md`, `scripts/archive-capsule.py` |
 | `.forgekit/*-report.md` | generated | 用户、AI 工具 | no | 脚本生成的报告 | 当前事实或可编辑项目文档 | 脚本运行生成或覆盖 | 对应脚本文档 |
 | `.forgekit/doc-health-report.md` | generated | 用户、AI 工具 | no | managed docs 健康汇总：过长、重复、职责错位、router 边界风险 | 长期 managed doc、修复结果、事实来源 | 用户要求检查文档健康、文档太乱、哪些文档该瘦身 | `workflow-router.md`, `scripts/doc-health-report.py` |
 | `.forgekit/source-trace-report.md` | generated | 用户、AI 工具 | no | 来源追溯链路断点：source、requirement、task、change、verification、work-log、changelog 的引用关系 | 长期 managed doc、自动补 Source ID、修复结果 | 用户要求检查任务来源、完成证据、追溯链路或状态冲突 | `task-intake.md`, `task-board.md`, `work-log.md`, `scripts/source-trace-report.py` |

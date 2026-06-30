@@ -12,7 +12,7 @@ When a task names a ForgeKit skill, read the project-local `.agents/skills/<skil
 2. Read `.forgekit/project-boundary.yml` to identify ForgeKitRoot, ProjectRoot, managed docs root, change root, business docs roots, and write policy.
 3. Read `.forgekit/docs/document-responsibility.md` to choose the right managed docs and avoid duplicate writes.
 4. Read `.forgekit/docs/codebase-map.md` to find likely modules, entry files, and local validation commands.
-5. Read `.forgekit/docs/workflow-router.md` when the user intent is unclear or the request is about tasks, sources, status, verification, reports, loop, review, worktree, or handoff.
+5. Read `.forgekit/docs/workflow-router.md` when the user intent is unclear or the request is about tasks, sources, status, verification, reports, loop, review, worktree, handoff, upgrade sync, or archive.
 6. Read `.forgekit/docs/local-toolchain.md` when lint, test, build, or local validation commands matter.
 7. Read `.forgekit/docs/codex-next-work-order.md` after initialization or when project direction is unclear.
 8. Read `.codex/project.md`, `.codex/scope.md`, and `.codex/commands.md` only as needed.
@@ -44,6 +44,7 @@ When a task names a ForgeKit skill, read the project-local `.agents/skills/<skil
 | Native agent adapter review | `.forgekit/docs/native-agent-adapter.md`, `.forgekit/docs/loop-operations.md`, `.forgekit/docs/maker-checker-protocol.md` | release-check or security-review |
 | Document synchronization check | `.codex/hooks.md`, `.codex/commands.md`, `.forgekit/docs/changelog.md`, related docs | `release-check` |
 | Archive dry-run plan | `.forgekit/docs/document-lifecycle.md`, `.forgekit/archive/README.md`, `.codex/commands.md` | `release-check` |
+| Project maintenance, upgrade sync, or archive capsule | `.forgekit/docs/project-maintenance.md`, `.forgekit/docs/archive-capsule.md` when archiving | `forgekit-maintenance` |
 | Code review | `.codex/testing.md`, `.codex/security.md`, `.forgekit/docs/code-ownership.md`, `.forgekit/docs/task-board.md` | `code-review` |
 | Release or version gate | `.codex/version-gates.md`, `.forgekit/docs/version-roadmap.md`, `.forgekit/docs/changelog.md` | `release-check` |
 | Security-sensitive change | `.codex/security.md`, `governance/security-governance.md` | `security-review` |
@@ -65,6 +66,7 @@ When a task names a ForgeKit skill, read the project-local `.agents/skills/<skil
 - Treat business `docs/` as read-mostly evidence. Read and cite it, but do not write ForgeKit governance templates there unless the user confirms target files and reasons.
 - Do not read all business `docs/` by default; use `.forgekit/docs/codebase-map.md` to choose what matters.
 - Treat `.forgekit/state.json` as the v0.36+ versioned migration state. For upgrades, use `scripts/forgekit-upgrade.py check`, then `plan`, then explicit `apply --safe`.
+- 用户表达安装、初始化、更新或同步 ForgeKit 时，优先使用 ForgeKitRoot 的 `forgekit-project.py --target <project-root>` 统一入口自动分流；升级必须先 plan，apply 必须确认。其他维护动作先识别 `MaintenanceIntent`；归档确认后生成 summary/items/index。归档不是删除。
 - Projects without state or below v0.36 are existing-project adoption cases. Do not create state or claim an automatic upgrade without explicit user confirmation.
 - Treat `upgrade-forgekit.*`, `.forgekit/upgrade-export/**`, and `.forgekit/upgrade/**` as legacy compatibility. Do not read or export all candidates by default, and never treat them as current truth.
 - Treat `.forgekit/template-lock.json` as a legacy installation baseline; the v0.36 migration model does not update it.

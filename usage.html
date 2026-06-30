@@ -386,7 +386,7 @@
           <p class="muted">v0.12.0 起仓库根目录就是统一 plugin 表面：<code>.codex-plugin/plugin.json</code>、<code>.claude-plugin/plugin.json</code> 和共享 <code>skills/</code> 同时服务 Codex 与 Claude Code。plugin 不包含 <code>user-rules/</code> 或外部开发记录，也不默认启用 hook、MCP 或外部写操作。</p>
 
           <h3>v0.36+ 升级</h3>
-          <p class="muted">新项目使用 <code>.forgekit/state.json</code> 和 versioned migrations，按 <code>check → plan → apply --safe</code> 三步升级。v0.35.x 及更早项目按既有项目接手，不自动迁移；旧 guided upgrade 只保留为 legacy 兼容。</p>
+          <p class="muted">推荐从 ForgeKitRoot 运行 <code>python scripts/forgekit-project.py --target &lt;project-root&gt;</code>。统一入口会自动识别初始化、无需更新、升级计划或 legacy adoption；默认不 apply，显式确认后才调用安全迁移。旧 init 和 <code>forgekit-upgrade.py</code> 仍作为高级入口保留。</p>
         </div>
       </div>
     </section>
@@ -621,6 +621,8 @@
         '   .forgekit/docs/codebase-map.md',
         '   .forgekit/docs/workflow-router.md（用户意图路由：判断该读什么、写什么、不要写什么）',
         '   .forgekit/docs/context-continuity.md（阶段边界、compact/clear 前和子 agent 关键结论的最小 checkpoint）',
+        '   .forgekit/docs/project-maintenance.md（维护意图统一走 intent -> plan -> confirm/apply -> summary/index）',
+        '   .forgekit/docs/archive-capsule.md（归档不是删除；确认后生成 summary、items log 和 archive index）',
         '   .forgekit/docs/local-toolchain.md',
         '   .forgekit/docs/codex-next-work-order.md',
         '   .forgekit/docs/loop-readiness.md、.forgekit/docs/loop-blueprint.md（仅作为 loop 评估和设计图纸，不是自动执行授权）',
@@ -654,10 +656,12 @@
         '   python .\\scripts\\forgekit-upgrade.py check --repo-root .',
         '   python .\\scripts\\forgekit-upgrade.py plan --repo-root .',
         '   python .\\scripts\\forgekit-upgrade.py apply --safe --repo-root .（只执行 migration 中明确标记为 safe 的动作）',
+        '   python .\\scripts\\archive-capsule.py plan --repo-root . --name phase-close --item .forgekit/changes/<change-id>（只生成计划）',
         '',
         '6. 归档 apply 不是只读操作，仅在 review plan 且 git clean 后执行：',
         '   python .\\scripts\\archive-changes.py --apply --plan .forgekit/archive-plan.md --confirm',
         '   python .\\scripts\\archive-changes.py --smart-apply --report .forgekit/smart-archive-report.md --confirm',
+        '   python .\\scripts\\archive-capsule.py apply --repo-root . --plan .forgekit/archive-capsule-plan.md --confirm',
         '',
         '7. 不要默认读取全部 governance/ 或 .forgekit/docs/**；先按 document-responsibility、codebase-map 和 workflow-router 判断需要哪些文档。只限制业务文件不等于禁止最小 managed docs 写回；review-only 和 report-only 仍不得写入或自动修复。工具链未知时先询问，不要默认安装或启动服务。'
       ].join('\n');

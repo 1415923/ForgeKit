@@ -1,0 +1,62 @@
+{
+  "id": "0.39.0-project-maintenance-operations",
+  "title": "Project maintenance operations",
+  "from": "0.38.0",
+  "to": "0.39.0",
+  "risk": "low",
+  "actions": [
+    {
+      "id": "ensure-archive-root",
+      "type": "ensure_directory",
+      "safety": "safe",
+      "target": ".forgekit/archive"
+    },
+    {
+      "id": "install-project-maintenance-guide",
+      "type": "copy_file_if_missing",
+      "safety": "safe",
+      "source": "files/.forgekit/docs/project-maintenance.md",
+      "target": ".forgekit/docs/project-maintenance.md"
+    },
+    {
+      "id": "install-archive-capsule-guide",
+      "type": "copy_file_if_missing",
+      "safety": "safe",
+      "source": "files/.forgekit/docs/archive-capsule.md",
+      "target": ".forgekit/docs/archive-capsule.md"
+    },
+    {
+      "id": "install-archive-capsule-script",
+      "type": "copy_file_if_missing",
+      "safety": "safe",
+      "source": "files/scripts/archive-capsule.py",
+      "target": "scripts/archive-capsule.py"
+    },
+    {
+      "id": "install-maintenance-skill",
+      "type": "copy_file_if_missing",
+      "safety": "safe",
+      "source": "files/.claude/skills/forgekit-maintenance/SKILL.md",
+      "target": ".claude/skills/forgekit-maintenance/SKILL.md"
+    },
+    {
+      "id": "enable-project-maintenance",
+      "type": "set_state_feature",
+      "safety": "safe",
+      "name": "project_maintenance_operations",
+      "value": true
+    }
+  ],
+  "manual_review": [
+    "Merge the short MaintenanceIntent and plan-before-apply rules into local AGENTS.md, CLAUDE.md, and .codex/rules.md without replacing project-specific rules.",
+    "Review workflow-router, bounded-auto, context-continuity, document-responsibility, and codebase-map updates before adopting them.",
+    "Do not reorganize or delete legacy archive content."
+  ],
+  "non_goals": [
+    "No automatic business docs changes",
+    "No automatic Git commit, push, or PR",
+    "No runner, daemon, or scheduler",
+    "No legacy archive reorganization",
+    "No archive apply without explicit confirmation"
+  ]
+}

@@ -6,6 +6,8 @@ Default agents should not read archive content unless the task is about history,
 
 Archive material is read-only historical context by default. If an archived conclusion becomes current again, copy the stable conclusion into `.forgekit/docs/` and cite the archive as background.
 
+v0.39 adds Archive Capsules for phase-level maintenance. Use `.forgekit/archive/index.md` as the search entry, and read a capsule summary before opening its items. Capsule apply requires an explicit plan and confirmation; it does not delete or reorganize legacy archive content. See `.forgekit/docs/archive-capsule.md`.
+
 v0.19 adds an archive dry-run plan at `.forgekit/archive-plan.md`.
 
 The plan is a candidate report, not an archive result. Each run recreates the plan instead of appending old content.

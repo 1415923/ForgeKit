@@ -19,6 +19,14 @@ ForgeKit 在生成项目内提供轻量 AI Engineering Loop：澄清目标、判
 
 ## 升级兼容
 
+从外层 ForgeKitRoot 统一检查当前项目：
+
+```bash
+python scripts/forgekit-project.py --target <project-root>
+```
+
+该统一入口属于 ForgeKitRoot，不复制到生成项目。它自动识别 init、up-to-date、upgrade-sync、工具版本过旧和 legacy adoption；非交互默认只展示计划，显式 `--yes` 才写入。下面的 `forgekit-upgrade.py` 是项目内高级入口。
+
 v0.36.0 及以后初始化的项目使用 `.forgekit/state.json` 和 `migrations/` 做版本迁移：
 
 ```bash
@@ -28,6 +36,10 @@ python scripts/forgekit-upgrade.py apply --safe --repo-root .
 ```
 
 `check` 和 `plan` 不改文件；`apply --safe` 只执行 migration 明确标记为 safe 的动作。v0.35.x 及更早项目不自动升级，统一按接手既有项目做 adoption inventory，并在用户确认后建立新 state。旧 guided upgrade 脚本仅作为 legacy report-only 兼容入口保留；不要默认读取全量 candidates 或 upgrade-export。
+
+## 项目维护
+
+用户说“安装/初始化/更新/同步 ForgeKit”时，优先路由到 ForgeKitRoot 的统一入口并识别 `project-bootstrap`。用户说“整理一下升级”“阶段结束了”“归档一下”时，先读 `.forgekit/docs/project-maintenance.md` 并识别其他 `MaintenanceIntent`。所有维护动作先 plan；Archive Capsule 只有在用户确认后才 apply，并生成 summary、items log 和 archive index。
 
 ## 可选增强
 

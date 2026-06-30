@@ -39,6 +39,16 @@ ForgeKit does not:
 
 ### 1. Generate a workspace
 
+Use the unified entry by default. It detects whether the target needs initialization, is current, needs an upgrade plan, or requires legacy adoption:
+
+```powershell
+python .\scripts\forgekit-project.py --target "D:\projects\my-app-workspace"
+```
+
+The default confirmation is No. Non-interactive use only shows the plan; explicit `--yes` is required for initialization or `apply --safe`. An uninstalled but non-empty target also requires `--force-init`, while existing files remain preserved.
+
+Use the lower-level init entry when you need explicit Mode, stack, or Native Agent Adapter selection:
+
 Windows PowerShell:
 
 ```powershell
@@ -96,7 +106,15 @@ Read CLAUDE.md, prefer the project-local .agents/skills/project-init/SKILL.md, a
 
 ## Upgrade Existing ForgeKit Projects
 
-Starting with v0.36.0, new projects use the Versioned Migration Upgrade Model:
+The unified entry remains the recommended command:
+
+```bash
+python scripts/forgekit-project.py --target <project-root>
+```
+
+It shows ProjectRoot, installed version, toolkit version, and the detected action. For an older supported project it runs check + plan first, then calls `apply --safe` only after interactive `y/yes` or explicit `--yes`.
+
+Starting with v0.36.0, new projects use the Versioned Migration Upgrade Model. These commands remain available as advanced entries:
 
 ```bash
 python scripts/forgekit-upgrade.py check --repo-root <project>
@@ -111,6 +129,18 @@ python scripts/forgekit-upgrade.py apply --safe --repo-root <project>
 If an upgrade changes AGENTS / CLAUDE / rules, skills, or agents, use the current session only for checkpoint and closure. Start a new session or restart the tool before new work; updated files on disk do not prove that the old session reloaded them.
 
 Only projects initialized at v0.36.0 or later with `.forgekit/state.json` use this model. v0.35.x and earlier projects should be treated as existing-project adoption: inventory current facts first, then create new v0.36+ state only after explicit user confirmation.
+
+## Project Maintenance
+
+v0.39.0 adds Project Maintenance Operations and Unified Project Bootstrap. Install, init, update, and sync requests prefer `forgekit-project.py` for automatic routing; other maintenance follows `intent -> plan -> confirm/apply -> summary/index`.
+
+```text
+I updated the outer ForgeKit; sync this project.
+This phase is complete; archive it as a capsule.
+Generate a maintenance plan, but do not apply it.
+```
+
+Upgrade sync reuses `forgekit-upgrade.py check / plan / apply --safe`. Phase archive uses `scripts/archive-capsule.py plan` and requires explicit `apply --confirm`. Archive is not deletion: apply creates a capsule summary, item log, and `.forgekit/archive/index.md` without reorganizing legacy archive or modifying business docs.
 
 ## Workflow
 
@@ -168,6 +198,7 @@ Existing business `docs/` is read-mostly evidence by default. AI may read and ci
 | Native Agent Adapter | Optionally exports Codex / Claude Code native agent configuration templates |
 | Independent Code Review Protocol | Uses an independent read-only reviewer, a minimal context packet, and pass / needs-fix / manual-review gates |
 | Context Continuity Protocol | Checkpoints critical facts to responsible docs so long sessions, compaction, clearing, and delegation do not erase engineering state |
+| Project Maintenance Operations | Routes upgrade sync, Archive Capsule, checkpoint, handoff, and reports through plan, confirmation, and summary/index steps |
 
 ## Common Commands
 

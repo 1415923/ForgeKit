@@ -618,7 +618,7 @@ function Test-TemplateManifest {
     $manifestPath = Join-Path $repoRoot "project-template\.forgekit\template-manifest.json"
     if (Test-Path -LiteralPath $manifestPath) {
         $manifest = Get-Content -LiteralPath $manifestPath -Raw | ConvertFrom-Json
-        if ($manifest.template_version -ne "0.38.0") {
+        if ($manifest.template_version -ne "0.39.0") {
             Add-Error "Unexpected template manifest version: $($manifest.template_version)"
         }
         $sources = @($manifest.files | ForEach-Object { $_.source_path })
@@ -627,6 +627,9 @@ function Test-TemplateManifest {
         }
         if ($sources -contains ".forgekit/archive-plan.md") {
             Add-Error "archive-plan.md must not be listed in template manifest"
+        }
+        if ($sources -contains ".forgekit/archive-capsule-plan.md") {
+            Add-Error "archive-capsule-plan.md must not be listed in template manifest"
         }
         if ($sources -contains ".forgekit/archive-apply-report.md") {
             Add-Error "archive-apply-report.md must not be listed in template manifest"
@@ -674,6 +677,12 @@ function Test-TemplateManifest {
         }
         if ($sources -notcontains "scripts/forgekit-upgrade.py") {
             Add-Error "forgekit-upgrade.py script must be listed in template manifest"
+        }
+        if ($sources -notcontains "scripts/archive-capsule.py") {
+            Add-Error "archive-capsule.py script must be listed in template manifest"
+        }
+        foreach ($source in @("docs/project-maintenance.md", "docs/archive-capsule.md", ".claude/skills/forgekit-maintenance/SKILL.md", "migrations/0.39.0/migration.json")) {
+            if ($sources -notcontains $source) { Add-Error "Project maintenance template missing from manifest: $source" }
         }
         if ($sources -notcontains "migrations/0.36.0/migration.json") {
             Add-Error "v0.36.0 migration descriptor must be listed in template manifest"
@@ -1066,7 +1075,7 @@ function Test-HarnessEntryConsistency {
     Test-RequiredPath "project-template\migrations\0.36.0\migration.json"
     Test-RequiredPath "project-template\.forgekit\state.json"
     Test-RequiredPattern "project-template\.forgekit\state.json" '"schema_version": 1' "State schema version"
-    Test-RequiredPattern "project-template\.forgekit\state.json" '"forgekit_version": "0.38.0"' "State ForgeKit version"
+    Test-RequiredPattern "project-template\.forgekit\state.json" '"forgekit_version": "0.39.0"' "State ForgeKit version"
     Test-RequiredPattern "project-template\.forgekit\state.json" '"managed_docs_root": ".forgekit/docs"' "State managed docs root"
     Test-RequiredPattern "project-template\.forgekit\state.json" '"change_root": ".forgekit/changes"' "State change root"
     Test-RequiredPattern "project-template\.forgekit\state.json" '"last_upgrade": null' "State last upgrade"
@@ -1130,7 +1139,7 @@ function Test-PluginDistribution {
     if ($codexPluginJson.name -ne "forgekit") {
         Add-Error "Unexpected Codex plugin name in root plugin.json: $($codexPluginJson.name)"
     }
-    if ($codexPluginJson.version -ne "0.38.0") {
+    if ($codexPluginJson.version -ne "0.39.0") {
         Add-Error "Unexpected Codex plugin version in root plugin.json: $($codexPluginJson.version)"
     }
     if ($codexPluginJson.skills -ne "./skills/") {
@@ -1141,7 +1150,7 @@ function Test-PluginDistribution {
     if ($claudePluginJson.name -ne "forgekit") {
         Add-Error "Unexpected Claude plugin name in root plugin.json: $($claudePluginJson.name)"
     }
-    if ($claudePluginJson.version -ne "0.38.0") {
+    if ($claudePluginJson.version -ne "0.39.0") {
         Add-Error "Unexpected Claude plugin version in root plugin.json: $($claudePluginJson.version)"
     }
     $claudeSkills = @($claudePluginJson.skills)
@@ -1279,6 +1288,54 @@ function Test-ContextContinuityProtocol {
         if ($sources -notcontains $source) { Add-Error "Context continuity template missing from manifest: $source" }
     }
 }
+function Test-ProjectMaintenanceOperations {
+    foreach ($path in @(
+        "project-template\docs\project-maintenance.md",
+        "project-template\docs\archive-capsule.md",
+        "project-template\.claude\skills\forgekit-maintenance\SKILL.md",
+        "scripts\forgekit-project.py",
+        "scripts\archive-capsule.py",
+        "project-template\scripts\archive-capsule.py",
+        "migrations\0.39.0\migration.json",
+        "project-template\migrations\0.39.0\migration.json"
+    )) { Test-RequiredPath $path }
+    foreach ($heading in @("Maintenance Intents", "Unified Project Bootstrap / Install-or-Upgrade Entry", "Upgrade Sync", "Archive Capsule", "Plan before Apply", "Confirmation Rules", "Post-Operation Summary")) {
+        Test-RequiredPattern "project-template\docs\project-maintenance.md" $heading "Project maintenance $heading"
+    }
+    foreach ($heading in @("Archive is not deletion", "Capsule structure", "Archive index", "Archived items log", "Legacy archive handling", "Plan / apply boundary")) {
+        Test-RequiredPattern "project-template\docs\archive-capsule.md" $heading "Archive capsule $heading"
+    }
+    foreach ($intent in @("project-bootstrap", "upgrade-sync", "archive-capsule", "context-checkpoint", "handoff", "doc-health", "source-trace")) {
+        Test-RequiredPattern "project-template\.claude\skills\forgekit-maintenance\SKILL.md" $intent "Maintenance skill intent $intent"
+    }
+    Test-RequiredPattern "scripts\archive-capsule.py" "Status: report-only" "Archive capsule report-only plan"
+    Test-RequiredPattern "scripts\archive-capsule.py" "requires --confirm" "Archive capsule confirmation gate"
+    Test-RequiredPattern "scripts\archive-capsule.py" "archive-summary.md" "Archive capsule summary"
+    Test-RequiredPattern "scripts\archive-capsule.py" "archived-items.md" "Archive capsule items log"
+    Test-RequiredPattern "scripts\archive-capsule.py" "archive/index.md" "Archive capsule index output"
+    Test-RequiredPattern "project-template\docs\workflow-router.md" "MaintenanceIntent: upgrade-sync" "Workflow router upgrade sync intent"
+    Test-RequiredPattern "project-template\docs\workflow-router.md" "MaintenanceIntent: archive-capsule" "Workflow router archive capsule intent"
+    Test-RequiredPattern "project-template\docs\workflow-router.md" "MaintenanceIntent: project-bootstrap" "Workflow router unified bootstrap intent"
+    Test-RequiredPattern "scripts\forgekit-project.py" "Continue with safe apply? [y/N]:" "Unified upgrade default-No confirmation"
+    Test-RequiredPattern "scripts\forgekit-project.py" '"apply", "--safe"' "Unified entry delegates safe apply"
+    Test-RequiredPattern "scripts\forgekit-project.py" "Non-interactive session detected" "Unified non-interactive plan-only rule"
+    Test-RequiredPattern "scripts\forgekit-project.py" "legacy-adoption" "Unified legacy adoption route"
+    Test-RequiredPattern "scripts\forgekit-project.py" "stop-toolkit-too-old" "Unified newer-project stop"
+    Test-NoPattern "project-template\.forgekit\template-manifest.json" '"source_path": "scripts/forgekit-project.py"' "ForgeKitRoot unified entry must not enter project manifest"
+    foreach ($entry in @("project-template\AGENTS.md", "project-template\CLAUDE.md", "project-template\.codex\rules.md")) {
+        Test-RequiredPattern $entry "MaintenanceIntent" "Maintenance intent entry rule"
+        Test-RequiredPattern $entry "归档不是删除" "Archive is not deletion entry rule"
+    }
+    Test-RequiredPattern "project-template\.forgekit\state.json" '"project_maintenance_operations": true' "State project maintenance feature"
+    Test-RequiredPattern "migrations\0.39.0\migration.json" '"from": "0.38.0"' "v0.39 migration source"
+    Test-RequiredPattern "migrations\0.39.0\migration.json" '"to": "0.39.0"' "v0.39 migration target"
+    $rootCapsule = Get-Content -LiteralPath (Join-Path $repoRoot "scripts\archive-capsule.py") -Raw
+    $templateCapsule = Get-Content -LiteralPath (Join-Path $repoRoot "project-template\scripts\archive-capsule.py") -Raw
+    if ($rootCapsule -ne $templateCapsule) { Add-Error "Root and project-template archive-capsule.py must stay identical" }
+    foreach ($forbidden in @("scripts\maintenance-runner.py", "project-template\scripts\maintenance-runner.py", "scripts\archive-daemon.py", "project-template\scripts\archive-daemon.py")) {
+        if (Test-Path -LiteralPath (Join-Path $repoRoot $forbidden)) { Add-Error "v0.39 must not add maintenance runner/daemon/scheduler: $forbidden" }
+    }
+}
 Test-RequiredPath "README.md"
 Test-RequiredPath "AGENTS.md"
 Test-RequiredPath "scripts\init-project-template.ps1"
@@ -1327,6 +1384,7 @@ Test-LargeChangeProtocol
 Test-TeamToolingProtocol
 Test-IndependentCodeReviewProtocol
 Test-ContextContinuityProtocol
+Test-ProjectMaintenanceOperations
 Test-AgentSuitability
 Test-ExecutableHarness
 Test-PluginDistribution

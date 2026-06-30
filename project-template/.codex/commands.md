@@ -124,6 +124,15 @@ python3 ./scripts/handoff-package.py --project-root . --change-id <change-id>
 
 ## 归档计划 Dry Run
 
+阶段级归档使用 Archive Capsule。它只接受显式 `--item`，不扫描或重排旧 archive：
+
+```powershell
+python .\scripts\archive-capsule.py plan --repo-root . --name phase-close --item .forgekit/changes/<change-id>
+python .\scripts\archive-capsule.py apply --repo-root . --plan .forgekit/archive-capsule-plan.md --confirm
+```
+
+apply 必须明确确认，并生成 `archive-summary.md`、`archived-items.md` 和 `.forgekit/archive/index.md`。归档不是删除。
+
 只生成或覆盖 `.forgekit/archive-plan.md`，不移动文件、不改状态、不改链接、不写 current docs、不写 business docs、不改 lock、不提交。
 
 ```powershell

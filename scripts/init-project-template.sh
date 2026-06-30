@@ -183,7 +183,7 @@ write_boundary_config() {
   mkdir -p "$(dirname "$boundary_file")"
   cat > "$boundary_file" <<EOF
 forgekit:
-  version: "0.38.0"
+  version: "0.39.0"
   mode: "$mode"
 
 roots:
@@ -236,7 +236,7 @@ write_forgekit_state() {
   cat > "$state_file" <<EOF
 {
   "schema_version": 1,
-  "forgekit_version": "0.38.0",
+  "forgekit_version": "0.39.0",
   "managed_docs_root": ".forgekit/docs",
   "change_root": ".forgekit/changes",
   "mode": "$mode",
@@ -245,6 +245,7 @@ write_forgekit_state() {
     "managed_docs_writeback": "minimal",
     "independent_code_review": true,
     "context_continuity": true,
+    "project_maintenance_operations": true,
     "native_agent_adapter": "$native_agent_adapter"
   },
   "last_upgrade": null

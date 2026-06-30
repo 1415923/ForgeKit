@@ -39,7 +39,10 @@
 | 请求独立代码审查 / maker-checker review | `maker-checker-protocol.md`, task summary, diff/stat, changed files, validation output, known risks | `.forgekit/changes/<id>/review.md` when active change exists | maker session history, unrelated docs, code fixes | structured `pass` / `needs-fix` / `manual-review` with ReviewType |
 | worktree 使用 | `worktree-playbook.md` | `work-log.md` only if user asks to execute or record | `task-board.md` unless task status changes | worktree plan / commands |
 | 实现完成 / 阶段收口 / 版本推进 | `task-board.md`, `work-log.md`, `changelog.md`, current change files | `work-log.md`; conditional `task-board.md`, `changelog.md`, `.forgekit/changes/<id>/*` | `task-intake.md`, `requirements.md`, business docs unless explicitly authorized | completion summary + minimal managed docs writeback |
+| 安装 / 初始化 / 更新 / 同步 ForgeKit | `project-maintenance.md`; unified entry reads target state | none before confirmation; init or safe migration targets after confirmation | business docs, legacy state creation, unsafe migration | `MaintenanceIntent: project-bootstrap` + detected action + plan/summary |
 | ForgeKit 版本升级 | `.forgekit/state.json`, applicable `migrations/*/migration.json`, `scripts/forgekit-upgrade.py` | none for `check` / `plan`; state and safe action targets only for explicit `apply --safe` | business docs, source code, legacy candidates, template-lock | eligibility result or one-screen migration plan |
+| 我更新了外层 ForgeKit / 同步一下 / 升级后整理 | `project-maintenance.md`, `.forgekit/state.json` | none for check/plan; safe migration targets only after confirmation | business docs, legacy candidates, template-lock | `MaintenanceIntent: upgrade-sync` + one-screen plan + upgrade summary |
+| 阶段结束 / 归档一下 / 历史收起来 | `project-maintenance.md`, `archive-capsule.md`, explicit items only | `.forgekit/archive-capsule-plan.md`; confirmed apply writes capsule summary/items/index | current docs, business docs, legacy archive, unplanned items | `MaintenanceIntent: archive-capsule` + plan or capsule summary/index |
 | ForgeKit 升级后继续工作 / 新版规则生效 | `context-continuity.md`, updated `AGENTS.md` / `CLAUDE.md` / `.codex/rules.md` | current-session checkpoint targets only | new implementation in the stale session | closure summary + restart/new-session instruction |
 | 保存关键结论 / compact 或 clear 前 checkpoint / 子 agent 返回 / 长会话续接 | `context-continuity.md`, `workflow-router.md`, related task/change docs | `work-log.md`, `task-board.md`, current change artifact, or narrow responsible doc | full chat history, long tool output, unconfirmed requirements, all facts in `CLAUDE.md` | minimal checkpoint + next-step recovery summary |
 | 生成交付包 / 阶段收口交付包 / 给领导汇报 / reviewer 审查 / handoff package | `task-intake.md`, `requirements.md`, `task-board.md`, `work-log.md`, `testing.md`, `changelog.md`, `risk-register.md`, `.forgekit/doc-health-report.md`, `.forgekit/source-trace-report.md`, `.forgekit/changes/<id>/*` | `.forgekit/handoff-package.md` or `.forgekit/changes/<id>/handoff.md` only when user asks to generate handoff | current docs, business docs, task status, changelog, Git, PR | review-ready handoff with TODO_REVIEW for missing evidence |
@@ -86,6 +89,8 @@
 ## Escalation Rules
 
 - 用户意图不明确时，先给出 1-3 个可能路由并追问。
+- 用户表达安装、初始化、更新或同步 ForgeKit 时，优先归类为 `project-bootstrap`，从 ForgeKitRoot 使用 `forgekit-project.py --target <project-root>` 自动分流。其他维护意图归类为 `upgrade-sync`、`archive-capsule`、`context-checkpoint`、`handoff`、`doc-health` 或 `source-trace`，再按 `project-maintenance.md` 走 `intent -> plan -> confirm/apply -> summary/index`。
+- 归档不是删除。Archive Capsule apply 必须使用已审查计划和明确确认，只移动计划 items，结束后生成 summary、items log 并更新 archive index；不要默认读取或重排 legacy archive。
 - 写入目标不明确时，不改 managed docs。
 - `review-only` 不写任何文件；report-only 报告不触发自动修复或 managed docs 写回。
 - 同一事实可能落入多个文档时，优先写入职责最窄的文档，其他文档只引用。
