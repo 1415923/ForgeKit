@@ -17,6 +17,8 @@
 
 ## Critical Facts
 
+First-Principles Pass 的关键机制推导，以及 Adversarial Review 的 blocking finding、失败路径和验证要求，都属于 Critical Facts。checkpoint 只记录结论摘要、证据路径、决策和 `TODO_REVIEW`，不复制完整推理或审查长日志。
+
 以下内容不能只留在聊天里：
 
 - 用户确认过的需求、范围和非目标。

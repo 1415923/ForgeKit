@@ -44,3 +44,5 @@
 ## Plan / apply boundary
 
 `plan` 只覆盖 `.forgekit/archive-capsule-plan.md`，不移动文件。`apply` 必须显式 `--confirm`，只消费计划中 `Archive-Status: candidate` 的条目；计划字段异常、来源变化、目标冲突或路径越界时停止，不做部分猜测。
+
+阶段包含高风险变更时，apply 前建议确认 Adversarial Review 已完成且 blocking finding 已处理或转为明确的人工接受项。capsule summary 只引用关键 First-Principles 结论、findings 摘要和证据路径，不复制完整审查日志。

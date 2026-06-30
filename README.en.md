@@ -134,6 +134,15 @@ Only projects initialized at v0.36.0 or later with `.forgekit/state.json` use th
 
 v0.39.0 adds Project Maintenance Operations and Unified Project Bootstrap. Install, init, update, and sync requests prefer `forgekit-project.py` for automatic routing; other maintenance follows `intent -> plan -> confirm/apply -> summary/index`.
 
+## First-Principles and Adversarial Review
+
+v0.40.0 adds two risk-triggered protocols. Complex problems derive the smallest correct mechanism from facts, assumptions, and constraints; high-risk closure actively searches for failure paths. They are not mandatory for typos or low-risk edits and do not replace independent code review.
+
+```text
+Analyze this bug root cause from first principles.
+Run an adversarial review of this feature and focus on failure paths.
+```
+
 ```text
 I updated the outer ForgeKit; sync this project.
 This phase is complete; archive it as a capsule.

@@ -37,6 +37,10 @@
 | 检查任务来源追溯 / 任务从哪来 / 完成状态有没有证据 | `task-intake.md`, `requirements.md`, `task-board.md`, `work-log.md`, `testing.md`, `changelog.md`, `.forgekit/changes/*` | `.forgekit/source-trace-report.md` only | Source ID / Task ID / requirements / task-board unless user explicitly authorizes manual fixes | source trace summary |
 | loop / bounded-auto 授权 | `bounded-auto-loop-policy.md`, `loop-blueprint.md`, `loop-operations.md`, `native-agent-adapter.md` | loop state or `work-log.md` only if executing | source/task/changelog docs unless their facts changed | authorization recap + stop conditions |
 | 请求独立代码审查 / maker-checker review | `maker-checker-protocol.md`, task summary, diff/stat, changed files, validation output, known risks | `.forgekit/changes/<id>/review.md` when active change exists | maker session history, unrelated docs, code fixes | structured `pass` / `needs-fix` / `manual-review` with ReviewType |
+| 从第一性原理出发 / 根因是什么 / 治标还是治本 / 不对再想想 | `reasoning-review.md`，再按需读取问题证据 | 当前 change 的 design/review 或 checkpoint 摘要（仅有稳定结论时） | 未验证推导、长会话日志、无关 managed docs | `first-principles` -> First-Principles Pass |
+| 对抗式审查 / 找失败路径 / 恶意用户角度 / 边界条件 / 生产事故风险 | `reasoning-review.md`、相关 diff、验证和风险证据 | 当前 change 的 review/verification 或 risk-register（仅开放风险） | 直接修代码、把自审冒充独立审查、完整长日志 | `adversarial-review` -> Adversarial Review findings + gate 建议 |
+| 高风险设计前 | `reasoning-review.md`, change proposal/design | 当前 change design/checkpoint | 未验证结论写入 current truth | First-Principles Pass + change workflow |
+| 高风险完成后 / commit 或 tag 前 | `reasoning-review.md`, `maker-checker-protocol.md`, diff 与验证证据 | 当前 change review/verification | 自动修复、自动提交、无证据 pass | Adversarial Review + independent review（按需） |
 | worktree 使用 | `worktree-playbook.md` | `work-log.md` only if user asks to execute or record | `task-board.md` unless task status changes | worktree plan / commands |
 | 实现完成 / 阶段收口 / 版本推进 | `task-board.md`, `work-log.md`, `changelog.md`, current change files | `work-log.md`; conditional `task-board.md`, `changelog.md`, `.forgekit/changes/<id>/*` | `task-intake.md`, `requirements.md`, business docs unless explicitly authorized | completion summary + minimal managed docs writeback |
 | 安装 / 初始化 / 更新 / 同步 ForgeKit | `project-maintenance.md`; unified entry reads target state | none before confirmation; init or safe migration targets after confirmation | business docs, legacy state creation, unsafe migration | `MaintenanceIntent: project-bootstrap` + detected action + plan/summary |
@@ -98,6 +102,8 @@
 - 涉及文档健康、文档太长或职责混乱时，先生成或建议 `.forgekit/doc-health-report.md`；不要自动按报告修改 managed docs。
 - 涉及任务来源、完成证据或追溯链断裂时，先生成或建议 `.forgekit/source-trace-report.md`；不要自动补 Source ID 或改写任务状态。
 - 涉及代码审查时，Maker 用 `forgekit-request-code-review` 构造最小 review packet，并调用独立 `forgekit-code-reviewer`；self-review 不得冒充 independent review，reviewer 不可用时使用 `manual-review`。
+- 用户要求第一性原理时执行 First-Principles Pass；用户要求对抗式审查时执行 Adversarial Review Pass。高风险设计前先推导根因和最小正确机制，高风险收口前先找失败路径。
+- 未验证推导不得写成事实；blocking finding 或 `TODO_REVIEW` 必须进入 checkpoint 并停止自动推进。
 - 涉及阶段边界、compact/clear 准备、子 agent 关键结论、长输出或 handoff/commit/tag 前，先按 `context-continuity.md` 执行 Context Checkpoint（minimal）；长输出只保留摘要和路径。
 - 涉及阶段收口、领导汇报、reviewer 审查或测试交接时，可以生成 `.forgekit/handoff-package.md` 或 scoped change `handoff.md`；它只汇总已有信息和 independent review 证据，缺证据写 `TODO_REVIEW`，不得编造提交、验证、风险或文件列表。
 - 涉及 ForgeKit 升级时先运行 `check`。缺 state 或低于 v0.36 时只输出 adoption guidance；未经用户确认不得创建 state，也不要读取全量 legacy candidates。

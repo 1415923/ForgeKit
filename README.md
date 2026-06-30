@@ -133,6 +133,17 @@ python scripts/forgekit-upgrade.py apply --safe --repo-root <project>
 
 v0.39.0 增加 Project Maintenance Operations 和 Unified Project Bootstrap。安装、初始化、更新或同步优先使用 `forgekit-project.py` 自动分流；其他维护动作按 `intent -> plan -> confirm/apply -> summary/index` 推进。
 
+## 第一性原理与对抗式审查
+
+v0.40.0 增加两个按风险触发的审查协议：复杂问题先从事实、假设和约束推导最小正确机制；高风险变更收口前主动寻找失败路径。它们不强制用于 typo 或低风险小改动，也不替代独立代码审查。
+
+常用说法：
+
+```text
+从第一性原理出发，重新分析这个 bug 的根因。
+对这个功能做一次对抗式审查，专门找失败路径。
+```
+
 ```text
 我更新了外层 ForgeKit，帮这个项目同步一下。
 这个阶段结束了，帮我归档成 capsule。

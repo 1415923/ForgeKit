@@ -39,6 +39,8 @@ This repository maintains a reusable Codex CLI workflow template.
 - After a ForgeKit upgrade changes entry rules, skills, or agents, use the current session only for checkpoint, minimal writeback, and closure; start a new session or restart the tool before new work.
 - Route install/init/update/sync through the ForgeKitRoot `forgekit-project.py` unified entry; it detects init, current, upgrade, toolkit-too-old, or legacy adoption. Other maintenance still uses `project-maintenance.md`: plan before apply, require confirmation, and produce summary/index. Archive is not deletion.
 - Keep independent code review split into maker request, fresh read-only reviewer context, structured gate result, and explicit human escalation; self-review must not satisfy an independent-review gate.
+- When the user requests first-principles analysis, derive from confirmed facts, assumptions, constraints, and the smallest verifiable mechanism. For high-risk completion, use adversarial failure-path review before declaring done.
+- Checkpoint critical derivations and blocking findings as summaries with evidence paths and `TODO_REVIEW`; never write unverified reasoning as fact or copy full review logs into persistent docs.
 
 ## Validation
 

@@ -67,6 +67,7 @@
 | `.forgekit/docs/bounded-auto-loop-policy.md` | triggered | 用户、AI 工具 | no | one-step、bounded-auto、review-only 的授权边界、预算、停止条件和交接规则 | runner、daemon、scheduler、自动 PR、worktree 编排 | 用户要求一次授权多阶段推进或审查 loop policy | `loop-blueprint.md`, `loop-operations.md`, `work-log.md` |
 | `.forgekit/docs/native-agent-adapter.md` | triggered | 用户、AI 工具 | no | 原生 agent 配置适配、runtime 验证清单、native/fallback/simulated 记录规则 | 自动执行授权、运行器配置、把 fallback 称为 native 成功 | 用户选择生成或验证 Claude Code / Codex native agent 配置 | `loop-blueprint.md`, `loop-operations.md`, `maker-checker-protocol.md` |
 | `.forgekit/docs/maker-checker-protocol.md` | triggered | 用户、AI 工具 | no | Maker/独立 Checker、最小 review packet、ReviewType 和 gate 规则 | 自动修复、PR API、多 agent 调度器或最终人工批准 | 代码变更、核心/API/数据/权限/脚本变更、发版/tag 或 bounded-auto 收口 | `changes/<id>/review.md`, `forgekit-request-code-review`, `forgekit-code-review` |
+| `.forgekit/docs/reasoning-review.md` | triggered | 用户、开发者、reviewer | no | First-Principles Pass 与 Adversarial Review Pass 的触发、输出和写回协议 | 所有审查报告、长推理日志、自动修复或事实源 | 根因不清、高风险设计、用户明确要求或高风险收口 | `changes/<id>/design.md`, `changes/<id>/review.md`, `risk-register.md`, `context-continuity.md` |
 | `.forgekit/docs/worktree-playbook.md` | triggered | 用户、AI 工具 | no | 手动 worktree 隔离指南 | 自动 worktree 编排 | 用户要求并行隔离工作 | `work-log.md` |
 | `.forgekit/changes/<id>/*` | triggered | 开发者、复查者 | no | 单次中高风险变更过程 | 当前态事实、无关历史 | 中高风险变更开始或收口 | `document-lifecycle.md` |
 | `.forgekit/archive/*` | archive | 审计者、维护者 | no | 历史证据和旧变更材料 | 当前事实、活跃变更上下文 | 用户要求历史、审计、回归、复盘 | `document-lifecycle.md` |

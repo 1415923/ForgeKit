@@ -68,6 +68,8 @@ ManagedDocsWriteback: off | minimal | full-review
 ## Independent Review Gate
 
 - bounded-auto 收口前必须调用独立 `forgekit-code-reviewer`；self-review 不能满足该 gate。
+- 进入高风险阶段前必须执行 First-Principles Pass；高风险阶段收口前必须执行 Adversarial Review Pass。两者的结构和边界见 `reasoning-review.md`。
+- Adversarial Review 发现 blocking finding 或 `TODO_REVIEW` 时必须停止；它不是自动修复授权。
 - Maker 只传任务摘要、diff/stat、changed files、验证输出和已知风险，不传完整会话历史。
 - reviewer 必须 read-only，不自动修复。
 - `ReviewDecision: pass` 才能进入最终 handoff。

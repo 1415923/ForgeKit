@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "template_version": "0.39.0",
+  "template_version": "0.40.0",
   "boundary_aware": true,
   "files": [
     {
@@ -9,7 +9,7 @@
       "role": "agent_entry",
       "update_policy": "ask",
       "render_mode": "copy",
-      "checksum": "sha256:5af30c22f40c03ab8f902e0f38a3299ad117ed8769dbd1d9bab13cead7f651b1"
+      "checksum": "sha256:5fe07b80ed4b1ba680f6e5871587ec0f54b2fc84e199793d11a426c2dedc1237"
     },
     {
       "source_path": "CLAUDE.md",
@@ -17,7 +17,7 @@
       "role": "agent_entry",
       "update_policy": "ask",
       "render_mode": "copy",
-      "checksum": "sha256:e0c1ff078c028e12ac342ef159ff4aa52898f720bc7bc8f06b3d0661ad26ac69"
+      "checksum": "sha256:aab78d0e9979687a59b283ec84efa15011fb79ea836c919a2d5597e6d676e0c3"
     },
     {
       "source_path": "README.md",
@@ -25,7 +25,7 @@
       "role": "readme",
       "update_policy": "ask",
       "render_mode": "copy",
-      "checksum": "sha256:4984b451dabed08dacd1c99cf5a7d77cf1beb1c109f6631d5e3a5e56d3ea3820"
+      "checksum": "sha256:30214bfd58ef882e72c15a3c0ee432ac4b4131a9c3bb671a3334ed871607243f"
     },
     {
       "source_path": ".forgekit/project-boundary.yml",
@@ -41,7 +41,7 @@
       "role": "managed_doc",
       "update_policy": "merge",
       "render_mode": "copy",
-      "checksum": "sha256:17d0732926c958fb74b919d41f7e8f1e693b59c60f8b5d2bf2b94d2ec19a337d"
+      "checksum": "sha256:8c27cf0ab4c5cbd1a8b21ef1c0e11f6dd776227c82bbe89eba2b81eb741322fd"
     },
     {
       "source_path": ".forgekit/docs/document-lifecycle.md",
@@ -81,7 +81,7 @@
       "role": "codex_rule",
       "update_policy": "ask",
       "render_mode": "copy",
-      "checksum": "sha256:09a43098667d3bb422ce05ebc3452112ecd44a5b615d04f2ea4a4248f2dd8c2e"
+      "checksum": "sha256:797ffcd2c3377757b2fddc0b02b49005da28cece677a2f2a7fd97164351f960f"
     },
     {
       "source_path": ".codex/version-gates.md",
@@ -209,7 +209,7 @@
       "role": "managed_doc",
       "update_policy": "merge",
       "render_mode": "copy",
-      "checksum": "sha256:e0e5a020cbf8d0af32c4fa5805f83d424fe19b9f8697d9e0563b5a858d1b0730"
+      "checksum": "sha256:ad712236670977a1311468c54b36530a93e3291e9a3b9e69174ddf93d5fee3f4"
     },
     {
       "source_path": "docs/workflow-router.md",
@@ -217,7 +217,7 @@
       "role": "managed_doc",
       "update_policy": "merge",
       "render_mode": "copy",
-      "checksum": "sha256:eb34b0f82c53c677cd65eac11590c4f8f15da6936381e79cce7db5e5ccccfad0"
+      "checksum": "sha256:dd44f9c9e708ec4766c5ccfb36747dbd8e7936b2745247106b1eac82673dc5df"
     },
     {
       "source_path": "docs/work-log.md",
@@ -273,7 +273,7 @@
       "role": "managed_doc",
       "update_policy": "merge",
       "render_mode": "copy",
-      "checksum": "sha256:53f7500a3b73019ffc6e61c762b13c908247c0d1e1eb47fae2f976b22ec62702"
+      "checksum": "sha256:e1534c35f5c700c23e66bc900b6d0082d7f15e246015f9c5d3767517aa3671be"
     },
     {
       "source_path": "docs/maker-checker-protocol.md",
@@ -489,7 +489,7 @@
       "role": "skill",
       "update_policy": "ask",
       "render_mode": "copy",
-      "checksum": "sha256:bc9d66e366a7c7ffa003be46136333b3d2f972d1f70048b3c3a8c936b20c7fb5"
+      "checksum": "sha256:ec13264349c714ccf3675858ff8006a741e96881472f43cf48fc54afc0674fda"
     },
     {
       "source_path": ".claude/skills/forgekit-code-review/references/universal-review.md",
@@ -585,7 +585,7 @@
       "role": "managed_doc",
       "update_policy": "merge",
       "render_mode": "copy",
-      "checksum": "sha256:cbbb7d01490347223e4a669c3be12f8470e60646df593e4b961035cbac77c7d4"
+      "checksum": "sha256:d486a065ce83cee95ef642f8e7921dc270d2b1f086f775c91436e3383fc7d17c"
     },
     {
       "source_path": "migrations/0.38.0/migration.json",
@@ -609,7 +609,7 @@
       "role": "managed_doc",
       "update_policy": "merge",
       "render_mode": "copy",
-      "checksum": "sha256:903c76fb898acc6c33ddb222470b6065ab930db1b5d82a4d7e30ab15d7a52b32"
+      "checksum": "sha256:58de364f747c21f18957b048a33b2995a3c5c6ac4ddfa93a49afc1520daa67f2"
     },
     {
       "source_path": "docs/archive-capsule.md",
@@ -617,7 +617,7 @@
       "role": "managed_doc",
       "update_policy": "merge",
       "render_mode": "copy",
-      "checksum": "sha256:b586d68ec4cf01541cff3a169ef7d3caf99c6def519b999309cb8fd645be5099"
+      "checksum": "sha256:f562edf1178f0222884cafb85b813b8769533cd614f75f7d49a06ab1b44d1c03"
     },
     {
       "source_path": "scripts/archive-capsule.py",
@@ -674,6 +674,62 @@
       "update_policy": "readonly",
       "render_mode": "copy",
       "checksum": "sha256:e85645d0cc775280f6417855d688bd9f0f2c7e12d99f9fe214116e76db36cd66"
+    },
+    {
+      "source_path": "docs/reasoning-review.md",
+      "target_path": "${managed_docs_root}/reasoning-review.md",
+      "role": "managed_doc",
+      "update_policy": "merge",
+      "render_mode": "copy",
+      "checksum": "sha256:8e9177bfbd213c5b75e4e6d9319279d3a4e29d2e231ff74dfd0b34d30a4ff9fe"
+    },
+    {
+      "source_path": ".claude/skills/forgekit-first-principles/SKILL.md",
+      "target_path": ".claude/skills/forgekit-first-principles/SKILL.md",
+      "role": "skill",
+      "update_policy": "ask",
+      "render_mode": "copy",
+      "checksum": "sha256:c807accdc2392730609ffee25d2ea479bf221f560cf9f76ce606b6a48e675c1f"
+    },
+    {
+      "source_path": ".claude/skills/forgekit-adversarial-review/SKILL.md",
+      "target_path": ".claude/skills/forgekit-adversarial-review/SKILL.md",
+      "role": "skill",
+      "update_policy": "ask",
+      "render_mode": "copy",
+      "checksum": "sha256:502176a8a468ea97cdfac544eecc5580dead72b8f8ba0f13a7f69d7673bbe2e9"
+    },
+    {
+      "source_path": "migrations/0.40.0/migration.json",
+      "target_path": "migrations/0.40.0/migration.json",
+      "role": "metadata",
+      "update_policy": "readonly",
+      "render_mode": "copy",
+      "checksum": "sha256:77797cfdd6f92134a65d09c21dec13fa3500a100d715fcd545671b715ba957d3"
+    },
+    {
+      "source_path": "migrations/0.40.0/files/.forgekit/docs/reasoning-review.md",
+      "target_path": "migrations/0.40.0/files/.forgekit/docs/reasoning-review.md",
+      "role": "metadata",
+      "update_policy": "readonly",
+      "render_mode": "copy",
+      "checksum": "sha256:8e9177bfbd213c5b75e4e6d9319279d3a4e29d2e231ff74dfd0b34d30a4ff9fe"
+    },
+    {
+      "source_path": "migrations/0.40.0/files/.claude/skills/forgekit-first-principles/SKILL.md",
+      "target_path": "migrations/0.40.0/files/.claude/skills/forgekit-first-principles/SKILL.md",
+      "role": "metadata",
+      "update_policy": "readonly",
+      "render_mode": "copy",
+      "checksum": "sha256:c807accdc2392730609ffee25d2ea479bf221f560cf9f76ce606b6a48e675c1f"
+    },
+    {
+      "source_path": "migrations/0.40.0/files/.claude/skills/forgekit-adversarial-review/SKILL.md",
+      "target_path": "migrations/0.40.0/files/.claude/skills/forgekit-adversarial-review/SKILL.md",
+      "role": "metadata",
+      "update_policy": "readonly",
+      "render_mode": "copy",
+      "checksum": "sha256:502176a8a468ea97cdfac544eecc5580dead72b8f8ba0f13a7f69d7673bbe2e9"
     }
   ]
 }

@@ -59,6 +59,8 @@ v0.35.x 及更早项目按既有项目接手，不假装自动升级。
 
 归档不是删除。阶段材料先形成计划，确认后移动到按日期和阶段命名的 capsule，并生成摘要、项目清单和索引。详细规则见 `archive-capsule.md`。
 
+如果阶段包含高风险变更，归档计划应确认 Adversarial Review 是否完成。maintenance summary 可以引用 First-Principles 结论或 adversarial findings 的摘要和证据路径，但不复制全文。
+
 ```powershell
 python scripts/archive-capsule.py plan --repo-root . --name phase-close --reason "阶段完成" --item .forgekit/changes/<change-id>
 python scripts/archive-capsule.py apply --repo-root . --plan .forgekit/archive-capsule-plan.md --confirm

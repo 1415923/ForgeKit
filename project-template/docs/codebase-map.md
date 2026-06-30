@@ -69,6 +69,7 @@
 | 文档健康检查 | `scripts/doc-health-report.py`，输出 `.forgekit/doc-health-report.md` |
 | 来源追溯检查 | `scripts/source-trace-report.py`，输出 `.forgekit/source-trace-report.md` |
 | 独立代码审查 | `.claude/skills/forgekit-request-code-review/SKILL.md` 请求；`forgekit-code-reviewer` 只读审查；结果写当前 change `review.md` |
+| 根因推导 / 失败路径审查 | `.forgekit/docs/reasoning-review.md`；按需使用 `forgekit-first-principles` 或 `forgekit-adversarial-review`，结果写当前 change 或 checkpoint 摘要 |
 | 阶段交付包 / reviewer handoff | `scripts/handoff-package.py`，汇总独立审查证据并输出 `.forgekit/handoff-package.md` 或 `.forgekit/changes/<change-id>/handoff.md` |
 | 项目维护意图 | `.forgekit/docs/project-maintenance.md`；先识别 `MaintenanceIntent`，再 plan / confirm / summary |
 | 阶段归档 capsule | `.forgekit/docs/archive-capsule.md`、`scripts/archive-capsule.py`；历史检索先看 `.forgekit/archive/index.md` |

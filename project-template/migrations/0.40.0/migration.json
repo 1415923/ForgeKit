@@ -1,0 +1,47 @@
+{
+  "id": "0.40.0-first-principles-adversarial-review",
+  "title": "First-Principles and Adversarial Review Protocol",
+  "from": "0.39.0",
+  "to": "0.40.0",
+  "risk": "low",
+  "actions": [
+    {
+      "id": "install-reasoning-review-guide",
+      "type": "copy_file_if_missing",
+      "safety": "safe",
+      "source": "files/.forgekit/docs/reasoning-review.md",
+      "target": ".forgekit/docs/reasoning-review.md"
+    },
+    {
+      "id": "install-first-principles-skill",
+      "type": "copy_file_if_missing",
+      "safety": "safe",
+      "source": "files/.claude/skills/forgekit-first-principles/SKILL.md",
+      "target": ".claude/skills/forgekit-first-principles/SKILL.md"
+    },
+    {
+      "id": "install-adversarial-review-skill",
+      "type": "copy_file_if_missing",
+      "safety": "safe",
+      "source": "files/.claude/skills/forgekit-adversarial-review/SKILL.md",
+      "target": ".claude/skills/forgekit-adversarial-review/SKILL.md"
+    },
+    {
+      "id": "enable-reasoning-review-protocol",
+      "type": "set_state_feature",
+      "safety": "safe",
+      "name": "first_principles_adversarial_review",
+      "value": true
+    }
+  ],
+  "manual_review": [
+    "Merge the short first-principles and adversarial-review routing rules into local entry files without replacing project-specific rules.",
+    "Review high-risk bounded-auto, independent-review, context checkpoint, and archive gates before adopting them."
+  ],
+  "non_goals": [
+    "No automatic business docs changes",
+    "No automatic code fixes",
+    "No automatic Git commit, push, or PR",
+    "No runner, daemon, scheduler, or unlimited agent execution"
+  ]
+}

@@ -15,6 +15,8 @@ Do not trust maker conclusions by default. Inspect the diff and evidence directl
 
 ## Review order
 
+For a high-risk change, use the Adversarial Review Pass from `.forgekit/docs/reasoning-review.md` when failure-path analysis is required. Keep this read-only and return fixes to the maker.
+
 1. Read the task summary and review boundary.
 2. Inspect `git diff --stat`, the exact diff, and changed files.
 3. Read [references/universal-review.md](references/universal-review.md).
@@ -28,6 +30,7 @@ Do not trust maker conclusions by default. Inspect the diff and evidence directl
 - `needs-fix`: at least one blocking finding exists.
 - `manual-review`: scope, evidence, ownership, runtime behavior, or independent execution cannot be verified.
 - `self-review` can inform the maker but cannot satisfy an independent-review gate.
+- A blocking adversarial finding requires `needs-fix` or `manual-review`. Reviewer unavailability must not be reported as pass.
 
 ## Output contract
 

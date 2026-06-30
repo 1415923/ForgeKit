@@ -618,7 +618,7 @@ function Test-TemplateManifest {
     $manifestPath = Join-Path $repoRoot "project-template\.forgekit\template-manifest.json"
     if (Test-Path -LiteralPath $manifestPath) {
         $manifest = Get-Content -LiteralPath $manifestPath -Raw | ConvertFrom-Json
-        if ($manifest.template_version -ne "0.39.0") {
+        if ($manifest.template_version -ne "0.40.0") {
             Add-Error "Unexpected template manifest version: $($manifest.template_version)"
         }
         $sources = @($manifest.files | ForEach-Object { $_.source_path })
@@ -1075,7 +1075,7 @@ function Test-HarnessEntryConsistency {
     Test-RequiredPath "project-template\migrations\0.36.0\migration.json"
     Test-RequiredPath "project-template\.forgekit\state.json"
     Test-RequiredPattern "project-template\.forgekit\state.json" '"schema_version": 1' "State schema version"
-    Test-RequiredPattern "project-template\.forgekit\state.json" '"forgekit_version": "0.39.0"' "State ForgeKit version"
+    Test-RequiredPattern "project-template\.forgekit\state.json" '"forgekit_version": "0.40.0"' "State ForgeKit version"
     Test-RequiredPattern "project-template\.forgekit\state.json" '"managed_docs_root": ".forgekit/docs"' "State managed docs root"
     Test-RequiredPattern "project-template\.forgekit\state.json" '"change_root": ".forgekit/changes"' "State change root"
     Test-RequiredPattern "project-template\.forgekit\state.json" '"last_upgrade": null' "State last upgrade"
@@ -1139,7 +1139,7 @@ function Test-PluginDistribution {
     if ($codexPluginJson.name -ne "forgekit") {
         Add-Error "Unexpected Codex plugin name in root plugin.json: $($codexPluginJson.name)"
     }
-    if ($codexPluginJson.version -ne "0.39.0") {
+    if ($codexPluginJson.version -ne "0.40.0") {
         Add-Error "Unexpected Codex plugin version in root plugin.json: $($codexPluginJson.version)"
     }
     if ($codexPluginJson.skills -ne "./skills/") {
@@ -1150,7 +1150,7 @@ function Test-PluginDistribution {
     if ($claudePluginJson.name -ne "forgekit") {
         Add-Error "Unexpected Claude plugin name in root plugin.json: $($claudePluginJson.name)"
     }
-    if ($claudePluginJson.version -ne "0.39.0") {
+    if ($claudePluginJson.version -ne "0.40.0") {
         Add-Error "Unexpected Claude plugin version in root plugin.json: $($claudePluginJson.version)"
     }
     $claudeSkills = @($claudePluginJson.skills)
@@ -1336,6 +1336,40 @@ function Test-ProjectMaintenanceOperations {
         if (Test-Path -LiteralPath (Join-Path $repoRoot $forbidden)) { Add-Error "v0.39 must not add maintenance runner/daemon/scheduler: $forbidden" }
     }
 }
+function Test-ReasoningReviewProtocol {
+    foreach ($path in @(
+        "project-template\docs\reasoning-review.md",
+        "project-template\.claude\skills\forgekit-first-principles\SKILL.md",
+        "project-template\.claude\skills\forgekit-adversarial-review\SKILL.md",
+        "migrations\0.40.0\migration.json",
+        "project-template\migrations\0.40.0\migration.json"
+    )) { Test-RequiredPath $path }
+    foreach ($marker in @(
+        "First-Principles Pass", "Adversarial Review Pass", "Problem / Goal", "Known Facts",
+        "Assumptions", "Constraints", "Surface Fix vs Root Fix", "Minimal Verifiable Outcome",
+        "Failure Scenario", "Trigger Condition", "Expected Failure", "Evidence / Reproduction",
+        "Verification Needed", "Relationship to Independent Code Review", "Critical Facts"
+    )) { Test-RequiredPattern "project-template\docs\reasoning-review.md" $marker "Reasoning/review marker $marker" }
+    foreach ($entry in @("project-template\AGENTS.md", "project-template\CLAUDE.md", "project-template\.codex\rules.md")) {
+        Test-RequiredPattern $entry "First-Principles Pass" "First-principles entry rule"
+        Test-RequiredPattern $entry "Adversarial Review Pass" "Adversarial-review entry rule"
+    }
+    Test-RequiredPattern "project-template\docs\workflow-router.md" "first-principles" "Workflow router first-principles route"
+    Test-RequiredPattern "project-template\docs\workflow-router.md" "adversarial-review" "Workflow router adversarial-review route"
+    Test-RequiredPattern "project-template\docs\bounded-auto-loop-policy.md" "blocking finding" "Bounded-auto adversarial stop gate"
+    Test-RequiredPattern "project-template\docs\context-continuity.md" "blocking finding" "Context Critical Facts finding"
+    Test-RequiredPattern "project-template\.forgekit\state.json" '"first_principles_adversarial_review": true' "State reasoning/review feature"
+    Test-RequiredPattern "migrations\0.40.0\migration.json" '"from": "0.39.0"' "v0.40 migration source"
+    Test-RequiredPattern "migrations\0.40.0\migration.json" '"to": "0.40.0"' "v0.40 migration target"
+    $manifest = Get-Content -LiteralPath (Join-Path $repoRoot "project-template\.forgekit\template-manifest.json") -Raw | ConvertFrom-Json
+    $sources = @($manifest.files | ForEach-Object { $_.source_path })
+    foreach ($source in @("docs/reasoning-review.md", ".claude/skills/forgekit-first-principles/SKILL.md", ".claude/skills/forgekit-adversarial-review/SKILL.md", "migrations/0.40.0/migration.json")) {
+        if ($sources -notcontains $source) { Add-Error "Reasoning/review template missing from manifest: $source" }
+    }
+    foreach ($forbidden in @("scripts/reasoning-runner.py", "scripts/adversarial-review-runner.py", "project-template\scripts\reasoning-runner.py", "project-template\scripts\adversarial-review-runner.py")) {
+        if (Test-Path -LiteralPath (Join-Path $repoRoot $forbidden)) { Add-Error "v0.40 must not add reasoning/review runner or daemon: $forbidden" }
+    }
+}
 Test-RequiredPath "README.md"
 Test-RequiredPath "AGENTS.md"
 Test-RequiredPath "scripts\init-project-template.ps1"
@@ -1385,6 +1419,7 @@ Test-TeamToolingProtocol
 Test-IndependentCodeReviewProtocol
 Test-ContextContinuityProtocol
 Test-ProjectMaintenanceOperations
+Test-ReasoningReviewProtocol
 Test-AgentSuitability
 Test-ExecutableHarness
 Test-PluginDistribution

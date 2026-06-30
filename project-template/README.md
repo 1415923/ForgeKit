@@ -41,6 +41,10 @@ python scripts/forgekit-upgrade.py apply --safe --repo-root .
 
 用户说“安装/初始化/更新/同步 ForgeKit”时，优先路由到 ForgeKitRoot 的统一入口并识别 `project-bootstrap`。用户说“整理一下升级”“阶段结束了”“归档一下”时，先读 `.forgekit/docs/project-maintenance.md` 并识别其他 `MaintenanceIntent`。所有维护动作先 plan；Archive Capsule 只有在用户确认后才 apply，并生成 summary、items log 和 archive index。
 
+## 根因与失败路径审查
+
+复杂问题、重复修补或高风险设计按需读取 `.forgekit/docs/reasoning-review.md`，先执行 First-Principles Pass；高风险收口前执行 Adversarial Review Pass。两者只输出推导、风险和验证项，不自动修代码，也不替代独立 reviewer。
+
 ## 可选增强
 
 - `.agents/skills/`：项目本地 skills，内置项目初始化、代码审查、发布检查和安全审查；引用 skill 时优先读取 `.agents/skills/<skill>/SKILL.md`。

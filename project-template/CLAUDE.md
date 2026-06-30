@@ -119,6 +119,8 @@ When a task names a ForgeKit skill, read the project-local `.agents/skills/<skil
 - Checker phase should review diff, validation, risks, and document sync; it should output `pass`, `needs-fix`, or `manual-review`.
 - Checker should not expand scope or implement new features unless the user explicitly asks.
 - Code changes require independent review by default; core logic, API, data, permissions, scripts, release/tag, and bounded-auto closure require it.
+- When the user asks for first-principles analysis, run the First-Principles Pass in `.forgekit/docs/reasoning-review.md`. Before high-risk design, derive the root mechanism; before high-risk completion, run the Adversarial Review Pass.
+- Checkpoint critical conclusions and blocking findings with evidence paths and `TODO_REVIEW`. Do not write unverified derivations as facts or copy full review logs into persistent docs.
 - Use `forgekit-request-code-review` to send only the task summary, diff/stat, changed files, validation output, and known risks to `forgekit-code-reviewer`; never pass the maker's full session history.
 - Self-review must be labeled `ReviewType: self-review` and cannot satisfy an independent-review gate. If the reviewer is unavailable, use `manual-review`, never `pass`.
 - Critical conclusions must not live only in chat. At phase boundaries, before compact/clear, and before handoff/commit/tag, use `.forgekit/docs/context-continuity.md` for a minimal checkpoint.
