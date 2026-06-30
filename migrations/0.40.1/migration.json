@@ -1,0 +1,25 @@
+{
+  "id": "0.40.1-idempotent-safe-migrations",
+  "title": "Upgrade idempotency and cross-platform project entry",
+  "from": "0.40.0",
+  "to": "0.40.1",
+  "risk": "low",
+  "actions": [
+    {
+      "id": "enable-idempotent-safe-migrations",
+      "type": "set_state_feature",
+      "safety": "safe",
+      "name": "idempotent_safe_migrations",
+      "value": true
+    }
+  ],
+  "manual_review": [
+    "Existing files skipped by an earlier migration remain user-owned; review any REVIEW-NEEDED plan entries manually."
+  ],
+  "non_goals": [
+    "No overwrite or deletion of existing project files",
+    "No automatic business docs changes",
+    "No automatic Git commit, push, or PR",
+    "No runner, daemon, or scheduler"
+  ]
+}

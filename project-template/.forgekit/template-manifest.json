@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "template_version": "0.40.0",
+  "template_version": "0.40.1",
   "boundary_aware": true,
   "files": [
     {
@@ -25,7 +25,7 @@
       "role": "readme",
       "update_policy": "ask",
       "render_mode": "copy",
-      "checksum": "sha256:30214bfd58ef882e72c15a3c0ee432ac4b4131a9c3bb671a3334ed871607243f"
+      "checksum": "sha256:f4cd92457aef941efd491ff4f18a5033ab27007c2c143caa5ac1bcd7397af6c1"
     },
     {
       "source_path": ".forgekit/project-boundary.yml",
@@ -417,7 +417,7 @@
       "role": "script",
       "update_policy": "replace",
       "render_mode": "copy",
-      "checksum": "sha256:b78bc44d69729573fe223982a9d39de33ee781f003cd0e71f5e1d96830b98dbf"
+      "checksum": "sha256:88658a46a691f9cfb6754df127baa0221376c97fed17981ffeafb860b4edc654"
     },
     {
       "source_path": "migrations/0.36.0/migration.json",
@@ -730,6 +730,14 @@
       "update_policy": "readonly",
       "render_mode": "copy",
       "checksum": "sha256:502176a8a468ea97cdfac544eecc5580dead72b8f8ba0f13a7f69d7673bbe2e9"
+    },
+    {
+      "source_path": "migrations/0.40.1/migration.json",
+      "target_path": "migrations/0.40.1/migration.json",
+      "role": "metadata",
+      "update_policy": "readonly",
+      "render_mode": "copy",
+      "checksum": "sha256:1e3604ccdb30757130609741bd308f237ce00589147d425ed5ed292ad07b7314"
     }
   ]
 }

@@ -164,8 +164,9 @@ def init_project(args, toolkit_root, target, toolkit):
 def migration_counts(plan_output):
     safe = sum(int(value) for value in re.findall(r"(?m)^Safe actions:\s*(\d+)\s*$", plan_output))
     non_safe = sum(int(value) for value in re.findall(r"(?m)^Manual actions:\s*(\d+)\s*$", plan_output))
+    review_needed = sum(int(value) for value in re.findall(r"(?m)^Review needed:\s*(\d+)\s*$", plan_output))
     reviews = len(re.findall(r"(?m)^- REVIEW:", plan_output))
-    return safe, non_safe + reviews
+    return safe, non_safe + review_needed + reviews
 
 
 def upgrade_project(args, toolkit_root, target, installed, toolkit):

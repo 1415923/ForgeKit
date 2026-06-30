@@ -19,10 +19,20 @@ ForgeKit 在生成项目内提供轻量 AI Engineering Loop：澄清目标、判
 
 ## 升级兼容
 
-从外层 ForgeKitRoot 统一检查当前项目：
+从外层 ForgeKitRoot 统一检查当前项目。统一的是入口语义，命令按平台选择。
+
+Windows PowerShell：
+
+```powershell
+python .\scripts\forgekit-project.py --target "D:\path\to\project"
+powershell -ExecutionPolicy Bypass -File .\scripts\forgekit-project.ps1 --target "D:\path\to\project"
+```
+
+macOS / Linux：
 
 ```bash
-python scripts/forgekit-project.py --target <project-root>
+python3 ./scripts/forgekit-project.py --target "/path/to/project"
+bash ./scripts/forgekit-project.sh --target "/path/to/project"
 ```
 
 该统一入口属于 ForgeKitRoot，不复制到生成项目。它自动识别 init、up-to-date、upgrade-sync、工具版本过旧和 legacy adoption；非交互默认只展示计划，显式 `--yes` 才写入。下面的 `forgekit-upgrade.py` 是项目内高级入口。

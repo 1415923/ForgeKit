@@ -136,6 +136,35 @@ def command_check(project_root, migration_root):
     print("Next: run `plan` to review the migration plan." if pending else "No migration is required.")
 
 
+def action_status(project_root, migration, action, state):
+    """Return the plan/apply classification without modifying project files."""
+    if action.get("safety") != "safe":
+        return "manual", "action is not marked safe"
+    action_type = action.get("type")
+    if action_type == "ensure_directory":
+        target = safe_target(project_root, action["target"])
+        if target.is_dir():
+            return "already-present", "directory already exists"
+        if target.exists():
+            return "review-needed", "target exists and is not a directory"
+        return "safe", "directory will be created"
+    if action_type == "copy_file_if_missing":
+        source = migration_source(migration, action)
+        target = safe_target(project_root, action["target"])
+        if not target.exists():
+            return "safe", "file will be installed"
+        if target.is_file() and sha256(target) == sha256(source):
+            return "already-present", "same content; no write needed"
+        return "review-needed", "target exists with different content; preserve and skip"
+    if action_type == "set_state_feature":
+        if not action.get("name"):
+            fail(f"Migration {migration['id']} has a state feature without a name")
+        if state.get("features", {}).get(action["name"]) == action["value"]:
+            return "already-present", "state feature already has the requested value"
+        return "safe", "state feature will be updated"
+    fail(f"Unsupported safe migration action: {action_type}")
+
+
 def render_plan(project_root, state, migrations):
     current = parse_version(state["forgekit_version"])
     pending, target = pending_migrations(current, migrations)
@@ -153,16 +182,25 @@ def render_plan(project_root, state, migrations):
         lines.extend(["No migration is required.", "No files were changed."])
         return "\n".join(lines), pending
     for item in pending:
-        safe_actions = [action for action in item["actions"] if action.get("safety") == "safe"]
-        non_safe = [action for action in item["actions"] if action.get("safety") != "safe"]
+        classified = [(action, *action_status(project_root, item, action, state)) for action in item["actions"]]
+        safe_actions = [entry for entry in classified if entry[1] == "safe"]
+        already_present = [entry for entry in classified if entry[1] == "already-present"]
+        review_needed = [entry for entry in classified if entry[1] == "review-needed"]
+        non_safe = [entry for entry in classified if entry[1] == "manual"]
         lines.extend([
             f"## {item['to']} - {item['title']}",
             f"Risk: {item['risk']}",
             f"Safe actions: {len(safe_actions)}",
+            f"Already present: {len(already_present)}",
+            f"Review needed: {len(review_needed)}",
             f"Manual actions: {len(non_safe)}",
         ])
-        for action in safe_actions:
+        for action, _, reason in safe_actions:
             lines.append(f"- SAFE: {action.get('description', action.get('id', action.get('type', 'action')))}")
+        for action, _, reason in already_present:
+            lines.append(f"- ALREADY-PRESENT: {action.get('id', action.get('type', 'action'))} ({reason})")
+        for action, _, reason in review_needed:
+            lines.append(f"- REVIEW-NEEDED: {action.get('id', action.get('type', 'action'))} ({reason})")
         for review in item["manual_review"]:
             lines.append(f"- REVIEW: {review}")
         lines.append("")
@@ -204,26 +242,36 @@ def sha256(path):
     return digest.hexdigest()
 
 
+def migration_source(migration, action):
+    source = (migration["_path"].parent / action["source"]).resolve()
+    try:
+        source.relative_to(migration["_path"].parent.resolve())
+    except ValueError:
+        fail(f"Migration source escapes package: {action['source']}")
+    if not source.is_file():
+        fail(f"Migration source not found: {source}")
+    return source
+
+
 def apply_action(project_root, migration, action, state):
     action_type = action.get("type")
     if action.get("safety") != "safe":
         return "manual"
     if action_type == "ensure_directory":
-        safe_target(project_root, action["target"]).mkdir(parents=True, exist_ok=True)
+        target = safe_target(project_root, action["target"])
+        if target.is_dir():
+            return "already-present"
+        if target.exists():
+            return "skipped-existing-review-needed"
+        target.mkdir(parents=True, exist_ok=True)
         return "applied"
     if action_type == "copy_file_if_missing":
-        source = (migration["_path"].parent / action["source"]).resolve()
-        try:
-            source.relative_to(migration["_path"].parent.resolve())
-        except ValueError:
-            fail(f"Migration source escapes package: {action['source']}")
-        if not source.is_file():
-            fail(f"Migration source not found: {source}")
+        source = migration_source(migration, action)
         target = safe_target(project_root, action["target"])
         if target.exists():
             if target.is_file() and sha256(target) == sha256(source):
-                return "unchanged"
-            fail(f"Conflict: target already exists and was not overwritten: {action['target']}")
+                return "already-present"
+            return "skipped-existing-review-needed"
         target.parent.mkdir(parents=True, exist_ok=True)
         shutil.copyfile(source, target)
         return "applied"
@@ -241,16 +289,8 @@ def preflight_action(project_root, migration, action):
         safe_target(project_root, action["target"])
         return
     if action_type == "copy_file_if_missing":
-        source = (migration["_path"].parent / action["source"]).resolve()
-        try:
-            source.relative_to(migration["_path"].parent.resolve())
-        except ValueError:
-            fail(f"Migration source escapes package: {action['source']}")
-        if not source.is_file():
-            fail(f"Migration source not found: {source}")
-        target = safe_target(project_root, action["target"])
-        if target.exists() and (not target.is_file() or sha256(target) != sha256(source)):
-            fail(f"Conflict: target already exists and was not overwritten: {action['target']}")
+        migration_source(migration, action)
+        safe_target(project_root, action["target"])
         return
     if action_type == "set_state_feature":
         if not action.get("name"):

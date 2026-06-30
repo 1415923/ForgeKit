@@ -6,6 +6,18 @@
 
 README 只保留当前定位、快速开始和常用入口；完整版本历史、设计取舍和演进脉络放在这里维护。
 
+## [0.40.1] - Upgrade Idempotency & Cross-Platform Entry Hotfix
+
+### Fixed
+
+- 统一项目入口文档按 Windows PowerShell 与 macOS/Linux 分别给出命令，并新增只转发参数的 `.ps1` / `.sh` wrapper。
+- `copy_file_if_missing` 迁移在目标已存在时可安全重跑：同内容 no-op，不同内容保留用户文件并标记 review-needed。原因：修复部分升级后重跑会被已有 managed doc 中止的问题。
+- plan 与 apply 共用目标状态分类，Safe actions count 只统计实际待执行动作。
+
+### Safety
+
+- 不覆盖或删除用户已有文件，不改 business docs，不自动 commit/push/PR，也不新增 runner/daemon/scheduler。
+
 ## 阅读方式
 
 每个版本尽量按以下结构记录：

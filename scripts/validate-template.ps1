@@ -618,7 +618,7 @@ function Test-TemplateManifest {
     $manifestPath = Join-Path $repoRoot "project-template\.forgekit\template-manifest.json"
     if (Test-Path -LiteralPath $manifestPath) {
         $manifest = Get-Content -LiteralPath $manifestPath -Raw | ConvertFrom-Json
-        if ($manifest.template_version -ne "0.40.0") {
+        if ($manifest.template_version -ne "0.40.1") {
             Add-Error "Unexpected template manifest version: $($manifest.template_version)"
         }
         $sources = @($manifest.files | ForEach-Object { $_.source_path })
@@ -1075,7 +1075,7 @@ function Test-HarnessEntryConsistency {
     Test-RequiredPath "project-template\migrations\0.36.0\migration.json"
     Test-RequiredPath "project-template\.forgekit\state.json"
     Test-RequiredPattern "project-template\.forgekit\state.json" '"schema_version": 1' "State schema version"
-    Test-RequiredPattern "project-template\.forgekit\state.json" '"forgekit_version": "0.40.0"' "State ForgeKit version"
+    Test-RequiredPattern "project-template\.forgekit\state.json" '"forgekit_version": "0.40.1"' "State ForgeKit version"
     Test-RequiredPattern "project-template\.forgekit\state.json" '"managed_docs_root": ".forgekit/docs"' "State managed docs root"
     Test-RequiredPattern "project-template\.forgekit\state.json" '"change_root": ".forgekit/changes"' "State change root"
     Test-RequiredPattern "project-template\.forgekit\state.json" '"last_upgrade": null' "State last upgrade"
@@ -1139,7 +1139,7 @@ function Test-PluginDistribution {
     if ($codexPluginJson.name -ne "forgekit") {
         Add-Error "Unexpected Codex plugin name in root plugin.json: $($codexPluginJson.name)"
     }
-    if ($codexPluginJson.version -ne "0.40.0") {
+    if ($codexPluginJson.version -ne "0.40.1") {
         Add-Error "Unexpected Codex plugin version in root plugin.json: $($codexPluginJson.version)"
     }
     if ($codexPluginJson.skills -ne "./skills/") {
@@ -1150,7 +1150,7 @@ function Test-PluginDistribution {
     if ($claudePluginJson.name -ne "forgekit") {
         Add-Error "Unexpected Claude plugin name in root plugin.json: $($claudePluginJson.name)"
     }
-    if ($claudePluginJson.version -ne "0.40.0") {
+    if ($claudePluginJson.version -ne "0.40.1") {
         Add-Error "Unexpected Claude plugin version in root plugin.json: $($claudePluginJson.version)"
     }
     $claudeSkills = @($claudePluginJson.skills)
@@ -1294,6 +1294,8 @@ function Test-ProjectMaintenanceOperations {
         "project-template\docs\archive-capsule.md",
         "project-template\.claude\skills\forgekit-maintenance\SKILL.md",
         "scripts\forgekit-project.py",
+        "scripts\forgekit-project.ps1",
+        "scripts\forgekit-project.sh",
         "scripts\archive-capsule.py",
         "project-template\scripts\archive-capsule.py",
         "migrations\0.39.0\migration.json",
@@ -1321,6 +1323,12 @@ function Test-ProjectMaintenanceOperations {
     Test-RequiredPattern "scripts\forgekit-project.py" "Non-interactive session detected" "Unified non-interactive plan-only rule"
     Test-RequiredPattern "scripts\forgekit-project.py" "legacy-adoption" "Unified legacy adoption route"
     Test-RequiredPattern "scripts\forgekit-project.py" "stop-toolkit-too-old" "Unified newer-project stop"
+    Test-RequiredPattern "README.md" 'python .\scripts\forgekit-project.py' "Windows unified entry command"
+    Test-RequiredPattern "README.md" 'python3 ./scripts/forgekit-project.py' "macOS/Linux unified entry command"
+    Test-RequiredPattern "README.md" "forgekit-project.ps1" "PowerShell unified wrapper entry"
+    Test-RequiredPattern "README.md" "forgekit-project.sh" "Bash unified wrapper entry"
+    Test-RequiredPattern "scripts\forgekit-upgrade.py" "already-present" "Idempotent same-content migration result"
+    Test-RequiredPattern "scripts\forgekit-upgrade.py" "skipped-existing-review-needed" "Idempotent different-content migration result"
     Test-NoPattern "project-template\.forgekit\template-manifest.json" '"source_path": "scripts/forgekit-project.py"' "ForgeKitRoot unified entry must not enter project manifest"
     foreach ($entry in @("project-template\AGENTS.md", "project-template\CLAUDE.md", "project-template\.codex\rules.md")) {
         Test-RequiredPattern $entry "MaintenanceIntent" "Maintenance intent entry rule"
@@ -1361,6 +1369,11 @@ function Test-ReasoningReviewProtocol {
     Test-RequiredPattern "project-template\.forgekit\state.json" '"first_principles_adversarial_review": true' "State reasoning/review feature"
     Test-RequiredPattern "migrations\0.40.0\migration.json" '"from": "0.39.0"' "v0.40 migration source"
     Test-RequiredPattern "migrations\0.40.0\migration.json" '"to": "0.40.0"' "v0.40 migration target"
+    Test-RequiredPath "migrations\0.40.1\migration.json"
+    Test-RequiredPath "project-template\migrations\0.40.1\migration.json"
+    Test-RequiredPattern "migrations\0.40.1\migration.json" '"from": "0.40.0"' "v0.40.1 migration source"
+    Test-RequiredPattern "migrations\0.40.1\migration.json" '"to": "0.40.1"' "v0.40.1 migration target"
+    Test-RequiredPattern "project-template\.forgekit\state.json" '"idempotent_safe_migrations": true' "State idempotent migration feature"
     $manifest = Get-Content -LiteralPath (Join-Path $repoRoot "project-template\.forgekit\template-manifest.json") -Raw | ConvertFrom-Json
     $sources = @($manifest.files | ForEach-Object { $_.source_path })
     foreach ($source in @("docs/reasoning-review.md", ".claude/skills/forgekit-first-principles/SKILL.md", ".claude/skills/forgekit-adversarial-review/SKILL.md", "migrations/0.40.0/migration.json")) {

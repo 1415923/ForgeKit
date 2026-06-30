@@ -106,10 +106,20 @@ Read CLAUDE.md, prefer the project-local .agents/skills/project-init/SKILL.md, a
 
 ## Upgrade Existing ForgeKit Projects
 
-The unified entry remains the recommended command:
+The entry semantics are unified; shell syntax remains platform-specific.
+
+Windows PowerShell:
+
+```powershell
+python .\scripts\forgekit-project.py --target "D:\path\to\project"
+powershell -ExecutionPolicy Bypass -File .\scripts\forgekit-project.ps1 --target "D:\path\to\project"
+```
+
+macOS / Linux:
 
 ```bash
-python scripts/forgekit-project.py --target <project-root>
+python3 ./scripts/forgekit-project.py --target "/path/to/project"
+bash ./scripts/forgekit-project.sh --target "/path/to/project"
 ```
 
 It shows ProjectRoot, installed version, toolkit version, and the detected action. For an older supported project it runs check + plan first, then calls `apply --safe` only after interactive `y/yes` or explicit `--yes`.
