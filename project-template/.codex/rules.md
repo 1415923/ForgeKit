@@ -89,6 +89,9 @@
 - 修改代码默认需要 independent review；核心逻辑、API、数据、权限、脚本、发版/tag 和 bounded-auto 收口必须 independent review。
 - Maker 只向 `forgekit-code-reviewer` 传任务摘要、diff/stat、changed files、验证输出和已知风险，不传完整会话历史或自我评价。
 - self-review 必须标为 `ReviewType: self-review`，不能冒充 independent review；reviewer 不可用时必须 `manual-review`，不得写 `pass`。
+- 关键结论不能只留在聊天里；阶段边界、compact/clear 前、子 agent 返回关键结论后、handoff/commit/tag 前，按 `context-continuity.md` 做 minimal checkpoint。
+- ForgeKit 升级更新 AGENTS/CLAUDE/rules、skills 或 agents 后，旧会话只用于 checkpoint、`ManagedDocsWriteback: minimal` 和当前收口；新任务应新开会话或重启工具，不假设当前会话自动加载新规则。
+- 长工具输出只保留摘要和路径，不写全文；不确定项标 `TODO_REVIEW`，不要把所有事实塞进 `CLAUDE.md` / `AGENTS.md`。
 - reviewer 必须 read-only；`needs-fix` 阻断 handoff/commit，除非修复或用户明确接受风险；`manual-review` 必须人工确认。
 - 对公司或业务项目，Checker 必须检查是否误写敏感信息、业务 docs、secrets、deploy 或 CI。
 - 不得自行创建 worktree，除非用户明确要求。

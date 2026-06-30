@@ -35,6 +35,7 @@
 | `.forgekit/state.json` | core | 升级脚本、维护者 | as-needed | versioned migration schema、当前 ForgeKit 版本、根目录、mode、features、最近迁移 | 项目事实、任务状态、人工伪造的升级结果 | v0.36+ 初始化或 safe migration 成功 | `migrations/`, `scripts/forgekit-upgrade.py` |
 | `.forgekit/docs/document-responsibility.md` | core | 用户、AI 工具 | yes | 文档职责、更新触发、事实归属 | 项目事实、任务日志、发布说明 | managed docs 职责变化 | `document-lifecycle.md` |
 | `.forgekit/docs/codebase-map.md` | core | AI 工具、维护者 | yes | 代码搜索入口、模块入口、关键命令、谨慎读取路径 | 完整架构、API 百科、长扫描历史 | 模块入口、命令或归属变化 | `architecture.md`, `api.md`, `local-toolchain.md` |
+| `.forgekit/docs/context-continuity.md` | reference | 用户、AI 工具 | as-needed | 关键事实、checkpoint 触发、存活位置和最小写回边界 | 完整聊天、长工具输出、临时推理、自动 compact/clear | 阶段边界、compact/clear 前、子 agent 关键结论、handoff/commit/tag 前 | `workflow-router.md`, `work-log.md`, current change |
 | `.forgekit/docs/workflow-router.md` | core | 用户、AI 工具 | yes | 用户意图到 Read / Write / Do Not Write / Required Output 的路由表 | 任务看板、执行器、自动 runner、业务事实正文 | 用户常见意图、文档读写边界或路由规则变化 | `document-responsibility.md`, `codebase-map.md` |
 | `.forgekit/docs/task-intake.md` | working | 用户、AI 工具 | as-needed | 工作来源原文或原始想法、Source ID、Update Notes、Task Decision、Derived Task IDs、人工确认状态 | 执行状态总表、工作流水、changelog、长分析 | 领导任务、微信任务、计划表格子、会议任务、个人规划、用户反馈、bug、技术债、测试失败；小补充默认更新已有 Source | `requirements.md`, `task-board.md`, `work-log.md` |
 | `.forgekit/docs/requirements.md` | current | 用户、产品、AI 工具 | as-needed | 已确认的需求事实、验收标准、范围边界、Source ID 引用 | 任务派发原文、长推理、执行状态 | 需求被确认、修正、拒绝或定界 | `task-intake.md`, `traceability.md` |

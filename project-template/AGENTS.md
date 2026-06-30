@@ -122,6 +122,9 @@ When a task names a ForgeKit skill, read the project-local `.agents/skills/<skil
 - Code changes require independent review by default; core logic, API, data, permissions, scripts, release/tag, and bounded-auto closure require it.
 - Use `forgekit-request-code-review` to send only the task summary, diff/stat, changed files, validation output, and known risks to `forgekit-code-reviewer`; never pass the maker's full session history.
 - Self-review must be labeled `ReviewType: self-review` and cannot satisfy an independent-review gate. If the reviewer is unavailable, use `manual-review`, never `pass`.
+- Critical conclusions must not live only in chat. At phase boundaries, before compact/clear, and before handoff/commit/tag, use `.forgekit/docs/context-continuity.md` for a minimal checkpoint.
+- After a ForgeKit upgrade changes AGENTS/CLAUDE/rules, skills, or agents, use the current session only for checkpoint, `ManagedDocsWriteback: minimal`, and closure. Start a new session or restart the tool before new work; updated disk files do not prove this session reloaded them.
+- Summarize large outputs; do not copy full logs or temporary reasoning into managed docs. Mark uncertain facts `TODO_REVIEW`, and do not put all project facts in `CLAUDE.md` or `AGENTS.md`.
 - The reviewer is read-only. `needs-fix` blocks handoff/commit unless the maker fixes it or the user explicitly accepts the risk; `manual-review` requires human confirmation.
 - For company or business projects, Checker must check for accidental writes to sensitive information, business docs, secrets, deploy files, and CI.
 - Do not create a worktree unless the user explicitly asks.

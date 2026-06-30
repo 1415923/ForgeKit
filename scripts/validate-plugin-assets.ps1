@@ -63,7 +63,7 @@ function Test-PluginManifest {
     if ($codexManifest.name -ne "forgekit") {
         Add-Error "Unexpected Codex plugin name: $($codexManifest.name)"
     }
-    if ($codexManifest.version -ne "0.37.0") {
+    if ($codexManifest.version -ne "0.38.0") {
         Add-Error "Unexpected Codex plugin version: $($codexManifest.version)"
     }
     if ($codexManifest.skills -ne "./skills/") {
@@ -74,7 +74,7 @@ function Test-PluginManifest {
     if ($claudeManifest.name -ne "forgekit") {
         Add-Error "Unexpected Claude plugin name: $($claudeManifest.name)"
     }
-    if ($claudeManifest.version -ne "0.37.0") {
+    if ($claudeManifest.version -ne "0.38.0") {
         Add-Error "Unexpected Claude plugin version: $($claudeManifest.version)"
     }
     $claudeSkills = @($claudeManifest.skills)
@@ -111,7 +111,7 @@ Test-RequiredPath "project-template\scripts\run-harness-check.ps1"
 Test-RequiredPath "scripts\init-project-template.ps1"
 Test-RequiredPath "scripts\init-project-template.sh"
 
-Test-RequiredPattern "README.md" "Plugin Distribution" "Unified root plugin section"
+Test-RequiredPattern "README.md" "Native Agent Adapter" "Current native adapter entry"
 Test-RequiredPattern "scripts\init-project-template.ps1" "CLAUDE.md" "Unified initializer Claude guidance"
 Test-RequiredPattern "skills\project-init\SKILL.md" "Classify the discovery state" "Project init discovery state"
 Test-RequiredPattern "skills\project-suitability\SKILL.md" "Suitable, Conditional, or Custom" "Project suitability outcome"

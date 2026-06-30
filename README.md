@@ -107,6 +107,8 @@ python scripts/forgekit-upgrade.py apply --safe --repo-root <project>
 - `plan`：输出一屏可读的迁移计划，不写文件。
 - `apply --safe`：只执行 migration 中明确标记为 safe 的动作；不做三方 merge，不改 business docs，不自动提交。
 
+升级如果更新了 AGENTS / CLAUDE / rules、skills 或 agents，当前会话只用于 checkpoint 和收口；新任务请新开会话或重启工具，不要假设磁盘文件更新后旧会话会自动重载。
+
 只有 v0.36.0 及以后初始化、且具有 `.forgekit/state.json` 的项目支持该模型。v0.35.x 及更早项目应按“接手既有项目”处理：先盘点当前事实，再由用户确认 adoption 边界。
 
 ## 工作流
@@ -123,8 +125,9 @@ source -> task -> change -> verification -> review -> work-log / changelog / han
 2. 只有可执行任务才进入 `.forgekit/docs/task-board.md`。
 3. 根据风险创建 `.forgekit/changes/<change-id>/` 下的变更工件。
 4. 实现后记录验证结果。
-5. 代码变更走 review；v0.37 起可使用 Independent Code Review Protocol。
-6. 更新 work-log、changelog 或 handoff，方便中断恢复和交接。
+5. 代码变更使用 Independent Code Review Protocol，区分 Maker 与独立只读 Reviewer。
+6. 在阶段边界、上下文压缩/清空前、子 agent 返回关键结论后做最小 Context Checkpoint。
+7. 更新 work-log、changelog 或 handoff，方便中断恢复和交接。
 
 风险分级对应的建议工件：
 
@@ -162,7 +165,8 @@ source -> task -> change -> verification -> review -> work-log / changelog / han
 | Managed docs responsibility | 规定每类文档什么时候读、写什么、不写什么 |
 | Report-only checks | 生成 doc-health、source-trace、handoff 等报告，不自动修复或提交 |
 | Native Agent Adapter | 可选生成 Codex / Claude Code 原生 agent 配置模板 |
-| Independent Code Review Protocol | v0.37 新增独立只读 reviewer、最小上下文包和 pass / needs-fix / manual-review gate |
+| Independent Code Review Protocol | 独立只读 reviewer、最小上下文包和 pass / needs-fix / manual-review gate |
+| Context Continuity Protocol | 把关键结论 checkpoint 到正确文档，避免长会话、压缩、清空或委派后丢失工程状态 |
 
 ## 常用命令
 

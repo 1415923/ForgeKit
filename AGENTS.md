@@ -35,6 +35,8 @@ This repository maintains a reusable Codex CLI workflow template.
 - When adding managed docs, update `project-template/.forgekit/docs/document-responsibility.md`, `project-template/docs/codebase-map.md`, manifest checks, and smoke tests.
 - Source-first task intake belongs in `project-template/docs/task-intake.md`; do not let `requirements.md`, `task-board.md`, or `changelog.md` replace the original assignment ledger.
 - Managed docs should stay lean: define audience, trigger, and "do not write here" boundaries before adding or expanding a document.
+- Critical engineering conclusions must survive chat compaction, clearing, and delegation through narrow managed-doc or change-artifact checkpoints; never copy full chats or long tool output into project docs.
+- After a ForgeKit upgrade changes entry rules, skills, or agents, use the current session only for checkpoint, minimal writeback, and closure; start a new session or restart the tool before new work.
 - Keep independent code review split into maker request, fresh read-only reviewer context, structured gate result, and explicit human escalation; self-review must not satisfy an independent-review gate.
 
 ## Validation

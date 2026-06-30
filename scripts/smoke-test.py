@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 import argparse
 import hashlib
+import importlib.util
 import json
 import os
 import re
@@ -65,6 +66,7 @@ REQUIRED_REPO_PATHS = [
     "project-template/docs/loop-blueprint.md",
     "project-template/docs/loop-operations.md",
     "project-template/docs/bounded-auto-loop-policy.md",
+    "project-template/docs/context-continuity.md",
     "project-template/docs/maker-checker-protocol.md",
     "project-template/docs/native-agent-adapter.md",
     "project-template/docs/worktree-playbook.md",
@@ -81,7 +83,9 @@ REQUIRED_REPO_PATHS = [
     "project-template/.claude/skills/forgekit-code-review/references/security-review.md",
     "project-template/.claude/skills/forgekit-code-review/references/testing-review.md",
     "project-template/migrations/0.37.0/migration.json",
+    "project-template/migrations/0.38.0/migration.json",
     "migrations/0.37.0/migration.json",
+    "migrations/0.38.0/migration.json",
     "project-template/scripts/check-codex-native-agents.py",
     "project-template/scripts/doc-health-report.py",
     "project-template/scripts/source-trace-report.py",
@@ -113,6 +117,7 @@ REQUIRED_GENERATED_PATHS = [
     ".forgekit/docs/loop-blueprint.md",
     ".forgekit/docs/loop-operations.md",
     ".forgekit/docs/bounded-auto-loop-policy.md",
+    ".forgekit/docs/context-continuity.md",
     ".forgekit/docs/maker-checker-protocol.md",
     ".forgekit/docs/native-agent-adapter.md",
     ".forgekit/docs/worktree-playbook.md",
@@ -130,6 +135,7 @@ REQUIRED_GENERATED_PATHS = [
     ".claude/skills/forgekit-code-review/references/security-review.md",
     ".claude/skills/forgekit-code-review/references/testing-review.md",
     "migrations/0.37.0/migration.json",
+    "migrations/0.38.0/migration.json",
     "governance/ai-engineering-loop.md",
     ".forgekit/changes/README.md",
     ".forgekit/changes/_template/proposal.md",
@@ -242,6 +248,59 @@ def assert_absent_paths(root, paths):
 
 def sha256_file(path):
     return hashlib.sha256(path.read_bytes()).hexdigest()
+
+
+def load_manifest_tool(repo):
+    script = repo / "scripts" / "update-template-manifest.py"
+    spec = importlib.util.spec_from_file_location("forgekit_template_manifest", script)
+    if spec is None or spec.loader is None:
+        fail("Unable to load update-template-manifest.py for checksum regression test")
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    return module
+
+
+def assert_manifest_checksum_stability(repo):
+    tool = load_manifest_tool(repo)
+    manifest = json.loads(
+        (repo / "project-template/.forgekit/template-manifest.json").read_text(encoding="utf-8")
+    )
+    entries = {item["source_path"]: item for item in manifest["files"]}
+    checked = ("AGENTS.md", "CLAUDE.md", ".codex/rules.md")
+
+    with tempfile.TemporaryDirectory(prefix="forgekit-checksum-") as temp_dir:
+        temp = Path(temp_dir)
+        for source_path in checked:
+            entry = entries.get(source_path)
+            if entry is None or entry.get("render_mode") != "copy":
+                fail(f"Manifest copy entry missing for checksum regression: {source_path}")
+            source = repo / "project-template" / source_path
+            text = source.read_text(encoding="utf-8").replace("\r\n", "\n").replace("\r", "\n")
+            lf_path = temp / (source.name + ".lf")
+            crlf_path = temp / (source.name + ".crlf")
+            lf_path.write_bytes(text.encode("utf-8"))
+            crlf_path.write_bytes(text.replace("\n", "\r\n").encode("utf-8"))
+            expected = entry["checksum"]
+            if tool.sha256_file(source) != expected:
+                fail(f"Manifest checksum does not match source: {source_path}")
+            if tool.sha256_file(lf_path) != expected or tool.sha256_file(crlf_path) != expected:
+                fail(f"Manifest checksum is not LF/CRLF stable: {source_path}")
+
+    if ".forgekit/state.json" in entries:
+        fail("Generated .forgekit/state.json must not be manifest-managed")
+
+
+def assert_generated_entry_checksums(repo, target):
+    tool = load_manifest_tool(repo)
+    manifest = json.loads(
+        (repo / "project-template/.forgekit/template-manifest.json").read_text(encoding="utf-8")
+    )
+    entries = {item["source_path"]: item for item in manifest["files"]}
+    for source_path in ("AGENTS.md", "CLAUDE.md", ".codex/rules.md"):
+        expected = entries[source_path]["checksum"]
+        generated = target / source_path
+        if tool.sha256_file(generated) != expected:
+            fail(f"Generated file checksum mismatch: {source_path}")
 
 
 def assert_boundary_config(path):
@@ -826,6 +885,50 @@ def assert_independent_code_review(root):
             if marker not in entry_text:
                 fail(f"{entry} missing independent review rule: {marker}")
 
+def assert_context_continuity(root, doc_path):
+    protocol = (root / doc_path).read_text(encoding="utf-8")
+    required = [
+        "## Purpose",
+        "## Why Chat Context Is Not Durable State",
+        "## Critical Facts",
+        "## Context Checkpoint Triggers",
+        "## Context Survival Map",
+        "## Compact / Clear Readiness",
+        "## Post-Upgrade Session Refresh",
+        "## Subagent Output Handling",
+        "## Large Output Handling",
+        "## Writeback Boundaries",
+        "## Examples",
+        "TODO_REVIEW",
+        "upgrade 后旧会话只用于收口",
+        "新任务应新开会话",
+        "不假设当前会话自动加载新规则",
+    ]
+    missing = [item for item in required if item not in protocol]
+    if missing:
+        fail("context-continuity.md missing expected sections:\n" + "\n".join(missing))
+
+    for entry in ("AGENTS.md", "CLAUDE.md"):
+        entry_text = (root / entry).read_text(encoding="utf-8")
+        for marker in ("Critical conclusions must not live only in chat", "After a ForgeKit upgrade", "updated disk files do not prove", "Summarize large outputs", "TODO_REVIEW"):
+            if marker not in entry_text:
+                fail(f"{entry} missing context continuity rule: {marker}")
+    rules = (root / ".codex/rules.md").read_text(encoding="utf-8")
+    for marker in ("关键结论不能只留在聊天里", "新任务应新开会话", "不假设当前会话自动加载新规则", "长工具输出只保留摘要", "TODO_REVIEW"):
+        if marker not in rules:
+            fail(f".codex/rules.md missing context continuity rule: {marker}")
+
+    router_path = root / (".forgekit/docs/workflow-router.md" if doc_path.startswith(".forgekit/") else "docs/workflow-router.md")
+    router = router_path.read_text(encoding="utf-8")
+    for marker in ("保存关键结论", "ForgeKit 升级后继续工作", "compact", "clear", "Context Checkpoint"):
+        if marker not in router:
+            fail(f"workflow-router.md missing context route: {marker}")
+
+    policy_path = root / (".forgekit/docs/bounded-auto-loop-policy.md" if doc_path.startswith(".forgekit/") else "docs/bounded-auto-loop-policy.md")
+    policy = policy_path.read_text(encoding="utf-8")
+    if "Context Checkpoint" not in policy or "长工具输出只保留摘要" not in policy:
+        fail("bounded-auto policy missing context checkpoint boundary")
+
 def assert_worktree_playbook(root, playbook_path, blueprint_path, maker_checker_path, agents_path, claude_path, rules_path):
     playbook = (root / playbook_path).read_text(encoding="utf-8")
     blueprint = (root / blueprint_path).read_text(encoding="utf-8")
@@ -1141,8 +1244,8 @@ def assert_json(path):
 def assert_manifest_lock(target):
     lock_path = target / ".forgekit" / "template-lock.json"
     lock = json.loads(lock_path.read_text(encoding="utf-8"))
-    if lock.get("installed_version") != "0.37.0":
-        fail("template-lock installed_version must be 0.37.0")
+    if lock.get("installed_version") != "0.38.0":
+        fail("template-lock installed_version must be 0.38.0")
     if lock.get("managed_docs_root") != ".forgekit/docs":
         fail("template-lock managed_docs_root must match boundary")
     if lock.get("change_root") != ".forgekit/changes":
@@ -1161,7 +1264,7 @@ def assert_versioned_migration_upgrade(repo, target, temp_parent):
     state = json.loads(state_path.read_text(encoding="utf-8-sig"))
     expected = {
         "schema_version": 1,
-        "forgekit_version": "0.37.0",
+        "forgekit_version": "0.38.0",
         "managed_docs_root": ".forgekit/docs",
         "change_root": ".forgekit/changes",
         "mode": "Standard",
@@ -1174,6 +1277,8 @@ def assert_versioned_migration_upgrade(repo, target, temp_parent):
         fail("state.json must enable versioned_migrations")
     if state.get("features", {}).get("independent_code_review") is not True:
         fail("state.json must enable independent_code_review")
+    if state.get("features", {}).get("context_continuity") is not True:
+        fail("state.json must enable context_continuity")
 
     script = target / "scripts" / "forgekit-upgrade.py"
     before_state = state_path.read_bytes()
@@ -1183,8 +1288,8 @@ def assert_versioned_migration_upgrade(repo, target, temp_parent):
         if path.is_file()
     }
     check = run([sys.executable, str(script), "check", "--repo-root", "."], cwd=target)
-    if "Status: current" not in check.stdout or "Current version: 0.37.0" not in check.stdout:
-        fail("versioned migration check did not report current v0.37.0 state")
+    if "Status: current" not in check.stdout or "Current version: 0.38.0" not in check.stdout:
+        fail("versioned migration check did not report current v0.38.0 state")
     plan = run([sys.executable, str(script), "plan", "--repo-root", "."], cwd=target)
     for marker in ["Status: report-only", "Mode: versioned-migration-plan", "No files were changed."]:
         if marker not in plan.stdout:
@@ -1208,13 +1313,16 @@ def assert_versioned_migration_upgrade(repo, target, temp_parent):
     v036_state = json.loads(v036_state_path.read_text(encoding="utf-8-sig"))
     v036_state["forgekit_version"] = "0.36.0"
     v036_state.setdefault("features", {}).pop("independent_code_review", None)
+    v036_state.setdefault("features", {}).pop("context_continuity", None)
     v036_state_path.write_text(json.dumps(v036_state, indent=2) + "\n", encoding="utf-8")
     run([sys.executable, str(v036_target / "scripts/forgekit-upgrade.py"), "apply", "--safe", "--repo-root", "."], cwd=v036_target)
     migrated = json.loads(v036_state_path.read_text(encoding="utf-8"))
-    if migrated.get("forgekit_version") != "0.37.0":
-        fail("v0.37 migration did not update state version")
+    if migrated.get("forgekit_version") != "0.38.0":
+        fail("version chain did not update state to v0.38.0")
     if migrated.get("features", {}).get("independent_code_review") is not True:
         fail("v0.37 migration did not enable independent_code_review")
+    if migrated.get("features", {}).get("context_continuity") is not True:
+        fail("v0.38 migration did not enable context_continuity")
 
     legacy = temp_parent / "pre-v036-adoption"
     (legacy / ".forgekit").mkdir(parents=True)
@@ -1231,14 +1339,14 @@ def assert_versioned_migration_upgrade(repo, target, temp_parent):
     apply_target = temp_parent / "versioned-apply"
     shutil.copytree(target, apply_target)
     migration_root = temp_parent / "migration-packages"
-    package = migration_root / "0.37.1"
+    package = migration_root / "0.38.1"
     package.mkdir(parents=True)
     (package / "proof.txt").write_text("safe migration\n", encoding="utf-8")
     migration = {
-        "id": "0.37.1-smoke",
+        "id": "0.38.1-smoke",
         "title": "Smoke safe migration",
-        "from": "0.37.0",
-        "to": "0.37.1",
+        "from": "0.38.0",
+        "to": "0.38.1",
         "risk": "low",
         "actions": [{
             "id": "copy-proof",
@@ -1256,13 +1364,13 @@ def assert_versioned_migration_upgrade(repo, target, temp_parent):
     apply_plan = run([
         sys.executable, str(apply_script), "plan", "--repo-root", ".", "--migration-root", str(migration_root)
     ], cwd=apply_target)
-    if "To: 0.37.1" not in apply_plan.stdout or (apply_target / ".forgekit" / "migration-proof.txt").exists():
+    if "To: 0.38.1" not in apply_plan.stdout or (apply_target / ".forgekit" / "migration-proof.txt").exists():
         fail("plan must show the safe migration without applying it")
     run([
         sys.executable, str(apply_script), "apply", "--safe", "--repo-root", ".", "--migration-root", str(migration_root)
     ], cwd=apply_target)
     applied_state = json.loads((apply_target / ".forgekit" / "state.json").read_text(encoding="utf-8"))
-    if applied_state.get("forgekit_version") != "0.37.1":
+    if applied_state.get("forgekit_version") != "0.38.1":
         fail("safe migration did not update state version")
     if not (apply_target / ".forgekit" / "migration-proof.txt").is_file():
         fail("safe migration did not apply the declared safe action")
@@ -1307,7 +1415,7 @@ def assert_upgrade_report(repo, target):
         fail("upgrade must not overwrite managed docs")
     assert_paths(target, [
         ".forgekit/upgrade-report.md",
-        ".forgekit/upgrade-export/0.37.0/.forgekit/docs/project-plan.md",
+        ".forgekit/upgrade-export/0.38.0/.forgekit/docs/project-plan.md",
     ])
 
 
@@ -1344,7 +1452,7 @@ def assert_guided_upgrade(repo, target):
         ".forgekit/upgrade/upgrade-plan.md",
         ".forgekit/upgrade/upgrade-actions.md",
         ".forgekit/upgrade/upgrade-inventory.json",
-        ".forgekit/upgrade/candidates/0.37.0/.forgekit/docs/project-plan.md",
+        ".forgekit/upgrade/candidates/0.38.0/.forgekit/docs/project-plan.md",
     ])
     plan = (target / ".forgekit" / "upgrade" / "upgrade-plan.md").read_text(encoding="utf-8")
     actions = (target / ".forgekit" / "upgrade" / "upgrade-actions.md").read_text(encoding="utf-8")
@@ -1952,11 +2060,14 @@ def main():
     assert_json(repo / ".codex-plugin" / "plugin.json")
     assert_json(repo / ".claude-plugin" / "plugin.json")
     assert_json(repo / "project-template" / ".forgekit" / "template-manifest.json")
+    assert_manifest_checksum_stability(repo)
     assert_json(repo / "project-template" / ".forgekit" / "state.json")
     assert_json(repo / "migrations" / "0.36.0" / "migration.json")
     assert_json(repo / "project-template" / "migrations" / "0.36.0" / "migration.json")
     assert_json(repo / "migrations" / "0.37.0" / "migration.json")
     assert_json(repo / "project-template" / "migrations" / "0.37.0" / "migration.json")
+    assert_json(repo / "migrations" / "0.38.0" / "migration.json")
+    assert_json(repo / "project-template" / "migrations" / "0.38.0" / "migration.json")
     assert_loop_docs(repo / "project-template", "docs/loop-readiness.md", "docs/loop-blueprint.md")
     assert_loop_operations(
         repo / "project-template",
@@ -1975,6 +2086,7 @@ def main():
         ".codex/rules.md",
     )
     assert_independent_code_review(repo / "project-template")
+    assert_context_continuity(repo / "project-template", "docs/context-continuity.md")
     assert_worktree_playbook(
         repo / "project-template",
         "docs/worktree-playbook.md",
@@ -2017,6 +2129,12 @@ def main():
         "scripts/checker-runner.py",
         "project-template/scripts/maker-checker-runner.py",
         "project-template/scripts/checker-runner.py",
+        "scripts/context-continuity-runner.py",
+        "project-template/scripts/context-continuity-runner.py",
+        "scripts/token-monitor.py",
+        "project-template/scripts/token-monitor.py",
+        "scripts/auto-compact.py",
+        "project-template/scripts/auto-compact.py",
         "scripts/loop-runner.py",
         "project-template/scripts/loop-runner.py",
         "scripts/loop-daemon.py",
@@ -2043,6 +2161,7 @@ def main():
     try:
         init_project(repo, target)
         assert_paths(target, REQUIRED_GENERATED_PATHS)
+        assert_generated_entry_checksums(repo, target)
         assert_absent_paths(target, [
             "docs/codebase-map.md",
             "docs/local-toolchain.md",
@@ -2070,6 +2189,7 @@ def main():
             ".codex/rules.md",
         )
         assert_independent_code_review(target)
+        assert_context_continuity(target, ".forgekit/docs/context-continuity.md")
         assert_worktree_playbook(
             target,
             ".forgekit/docs/worktree-playbook.md",

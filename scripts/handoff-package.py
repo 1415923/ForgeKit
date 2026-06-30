@@ -198,6 +198,12 @@ def build_report(project_root, docs_root, change_root, change_id=None):
     verification = collect_verification(docs, change_files)
     risks = collect_risks(docs, change_files)
     review_evidence = collect_review_evidence(change_files)
+    continuity = []
+    continuity.append("- Source / requirement scope is checkpointed." if scope["source_ids"] or scope["requirement_ids"] else "- TODO_REVIEW: confirmed source / requirement scope is not checkpointed.")
+    continuity.append("- Verification evidence is checkpointed." if verification else "- TODO_REVIEW: verification evidence is not checkpointed.")
+    continuity.append("- Risk / blocker state is checkpointed." if risks else "- TODO_REVIEW: risk / blocker state is not checkpointed.")
+    if change_id:
+        continuity.append("- Independent review evidence is checkpointed." if review_evidence else "- TODO_REVIEW: independent review evidence is not checkpointed.")
 
     changed = []
     for name in ("changelog", "work-log", "task-board"):
@@ -290,6 +296,10 @@ def build_report(project_root, docs_root, change_root, change_id=None):
         "",
         *bullet_lines(review_evidence, "- TODO_REVIEW: independent review evidence is not available for this handoff scope."),
         "",
+        "## Context Continuity Check",
+        "",
+        *continuity,
+        "",
         "## Doc Health / Source Trace Status",
         "",
         *summarize_report(doc_health_path),
@@ -310,6 +320,7 @@ def build_report(project_root, docs_root, change_root, change_id=None):
         "- [ ] What Did Not Change is explicit enough for reviewer / tester / leader review.",
         "- [ ] Verification Evidence is enough for the current risk level.",
         "- [ ] Independent Review is pass, or needs-fix/manual-review has explicit human risk acceptance.",
+        "- [ ] Critical facts are checkpointed to responsible docs or change artifacts; long output is summarized, not copied.",
         "- [ ] Doc Health / Source Trace warnings are acknowledged or intentionally deferred.",
         "- [ ] Risks / Blockers are accepted, assigned, or closed.",
         "",

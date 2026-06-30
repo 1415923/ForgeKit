@@ -1,0 +1,33 @@
+{
+  "id": "0.38.0-context-continuity",
+  "title": "Context continuity protocol",
+  "from": "0.37.0",
+  "to": "0.38.0",
+  "risk": "low",
+  "actions": [
+    {
+      "id": "install-context-continuity-protocol",
+      "type": "copy_file_if_missing",
+      "safety": "safe",
+      "source": "files/.forgekit/docs/context-continuity.md",
+      "target": ".forgekit/docs/context-continuity.md"
+    },
+    {
+      "id": "enable-context-continuity",
+      "type": "set_state_feature",
+      "safety": "safe",
+      "name": "context_continuity",
+      "value": true
+    }
+  ],
+  "manual_review": [
+    "Merge the short context checkpoint rules into AGENTS.md, CLAUDE.md, and .codex/rules.md without replacing local rules.",
+    "Review workflow-router, bounded-auto, document responsibility, codebase map, and handoff updates before adopting them."
+  ],
+  "non_goals": [
+    "No automatic compact or clear",
+    "No token monitor, hook, runner, daemon, or scheduler",
+    "No full chat or long tool output writeback",
+    "No automatic business docs or confirmed requirements changes"
+  ]
+}

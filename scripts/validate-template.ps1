@@ -570,12 +570,8 @@ function Test-AIEngineeringLoop {
     Test-RequiredPattern "project-template\.forgekit\docs\document-responsibility.md" "worktree-playbook.md" "Document responsibility worktree playbook"
     Test-RequiredPattern "project-template\docs\codebase-map.md" "ForgeKit" "Codebase map managed docs entry"
     Test-RequiredPattern "project-template\docs\codebase-map.md" ".forgekit/docs/" "Codebase map avoids full docs loading"
-    Test-RequiredPattern "README.md" "Maker / Checker Protocol" "Root README maker checker release"
-    Test-RequiredPattern "README.en.md" "Maker / Checker Protocol" "English README maker checker release"
-    Test-RequiredPattern "README.md" "Optional Loop Operation Mode" "Root README loop operations release"
-    Test-RequiredPattern "README.en.md" "Optional Loop Operation Mode" "English README loop operations release"
-    Test-RequiredPattern "README.md" "Worktree Playbook" "Root README worktree release"
-    Test-RequiredPattern "README.en.md" "Worktree Playbook" "English README worktree release"
+    Test-RequiredPattern "README.md" "Independent Code Review Protocol" "Root README current review capability"
+    Test-RequiredPattern "README.en.md" "Independent Code Review Protocol" "English README current review capability"
     Test-RequiredPattern "usage.html" "maker-checker-protocol.md" "Usage maker checker docs"
     Test-RequiredPattern "usage.html" "loop-operations.md" "Usage loop operations docs"
     Test-RequiredPattern "usage.html" "worktree-playbook.md" "Usage worktree playbook docs"
@@ -622,7 +618,7 @@ function Test-TemplateManifest {
     $manifestPath = Join-Path $repoRoot "project-template\.forgekit\template-manifest.json"
     if (Test-Path -LiteralPath $manifestPath) {
         $manifest = Get-Content -LiteralPath $manifestPath -Raw | ConvertFrom-Json
-        if ($manifest.template_version -ne "0.37.0") {
+        if ($manifest.template_version -ne "0.38.0") {
             Add-Error "Unexpected template manifest version: $($manifest.template_version)"
         }
         $sources = @($manifest.files | ForEach-Object { $_.source_path })
@@ -1029,11 +1025,10 @@ function Test-NoForgeKitHistoryInTemplate {
 
 function Test-HarnessEntryConsistency {
     $codebaseMapRef = Get-CodebaseMapRef
-    Test-RequiredPattern "README.md" "Plugin Distribution" "Root README unified plugin surface"
-    Test-RequiredPattern "README.md" ".codex-plugin/plugin.json" "Root README Codex root manifest"
-    Test-RequiredPattern "README.md" ".claude-plugin/plugin.json" "Root README Claude root manifest"
-    Test-RequiredPattern "README.md" "./skills/" "Root README shared skills reference"
-    Test-RequiredPattern "README.md" $codebaseMapRef "Root README codebase map reference"
+    Test-RequiredPattern "README.md" "## 快速开始" "Root README quick start"
+    Test-RequiredPattern "README.md" "## 核心能力" "Root README current capabilities"
+    Test-RequiredPattern "README.md" "CHANGELOG.md" "Root README changelog link"
+    Test-RequiredPattern "README.en.md" "CHANGELOG.md" "English README changelog link"
     Test-RequiredPattern "project-template\README.md" ".codex-plugin" "Template README unified plugin note"
     Test-RequiredPattern "project-template\README.md" "CLAUDE.md" "Template README Claude entry"
     Test-RequiredPattern "project-template\README.md" ".agents/skills/<skill>/SKILL.md" "Template README project-local skill resolution"
@@ -1071,7 +1066,7 @@ function Test-HarnessEntryConsistency {
     Test-RequiredPath "project-template\migrations\0.36.0\migration.json"
     Test-RequiredPath "project-template\.forgekit\state.json"
     Test-RequiredPattern "project-template\.forgekit\state.json" '"schema_version": 1' "State schema version"
-    Test-RequiredPattern "project-template\.forgekit\state.json" '"forgekit_version": "0.37.0"' "State ForgeKit version"
+    Test-RequiredPattern "project-template\.forgekit\state.json" '"forgekit_version": "0.38.0"' "State ForgeKit version"
     Test-RequiredPattern "project-template\.forgekit\state.json" '"managed_docs_root": ".forgekit/docs"' "State managed docs root"
     Test-RequiredPattern "project-template\.forgekit\state.json" '"change_root": ".forgekit/changes"' "State change root"
     Test-RequiredPattern "project-template\.forgekit\state.json" '"last_upgrade": null' "State last upgrade"
@@ -1082,11 +1077,11 @@ function Test-HarnessEntryConsistency {
     Test-NoPattern "scripts\forgekit-upgrade.py" "candidates" "New upgrade model must not export candidates"
     Test-NoPattern "scripts\forgekit-upgrade.py" "upgrade-export" "New upgrade model must not use upgrade-export"
     Test-RequiredPattern "README.md" "forgekit-upgrade.py check" "Root README versioned upgrade check"
-    Test-RequiredPattern "README.md" "Pre-v0.36" "Root README pre-v0.36 adoption"
+    Test-RequiredPattern "README.md" "v0.35.x" "Root README pre-v0.36 adoption"
     Test-RequiredPattern "README.md" ".agents/skills/project-init/SKILL.md" "Root README project-local startup skill"
     Test-RequiredPattern "README.md" "-NativeAgentAdapter all" "Root README init native adapter example"
     Test-RequiredPattern "README.en.md" "forgekit-upgrade.py check" "English README versioned upgrade check"
-    Test-RequiredPattern "README.en.md" "Pre-v0.36" "English README pre-v0.36 adoption"
+    Test-RequiredPattern "README.en.md" "v0.35.x" "English README pre-v0.36 adoption"
     Test-RequiredPattern "README.en.md" ".agents/skills/project-init/SKILL.md" "English README project-local startup skill"
     Test-RequiredPattern "README.en.md" "-NativeAgentAdapter all" "English README init native adapter example"
     Test-RequiredPattern "usage.html" "startupOutput" "HTML startup output"
@@ -1135,7 +1130,7 @@ function Test-PluginDistribution {
     if ($codexPluginJson.name -ne "forgekit") {
         Add-Error "Unexpected Codex plugin name in root plugin.json: $($codexPluginJson.name)"
     }
-    if ($codexPluginJson.version -ne "0.37.0") {
+    if ($codexPluginJson.version -ne "0.38.0") {
         Add-Error "Unexpected Codex plugin version in root plugin.json: $($codexPluginJson.version)"
     }
     if ($codexPluginJson.skills -ne "./skills/") {
@@ -1146,7 +1141,7 @@ function Test-PluginDistribution {
     if ($claudePluginJson.name -ne "forgekit") {
         Add-Error "Unexpected Claude plugin name in root plugin.json: $($claudePluginJson.name)"
     }
-    if ($claudePluginJson.version -ne "0.37.0") {
+    if ($claudePluginJson.version -ne "0.38.0") {
         Add-Error "Unexpected Claude plugin version in root plugin.json: $($claudePluginJson.version)"
     }
     $claudeSkills = @($claudePluginJson.skills)
@@ -1224,6 +1219,66 @@ function Test-IndependentCodeReviewProtocol {
         if ($sources -notcontains $source) { Add-Error "Independent review template missing from manifest: $source" }
     }
 }
+function Test-ContextContinuityProtocol {
+    Test-RequiredPath "project-template\docs\context-continuity.md"
+    Test-RequiredPath "migrations\0.38.0\migration.json"
+    Test-RequiredPath "project-template\migrations\0.38.0\migration.json"
+    foreach ($heading in @(
+        "Critical Facts",
+        "Context Checkpoint Triggers",
+        "Context Survival Map",
+        "Compact / Clear Readiness",
+        "Post-Upgrade Session Refresh",
+        "Subagent Output Handling",
+        "Large Output Handling",
+        "Writeback Boundaries"
+    )) {
+        Test-RequiredPattern "project-template\docs\context-continuity.md" $heading "Context continuity $heading"
+    }
+    Test-RequiredPattern "project-template\docs\context-continuity.md" "upgrade 后旧会话只用于收口" "Post-upgrade old-session closure rule"
+    Test-RequiredPattern "project-template\docs\context-continuity.md" "新任务应新开会话" "Post-upgrade new-session rule"
+    Test-RequiredPattern "project-template\docs\context-continuity.md" "不假设当前会话自动加载新规则" "Post-upgrade reload boundary"
+    Test-RequiredPattern "project-template\AGENTS.md" "Critical conclusions must not live only in chat" "AGENTS context checkpoint rule"
+    Test-RequiredPattern "project-template\AGENTS.md" "After a ForgeKit upgrade" "AGENTS post-upgrade refresh rule"
+    Test-RequiredPattern "project-template\AGENTS.md" "Summarize large outputs" "AGENTS large output rule"
+    Test-RequiredPattern "project-template\CLAUDE.md" "Critical conclusions must not live only in chat" "CLAUDE context checkpoint rule"
+    Test-RequiredPattern "project-template\CLAUDE.md" "After a ForgeKit upgrade" "CLAUDE post-upgrade refresh rule"
+    Test-RequiredPattern "project-template\CLAUDE.md" "Summarize large outputs" "CLAUDE large output rule"
+    Test-RequiredPattern "project-template\.codex\rules.md" "关键结论不能只留在聊天里" "Rules context checkpoint rule"
+    Test-RequiredPattern "project-template\.codex\rules.md" "新任务应新开会话" "Rules post-upgrade refresh rule"
+    Test-RequiredPattern "project-template\.codex\rules.md" "长工具输出只保留摘要" "Rules large output rule"
+    Test-RequiredPattern "project-template\docs\workflow-router.md" "保存关键结论" "Workflow router context intent"
+    Test-RequiredPattern "project-template\docs\workflow-router.md" "ForgeKit 升级后继续工作" "Workflow router post-upgrade intent"
+    Test-RequiredPattern "project-template\docs\workflow-router.md" "compact" "Workflow router compact route"
+    Test-RequiredPattern "project-template\docs\workflow-router.md" "clear" "Workflow router clear route"
+    Test-RequiredPattern "project-template\docs\bounded-auto-loop-policy.md" "Context Checkpoint" "Bounded-auto context checkpoint"
+    Test-RequiredPattern "project-template\docs\bounded-auto-loop-policy.md" "不得跨过版本边界" "Bounded-auto post-upgrade stop"
+    Test-RequiredPattern "project-template\.forgekit\docs\document-responsibility.md" "context-continuity.md" "Document responsibility context entry"
+    Test-RequiredPattern "project-template\docs\codebase-map.md" "context-continuity.md" "Codebase map context entry"
+    Test-RequiredPattern "project-template\.forgekit\state.json" '"context_continuity": true' "State context continuity feature"
+    Test-RequiredPattern "README.md" "Context Continuity Protocol" "README context continuity entry"
+    Test-RequiredPattern "README.en.md" "Context Continuity Protocol" "English README context continuity entry"
+    Test-RequiredPattern "project-template\README.md" "context-continuity.md" "Template README context continuity entry"
+    Test-RequiredPattern "usage.html" "context-continuity.md" "Usage context continuity entry"
+    Test-RequiredPattern "scripts\handoff-package.py" "Context Continuity Check" "Handoff continuity check"
+    Test-RequiredPattern "migrations\0.38.0\migration.json" '"from": "0.37.0"' "v0.38 migration source"
+    Test-RequiredPattern "migrations\0.38.0\migration.json" '"to": "0.38.0"' "v0.38 migration target"
+    foreach ($forbidden in @(
+        "scripts\context-continuity-runner.py",
+        "project-template\scripts\context-continuity-runner.py",
+        "scripts\token-monitor.py",
+        "project-template\scripts\token-monitor.py",
+        "scripts\auto-compact.py",
+        "project-template\scripts\auto-compact.py"
+    )) {
+        if (Test-Path -LiteralPath (Join-Path $repoRoot $forbidden)) { Add-Error "v0.38 must not add automatic context execution: $forbidden" }
+    }
+    $manifest = Get-Content -LiteralPath (Join-Path $repoRoot "project-template\.forgekit\template-manifest.json") -Raw | ConvertFrom-Json
+    $sources = @($manifest.files | ForEach-Object { $_.source_path })
+    foreach ($source in @("docs/context-continuity.md", "migrations/0.38.0/migration.json")) {
+        if ($sources -notcontains $source) { Add-Error "Context continuity template missing from manifest: $source" }
+    }
+}
 Test-RequiredPath "README.md"
 Test-RequiredPath "AGENTS.md"
 Test-RequiredPath "scripts\init-project-template.ps1"
@@ -1271,6 +1326,7 @@ Test-StackHarnessDetails
 Test-LargeChangeProtocol
 Test-TeamToolingProtocol
 Test-IndependentCodeReviewProtocol
+Test-ContextContinuityProtocol
 Test-AgentSuitability
 Test-ExecutableHarness
 Test-PluginDistribution

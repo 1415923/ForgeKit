@@ -45,11 +45,19 @@ def fail(message):
     raise SystemExit(f"[fail] {message}")
 
 
+def canonical_checksum_bytes(content):
+    if b"\x00" in content:
+        return content
+    try:
+        text = content.decode("utf-8")
+    except UnicodeDecodeError:
+        return content
+    return text.replace("\r\n", "\n").replace("\r", "\n").encode("utf-8")
+
+
 def sha256_file(path):
     digest = hashlib.sha256()
-    with path.open("rb") as fh:
-        for chunk in iter(lambda: fh.read(1024 * 1024), b""):
-            digest.update(chunk)
+    digest.update(canonical_checksum_bytes(path.read_bytes()))
     return "sha256:" + digest.hexdigest()
 
 

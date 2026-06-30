@@ -95,7 +95,7 @@ ManagedDocsWriteback: off | minimal | full-review
 
 ## Checkpoint Writeback
 
-每个阶段结束后先执行 writeback check，按 `ManagedDocsWriteback` 决定是否写回。`minimal` 模式至少把实际完成进展写入 `.forgekit/docs/work-log.md` 或明确指定的 loop state，并只在状态或用户可见事实确实变化时更新其他允许目标：
+每个阶段结束后先按 `context-continuity.md` 执行 Context Checkpoint 检查，再执行 writeback check，按 `ManagedDocsWriteback` 决定是否写回。关键结论不能只留在聊天里；长工具输出只保留摘要、证据路径和 `TODO_REVIEW`，不得写入全文。`minimal` 模式至少把实际完成进展写入 `.forgekit/docs/work-log.md` 或明确指定的 loop state，并只在状态或用户可见事实确实变化时更新其他允许目标：
 
 - 阶段名称。
 - 已做事项。
@@ -105,6 +105,8 @@ ManagedDocsWriteback: off | minimal | full-review
 - 阻塞、风险和下一步。
 
 `one-step` 在结束前执行一次最小 writeback check；`bounded-auto` 每个 checkpoint 都执行；`review-only` 绝不写文件，即使 `ManagedDocsWriteback` 不是 `off`，也只在聊天中输出结论。
+
+ForgeKit 升级后，当前 `bounded-auto` 不得跨过版本边界继续新阶段。它必须在 Context Checkpoint 和 `ManagedDocsWriteback: minimal` 后停止；旧会话只可完成当前 handoff / commit / tag，新任务应新开会话或重启工具。
 
 文档健康场景下，`bounded-auto` 最多生成 `.forgekit/doc-health-report.md` 并停止。报告只是 review 输入，不能自动触发文档瘦身、归档、链接重写或事实合并。
 

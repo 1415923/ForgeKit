@@ -59,6 +59,7 @@
 | --- | --- |
 | 文档该写到哪里 | `.forgekit/docs/document-responsibility.md` |
 | 用户一句话该读/写哪些文档 | `.forgekit/docs/workflow-router.md` |
+| 长会话、compact/clear、子 agent 结果如何存活 | `.forgekit/docs/context-continuity.md` |
 | 当前项目目标和范围 | `.forgekit/docs/project-plan.md` |
 | 工作来源原文、补充记录和 Task Decision | `.forgekit/docs/task-intake.md` |
 | 可执行任务、Task ID、状态和 Source ID 反链 | `.forgekit/docs/task-board.md` |

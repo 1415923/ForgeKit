@@ -108,6 +108,8 @@ python scripts/forgekit-upgrade.py apply --safe --repo-root <project>
 - `plan` prints a one-screen migration plan without writing files.
 - `apply --safe` runs only actions explicitly marked safe; it does not perform three-way merge, edit business docs, or create commits.
 
+If an upgrade changes AGENTS / CLAUDE / rules, skills, or agents, use the current session only for checkpoint and closure. Start a new session or restart the tool before new work; updated files on disk do not prove that the old session reloaded them.
+
 Only projects initialized at v0.36.0 or later with `.forgekit/state.json` use this model. v0.35.x and earlier projects should be treated as existing-project adoption: inventory current facts first, then create new v0.36+ state only after explicit user confirmation.
 
 ## Workflow
@@ -124,8 +126,9 @@ Typical daily use:
 2. Move only executable work into `.forgekit/docs/task-board.md`.
 3. Create change artifacts under `.forgekit/changes/<change-id>/` based on risk.
 4. Implement and record verification results.
-5. Review code changes; v0.37 adds the Independent Code Review Protocol.
-6. Update work-log, changelog, or handoff records for resumption and transfer.
+5. Review code changes with the Independent Code Review Protocol, separating the maker from an independent read-only reviewer.
+6. Create a minimal Context Checkpoint at phase boundaries, before context compact/clear, and after critical subagent findings.
+7. Update work-log, changelog, or handoff records for resumption and transfer.
 
 Suggested artifacts by risk:
 
@@ -163,7 +166,8 @@ Existing business `docs/` is read-mostly evidence by default. AI may read and ci
 | Managed docs responsibility | Defines when docs should be read, what should be written, and what should not be duplicated |
 | Report-only checks | Produces doc-health, source-trace, and handoff reports without automatic fixes or commits |
 | Native Agent Adapter | Optionally exports Codex / Claude Code native agent configuration templates |
-| Independent Code Review Protocol | v0.37 adds an independent read-only reviewer, a minimal context packet, and pass / needs-fix / manual-review gates |
+| Independent Code Review Protocol | Uses an independent read-only reviewer, a minimal context packet, and pass / needs-fix / manual-review gates |
+| Context Continuity Protocol | Checkpoints critical facts to responsible docs so long sessions, compaction, clearing, and delegation do not erase engineering state |
 
 ## Common Commands
 

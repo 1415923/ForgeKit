@@ -14,7 +14,8 @@ ForgeKit 在生成项目内提供轻量 AI Engineering Loop：澄清目标、判
 6. 工作来自领导、微信、计划表、会议、个人规划、用户反馈、bug、技术债或测试失败时，先写 `.forgekit/docs/task-intake.md`；补充和确认默认归并到已有 Source，只有满足任务准入时才进入 `task-board.md`。
 7. 中高风险变更使用 `.forgekit/changes/<id>/`；低风险改动保持轻流程。
 8. 触发式文档只在事件发生时更新：缺陷复盘、事故复盘、依赖审查、威胁建模、发布流水线、traceability、loop、maker-checker、worktree 等都不是日常必填。
-9. 编码前分别确认业务 `Implementation Scope` 与 `Governance Writeback Scope`。默认 `ManagedDocsWriteback: minimal`：完成后最小更新实际进展、真实任务状态、用户/版本可见变化和当前 change；只有用户明确禁写文档时才关闭，不把同一事实重复写入多个文件。
+9. 长会话阶段边界、compact/clear 前、子 agent 返回关键结论后，以及 handoff/commit/tag 前，按 `.forgekit/docs/context-continuity.md` 做最小 checkpoint；不复制完整聊天或长日志。
+10. 编码前分别确认业务 `Implementation Scope` 与 `Governance Writeback Scope`。默认 `ManagedDocsWriteback: minimal`：完成后最小更新实际进展、真实任务状态、用户/版本可见变化和当前 change；只有用户明确禁写文档时才关闭，不把同一事实重复写入多个文件。
 
 ## 升级兼容
 
@@ -47,6 +48,7 @@ python scripts/forgekit-upgrade.py apply --safe --repo-root .
 - `.forgekit/docs/document-responsibility.md`：管理文档职责矩阵，记录读者、默认读取策略、触发条件、写什么和不写什么。
 - `.forgekit/docs/codebase-map.md`：代码搜索起点，记录模块入口、常用关键词和局部验证命令，不做项目百科。
 - `.forgekit/docs/workflow-router.md`：用户意图路由表，决定一句话该读什么、写什么、不要写什么。
+- `.forgekit/docs/context-continuity.md`：定义关键事实、checkpoint 触发和上下文存活位置，防止结论只留在聊天里。
 - `.forgekit/docs/local-toolchain.md`：记录各技术栈 LSP、lint、test、build 和局部验证能力。
 - `governance/agent-harness.md`：说明 AGENTS 分层、agentic search、停止编码条件和输出要求。
 - `governance/ai-engineering-loop.md`：说明 low / medium / high 风险分级、change 工件和交付闭环。
@@ -74,7 +76,8 @@ python scripts/forgekit-upgrade.py apply --safe --repo-root .
 
 使用优先级：Codex 从 `AGENTS.md` 开始，Claude Code 从 `CLAUDE.md` 开始；如果任务命中 ForgeKit skill，优先读取项目内 `.agents/skills/<skill>/SKILL.md`，不要假设用户级或系统级 skill 路径存在；然后进入 `.forgekit/docs/document-responsibility.md` -> `.forgekit/docs/codebase-map.md` -> 必要的 `.forgekit/docs/workflow-router.md` / `.forgekit/docs/local-toolchain.md` / `.forgekit/docs/codex-next-work-order.md` -> `.codex/` -> 相关 `.codex/stacks/<stack>/` -> 任务相关治理文件。不要默认读取全部 `.forgekit/docs/**` 或治理文档。
 
-常见 stack 名称：`java-springboot`、`vue`、`react`、`python-fastapi`、`node-express`、`csharp-dotnet`、`go-service`、`php-laravel`、`rust-cli-service`、`flutter-dart`、`cpp-cmake`、`kotlin-spring`、`swift-ios`、`ruby-rails`、`r-data-analysis`、`fpga-vivado-vitis`。只读取当前项目实际选择的 stack，避免把无关语言规则混入上下文。
+常见 stack 名称：`java-springboot`、`vue`、`react`、`python-fastapi`、
+ode-express`、`csharp-dotnet`、`go-service`、`php-laravel`、`rust-cli-service`、`flutter-dart`、`cpp-cmake`、`kotlin-spring`、`swift-ios`、`ruby-rails`、`r-data-analysis`、`fpga-vivado-vitis`。只读取当前项目实际选择的 stack，避免把无关语言规则混入上下文。
 
 大任务优先级：先完成 `.forgekit/docs/exploration-report.md`，再完成 `.forgekit/docs/implementation-plan.md`，确认后才进入分阶段编码。
 
