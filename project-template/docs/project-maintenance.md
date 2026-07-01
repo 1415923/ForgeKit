@@ -6,6 +6,8 @@
 
 维护操作不等于业务开发，不自动改 business docs，不自动提交 Git，也不默认读取全量 archive。
 
+Multi-project scoped docs 是显式启用能力。维护前读取 `.forgekit/state.json`；只有 state 与 `.forgekit/workspace-map.json` 都启用时才按 WorkspaceRoot / ProjectScope / RepoRoot 分层处理。缺少配置的 legacy single-project 项目只给 adoption guidance，不自动拆分文档或创建 capsule。
+
 ## Maintenance Intents
 
 | MaintenanceIntent | 常见说法 | 入口 | 默认行为 |
@@ -82,6 +84,8 @@ python scripts/archive-capsule.py apply --repo-root . --plan .forgekit/archive-c
 ## Plan before Apply
 
 所有维护动作先说明 intent、范围、可写路径、禁止动作和预期输出。report-only 动作可直接生成报告；会移动或改写文件的动作必须先 plan。
+
+跨项目维护计划还必须列出 WorkspaceRoot、Project ID、Repo ID 和 Artifact ID。Artifact 只作为 evidence index；Archive 不是 current docs。`check-workspace-integrity.py` 只检查跨层关系，不替代 `check-current-docs-integrity.py` 的单作用域事实检查。
 
 ## Confirmation Rules
 

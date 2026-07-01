@@ -1,0 +1,96 @@
+{
+  "id": "0.41.0-multi-project-scoped-docs",
+  "title": "Multi-Project Workspace and Scoped Docs Protocol",
+  "from": "0.40.2",
+  "to": "0.41.0",
+  "risk": "low",
+  "actions": [
+    {
+      "id": "install-disabled-workspace-map",
+      "type": "copy_file_if_missing",
+      "safety": "safe",
+      "source": "files/.forgekit/workspace-map.json",
+      "target": ".forgekit/workspace-map.json"
+    },
+    {
+      "id": "install-scoped-docs-guide",
+      "type": "copy_file_if_missing",
+      "safety": "safe",
+      "source": "files/.forgekit/docs/scoped-docs.md",
+      "target": ".forgekit/docs/scoped-docs.md"
+    },
+    {
+      "id": "install-project-card-template",
+      "type": "copy_file_if_missing",
+      "safety": "safe",
+      "source": "files/.forgekit/projects/_template/project-card.md",
+      "target": ".forgekit/projects/_template/project-card.md"
+    },
+    {
+      "id": "install-source-links-template",
+      "type": "copy_file_if_missing",
+      "safety": "safe",
+      "source": "files/.forgekit/projects/_template/source-links.md",
+      "target": ".forgekit/projects/_template/source-links.md"
+    },
+    {
+      "id": "install-project-task-board-template",
+      "type": "copy_file_if_missing",
+      "safety": "safe",
+      "source": "files/.forgekit/projects/_template/task-board.md",
+      "target": ".forgekit/projects/_template/task-board.md"
+    },
+    {
+      "id": "install-project-testing-template",
+      "type": "copy_file_if_missing",
+      "safety": "safe",
+      "source": "files/.forgekit/projects/_template/testing.md",
+      "target": ".forgekit/projects/_template/testing.md"
+    },
+    {
+      "id": "install-project-risk-template",
+      "type": "copy_file_if_missing",
+      "safety": "safe",
+      "source": "files/.forgekit/projects/_template/risk-register.md",
+      "target": ".forgekit/projects/_template/risk-register.md"
+    },
+    {
+      "id": "install-project-decision-template",
+      "type": "copy_file_if_missing",
+      "safety": "safe",
+      "source": "files/.forgekit/projects/_template/decisions/0001-example.md",
+      "target": ".forgekit/projects/_template/decisions/0001-example.md"
+    },
+    {
+      "id": "install-workspace-integrity-checker",
+      "type": "copy_file_if_missing",
+      "safety": "safe",
+      "source": "files/scripts/check-workspace-integrity.py",
+      "target": "scripts/check-workspace-integrity.py"
+    },
+    {
+      "id": "register-scoped-docs-capability",
+      "type": "set_state_feature",
+      "safety": "safe",
+      "name": "multi_project_scoped_docs_available",
+      "value": true
+    },
+    {
+      "id": "keep-scoped-docs-disabled",
+      "type": "set_state_feature",
+      "safety": "safe",
+      "name": "multi_project_scoped_docs_enabled",
+      "value": false
+    }
+  ],
+  "manual_review": [
+    "The installed workspace-map.json is disabled and contains TODO_REVIEW placeholders. Configure it and explicitly enable the state feature before using multi-project checks.",
+    "Existing task, risk, testing, source, work-log, repository, artifact, and archive content is not split or migrated."
+  ],
+  "non_goals": [
+    "No automatic creation of .forgekit/projects/<project-id>/",
+    "No automatic split or migration of existing managed docs",
+    "No repo-lite generation, repository creation, code movement, artifact movement, or archive movement",
+    "No automatic Git commit, push, PR, runner, daemon, or scheduler"
+  ]
+}

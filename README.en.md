@@ -163,6 +163,22 @@ Upgrade sync reuses `forgekit-upgrade.py check / plan / apply --safe`. Phase arc
 
 v0.40.2 adds the Active Current Docs Integrity Guard. Archive apply checks the current Source / Task / Risk / Traceability / Testing chain before and after moving planned items. Active-work snapshots cannot be presented as completed phase archives; broken current docs require a Current State Restoration Pass first.
 
+## Multi-Project Workspace And Scoped Docs
+
+v0.41.0 adds an opt-in Multi-Project Workspace & Scoped Docs Protocol. Workspace Docs keep cross-project facts, while lightweight `.forgekit/projects/<project-id>/` capsules keep local tasks, tests, risks, and source links. Individual Git repositories do not receive a full ForgeKit copy.
+
+New projects install a disabled `.forgekit/workspace-map.json` and capsule templates. ForgeKit does not split existing docs or create real project capsules automatically. After explicit configuration and enablement, run:
+
+```powershell
+python .\scripts\check-workspace-integrity.py --repo-root "D:\path\to\workspace"
+```
+
+```bash
+python3 ./scripts/check-workspace-integrity.py --repo-root "/path/to/workspace"
+```
+
+Legacy single-project projects without a map return `not-enabled` adoption guidance instead of a failure.
+
 Windows: `python .\scripts\check-current-docs-integrity.py --repo-root "D:\path\to\project"`
 
 macOS / Linux: `python3 ./scripts/check-current-docs-integrity.py --repo-root "/path/to/project"`
@@ -224,6 +240,7 @@ Existing business `docs/` is read-mostly evidence by default. AI may read and ci
 | Independent Code Review Protocol | Uses an independent read-only reviewer, a minimal context packet, and pass / needs-fix / manual-review gates |
 | Context Continuity Protocol | Checkpoints critical facts to responsible docs so long sessions, compaction, clearing, and delegation do not erase engineering state |
 | Project Maintenance Operations | Routes upgrade sync, Archive Capsule, checkpoint, handoff, and reports through plan, confirmation, and summary/index steps |
+| Multi-Project Scoped Docs | Uses a JSON workspace map to index cross-project facts, lightweight project capsules, Git repos, and artifact evidence |
 
 ## Common Commands
 

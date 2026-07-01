@@ -1,5 +1,23 @@
 # Changelog
 
+## [0.41.0] - Multi-Project Workspace & Scoped Docs Protocol
+
+### Added
+
+- 新增 opt-in `.forgekit/workspace-map.json`，使用标准 JSON 描述 Workspace、Project、Repo 和 Artifact 关系。
+- 新增 `.forgekit/docs/scoped-docs.md` 和最小 Project Capsule `_template`，项目局部文档不再复制完整 ForgeKit。
+- 新增 report-only `check-workspace-integrity.py`，检查跨层路径、引用、capsule 重量和 archive/current truth 边界。
+
+### Changed
+
+- Multi-project 能力默认 available 但 disabled；legacy single-project 项目缺少 map 时只输出 adoption guidance。
+- Workspace 保存跨项目事实，Project Capsule 保存局部事实，Repo Lite 只提供指针和本地命令，Artifact 只作为证据位置。
+
+### Safety
+
+- v0.41 migration 不拆分现有文档，不创建真实 project capsule，不生成 repo-lite，不移动业务代码、artifact 或 archive。
+- `check-current-docs-integrity.py` 继续检查单作用域 current docs；workspace checker 不能替代它。
+
 本文件记录 ForgeKit 的用户可感知变化。
 
 写法参考 [Keep a Changelog](https://keepachangelog.com/zh-CN/1.1.0/) 和语义化版本风格，但 ForgeKit 的版本历史不只记录“做了什么”，也记录每个版本当时面对的问题、形成的设计结论，以及解决的真实痛点。

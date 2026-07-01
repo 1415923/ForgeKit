@@ -1,16 +1,16 @@
 {
   "$schema": "https://json.schemastore.org/claude-code-marketplace.json",
   "name": "forgekit-local",
-  "version": "0.40.2",
-  "description": "Local ForgeKit marketplace with first-principles reasoning, adversarial review, safe maintenance plans, independent review, and context checkpoints.",
+  "version": "0.41.0",
+  "description": "Local ForgeKit marketplace with opt-in multi-project scoped docs, safe maintenance plans, independent review, and context checkpoints.",
   "owner": {
     "name": "ForgeKit Maintainers"
   },
   "plugins": [
     {
       "name": "forgekit",
-      "description": "Project-level workflow harness for Claude Code, Codex, and adjacent AI coding tools, with first-principles reasoning, adversarial review, safe maintenance plans, independent review, and context checkpoints.",
-      "version": "0.40.2",
+      "description": "Project-level workflow harness for Claude Code, Codex, and adjacent AI coding tools, with opt-in multi-project scoped docs, safe maintenance plans, independent review, and context checkpoints.",
+      "version": "0.41.0",
       "source": "./",
       "category": "productivity"
     }

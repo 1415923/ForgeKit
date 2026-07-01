@@ -12,6 +12,7 @@ When a task names a ForgeKit skill, read the project-local `.agents/skills/<skil
 
 1. Read this file first.
 2. Read `.forgekit/project-boundary.yml` to identify ForgeKitRoot, ProjectRoot, managed docs root, change root, business docs roots, and write policy.
+   If `.forgekit/state.json` explicitly enables multi-project scoped docs, also read `.forgekit/workspace-map.json` and `.forgekit/docs/scoped-docs.md`; otherwise keep the legacy single-project flow.
 3. Read `.forgekit/docs/document-responsibility.md` to choose the right managed docs and avoid duplicate writes.
 4. Read `.forgekit/docs/codebase-map.md` to find likely modules, entry files, and local validation commands.
 5. Read `.forgekit/docs/workflow-router.md` when the user intent is unclear or the request is about tasks, sources, status, verification, reports, loop, review, worktree, handoff, upgrade sync, or archive.
@@ -48,6 +49,7 @@ When a task names a ForgeKit skill, read the project-local `.agents/skills/<skil
 | Document synchronization check | `.codex/hooks.md`, `.codex/commands.md`, `.forgekit/docs/changelog.md`, related docs | `release-check` |
 | Archive dry-run plan | `.forgekit/docs/document-lifecycle.md`, `.forgekit/archive/README.md`, `.codex/commands.md` | `release-check` |
 | Project maintenance, upgrade sync, or archive capsule | `.forgekit/docs/project-maintenance.md`, `.forgekit/docs/archive-capsule.md` when archiving | `forgekit-maintenance` |
+| Multi-project workspace or cross-repo task | `.forgekit/workspace-map.json`, `.forgekit/docs/scoped-docs.md`, then only the selected project capsule | relevant existing skill |
 | Code review | `.codex/testing.md`, `.codex/security.md`, `.forgekit/docs/code-ownership.md`, `.forgekit/docs/task-board.md` | `code-review` |
 | Release or version gate | `.codex/version-gates.md`, `.forgekit/docs/version-roadmap.md`, `.forgekit/docs/changelog.md` | `release-check` |
 | Security-sensitive change | `.codex/security.md`, `governance/security-governance.md` | `security-review` |
@@ -56,6 +58,7 @@ When a task names a ForgeKit skill, read the project-local `.agents/skills/<skil
 
 - Do not read every file in `governance/` by default.
 - 默认不要读取全部 `.forgekit/docs/**`。先读 `.forgekit/docs/document-responsibility.md`、`.forgekit/docs/codebase-map.md` 和必要的 `.forgekit/docs/workflow-router.md`，再按默认读取策略和任务触发条件读取相关文档。
+- Multi-project scoped docs 启用后，先选择 workspace / project / repo scope；不要同时读取所有 project capsules。Workspace 保存跨项目事实，capsule 保存局部事实，Repo Lite 只保存指针和本地命令。
 - 用户请求不明确时，先做 intent routing：判断 Read Targets、Write Targets、Do Not Write 和 Required Output。
 - 没有写入触发条件时，不要修改 managed docs；不要把同一事实写进多个文档。
 - Separate Implementation Scope from Governance Writeback Scope. A business-file-only implementation scope does not disable ForgeKit managed docs writeback unless the user explicitly forbids docs or ForgeKit writes.

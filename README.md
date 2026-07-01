@@ -168,6 +168,22 @@ Windows：`python .\scripts\check-current-docs-integrity.py --repo-root "D:\path
 
 macOS / Linux：`python3 ./scripts/check-current-docs-integrity.py --repo-root "/path/to/project"`
 
+## 多项目工作区与分层文档
+
+v0.41.0 增加 opt-in Multi-Project Workspace & Scoped Docs Protocol。Workspace Docs 只保留跨项目事实，`.forgekit/projects/<project-id>/` 的轻量 capsule 保存项目局部任务、测试、风险和来源引用；每个 Git repo 不再复制完整 ForgeKit。
+
+新项目默认只安装 `.forgekit/workspace-map.json` 和 capsule 模板，`enabled` 保持 `false`，不会自动拆分现有文档或创建真实 project capsule。配置并显式启用后可运行：
+
+```powershell
+python .\scripts\check-workspace-integrity.py --repo-root "D:\path\to\workspace"
+```
+
+```bash
+python3 ./scripts/check-workspace-integrity.py --repo-root "/path/to/workspace"
+```
+
+Legacy single-project 项目缺少 map 时只会得到 `not-enabled` 和 adoption guidance，不会被判为损坏。
+
 ## 工作流
 
 ForgeKit 推荐把项目推进拆成一条可追溯链路：
@@ -225,6 +241,7 @@ source -> task -> change -> verification -> review -> work-log / changelog / han
 | Independent Code Review Protocol | 独立只读 reviewer、最小上下文包和 pass / needs-fix / manual-review gate |
 | Context Continuity Protocol | 把关键结论 checkpoint 到正确文档，避免长会话、压缩、清空或委派后丢失工程状态 |
 | Project Maintenance Operations | 将 upgrade sync、Archive Capsule、checkpoint、handoff 和报告路由到先计划、后确认、再总结的维护流程 |
+| Multi-Project Scoped Docs | 用 JSON workspace map 集中索引跨项目事实、轻量 project capsules、Git repos 和 artifact evidence |
 
 ## 常用命令
 

@@ -25,6 +25,8 @@
 
 用户意图类问题先看 `.forgekit/docs/workflow-router.md`。本文只指向入口，不复制路由表。
 
+Multi-project scoped docs 启用后，先从 `.forgekit/workspace-map.json` 确认 WorkspaceRoot、ProjectScope、RepoRoot 和 ArtifactRoot，再只读取命中的 project capsule。详细边界见 `.forgekit/docs/scoped-docs.md`。
+
 ## 当前主要模块
 
 | 模块 | 路径 | 关键文件 | 什么时候读 | 验证方式 |
@@ -74,6 +76,7 @@
 | 项目维护意图 | `.forgekit/docs/project-maintenance.md`；先识别 `MaintenanceIntent`，再 plan / confirm / summary |
 | 阶段归档 capsule | `.forgekit/docs/archive-capsule.md`、`scripts/archive-capsule.py`；历史检索先看 `.forgekit/archive/index.md` |
 | 当前任务断链 / 归档后无法继续 | `.forgekit/docs/current-docs-integrity.md`、`scripts/check-current-docs-integrity.py`；先检查，再决定是否做 Current State Restoration Pass |
+| 多项目 / 多仓库边界和 scoped docs | `.forgekit/workspace-map.json`、`.forgekit/docs/scoped-docs.md`、`scripts/check-workspace-integrity.py`；未启用时保持 single-project |
 | 中高风险变更过程 | `.forgekit/changes/<change-id>/` |
 | 有限授权连续推进规则 | `.forgekit/docs/bounded-auto-loop-policy.md` |
 | 原生 agent 配置适配 | `.forgekit/docs/native-agent-adapter.md` |

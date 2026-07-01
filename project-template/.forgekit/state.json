@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "forgekit_version": "0.40.2",
+  "forgekit_version": "0.41.0",
   "managed_docs_root": ".forgekit/docs",
   "change_root": ".forgekit/changes",
   "mode": "Standard",
@@ -13,6 +13,8 @@
     "first_principles_adversarial_review": true,
     "idempotent_safe_migrations": true,
     "active_current_docs_integrity_guard": true,
+    "multi_project_scoped_docs_available": true,
+    "multi_project_scoped_docs_enabled": false,
     "native_agent_adapter": "none"
   },
   "last_upgrade": null

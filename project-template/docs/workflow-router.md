@@ -13,17 +13,19 @@
 ## How to Use
 
 1. 先识别用户意图。
-2. 按 Intent Routing Table 选择 Read Targets。
-3. 写入前确认 Write Targets、Do Not Write 和触发条件。
-4. 没有写入触发且项目事实、任务状态、验证结果或用户可见变化都未改变时，只输出 Required Output，不改 managed docs。
-5. 同一事实只写到一个负责文档，其他文档用 `Source ID`、`Task ID` 或链接引用。
-6. 分开判断 `Implementation Scope` 和 `Governance Writeback Scope`；用户只限制业务文件时，默认仍保留 `ManagedDocsWriteback: minimal`。
+2. Multi-project scoped docs 已启用时，先选择 `Scope: workspace | project | repo`，并确认 Project ID / Repo ID；未启用时保持 single-project 路由。
+3. 按 Intent Routing Table 选择 Read Targets。
+4. 写入前确认 Write Targets、Do Not Write 和触发条件。
+5. 没有写入触发且项目事实、任务状态、验证结果或用户可见变化都未改变时，只输出 Required Output，不改 managed docs。
+6. 同一事实只写到一个负责文档，其他文档用 `Source ID`、`Task ID` 或链接引用。
+7. 分开判断 `Implementation Scope` 和 `Governance Writeback Scope`；用户只限制业务文件时，默认仍保留 `ManagedDocsWriteback: minimal`。
 
 ## Intent Routing Table
 
 | 用户意图 | Read Targets | Write Targets | Do Not Write | Required Output |
 | --- | --- | --- | --- | --- |
 | 查看任务派发原文 / 领导原话 / 微信任务 | `task-intake.md` | none | `task-board.md`, `requirements.md`, `changelog.md` | source summary + `Source ID` |
+| 多项目 / 多仓库任务 / 前后端联调 | `.forgekit/workspace-map.json`, `scoped-docs.md`, workspace task/source，再读取命中的 project capsule | workspace 写跨项目事实；project capsule 写局部事实 | 未命中的 capsules、Repo Lite 中的任务事实、artifact、archive | scope recap + cross-project status + local next steps |
 | 记录新任务来源 | `task-intake.md`, `document-responsibility.md` | `task-intake.md` | `task-board.md` unless task is confirmed | Source record |
 | 查看当前任务状态 / 看板 / 下一步 | `task-board.md` | none | `task-intake.md`, `changelog.md` | compact task status |
 | 拆解任务 | `task-intake.md`, `requirements.md`, `task-board.md` | `task-board.md` | `changelog.md` | derived tasks with `Source ID` |
@@ -56,6 +58,7 @@
 
 - 先读 `document-responsibility.md` 和 `codebase-map.md`，再读本文件。
 - 只读取路由表命中的文档。
+- Multi-project 模式不默认读取所有 `.forgekit/projects/**`；先从 map 选择 Project ID 和 Repo ID。
 - 业务 `docs/` 仍然是 read-mostly 证据源；只有用户要求时才读取相关文件。
 - `.forgekit/archive/**` 默认不读，除非任务涉及历史、审计、回归、复盘或用户明确要求。
 

@@ -4,8 +4,10 @@
 
 - 先读取 `governance/overview.md`，再按项目入口选择新项目、接手项目、Bug 修复、发布或安全审查流程。
 - 先读取 `.forgekit/project-boundary.yml`，确认 ForgeKitRoot、ProjectRoot、managed docs root、change root、business docs roots 和 write policy。
+- `.forgekit/state.json` 明确启用 multi-project scoped docs 时，再读取 `.forgekit/workspace-map.json` 和 `.forgekit/docs/scoped-docs.md`；未启用时继续使用 legacy single-project 流程，不把缺少 map 判为项目损坏。
 - 修改前先阅读相关代码、文档和配置。
 - 不要默认全量读取 `.forgekit/docs/**`；先看 `.forgekit/docs/document-responsibility.md`、`.forgekit/docs/codebase-map.md` 和必要的 `.forgekit/docs/workflow-router.md`，再按任务触发读取相关文档。
+- Multi-project 模式先选择 workspace / project / repo scope，只读取命中的 capsule；不要把 Repo Lite、artifact 或 archive 当作 current truth。
 - 用户请求不明确时先做 intent routing：判断 Read Targets、Write Targets、Do Not Write 和 Required Output。
 - 文档混乱、过长、重复或职责错位时，先建议或运行 `scripts/doc-health-report.py`。它默认只生成 `.forgekit/doc-health-report.md`，不得自动按报告修改 managed docs。
 - 任务来源、完成证据或追溯链路不清时，先建议或运行 `scripts/source-trace-report.py`。它默认只生成 `.forgekit/source-trace-report.md`，不得自动补 Source ID、改任务状态或补验证记录。

@@ -150,7 +150,7 @@ function Write-BoundaryConfig {
 
     $lines = @(
         'forgekit:',
-        '  version: "0.40.2"',
+        '  version: "0.41.0"',
         "  mode: `"$SelectedMode`"",
         '',
         'roots:',
@@ -236,7 +236,7 @@ function Write-ForgeKitState {
     }
     $state = [ordered]@{
         schema_version = 1
-        forgekit_version = "0.40.2"
+        forgekit_version = "0.41.0"
         managed_docs_root = ".forgekit/docs"
         change_root = ".forgekit/changes"
         mode = $SelectedMode
@@ -249,6 +249,8 @@ function Write-ForgeKitState {
             first_principles_adversarial_review = $true
             idempotent_safe_migrations = $true
             active_current_docs_integrity_guard = $true
+            multi_project_scoped_docs_available = $true
+            multi_project_scoped_docs_enabled = $false
             native_agent_adapter = $NativeAdapter
         }
         last_upgrade = $null

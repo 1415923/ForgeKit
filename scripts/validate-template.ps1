@@ -618,7 +618,7 @@ function Test-TemplateManifest {
     $manifestPath = Join-Path $repoRoot "project-template\.forgekit\template-manifest.json"
     if (Test-Path -LiteralPath $manifestPath) {
         $manifest = Get-Content -LiteralPath $manifestPath -Raw | ConvertFrom-Json
-        if ($manifest.template_version -ne "0.40.2") {
+        if ($manifest.template_version -ne "0.41.0") {
             Add-Error "Unexpected template manifest version: $($manifest.template_version)"
         }
         $sources = @($manifest.files | ForEach-Object { $_.source_path })
@@ -1075,7 +1075,7 @@ function Test-HarnessEntryConsistency {
     Test-RequiredPath "project-template\migrations\0.36.0\migration.json"
     Test-RequiredPath "project-template\.forgekit\state.json"
     Test-RequiredPattern "project-template\.forgekit\state.json" '"schema_version": 1' "State schema version"
-    Test-RequiredPattern "project-template\.forgekit\state.json" '"forgekit_version": "0.40.2"' "State ForgeKit version"
+    Test-RequiredPattern "project-template\.forgekit\state.json" '"forgekit_version": "0.41.0"' "State ForgeKit version"
     Test-RequiredPattern "project-template\.forgekit\state.json" '"managed_docs_root": ".forgekit/docs"' "State managed docs root"
     Test-RequiredPattern "project-template\.forgekit\state.json" '"change_root": ".forgekit/changes"' "State change root"
     Test-RequiredPattern "project-template\.forgekit\state.json" '"last_upgrade": null' "State last upgrade"
@@ -1139,7 +1139,7 @@ function Test-PluginDistribution {
     if ($codexPluginJson.name -ne "forgekit") {
         Add-Error "Unexpected Codex plugin name in root plugin.json: $($codexPluginJson.name)"
     }
-    if ($codexPluginJson.version -ne "0.40.2") {
+    if ($codexPluginJson.version -ne "0.41.0") {
         Add-Error "Unexpected Codex plugin version in root plugin.json: $($codexPluginJson.version)"
     }
     if ($codexPluginJson.skills -ne "./skills/") {
@@ -1150,7 +1150,7 @@ function Test-PluginDistribution {
     if ($claudePluginJson.name -ne "forgekit") {
         Add-Error "Unexpected Claude plugin name in root plugin.json: $($claudePluginJson.name)"
     }
-    if ($claudePluginJson.version -ne "0.40.2") {
+    if ($claudePluginJson.version -ne "0.41.0") {
         Add-Error "Unexpected Claude plugin version in root plugin.json: $($claudePluginJson.version)"
     }
     $claudeSkills = @($claudePluginJson.skills)
@@ -1405,6 +1405,47 @@ function Test-ReasoningReviewProtocol {
         if (Test-Path -LiteralPath (Join-Path $repoRoot $forbidden)) { Add-Error "v0.40 must not add reasoning/review runner or daemon: $forbidden" }
     }
 }
+function Test-MultiProjectScopedDocs {
+    foreach ($path in @(
+        "project-template\.forgekit\workspace-map.json",
+        "project-template\.forgekit\docs\scoped-docs.md",
+        "project-template\.forgekit\projects\_template\project-card.md",
+        "project-template\.forgekit\projects\_template\source-links.md",
+        "project-template\.forgekit\projects\_template\task-board.md",
+        "project-template\.forgekit\projects\_template\testing.md",
+        "project-template\.forgekit\projects\_template\risk-register.md",
+        "project-template\.forgekit\projects\_template\decisions\0001-example.md",
+        "scripts\check-workspace-integrity.py",
+        "project-template\scripts\check-workspace-integrity.py",
+        "migrations\0.41.0\migration.json",
+        "project-template\migrations\0.41.0\migration.json"
+    )) { Test-RequiredPath $path }
+    if (Test-Path -LiteralPath (Join-Path $repoRoot "project-template\docs\scoped-docs.md")) {
+        Add-Error "scoped-docs.md must live only under project-template/.forgekit/docs"
+    }
+    foreach ($marker in @("WorkspaceRoot", "ProjectScope", "RepoRoot", "ArtifactRoot", "Project Capsule", "source-links.md")) {
+        Test-RequiredPattern "project-template\.forgekit\docs\scoped-docs.md" $marker "Scoped docs marker $marker"
+    }
+    Test-RequiredPattern "project-template\.forgekit\workspace-map.json" '"enabled": false' "Disabled workspace map default"
+    Test-RequiredPattern "project-template\.forgekit\state.json" '"multi_project_scoped_docs_available": true' "Scoped docs capability feature"
+    Test-RequiredPattern "project-template\.forgekit\state.json" '"multi_project_scoped_docs_enabled": false' "Scoped docs disabled feature"
+    Test-RequiredPattern "scripts\check-workspace-integrity.py" "--require-enabled" "Workspace checker require-enabled option"
+    Test-RequiredPattern "scripts\check-workspace-integrity.py" "args.strict" "Workspace checker strict semantics"
+    Test-RequiredPattern "migrations\0.41.0\migration.json" '"from": "0.40.2"' "v0.41 migration source"
+    Test-RequiredPattern "migrations\0.41.0\migration.json" '"to": "0.41.0"' "v0.41 migration target"
+    Test-RequiredPattern "migrations\0.41.0\migration.json" '"multi_project_scoped_docs_enabled"' "v0.41 disabled feature action"
+    $rootChecker = Get-Content -LiteralPath (Join-Path $repoRoot "scripts\check-workspace-integrity.py") -Raw
+    $templateChecker = Get-Content -LiteralPath (Join-Path $repoRoot "project-template\scripts\check-workspace-integrity.py") -Raw
+    if ($rootChecker -ne $templateChecker) { Add-Error "Root and project-template check-workspace-integrity.py must stay identical" }
+    $migrationText = Get-Content -LiteralPath (Join-Path $repoRoot "migrations\0.41.0\migration.json") -Raw
+    foreach ($forbidden in @(".forgekit/projects/backend", "repo-lite/FORGEKIT.md", "move_file", "business docs")) {
+        if ($forbidden -ne "business docs" -and $migrationText.Contains($forbidden)) { Add-Error "v0.41 migration contains forbidden automatic scope action: $forbidden" }
+    }
+    foreach ($entry in @("project-template\AGENTS.md", "project-template\CLAUDE.md", "project-template\.codex\rules.md")) {
+        Test-RequiredPattern $entry "multi-project" "Multi-project short entry rule"
+        Test-RequiredPattern $entry "single-project" "Legacy single-project compatibility rule"
+    }
+}
 Test-RequiredPath "README.md"
 Test-RequiredPath "AGENTS.md"
 Test-RequiredPath "scripts\init-project-template.ps1"
@@ -1455,6 +1496,7 @@ Test-IndependentCodeReviewProtocol
 Test-ContextContinuityProtocol
 Test-ProjectMaintenanceOperations
 Test-ReasoningReviewProtocol
+Test-MultiProjectScopedDocs
 Test-AgentSuitability
 Test-ExecutableHarness
 Test-PluginDistribution

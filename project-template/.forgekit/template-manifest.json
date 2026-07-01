@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "template_version": "0.40.2",
+  "template_version": "0.41.0",
   "boundary_aware": true,
   "files": [
     {
@@ -9,7 +9,7 @@
       "role": "agent_entry",
       "update_policy": "ask",
       "render_mode": "copy",
-      "checksum": "sha256:0e4a20eaf16920534aa408ae82ad7d3ec933666f4d20cdf9ca60a6a4654680b6"
+      "checksum": "sha256:a4ef41abf81fe5b15305ebbb384f1c8c21e4e64296d7a8a9b0280a1e345be30a"
     },
     {
       "source_path": "CLAUDE.md",
@@ -17,7 +17,7 @@
       "role": "agent_entry",
       "update_policy": "ask",
       "render_mode": "copy",
-      "checksum": "sha256:ef9c8bf4f52cfd1dfe6eff7a485d5ec850bc6d75212a085b0d9dca0c5082b5d5"
+      "checksum": "sha256:c38cb0316c0d5761c8793377098309c93190d4a78abac2c1d14feacbb9bf5007"
     },
     {
       "source_path": "README.md",
@@ -25,7 +25,7 @@
       "role": "readme",
       "update_policy": "ask",
       "render_mode": "copy",
-      "checksum": "sha256:0f891833ba7ff230addc2b76d8c0d666a8979441e1a27c112db24e8962bdc2b8"
+      "checksum": "sha256:d7324ae4966bb81ad389ab247d9ce9a52b5ac42a5e1c689feeebf5c4358d73d4"
     },
     {
       "source_path": ".forgekit/project-boundary.yml",
@@ -41,7 +41,7 @@
       "role": "managed_doc",
       "update_policy": "merge",
       "render_mode": "copy",
-      "checksum": "sha256:3f06d44d53ce000fe8c930a7650dadc6597f61cfcd5e4a2c83fe324aa62d2a8b"
+      "checksum": "sha256:572da3bd40cabfd28088f90f926dff43ee2d7158f6ea298d94b9a36fa0cbf662"
     },
     {
       "source_path": ".forgekit/docs/document-lifecycle.md",
@@ -81,7 +81,7 @@
       "role": "codex_rule",
       "update_policy": "ask",
       "render_mode": "copy",
-      "checksum": "sha256:3d0104d230849698f7d74818f612ae7f7955c048b9c2ebf74b94dc1cf4d1c009"
+      "checksum": "sha256:6bfbb8a6edb532a027e0689908b5cd515fadc8ee027767c16b4a481d03016bf4"
     },
     {
       "source_path": ".codex/version-gates.md",
@@ -209,7 +209,7 @@
       "role": "managed_doc",
       "update_policy": "merge",
       "render_mode": "copy",
-      "checksum": "sha256:989191c3c5650f392af5417719f4e13452cea301515ae120d0336831c2b3b93c"
+      "checksum": "sha256:95a68b6779dfd79dc84884d60618521ebb8abd308d5835cb965d22773fa6b93d"
     },
     {
       "source_path": "docs/workflow-router.md",
@@ -217,7 +217,7 @@
       "role": "managed_doc",
       "update_policy": "merge",
       "render_mode": "copy",
-      "checksum": "sha256:b4b704c49238198847cb8ccb0e1aff5c8ae0b0cf4897bd6235f0e33a8a1e596b"
+      "checksum": "sha256:f8f89187137f147daaec02e4e0c67bd1789c604932f1a24f923e39c559f5ba18"
     },
     {
       "source_path": "docs/work-log.md",
@@ -609,7 +609,7 @@
       "role": "managed_doc",
       "update_policy": "merge",
       "render_mode": "copy",
-      "checksum": "sha256:bb98aa3a5fd543a1fecd9564f6b4b8d7851e27b2d8384ee611bea54ebf4f8fc5"
+      "checksum": "sha256:af43d2d311f4abaa88f7b04aa964767ad3ad5ba87f0d259b81f762be9ecc4853"
     },
     {
       "source_path": "docs/archive-capsule.md",
@@ -745,7 +745,7 @@
       "role": "managed_doc",
       "update_policy": "merge",
       "render_mode": "copy",
-      "checksum": "sha256:4c3c36ba77e936bd82eb36a4517b03ec0efdc473a66afd9d84c907db47fb4d59"
+      "checksum": "sha256:0413010e73d0225411aa474656e31e510fdc99a526a4f484f4ea13802fd80f3c"
     },
     {
       "source_path": "scripts/check-current-docs-integrity.py",
@@ -794,6 +794,158 @@
       "update_policy": "readonly",
       "render_mode": "copy",
       "checksum": "sha256:8538f34a83fa60dd998f25137179cd09404e36a881d3de8d02372209499cdc41"
+    },
+    {
+      "source_path": ".forgekit/workspace-map.json",
+      "target_path": ".forgekit/workspace-map.json",
+      "role": "metadata",
+      "update_policy": "ask",
+      "render_mode": "copy",
+      "checksum": "sha256:ce4173a38d540c3d04ec4c4ac022b1874866d4cdf459d685864953e17bb23349"
+    },
+    {
+      "source_path": ".forgekit/docs/scoped-docs.md",
+      "target_path": "${managed_docs_root}/scoped-docs.md",
+      "role": "managed_doc",
+      "update_policy": "merge",
+      "render_mode": "copy",
+      "checksum": "sha256:f4f29ce1dd847029a66d9f20cbd22623fd5ee496963900ec91858c3e1e0d08da"
+    },
+    {
+      "source_path": ".forgekit/projects/_template/project-card.md",
+      "target_path": ".forgekit/projects/_template/project-card.md",
+      "role": "metadata",
+      "update_policy": "readonly",
+      "render_mode": "copy",
+      "checksum": "sha256:88f746be37b13a68d028a4c92a3616b15baac78e8113d3740e43c40f2cd1184b"
+    },
+    {
+      "source_path": ".forgekit/projects/_template/source-links.md",
+      "target_path": ".forgekit/projects/_template/source-links.md",
+      "role": "metadata",
+      "update_policy": "readonly",
+      "render_mode": "copy",
+      "checksum": "sha256:c67001ae5e3eaefc6cf67a6fd1183d075684e3a0b9f130d81f6a747e9c56cb79"
+    },
+    {
+      "source_path": ".forgekit/projects/_template/task-board.md",
+      "target_path": ".forgekit/projects/_template/task-board.md",
+      "role": "metadata",
+      "update_policy": "readonly",
+      "render_mode": "copy",
+      "checksum": "sha256:962352f578ed8ad84bca698f896d1a81ac4d5dd032f7a3dc687a407bc2bf375a"
+    },
+    {
+      "source_path": ".forgekit/projects/_template/testing.md",
+      "target_path": ".forgekit/projects/_template/testing.md",
+      "role": "metadata",
+      "update_policy": "readonly",
+      "render_mode": "copy",
+      "checksum": "sha256:f0df3bcfb87b94bb7e6aa8e0cb2a1c661ace54ddca6396ffaa33a5dd0c1a5f4c"
+    },
+    {
+      "source_path": ".forgekit/projects/_template/risk-register.md",
+      "target_path": ".forgekit/projects/_template/risk-register.md",
+      "role": "metadata",
+      "update_policy": "readonly",
+      "render_mode": "copy",
+      "checksum": "sha256:d6bfe4a7aeabd94a898729a71b99f32d92ae8a5eb2b38594f5f08fa29b10d7f3"
+    },
+    {
+      "source_path": ".forgekit/projects/_template/decisions/0001-example.md",
+      "target_path": ".forgekit/projects/_template/decisions/0001-example.md",
+      "role": "metadata",
+      "update_policy": "readonly",
+      "render_mode": "copy",
+      "checksum": "sha256:516dd2ab369d6ec654804c828bbd95ce2f4e14380a317785003b74db4f44e840"
+    },
+    {
+      "source_path": "scripts/check-workspace-integrity.py",
+      "target_path": "scripts/check-workspace-integrity.py",
+      "role": "script",
+      "update_policy": "replace",
+      "render_mode": "copy",
+      "checksum": "sha256:ba457c059a648da9a92a07b9bcfee6239a9ae5d7195db94c07196b8622f6d54d"
+    },
+    {
+      "source_path": "migrations/0.41.0/migration.json",
+      "target_path": "migrations/0.41.0/migration.json",
+      "role": "metadata",
+      "update_policy": "readonly",
+      "render_mode": "copy",
+      "checksum": "sha256:2cb4dc70f332daabbab65a81ebde144ddd5a32964448d03333f1e38e633b68a5"
+    },
+    {
+      "source_path": "migrations/0.41.0/files/.forgekit/workspace-map.json",
+      "target_path": "migrations/0.41.0/files/.forgekit/workspace-map.json",
+      "role": "metadata",
+      "update_policy": "readonly",
+      "render_mode": "copy",
+      "checksum": "sha256:ce4173a38d540c3d04ec4c4ac022b1874866d4cdf459d685864953e17bb23349"
+    },
+    {
+      "source_path": "migrations/0.41.0/files/.forgekit/docs/scoped-docs.md",
+      "target_path": "migrations/0.41.0/files/.forgekit/docs/scoped-docs.md",
+      "role": "metadata",
+      "update_policy": "readonly",
+      "render_mode": "copy",
+      "checksum": "sha256:f4f29ce1dd847029a66d9f20cbd22623fd5ee496963900ec91858c3e1e0d08da"
+    },
+    {
+      "source_path": "migrations/0.41.0/files/.forgekit/projects/_template/project-card.md",
+      "target_path": "migrations/0.41.0/files/.forgekit/projects/_template/project-card.md",
+      "role": "metadata",
+      "update_policy": "readonly",
+      "render_mode": "copy",
+      "checksum": "sha256:88f746be37b13a68d028a4c92a3616b15baac78e8113d3740e43c40f2cd1184b"
+    },
+    {
+      "source_path": "migrations/0.41.0/files/.forgekit/projects/_template/source-links.md",
+      "target_path": "migrations/0.41.0/files/.forgekit/projects/_template/source-links.md",
+      "role": "metadata",
+      "update_policy": "readonly",
+      "render_mode": "copy",
+      "checksum": "sha256:c67001ae5e3eaefc6cf67a6fd1183d075684e3a0b9f130d81f6a747e9c56cb79"
+    },
+    {
+      "source_path": "migrations/0.41.0/files/.forgekit/projects/_template/task-board.md",
+      "target_path": "migrations/0.41.0/files/.forgekit/projects/_template/task-board.md",
+      "role": "metadata",
+      "update_policy": "readonly",
+      "render_mode": "copy",
+      "checksum": "sha256:962352f578ed8ad84bca698f896d1a81ac4d5dd032f7a3dc687a407bc2bf375a"
+    },
+    {
+      "source_path": "migrations/0.41.0/files/.forgekit/projects/_template/testing.md",
+      "target_path": "migrations/0.41.0/files/.forgekit/projects/_template/testing.md",
+      "role": "metadata",
+      "update_policy": "readonly",
+      "render_mode": "copy",
+      "checksum": "sha256:f0df3bcfb87b94bb7e6aa8e0cb2a1c661ace54ddca6396ffaa33a5dd0c1a5f4c"
+    },
+    {
+      "source_path": "migrations/0.41.0/files/.forgekit/projects/_template/risk-register.md",
+      "target_path": "migrations/0.41.0/files/.forgekit/projects/_template/risk-register.md",
+      "role": "metadata",
+      "update_policy": "readonly",
+      "render_mode": "copy",
+      "checksum": "sha256:d6bfe4a7aeabd94a898729a71b99f32d92ae8a5eb2b38594f5f08fa29b10d7f3"
+    },
+    {
+      "source_path": "migrations/0.41.0/files/.forgekit/projects/_template/decisions/0001-example.md",
+      "target_path": "migrations/0.41.0/files/.forgekit/projects/_template/decisions/0001-example.md",
+      "role": "metadata",
+      "update_policy": "readonly",
+      "render_mode": "copy",
+      "checksum": "sha256:516dd2ab369d6ec654804c828bbd95ce2f4e14380a317785003b74db4f44e840"
+    },
+    {
+      "source_path": "migrations/0.41.0/files/scripts/check-workspace-integrity.py",
+      "target_path": "migrations/0.41.0/files/scripts/check-workspace-integrity.py",
+      "role": "metadata",
+      "update_policy": "readonly",
+      "render_mode": "copy",
+      "checksum": "sha256:ba457c059a648da9a92a07b9bcfee6239a9ae5d7195db94c07196b8622f6d54d"
     }
   ]
 }
