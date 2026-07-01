@@ -2,45 +2,200 @@
 
 English documentation: [README.en.md](README.en.md)
 
-ForgeKit 是一套轻量级 AI 工程交付工具包，用来把 Codex、Claude Code 等 AI 编程工具约束在可审查、可验证、可交接的项目流程里。
+ForgeKit 是一套轻量级 AI 工程交付工具包，用来把 Codex、Claude Code 等 AI 编程工具约束在**可审查、可验证、可交接**的项目流程里。
 
-它不生成业务框架代码，也不替你部署系统。ForgeKit 只在项目本地生成一层“AI 交付工作区”：入口文件、项目边界、共享 skills、风险分级 change 工件、治理文档、检查脚本和可选 agent 配置模板。
+它不生成业务框架代码，也不替你部署系统。ForgeKit 做的是：在项目本地生成一层 AI 交付工作区，让 AI 知道项目边界、任务来源、验证方式、风险、交接材料和什么时候该停下来等你确认。
 
-## 为什么需要 ForgeKit
+---
 
-AI 写代码越来越快，但项目真正容易失控的地方通常不是“能不能写”，而是：
+## 一句话理解
 
-- AI 不知道项目边界，误改业务仓库或旧文档。
-- 需求、任务、实现、验证和交接记录断链。
-- 中高风险变更缺少 proposal、tasks、verification、review。
-- Codex、Claude Code 等工具各读各的上下文，事实不一致。
-- 代码做完了，但没人能快速确认“改了什么、怎么验证、还有什么风险”。
+```text
+ForgeKit = 给 AI 编程工具用的本地项目交付规则、文档和检查工具。
+```
 
-ForgeKit 的目标就是把这些交付约束固定到项目里，让 AI 能在同一个可检查流程下推进工作。
+它解决的不是“AI 会不会写代码”，而是：
 
-## 适合与不适合
+```text
+AI 该改哪里？
+任务从哪来？
+现在做到哪了？
+怎么验证？
+风险是什么？
+什么时候写文档？
+怎么交接给下一个会话 / reviewer / 同事？
+```
 
-适合：
+---
 
-- 新项目启动：先澄清目标、边界、技术栈和验证方式，再让 AI 写代码。
-- 接手已有项目：先从 README、脚本、构建文件和旧文档中提取事实，而不是先猜技术栈。
-- 中高风险变更：要求 proposal / tasks / verification / review，必要时增加 design / ship / retro。
-- 多 AI 工具协作：让 Codex、Claude Code 共用同一套项目事实、命令、skills 和交付规则。
+## 什么时候用 ForgeKit
+
+| 场景 | ForgeKit 帮你做什么 |
+| --- | --- |
+| 新项目启动 | 先澄清目标、边界、技术栈和验证方式，再让 AI 写代码 |
+| 接手已有项目 | 先只读盘点 README、脚本、构建文件和旧文档，避免 AI 乱猜 |
+| 中高风险变更 | 生成 proposal / tasks / verification / review，必要时增加 design / ship |
+| 长会话开发 | 在阶段边界、compact 前、换会话前做 checkpoint，防止细节丢失 |
+| 多 AI 工具协作 | 让 Codex 和 Claude Code 读取同一套项目事实和规则 |
+| 多 repo / 多项目工作区 | 用 workspace map 区分 workspace、project、repo、artifact、archive |
+| 阶段交付 | 生成 handoff、archive capsule、review-ready summary |
 
 不适合：
 
-- 作为业务框架脚手架。
-- 自动安装依赖、启动服务、部署或发布。
-- 默认启用 hook、MCP、memory、多 agent runtime 或外部账号集成。
-- 自动创建 issue / PR、commit、tag 或 push。
+| 不适合的事 | 原因 |
+| --- | --- |
+| 业务框架脚手架 | ForgeKit 不生成 Spring / React / FastAPI 业务模板 |
+| 自动部署平台 | 不安装依赖、不启动服务、不部署、不发布 |
+| 后台自动任务系统 | 不提供 runner、daemon、scheduler |
+| 自动 Git 系统 | 不自动 commit、tag、push、PR |
+| 外部账号集成 | 默认不接 GitHub issue、MCP、memory、云服务账号 |
+
+---
 
 ## 快速开始
 
-### 1. 生成项目工作区
+下面三步通常可在 3 分钟内完成。
 
-统一的是入口语义，不是所有平台使用同一条 shell 命令。它会判断目标目录应初始化、无需更新、生成升级计划，还是进入 legacy adoption。
+### 1. 在 ForgeKit 仓库里初始化或同步目标项目
 
 Windows PowerShell：
+
+```powershell
+python .\scripts\forgekit-project.py --target "D:\path\to\project"
+```
+
+macOS / Linux：
+
+```bash
+python3 ./scripts/forgekit-project.py --target "/path/to/project"
+```
+
+这个统一入口会自动判断：
+
+| 目标状态 | ForgeKit 行为 |
+| --- | --- |
+| 未安装 ForgeKit | 展示初始化计划 |
+| 已是当前版本 | 显示 up-to-date |
+| 版本落后 | 先 check + plan，确认后才 apply |
+| 工具版本太旧 | 停止并提示先更新外层 ForgeKit |
+| legacy 项目 | 给 adoption guidance，不自动强行升级 |
+
+默认不会直接写入；需要你确认或传入 `--yes` 才执行安全操作。
+
+只有 v0.36.0 及以后初始化、且具有 `.forgekit/state.json` 的项目支持安全迁移；v0.35.x 及更早项目按“接手已有项目”处理，不自动升级。
+
+需要在首次初始化时同时生成可审查的 Claude Code / Codex agent 配置，可使用底层高级入口：
+
+```powershell
+powershell -ExecutionPolicy Bypass -File .\scripts\init-project-template.ps1 -TargetPath "D:\path\to\workspace" -ProjectName "my-app" -Mode Standard -NativeAgentAdapter all
+```
+
+该参数只生成配置，不代表运行时已经注册 agent。
+
+---
+
+### 2. 在项目根目录启动 AI 工具
+
+Codex：
+
+```powershell
+cd D:\path\to\project
+codex
+```
+
+Claude Code：
+
+```powershell
+cd D:\path\to\project
+claude
+```
+
+---
+
+### 3. 发启动提示词
+
+Codex：
+
+```text
+请读取 AGENTS.md，并优先使用项目内 .agents/skills/project-init/SKILL.md，按 ForgeKit 流程理解当前项目。先告诉我项目边界、当前任务、风险和建议下一步，不要直接改文件。
+```
+
+Claude Code：
+
+```text
+请读取 CLAUDE.md，按 ForgeKit 流程理解当前项目。先告诉我项目边界、当前任务、风险和建议下一步，不要直接改文件。
+```
+
+---
+
+## 最常用提示词
+
+详细变体见生成项目中的：
+
+```text
+.forgekit/docs/usage-playbook.md
+```
+
+日常先用下面这些短提示词就够了。
+
+| 你想做什么 | 直接复制给 Claude / Codex |
+| --- | --- |
+| 初始化新项目 | `请使用 ForgeKitRoot 统一入口初始化 <project-root>，先展示计划，不要自动提交。` |
+| 接手已有项目 | `先只读盘点 <project-root>，按 existing-project adoption 给出计划后等我确认。` |
+| 更新项目中的 ForgeKit | `外层 ForgeKit 已更新，请对 <project-root> 做 check 和 plan，未经确认不要 apply。` |
+| 开始今天工作 | `按 workflow router 读取当前任务、最近进展、风险和验证入口，给我今天的下一步。` |
+| 执行一个任务 | `执行 <Task ID>，先确认范围和验证方式，完成后做最小 checkpoint。` |
+| 保存当前进展 | `只把本轮已确认的状态、验证、风险和下一步最小写回负责文档。` |
+| compact / clear 前 | `做 pre-compact checkpoint，并告诉我新会话应先读哪些文件。` |
+| compact 后恢复 | `刚发生 compact / 换会话。请先只读恢复当前目标、最近结论、风险、验证和下一步，不要改文件。` |
+| 提交前检查 | `检查 diff、验证、独立 review、风险和最小写回，不要自动 commit。` |
+| 阶段结束归档 | `先检查 current docs integrity，再生成 Archive Capsule plan，不要直接 apply。` |
+| 生成交接材料 | `生成 review-ready handoff，缺证据标 TODO_REVIEW，不要编造。` |
+| 多项目只读分析 | `按 workspace map 只读分析命中的 project/repo，不启用 map 或创建 capsule。` |
+| 启用 multi-project 前检查 | `先运行 workspace integrity check，只给 adoption guidance，不自动启用。` |
+| 第一性原理分析 | `从第一性原理出发，重新分析这个问题的事实、假设、约束和最小正确机制。` |
+| 对抗式审查 | `做一次 adversarial review，专门找失败路径、边界条件和验证缺口。` |
+
+---
+
+## 什么时候更新 ForgeKit 文档
+
+ForgeKit v0.42 起，文档写回按事件触发，不按“每改一下就写”。
+
+| 粒度 | 是否写 ForgeKit managed docs | 典型场景 |
+| --- | --- | --- |
+| Micro Update | 不写 | typo、小参数、临时试错、单次失败命令、未确认探索 |
+| Checkpoint Update | 最小写回 | 小闭环完成、任务状态变化、根因确认、新风险、有效验证、准备中断/换会话 |
+| Ship Update | 收口写回 | commit、tag、handoff、archive、发布前 |
+
+写回位置：
+
+| 信息 | 写到哪里 |
+| --- | --- |
+| 今天做了什么、下一步 | `.forgekit/docs/work-log.md` |
+| 任务状态变化 | `.forgekit/docs/task-board.md` |
+| 验证结论和缺口 | `.forgekit/docs/testing.md` |
+| 风险和阻塞 | `.forgekit/docs/risk-register.md` |
+| 用户/版本可见变化 | `CHANGELOG.md` |
+| 来源事实变化 | `task-intake.md` 或 project `source-links.md` |
+
+注意：
+
+```text
+Micro Update 只是不写 ForgeKit governance docs，
+不代表禁止修改任务授权范围内的业务代码、业务 README、注释、测试或配置。
+```
+
+可预见的 compact、clear 或换会话前，先做 pre-compact checkpoint。
+如果发生不可预见的 auto compact，恢复后第一步先做 post-compact recovery check。
+
+---
+
+## 常用命令
+
+### 更新 / 同步项目中的 ForgeKit
+
+Windows：
 
 ```powershell
 python .\scripts\forgekit-project.py --target "D:\path\to\project"
@@ -54,76 +209,7 @@ python3 ./scripts/forgekit-project.py --target "/path/to/project"
 bash ./scripts/forgekit-project.sh --target "/path/to/project"
 ```
 
-默认确认是 No；非交互环境只展示计划，显式 `--yes` 才执行初始化或 `apply --safe`。未安装但非空的目录需要额外使用 `--force-init`，已有文件仍不会被覆盖。
-
-需要显式选择 Mode、stack 或 Native Agent Adapter 时，可以使用底层初始化入口：
-
-Windows PowerShell：
-
-```powershell
-powershell -ExecutionPolicy Bypass -File .\scripts\init-project-template.ps1 -TargetPath "D:\projects\my-app-workspace" -ProjectName "my-app" -Mode Standard -NativeAgentAdapter all
-```
-
-Ubuntu / macOS：
-
-```bash
-./scripts/init-project-template.sh --target-path "$HOME/projects/my-app-workspace" --project-name "my-app" --mode Standard --native-agent-adapter all
-```
-
-生成后的目录是内外两层：
-
-```text
-my-app-workspace/        # 外层：ForgeKit 治理、AI 入口、.forgekit、.codex、scripts
-  my-app/                # 内层：真实业务代码和 Git 仓库
-```
-
-如果已有业务代码，把整个业务项目放进内层 `my-app/`。如果是新项目，源码、测试、业务 README 和构建文件也都放在内层。
-
-只在内层 `my-app/` 初始化 Git、commit 和 push，避免把外层 ForgeKit 治理文档和配置推送到业务仓库。
-
-### 2. 在外层启动 AI 工具
-
-Codex：
-
-```powershell
-cd D:\projects\my-app-workspace
-codex
-```
-
-Claude Code：
-
-```powershell
-cd D:\projects\my-app-workspace
-claude
-```
-
-### 3. 发送启动消息
-
-Codex：
-
-```text
-请读取 AGENTS.md，并优先使用项目内 .agents/skills/project-init/SKILL.md，按 ForgeKit 流程帮我初始化这个项目。不要读取用户级或系统级 project-init 路径。
-```
-
-Claude Code：
-
-```text
-请读取 CLAUDE.md，并优先使用项目内 .agents/skills/project-init/SKILL.md，按 ForgeKit 流程帮我初始化这个项目。不要读取用户级或系统级 project-init 路径。
-```
-
-`-NativeAgentAdapter all` 只生成 Claude Code / Codex 可审查的原生 agent 配置模板，不代表 runtime 已经注册成功。首次真实使用时，仍要按 `.forgekit/docs/native-agent-adapter.md` 验证是否确实调用到 `forgekit-*` agent。
-
-## 升级已有 ForgeKit 项目
-
-推荐仍使用统一入口：
-
-```bash
-python scripts/forgekit-project.py --target <project-root>
-```
-
-它会先展示 ProjectRoot、已安装版本、工具版本和检测动作。版本落后时自动调用 check + plan，只有交互输入 `y/yes` 或显式 `--yes` 才调用 `apply --safe`。
-
-v0.36.0 起，新项目使用 Versioned Migration Upgrade Model；以下命令保留为高级入口：
+### 低层升级入口
 
 ```bash
 python scripts/forgekit-upgrade.py check --repo-root <project>
@@ -131,99 +217,108 @@ python scripts/forgekit-upgrade.py plan --repo-root <project>
 python scripts/forgekit-upgrade.py apply --safe --repo-root <project>
 ```
 
-- `check`：检查 `.forgekit/state.json` 和迁移资格，不写文件。
-- `plan`：输出一屏可读的迁移计划，不写文件。
-- `apply --safe`：只执行 migration 中明确标记为 safe 的动作；不做三方 merge，不改 business docs，不自动提交。
+| 命令 | 作用 |
+| --- | --- |
+| `check` | 检查版本和迁移资格，不写文件 |
+| `plan` | 输出迁移计划，不写文件 |
+| `apply --safe` | 只执行 migration 标记为 safe 的动作 |
 
-升级如果更新了 AGENTS / CLAUDE / rules、skills 或 agents，当前会话只用于 checkpoint 和收口；新任务请新开会话或重启工具，不要假设磁盘文件更新后旧会话会自动重载。
+### 检查 current docs 是否断链
 
-只有 v0.36.0 及以后初始化、且具有 `.forgekit/state.json` 的项目支持该模型。v0.35.x 及更早项目应按“接手既有项目”处理：先盘点当前事实，再由用户确认 adoption 边界。
+Windows：
 
-## 项目维护
-
-v0.39.0 增加 Project Maintenance Operations 和 Unified Project Bootstrap。安装、初始化、更新或同步优先使用 `forgekit-project.py` 自动分流；其他维护动作按 `intent -> plan -> confirm/apply -> summary/index` 推进。
-
-## 第一性原理与对抗式审查
-
-v0.40.0 增加两个按风险触发的审查协议：复杂问题先从事实、假设和约束推导最小正确机制；高风险变更收口前主动寻找失败路径。它们不强制用于 typo 或低风险小改动，也不替代独立代码审查。
-
-常用说法：
-
-```text
-从第一性原理出发，重新分析这个 bug 的根因。
-对这个功能做一次对抗式审查，专门找失败路径。
+```powershell
+python .\scripts\check-current-docs-integrity.py --repo-root "D:\path\to\project"
 ```
 
-```text
-我更新了外层 ForgeKit，帮这个项目同步一下。
-这个阶段结束了，帮我归档成 capsule。
-帮我生成维护计划，不要直接 apply。
+macOS / Linux：
+
+```bash
+python3 ./scripts/check-current-docs-integrity.py --repo-root "/path/to/project"
 ```
 
-升级同步复用上面的 `forgekit-upgrade.py check / plan / apply --safe`。阶段归档使用 `scripts/archive-capsule.py plan`，确认后才运行 `apply --confirm`；归档不是删除，apply 会生成 capsule summary、items log 和 `.forgekit/archive/index.md`，不会整理旧 archive 或修改 business docs。
+### 检查 multi-project workspace 边界
 
-v0.40.2 增加 Active Current Docs Integrity Guard。Archive apply 前后会检查 current Source / Task / Risk / Traceability / Testing 链路；active work 仍存在时不能把 snapshot 写成 completed phase archive，断链必须先做 Current State Restoration Pass。
-
-Windows：`python .\scripts\check-current-docs-integrity.py --repo-root "D:\path\to\project"`
-
-macOS / Linux：`python3 ./scripts/check-current-docs-integrity.py --repo-root "/path/to/project"`
-
-## 多项目工作区与分层文档
-
-v0.41.0 增加 opt-in Multi-Project Workspace & Scoped Docs Protocol。Workspace Docs 只保留跨项目事实，`.forgekit/projects/<project-id>/` 的轻量 capsule 保存项目局部任务、测试、风险和来源引用；每个 Git repo 不再复制完整 ForgeKit。
-
-新项目默认只安装 `.forgekit/workspace-map.json` 和 capsule 模板，`enabled` 保持 `false`，不会自动拆分现有文档或创建真实 project capsule。配置并显式启用后可运行：
-
-v0.41.1 hotfix 允许 Project 先使用 `docs_profile: "workspace-only"` 登记到 map，继续由 Workspace Docs 管理事实且不创建 capsule；切换为 `project-capsule` 后才要求对应 `docs_path` 存在。WorkspaceRoot 非 Git repo 只会提示 workspace 级 `.forgekit` 文档无法随 root 提交，不影响子 repo 独立使用 Git。
+Windows：
 
 ```powershell
 python .\scripts\check-workspace-integrity.py --repo-root "D:\path\to\workspace"
 ```
 
+macOS / Linux：
+
 ```bash
 python3 ./scripts/check-workspace-integrity.py --repo-root "/path/to/workspace"
 ```
 
-Legacy single-project 项目缺少 map 时只会得到 `not-enabled` 和 adoption guidance，不会被判为损坏。
+---
 
-## 工作流
+## 生成内容概览
 
-ForgeKit 推荐把项目推进拆成一条可追溯链路：
+| 路径 | 用途 |
+| --- | --- |
+| `AGENTS.md` | Codex 项目入口 |
+| `CLAUDE.md` | Claude Code 项目入口 |
+| `.agents/skills/` | 项目自包含 skills |
+| `.codex/` | Codex rules、commands、可选 agent 配置 |
+| `.forgekit/state.json` | ForgeKit 项目版本和 feature 状态 |
+| `.forgekit/project-boundary.yml` | 项目边界和写入策略 |
+| `.forgekit/workspace-map.json` | 多项目 workspace 的机器可读边界地图，默认 disabled |
+| `.forgekit/docs/` | 当前项目事实、任务、验证、风险、交接、工具链说明 |
+| `.forgekit/projects/_template/` | Project Capsule 最小模板 |
+| `.forgekit/changes/` | 中高风险变更的 proposal / design / tasks / verification / review |
+| `.forgekit/archive/` | 历史证据和 archive capsule |
+| `scripts/` | 初始化、升级、检查、归档等脚本 |
+
+已有业务 `docs/` 默认是 read-mostly evidence。AI 可以读取和引用，但不应默认把 ForgeKit 治理模板写进去。
+
+---
+
+## 核心能力
+
+| 能力 | 解决什么问题 |
+| --- | --- |
+| Boundary-first workspace | 避免 AI 搞错 ForgeKitRoot、ProjectRoot、业务 repo 和 artifact |
+| Source-first task intake | 先记录任务来源，再决定是否生成可执行任务 |
+| Risk-based change artifacts | 按风险生成 proposal / tasks / verification / review / design / ship |
+| Managed docs responsibility | 明确哪些文档负责哪些事实，减少重复写入 |
+| Work session checkpoint | 解决“每小改都写”和“一天结束也没写”的两极问题 |
+| Context Continuity Protocol | compact、换会话、handoff 前保留关键事实 |
+| Active current docs integrity | 防止 archive 后 current docs 接不上 active tasks |
+| Project maintenance operations | 统一 init、upgrade、archive、handoff、doc-health 等维护入口 |
+| Native Agent Adapter | 可选生成 Claude Code / Codex agent 配置；是否注册和调用仍需运行时验证 |
+| Independent Code Review Protocol | maker 和 reviewer 分离，避免自审冒充独立审查 |
+| First-principles pass | 复杂问题先从事实、假设、约束推导最小正确机制 |
+| Adversarial review | 高风险收口前主动找失败路径 |
+| Multi-project scoped docs | 区分 workspace、project、repo、artifact、archive 边界 |
+| Safe migration | 版本升级先 plan，safe apply 不覆盖用户内容 |
+
+---
+
+## 多项目工作区怎么理解
+
+ForgeKit v0.41 起支持 opt-in multi-project workspace。
+
+| 层级 | 作用 |
+| --- | --- |
+| Workspace Docs | 管跨项目事实，例如 overall task、联调状态、跨项目风险 |
+| Project Capsule | 管项目局部事实，例如 backend 的局部任务、测试、风险 |
+| Repo Lite | 只作为代码仓库薄入口，不成为第三套事实源 |
+| Artifact | 报告样本、运行日志、构建物、测试输出等证据位置 |
+| Archive | 历史证据，不参与 current truth |
+
+默认只安装 disabled `.forgekit/workspace-map.json` 和 `_template`，不会自动启用，也不会自动拆分现有文档。
+
+常见方式：
 
 ```text
-source -> task -> change -> verification -> review -> work-log / changelog / handoff
+先使用 workspace-only 登记 project；
+等某个 project 长期独立推进，再切换为 project-capsule。
 ```
 
-日常使用时通常按这个顺序：
+---
 
-1. 把需求、反馈、bug、技术债或调研发现先记到 `.forgekit/docs/task-intake.md`。
-2. 只有可执行任务才进入 `.forgekit/docs/task-board.md`。
-3. 根据风险创建 `.forgekit/changes/<change-id>/` 下的变更工件。
-4. 实现后记录验证结果。
-5. 代码变更使用 Independent Code Review Protocol，区分 Maker 与独立只读 Reviewer。
-6. 在阶段边界、上下文压缩/清空前、子 agent 返回关键结论后做最小 Context Checkpoint。
-7. 更新 work-log、changelog 或 handoff，方便中断恢复和交接。
-
-### 日常可复制提示词
-
-详细边界和变体见生成项目中的 `.forgekit/docs/usage-playbook.md`。每个场景先用这一条：
-
-- 初始化：`请使用 ForgeKitRoot 统一入口初始化 <project-root>，先展示计划，不要自动提交。`
-- 接手旧项目：`先只读盘点 <project-root>，按 existing-project adoption 给出计划后等我确认。`
-- 更新 ForgeKit：`外层 ForgeKit 已更新，请对 <project-root> 做 check 和 plan，未经确认不要 apply。`
-- 开始今天工作：`按 workflow router 读取当前任务、最近进展、风险和验证入口，给我今天的下一步。`
-- 执行任务：`执行 <Task ID>，先确认范围和验证，完成后做最小 checkpoint。`
-- 文档 checkpoint：`只把本轮已确认的状态、验证、风险和下一步最小写回负责文档。`
-- compact/clear 前：`做 pre-compact checkpoint，并告诉我新会话应先读哪些文件。`
-- 提交前：`检查 diff、验证、独立 review、风险和最小写回，不要自动 commit。`
-- 阶段归档：`先检查 current docs integrity，再生成 Archive Capsule plan，不要直接 apply。`
-- handoff：`生成 review-ready handoff，缺证据标 TODO_REVIEW，不要编造。`
-- 多项目只读分析：`按 workspace map 只读分析命中的 project/repo，不启用 map 或创建 capsule。`
-- 启用 map 前：`先运行 workspace integrity check，只给 adoption guidance，不自动启用。`
-
-可预见的 compact、clear 或换会话前执行 pre-compact checkpoint；不可预见的 auto compact 后，恢复工作的第一步是 post-compact recovery check。Micro Update 只是不写 ForgeKit governance docs，不限制任务授权范围内的业务修改。
-
-风险分级对应的建议工件：
+## 风险分级工件
 
 | 风险 | 建议工件 |
 | --- | --- |
@@ -233,113 +328,47 @@ source -> task -> change -> verification -> review -> work-log / changelog / han
 
 `retro` 只在重大变更、事故、失败交付或团队明确要求时使用。
 
-## 生成内容概览
+---
 
-| 路径 | 用途 |
+## 常见误解
+
+| 误解 | 实际情况 |
 | --- | --- |
-| `AGENTS.md` | Codex 项目入口 |
-| `CLAUDE.md` | Claude Code 项目入口 |
-| `.agents/skills/` | 项目自包含 skills |
-| `.forgekit/project-boundary.yml` | ForgeKitRoot、ProjectRoot、managed docs root、change root 和写入策略 |
-| `.forgekit/docs/` | 管理文档：项目事实、任务、验证、交接、工具链等 |
-| `.forgekit/changes/` | 中高风险变更的 proposal / design / tasks / verification / review 等工件 |
-| `.codex/` | Codex 项目命令、version gates、可选 agent 配置 |
-| `governance/` | AI Engineering Loop 等治理说明 |
-| `scripts/` | 初始化、检查、升级、归档和 hook 安装脚本 |
+| ForgeKit 会生成业务项目代码 | 不会，它只生成 AI 交付工作区 |
+| ForgeKit 会自动部署 / 发布 | 不会 |
+| ForgeKit 会自动 commit / push | 不会 |
+| 每次小改都要更新文档 | 不需要，Micro Update 不写 ForgeKit governance docs |
+| 一天结束不用写文档 | 不对，应该做最小 checkpoint |
+| archive 就是删除旧文件 | 不是，archive 是可检索历史证据 |
+| multi-project 会自动拆文档 | 不会，只提供 map、模板和检查器 |
+| Project Capsule 是完整 ForgeKit 副本 | 不是，它只是最小局部事实集 |
+| Codex / Claude 自动读取了新规则 | 不一定，升级后新任务建议新开会话 |
 
-业务已有 `docs/` 默认是 read-mostly 证据源。AI 可以读取和引用，但不应默认把 ForgeKit 治理模板写入业务 docs。
+---
 
-## 核心能力
+## 文档地图
 
-| 能力 | 作用 |
+| 你想看 | 文件 |
 | --- | --- |
-| Boundary-first workspace | 明确外层治理目录和内层业务仓库，降低误写风险 |
-| Source-first task intake | 先记录来源，再判断是否形成可执行任务 |
-| Risk-based change artifacts | 按风险控制 proposal、tasks、verification、review、design、ship 的数量 |
-| Managed docs responsibility | 规定每类文档什么时候读、写什么、不写什么 |
-| Report-only checks | 生成 doc-health、source-trace、handoff 等报告，不自动修复或提交 |
-| Native Agent Adapter | 可选生成 Codex / Claude Code 原生 agent 配置模板 |
-| Independent Code Review Protocol | 独立只读 reviewer、最小上下文包和 pass / needs-fix / manual-review gate |
-| Context Continuity Protocol | 把关键结论 checkpoint 到正确文档，避免长会话、压缩、清空或委派后丢失工程状态 |
-| Project Maintenance Operations | 将 upgrade sync、Archive Capsule、checkpoint、handoff 和报告路由到先计划、后确认、再总结的维护流程 |
-| Multi-Project Scoped Docs | 用 JSON workspace map 集中索引跨项目事实、轻量 project capsules、Git repos 和 artifact evidence |
+| 日常怎么问 AI | `.forgekit/docs/usage-playbook.md` |
+| 什么时候写文档 | `.forgekit/docs/work-session-checkpoint.md` |
+| 哪些文档负责哪些事实 | `.forgekit/docs/document-responsibility.md` |
+| 当前任务 | `.forgekit/docs/task-board.md` |
+| 工作来源 | `.forgekit/docs/task-intake.md` |
+| 验证方式和结论 | `.forgekit/docs/testing.md` |
+| 风险和阻塞 | `.forgekit/docs/risk-register.md` |
+| 项目边界 | `.forgekit/project-boundary.yml` |
+| 多项目边界 | `.forgekit/workspace-map.json` |
+| 当前版本变化 | `CHANGELOG.md` |
 
-## 常用命令
+---
 
-模板仓库检查：
+## 版本历史
 
-```powershell
-powershell -ExecutionPolicy Bypass -File .\scripts\validate-template.ps1
-powershell -ExecutionPolicy Bypass -File .\scripts\validate-plugin-assets.ps1
+完整版本历史、设计取舍和每个版本解决的真实痛点见：
+
+```text
+CHANGELOG.md
 ```
 
-```bash
-bash scripts/smoke-test.sh
-python3 scripts/update-template-manifest.py --check --repo-root .
-```
-
-生成项目内检查：
-
-```powershell
-powershell -ExecutionPolicy Bypass -File .\scripts\run-harness-check.ps1
-powershell -ExecutionPolicy Bypass -File .\scripts\check-doc-sync.ps1
-```
-
-```bash
-./scripts/check-doc-sync.sh
-```
-
-这些脚本只做检查、复制模板或安装本地 opt-in hook；不会自动安装依赖、启动服务、部署、commit、tag 或 push。
-
-
-## 可选功能
-
-### Native Agent Adapter
-
-Native Agent Adapter 会把 ForgeKit 的 loop、maker-checker、verification 协议导出为 Codex / Claude Code 可审查的原生 agent 配置模板。
-
-它只生成配置，不执行 loop，不启动 agent，不做 runner、dispatcher、worktree 自动化、merge、commit、push 或 PR。
-
-### Hooks
-
-ForgeKit 默认不启用 hook。需要文档同步提醒时，可以安装 opt-in Git hook：
-
-```powershell
-powershell -ExecutionPolicy Bypass -File .\scripts\install-hooks.ps1 -Profile docs-warn -Target git
-```
-
-```bash
-./scripts/install-hooks.sh --profile docs-warn --target git
-```
-
-`docs-warn` 只提示不阻断；团队确认噪音可接受后再使用 `docs-strict`。
-
-### Change Archiving
-
-ForgeKit 把当前事实和历史过程分开：
-
-- 当前事实：`.forgekit/docs/`
-- 活跃或刚完成的变更：`.forgekit/changes/`
-- 历史变更：`.forgekit/archive/changes/YYYY/`
-
-常用归档入口：
-
-```bash
-python3 scripts/archive-changes.py --dry-run
-python3 scripts/archive-changes.py --smart-check --plan .forgekit/archive-plan.md --reference-report .forgekit/archive-reference-report.md --sync-report .forgekit/current-docs-sync-report.md
-python3 scripts/archive-changes.py --smart-apply --report .forgekit/smart-archive-report.md --confirm
-```
-
-`--smart-apply` 要求 Git clean 且显式 `--confirm`，只移动报告中标记为 `auto_archive_candidate` 的 change。
-
-## 与 ECC 的边界
-
-ECC 更像 AI 编程工具增强套件，覆盖 commands、hooks、memory、MCP、多 agent、安全工具和跨工具适配。
-
-ForgeKit 的职责更窄：约束具体项目的交付流程，让 AI 工具更可靠地接手项目现场。
-
-两者可以共存：ECC 增强 AI 工具，ForgeKit 约束项目工作区。
-
-## 版本提示
-
-完整版本历史请查看 CHANGELOG.md。
+README 只保留当前定位、快速开始、常用入口和日常使用方式。
