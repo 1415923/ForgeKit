@@ -468,7 +468,24 @@
     </section>
 
     <section class="section">
-      <h2>4. 给 Codex 的下一步提示词</h2>
+      <h2>4. 日常使用提示词</h2>
+      <p class="muted">README 只给短入口；生成项目中的 <code>.forgekit/docs/usage-playbook.md</code> 包含详细边界和变体。</p>
+      <ul>
+        <li><code>开始工作：按 workflow router 读取当前任务、最近进展、风险和验证入口，给我今天的下一步。</code></li>
+        <li><code>执行任务：执行 &lt;Task ID&gt;，先确认范围和验证，完成后做最小 checkpoint。</code></li>
+        <li><code>文档 checkpoint：只把已确认的状态、验证、风险和下一步最小写回负责文档。</code></li>
+        <li><code>compact/clear 前：做 pre-compact checkpoint，并告诉我新会话应先读哪些文件。</code></li>
+        <li><code>提交前：检查 diff、验证、独立 review、风险和最小写回，不要自动 commit。</code></li>
+        <li><code>升级：外层 ForgeKit 已更新，请先 check 和 plan，未经确认不要 apply。</code></li>
+        <li><code>归档：先检查 current docs integrity，再生成 Archive Capsule plan，不要直接 apply。</code></li>
+        <li><code>handoff：生成 review-ready handoff，缺证据标 TODO_REVIEW，不要编造。</code></li>
+        <li><code>多项目：按 workspace map 只读分析命中的 project/repo，不启用 map 或创建 capsule。</code></li>
+      </ul>
+      <p class="muted">auto compact 不一定可预见。若已经发生，先做 post-compact recovery check，再继续任务。</p>
+    </section>
+
+    <section class="section">
+      <h2>5. 给 Codex 的下一步提示词</h2>
       <p class="muted">“初始化并访谈”已经合并项目初始化和问答填充。它应该先和你确认方案，再决定是否允许编码。</p>
       <div class="tabs">
         <button type="button" class="tab active" data-prompt="init">初始化并访谈</button>

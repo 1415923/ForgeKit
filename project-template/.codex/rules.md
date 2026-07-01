@@ -43,6 +43,8 @@
 - 更新 managed docs 前先按 `.forgekit/docs/workflow-router.md` 判断是否有写入触发；没有写入触发时不要改文档。
 - 区分 `Implementation Scope` 与 `Governance Writeback Scope`；“只改这些业务文件”默认不关闭 ForgeKit managed docs 的最小写回，只有用户明确禁写文档时才关闭。
 - 默认 `ManagedDocsWriteback: minimal`：实际进展写 `work-log.md`，真实状态变化写 `task-board.md`，用户/版本可见变化写 `changelog.md`，当前 change 按流程写回。
+- 按 `work-session-checkpoint.md` 选择 Micro / Checkpoint / Ship 写回。Micro Update 只是不写 ForgeKit governance docs，不限制授权范围内的业务代码、README、注释、测试或配置修改。
+- 可预见的 compact/clear/换会话前做 pre-compact checkpoint；不可预见的 auto compact 后先做 post-compact recovery check，不把不确定摘要写成事实。
 - 最小写回不得修改 `task-intake.md` 原文、`requirements.md` 事实源或 business docs；`review-only` 不写，report-only 报告不得触发自动修复。
 - 同一事实只写到负责的文档；其他文档只做引用，不复制长段内容。
 - 触发式文档只有事件发生才更新；不要把缺陷复盘、事故复盘、依赖审查、威胁建模、发布流水线、traceability、loop、maker-checker 或 worktree 文档当作日常必填项。

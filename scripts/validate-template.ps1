@@ -618,7 +618,7 @@ function Test-TemplateManifest {
     $manifestPath = Join-Path $repoRoot "project-template\.forgekit\template-manifest.json"
     if (Test-Path -LiteralPath $manifestPath) {
         $manifest = Get-Content -LiteralPath $manifestPath -Raw | ConvertFrom-Json
-        if ($manifest.template_version -ne "0.41.1") {
+        if ($manifest.template_version -ne "0.42.0") {
             Add-Error "Unexpected template manifest version: $($manifest.template_version)"
         }
         $sources = @($manifest.files | ForEach-Object { $_.source_path })
@@ -1075,7 +1075,7 @@ function Test-HarnessEntryConsistency {
     Test-RequiredPath "project-template\migrations\0.36.0\migration.json"
     Test-RequiredPath "project-template\.forgekit\state.json"
     Test-RequiredPattern "project-template\.forgekit\state.json" '"schema_version": 1' "State schema version"
-    Test-RequiredPattern "project-template\.forgekit\state.json" '"forgekit_version": "0.41.1"' "State ForgeKit version"
+    Test-RequiredPattern "project-template\.forgekit\state.json" '"forgekit_version": "0.42.0"' "State ForgeKit version"
     Test-RequiredPattern "project-template\.forgekit\state.json" '"managed_docs_root": ".forgekit/docs"' "State managed docs root"
     Test-RequiredPattern "project-template\.forgekit\state.json" '"change_root": ".forgekit/changes"' "State change root"
     Test-RequiredPattern "project-template\.forgekit\state.json" '"last_upgrade": null' "State last upgrade"
@@ -1139,7 +1139,7 @@ function Test-PluginDistribution {
     if ($codexPluginJson.name -ne "forgekit") {
         Add-Error "Unexpected Codex plugin name in root plugin.json: $($codexPluginJson.name)"
     }
-    if ($codexPluginJson.version -ne "0.41.1") {
+    if ($codexPluginJson.version -ne "0.42.0") {
         Add-Error "Unexpected Codex plugin version in root plugin.json: $($codexPluginJson.version)"
     }
     if ($codexPluginJson.skills -ne "./skills/") {
@@ -1150,7 +1150,7 @@ function Test-PluginDistribution {
     if ($claudePluginJson.name -ne "forgekit") {
         Add-Error "Unexpected Claude plugin name in root plugin.json: $($claudePluginJson.name)"
     }
-    if ($claudePluginJson.version -ne "0.41.1") {
+    if ($claudePluginJson.version -ne "0.42.0") {
         Add-Error "Unexpected Claude plugin version in root plugin.json: $($claudePluginJson.version)"
     }
     $claudeSkills = @($claudePluginJson.skills)
@@ -1456,6 +1456,39 @@ function Test-MultiProjectScopedDocs {
         Test-RequiredPattern $entry "single-project" "Legacy single-project compatibility rule"
     }
 }
+
+function Test-WorkSessionCheckpoint {
+    foreach ($path in @(
+        "project-template\.forgekit\docs\work-session-checkpoint.md",
+        "project-template\.forgekit\docs\usage-playbook.md",
+        "migrations\0.42.0\migration.json",
+        "project-template\migrations\0.42.0\migration.json"
+    )) { Test-RequiredPath $path }
+    foreach ($forbidden in @(
+        "project-template\docs\work-session-checkpoint.md",
+        "project-template\docs\usage-playbook.md",
+        "scripts\project-capsule-bootstrap.py",
+        "project-template\scripts\project-capsule-bootstrap.py"
+    )) {
+        if (Test-Path -LiteralPath (Join-Path $repoRoot $forbidden)) { Add-Error "v0.42 forbidden path exists: $forbidden" }
+    }
+    foreach ($marker in @("Micro Update", "Checkpoint Update", "Ship Update", "Pre-Compact Checkpoint", "Post-Compact Recovery Check", "auto compact", "业务 README", "TODO_REVIEW")) {
+        Test-RequiredPattern "project-template\.forgekit\docs\work-session-checkpoint.md" $marker "Work session checkpoint marker $marker"
+    }
+    foreach ($marker in @("初始化新项目", "接手已有项目", "更新项目中的 ForgeKit", "开始今天工作", "执行具体任务", "文档 Checkpoint", "Compact / Clear", "提交前检查", "阶段结束归档", "生成 Handoff", "多项目 Workspace", "启用 Multi-Project Map")) {
+        Test-RequiredPattern "project-template\.forgekit\docs\usage-playbook.md" $marker "Usage playbook scenario $marker"
+    }
+    foreach ($entry in @("project-template\AGENTS.md", "project-template\CLAUDE.md", "project-template\.codex\rules.md")) {
+        Test-RequiredPattern $entry "work-session-checkpoint.md" "Checkpoint entry reference"
+        Test-RequiredPattern $entry "pre-compact checkpoint" "Pre-compact entry rule"
+        Test-RequiredPattern $entry "post-compact recovery check" "Post-compact entry rule"
+    }
+    Test-RequiredPattern "migrations\0.42.0\migration.json" '"from": "0.41.1"' "v0.42 migration source"
+    Test-RequiredPattern "migrations\0.42.0\migration.json" '"to": "0.42.0"' "v0.42 migration target"
+    Test-RequiredPattern "migrations\0.42.0\migration.json" '"work_session_checkpoint"' "v0.42 checkpoint feature"
+    Test-RequiredPattern "migrations\0.42.0\migration.json" '"usage_playbook"' "v0.42 playbook feature"
+    Test-NoPattern "CHANGELOG.md" "## \[0.42.0\] - Project Capsule Bootstrap" "v0.42 must not claim Project Capsule Bootstrap"
+}
 Test-RequiredPath "README.md"
 Test-RequiredPath "AGENTS.md"
 Test-RequiredPath "scripts\init-project-template.ps1"
@@ -1507,6 +1540,7 @@ Test-ContextContinuityProtocol
 Test-ProjectMaintenanceOperations
 Test-ReasoningReviewProtocol
 Test-MultiProjectScopedDocs
+Test-WorkSessionCheckpoint
 Test-AgentSuitability
 Test-ExecutableHarness
 Test-PluginDistribution

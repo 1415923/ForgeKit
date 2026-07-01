@@ -17,6 +17,8 @@ ForgeKit 在生成项目内提供轻量 AI Engineering Loop：澄清目标、判
 9. 长会话阶段边界、compact/clear 前、子 agent 返回关键结论后，以及 handoff/commit/tag 前，按 `.forgekit/docs/context-continuity.md` 做最小 checkpoint；不复制完整聊天或长日志。
 10. 编码前分别确认业务 `Implementation Scope` 与 `Governance Writeback Scope`。默认 `ManagedDocsWriteback: minimal`：完成后最小更新实际进展、真实任务状态、用户/版本可见变化和当前 change；只有用户明确禁写文档时才关闭，不把同一事实重复写入多个文件。
 
+日常不知道如何触发 ForgeKit 时，读取 `.forgekit/docs/usage-playbook.md`。写回时机按 `.forgekit/docs/work-session-checkpoint.md`：小改不写治理文档，小闭环做最小 checkpoint，交付前做 Ship Update；auto compact 后先恢复检查。
+
 ## 升级兼容
 
 从外层 ForgeKitRoot 统一检查当前项目。统一的是入口语义，命令按平台选择。

@@ -48,6 +48,8 @@ current docs integrity failure 也是 Critical Fact。task-intake 断链、risk-
 
 Checkpoint 只写发生变化且有证据的关键事实；无新事实时不为“同步”而改文档。
 
+具体写回粒度和位置按 `work-session-checkpoint.md` 执行：日常小改默认是 Micro Update；形成可恢复结论时才升级为 Checkpoint Update；commit/tag/handoff/archive 前执行 Ship Update。
+
 ## Context Survival Map
 
 | 需要存活的内容 | 目标 | 边界 |
@@ -76,6 +78,8 @@ Checkpoint 只写发生变化且有证据的关键事实；无新事实时不为
 5. 后续会话能从 `codebase-map.md`、`workflow-router.md` 和相关任务文档恢复，不需要全量读取 docs。
 
 ForgeKit 不自动执行 compact 或 clear；这只是执行前的人工可审查检查。
+
+当 compact / clear / 换会话可以预见时，按 `work-session-checkpoint.md` 执行 pre-compact checkpoint。auto compact 可能不可预见；发生后不要假设压缩摘要保留了全部事实，恢复后的第一步应执行 post-compact recovery check，对照 task/change/work-log 和工作区证据恢复状态，未知项标记 `TODO_REVIEW`。
 
 ## Post-Upgrade Session Refresh
 

@@ -1,0 +1,46 @@
+{
+  "id": "0.42.0-work-session-checkpoint-usage-playbook",
+  "title": "Work Session Checkpoint and Usage Playbook",
+  "from": "0.41.1",
+  "to": "0.42.0",
+  "risk": "low",
+  "actions": [
+    {
+      "id": "install-work-session-checkpoint",
+      "type": "copy_file_if_missing",
+      "safety": "safe",
+      "source": "files/.forgekit/docs/work-session-checkpoint.md",
+      "target": ".forgekit/docs/work-session-checkpoint.md"
+    },
+    {
+      "id": "install-usage-playbook",
+      "type": "copy_file_if_missing",
+      "safety": "safe",
+      "source": "files/.forgekit/docs/usage-playbook.md",
+      "target": ".forgekit/docs/usage-playbook.md"
+    },
+    {
+      "id": "register-work-session-checkpoint",
+      "type": "set_state_feature",
+      "safety": "safe",
+      "name": "work_session_checkpoint",
+      "value": true
+    },
+    {
+      "id": "register-usage-playbook",
+      "type": "set_state_feature",
+      "safety": "safe",
+      "name": "usage_playbook",
+      "value": true
+    }
+  ],
+  "manual_review": [
+    "Existing managed docs are not rewritten. Use the new checkpoint policy only for future event-triggered minimal writeback.",
+    "If either target already exists with different content, safe apply preserves it and reports skipped-existing-review-needed."
+  ],
+  "non_goals": [
+    "No Project Capsule Bootstrap, automatic docs split, real capsule creation, or Repo Lite generation",
+    "No chat-history scan, automatic compact detection, background writeback, runner, daemon, or scheduler",
+    "No automatic Git commit, tag, push, PR, repository, artifact, or archive movement"
+  ]
+}

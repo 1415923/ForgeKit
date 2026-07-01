@@ -204,6 +204,25 @@ source -> task -> change -> verification -> review -> work-log / changelog / han
 6. 在阶段边界、上下文压缩/清空前、子 agent 返回关键结论后做最小 Context Checkpoint。
 7. 更新 work-log、changelog 或 handoff，方便中断恢复和交接。
 
+### 日常可复制提示词
+
+详细边界和变体见生成项目中的 `.forgekit/docs/usage-playbook.md`。每个场景先用这一条：
+
+- 初始化：`请使用 ForgeKitRoot 统一入口初始化 <project-root>，先展示计划，不要自动提交。`
+- 接手旧项目：`先只读盘点 <project-root>，按 existing-project adoption 给出计划后等我确认。`
+- 更新 ForgeKit：`外层 ForgeKit 已更新，请对 <project-root> 做 check 和 plan，未经确认不要 apply。`
+- 开始今天工作：`按 workflow router 读取当前任务、最近进展、风险和验证入口，给我今天的下一步。`
+- 执行任务：`执行 <Task ID>，先确认范围和验证，完成后做最小 checkpoint。`
+- 文档 checkpoint：`只把本轮已确认的状态、验证、风险和下一步最小写回负责文档。`
+- compact/clear 前：`做 pre-compact checkpoint，并告诉我新会话应先读哪些文件。`
+- 提交前：`检查 diff、验证、独立 review、风险和最小写回，不要自动 commit。`
+- 阶段归档：`先检查 current docs integrity，再生成 Archive Capsule plan，不要直接 apply。`
+- handoff：`生成 review-ready handoff，缺证据标 TODO_REVIEW，不要编造。`
+- 多项目只读分析：`按 workspace map 只读分析命中的 project/repo，不启用 map 或创建 capsule。`
+- 启用 map 前：`先运行 workspace integrity check，只给 adoption guidance，不自动启用。`
+
+可预见的 compact、clear 或换会话前执行 pre-compact checkpoint；不可预见的 auto compact 后，恢复工作的第一步是 post-compact recovery check。Micro Update 只是不写 ForgeKit governance docs，不限制任务授权范围内的业务修改。
+
 风险分级对应的建议工件：
 
 | 风险 | 建议工件 |

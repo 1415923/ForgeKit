@@ -63,6 +63,8 @@ When a task names a ForgeKit skill, read the project-local `.agents/skills/<skil
 - 没有写入触发条件时，不要修改 managed docs；不要把同一事实写进多个文档。
 - Separate Implementation Scope from Governance Writeback Scope. A business-file-only implementation scope does not disable ForgeKit managed docs writeback unless the user explicitly forbids docs or ForgeKit writes.
 - Default to `ManagedDocsWriteback: minimal`: update work-log for actual progress, task-board only for real status changes, changelog only for user/version-visible changes, and current change artifacts only when required.
+- Use `.forgekit/docs/work-session-checkpoint.md` to choose Micro, Checkpoint, or Ship writeback. Micro Update skips ForgeKit governance docs only; it does not prohibit authorized business code, README, comment, test, or config changes.
+- Before predictable compact/clear/session switches, run a pre-compact checkpoint. After unexpected auto compact, start with a post-compact recovery check and do not promote uncertain summaries to facts.
 - Do not use minimal writeback to edit task-intake source text, requirements facts, or business docs without explicit authorization. Review-only writes nothing, and report-only outputs never trigger automatic fixes.
 - 文档混乱、过长、重复或职责错位时，先建议或运行 `scripts/doc-health-report.py`。它只生成 `.forgekit/doc-health-report.md`，不得自动按报告修改 managed docs。
 - 任务来源、完成证据或追溯链路不清时，先建议或运行 `scripts/source-trace-report.py`。它只生成 `.forgekit/source-trace-report.md`，不得自动补 Source ID、改任务状态或补验证记录。

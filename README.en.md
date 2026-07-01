@@ -203,6 +203,25 @@ Typical daily use:
 6. Create a minimal Context Checkpoint at phase boundaries, before context compact/clear, and after critical subagent findings.
 7. Update work-log, changelog, or handoff records for resumption and transfer.
 
+### Copyable Daily Prompts
+
+See `.forgekit/docs/usage-playbook.md` in a generated project for boundaries and variants. Start each scenario with one prompt:
+
+- Initialize: `Use the ForgeKitRoot unified entry to initialize <project-root>. Show the plan first; do not commit automatically.`
+- Adopt existing: `Inspect <project-root> read-only and propose an existing-project adoption plan before changes.`
+- Upgrade: `The outer ForgeKit is updated. Run check and plan for <project-root>; do not apply without confirmation.`
+- Start work: `Use the workflow router to read current tasks, recent progress, risks, and verification entry points; give me today's next step.`
+- Execute task: `Execute <Task ID>. Confirm scope and verification first, then make a minimal checkpoint.`
+- Checkpoint: `Write back only confirmed status, verification, risks, and next steps to their responsible docs.`
+- Before compact/clear: `Create a pre-compact checkpoint and list the files the next session should read first.`
+- Before commit: `Check diff, verification, independent review, risks, and minimal writeback. Do not commit automatically.`
+- Archive: `Check current docs integrity, then generate an Archive Capsule plan. Do not apply yet.`
+- Handoff: `Generate a review-ready handoff; mark missing evidence TODO_REVIEW and do not invent facts.`
+- Multi-project read-only: `Analyze only mapped project/repo scopes; do not enable the map or create capsules.`
+- Before enabling map: `Run workspace integrity checks and provide adoption guidance only.`
+
+Run a pre-compact checkpoint before predictable compact, clear, or session switches. After unexpected auto compact, begin with a post-compact recovery check. Micro Update skips ForgeKit governance-doc writeback only; it does not prohibit authorized business changes.
+
 Suggested artifacts by risk:
 
 | Risk | Suggested artifacts |

@@ -1,6 +1,6 @@
 {
   "name": "forgekit",
-  "version": "0.41.1",
+  "version": "0.42.0",
   "description": "Project-level workflow harness for Claude Code, Codex, and adjacent AI coding tools, with opt-in multi-project scoped docs, safe maintenance plans, independent review, and context checkpoints.",
   "author": {
     "name": "ForgeKit Maintainers"

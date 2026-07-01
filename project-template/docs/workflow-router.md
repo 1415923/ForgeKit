@@ -52,6 +52,8 @@
 | 归档后当前任务接不上 / task-intake 空了 / 看板和原始任务对不上 / current docs 断链 / archive 后任务跑偏 / 恢复当前状态 | `current-docs-integrity.md`、task-board、task-intake、risk-register、traceability、testing | 仅在用户确认后做最小 Current State Restoration Pass | 继续 archive、全量复制 archive、覆盖 business docs | current-docs-integrity check + restoration plan；不继续 archive |
 | ForgeKit 升级后继续工作 / 新版规则生效 | `context-continuity.md`, updated `AGENTS.md` / `CLAUDE.md` / `.codex/rules.md` | current-session checkpoint targets only | new implementation in the stale session | closure summary + restart/new-session instruction |
 | 保存关键结论 / compact 或 clear 前 checkpoint / 子 agent 返回 / 长会话续接 | `context-continuity.md`, `workflow-router.md`, related task/change docs | `work-log.md`, `task-board.md`, current change artifact, or narrow responsible doc | full chat history, long tool output, unconfirmed requirements, all facts in `CLAUDE.md` | minimal checkpoint + next-step recovery summary |
+| auto compact 后恢复 / 压缩后继续 | `work-session-checkpoint.md`, `context-continuity.md`, related task/change/work-log | 仅在核对证据后做 minimal checkpoint | 凭压缩摘要补写事实、立即继续实现、全量扫描 docs | post-compact recovery check + recovery scope |
+| 今天怎么使用 ForgeKit / 给我常用提示词 | `usage-playbook.md` | none | managed docs、业务代码 | 命中场景的一条可复制提示词 |
 | 生成交付包 / 阶段收口交付包 / 给领导汇报 / reviewer 审查 / handoff package | `task-intake.md`, `requirements.md`, `task-board.md`, `work-log.md`, `testing.md`, `changelog.md`, `risk-register.md`, `.forgekit/doc-health-report.md`, `.forgekit/source-trace-report.md`, `.forgekit/changes/<id>/*` | `.forgekit/handoff-package.md` or `.forgekit/changes/<id>/handoff.md` only when user asks to generate handoff | current docs, business docs, task status, changelog, Git, PR | review-ready handoff with TODO_REVIEW for missing evidence |
 
 ## Read Targets
@@ -109,6 +111,7 @@
 - 用户要求第一性原理时执行 First-Principles Pass；用户要求对抗式审查时执行 Adversarial Review Pass。高风险设计前先推导根因和最小正确机制，高风险收口前先找失败路径。
 - 未验证推导不得写成事实；blocking finding 或 `TODO_REVIEW` 必须进入 checkpoint 并停止自动推进。
 - 涉及阶段边界、compact/clear 准备、子 agent 关键结论、长输出或 handoff/commit/tag 前，先按 `context-continuity.md` 执行 Context Checkpoint（minimal）；长输出只保留摘要和路径。
+- 可预见的 compact/clear/换会话前执行 pre-compact checkpoint；不可预见的 auto compact 后先执行 post-compact recovery check。具体粒度按 `work-session-checkpoint.md`，Micro Update 只是不写 ForgeKit governance docs，不限制授权范围内的业务修改。
 - 涉及阶段收口、领导汇报、reviewer 审查或测试交接时，可以生成 `.forgekit/handoff-package.md` 或 scoped change `handoff.md`；它只汇总已有信息和 independent review 证据，缺证据写 `TODO_REVIEW`，不得编造提交、验证、风险或文件列表。
 - 涉及 ForgeKit 升级时先运行 `check`。缺 state 或低于 v0.36 时只输出 adoption guidance；未经用户确认不得创建 state，也不要读取全量 legacy candidates。
 - ForgeKit 升级更新入口规则、skills 或 agents 后，旧会话只执行 Context Checkpoint、`ManagedDocsWriteback: minimal` 和当前收口；新任务应新开会话或重启工具。
