@@ -59,6 +59,7 @@ When a task names a ForgeKit skill, read the project-local `.agents/skills/<skil
 - Do not read every file in `governance/` by default.
 - 默认不要读取全部 `.forgekit/docs/**`。先读 `.forgekit/docs/document-responsibility.md`、`.forgekit/docs/codebase-map.md` 和必要的 `.forgekit/docs/workflow-router.md`，再按默认读取策略和任务触发条件读取相关文档。
 - Multi-project scoped docs 启用后，先选择 workspace / project / repo scope；不要同时读取所有 project capsules。Workspace 保存跨项目事实，capsule 保存局部事实，Repo Lite 只保存指针和本地命令。
+- 只有已启用 map 中明确标记为 `project-capsule` 的单个 project，才可先 plan、再经 `--confirm` 使用 `bootstrap-project-capsule.py` 创建最小 capsule；不得批量创建、切换 profile、拆分 Workspace Docs 或覆盖已有不同内容。
 - 用户请求不明确时，先做 intent routing：判断 Read Targets、Write Targets、Do Not Write 和 Required Output。
 - 没有写入触发条件时，不要修改 managed docs；不要把同一事实写进多个文档。
 - Separate Implementation Scope from Governance Writeback Scope. A business-file-only implementation scope does not disable ForgeKit managed docs writeback unless the user explicitly forbids docs or ForgeKit writes.

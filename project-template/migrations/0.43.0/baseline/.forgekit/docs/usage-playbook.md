@@ -56,10 +56,6 @@
 
 > 在启用 multi-project map 前运行 workspace integrity check，检查 Project/Repo/Artifact/Archive 边界和 docs profile；只给 adoption guidance，不自动启用或创建 Project Capsule。
 
-## 13. 创建一个最小 Project Capsule
-
-> `<project-id>` 已在启用的 workspace map 中设为 `project-capsule`。请先运行 `bootstrap-project-capsule.py plan`，展示最小写入清单；没有我的确认不要 apply，不要修改 map、拆分 workspace docs 或创建其他 project capsule。
-
 ## Writeback Reminder
 
 - 默认 `ManagedDocsWriteback: minimal`。

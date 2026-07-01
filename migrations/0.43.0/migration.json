@@ -1,0 +1,51 @@
+{
+  "id": "0.43.0-minimal-project-capsule-bootstrap",
+  "title": "Minimal Project Capsule Bootstrap",
+  "from": "0.42.0",
+  "to": "0.43.0",
+  "risk": "low",
+  "actions": [
+    {
+      "id": "install-project-capsule-bootstrap",
+      "type": "copy_file_if_missing",
+      "safety": "safe",
+      "source": "files/scripts/bootstrap-project-capsule.py",
+      "target": "scripts/bootstrap-project-capsule.py"
+    },
+    {
+      "id": "update-scoped-docs-bootstrap-guide",
+      "type": "replace_file_if_baseline_matches",
+      "safety": "safe",
+      "source": "files/.forgekit/docs/scoped-docs.md",
+      "baseline": "baseline/.forgekit/docs/scoped-docs.md",
+      "target": ".forgekit/docs/scoped-docs.md",
+      "skip_warning": "The scoped docs guide differs from the v0.42.0 baseline. Project Capsule Bootstrap guidance was not merged automatically; review it manually."
+    },
+    {
+      "id": "update-usage-playbook-capsule-prompt",
+      "type": "replace_file_if_baseline_matches",
+      "safety": "safe",
+      "source": "files/.forgekit/docs/usage-playbook.md",
+      "baseline": "baseline/.forgekit/docs/usage-playbook.md",
+      "target": ".forgekit/docs/usage-playbook.md",
+      "skip_warning": "The usage playbook differs from the v0.42.0 baseline. The single-project capsule prompt was not merged automatically; review it manually."
+    },
+    {
+      "id": "register-minimal-project-capsule-bootstrap",
+      "type": "set_state_feature",
+      "safety": "safe",
+      "name": "minimal_project_capsule_bootstrap",
+      "value": true
+    }
+  ],
+  "manual_review": [
+    "The bootstrap command works only after the user has enabled scoped docs and selected project-capsule for one project.",
+    "Existing different capsule files are preserved and reported as review-needed.",
+    "If a guarded documentation update is skipped, review the new bootstrap guidance manually."
+  ],
+  "non_goals": [
+    "No workspace-map enablement, profile change, workspace docs split, Source/Task/Risk/Test migration, or real capsule creation during upgrade",
+    "No --all, --force, Repo Lite generation, repository, artifact, or archive movement",
+    "No runner, daemon, scheduler, automatic commit, tag, push, or PR"
+  ]
+}

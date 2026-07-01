@@ -5,6 +5,7 @@
 - 先读取 `governance/overview.md`，再按项目入口选择新项目、接手项目、Bug 修复、发布或安全审查流程。
 - 先读取 `.forgekit/project-boundary.yml`，确认 ForgeKitRoot、ProjectRoot、managed docs root、change root、business docs roots 和 write policy。
 - `.forgekit/state.json` 明确启用 multi-project scoped docs 时，再读取 `.forgekit/workspace-map.json` 和 `.forgekit/docs/scoped-docs.md`；未启用时继续使用 legacy single-project 流程，不把缺少 map 判为项目损坏。
+- `bootstrap-project-capsule.py` 只处理启用 map 中明确设为 `project-capsule` 的单个 project：先 plan，`apply` 必须 `--confirm`；不得使用它启用 map、切换 profile、批量创建、拆分 Workspace Docs 或覆盖不同内容。
 - 修改前先阅读相关代码、文档和配置。
 - 不要默认全量读取 `.forgekit/docs/**`；先看 `.forgekit/docs/document-responsibility.md`、`.forgekit/docs/codebase-map.md` 和必要的 `.forgekit/docs/workflow-router.md`，再按任务触发读取相关文档。
 - Multi-project 模式先选择 workspace / project / repo scope，只读取命中的 capsule；不要把 Repo Lite、artifact 或 archive 当作 current truth。

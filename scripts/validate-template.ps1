@@ -618,7 +618,7 @@ function Test-TemplateManifest {
     $manifestPath = Join-Path $repoRoot "project-template\.forgekit\template-manifest.json"
     if (Test-Path -LiteralPath $manifestPath) {
         $manifest = Get-Content -LiteralPath $manifestPath -Raw | ConvertFrom-Json
-        if ($manifest.template_version -ne "0.42.0") {
+        if ($manifest.template_version -ne "0.43.0") {
             Add-Error "Unexpected template manifest version: $($manifest.template_version)"
         }
         $sources = @($manifest.files | ForEach-Object { $_.source_path })
@@ -1075,7 +1075,7 @@ function Test-HarnessEntryConsistency {
     Test-RequiredPath "project-template\migrations\0.36.0\migration.json"
     Test-RequiredPath "project-template\.forgekit\state.json"
     Test-RequiredPattern "project-template\.forgekit\state.json" '"schema_version": 1' "State schema version"
-    Test-RequiredPattern "project-template\.forgekit\state.json" '"forgekit_version": "0.42.0"' "State ForgeKit version"
+    Test-RequiredPattern "project-template\.forgekit\state.json" '"forgekit_version": "0.43.0"' "State ForgeKit version"
     Test-RequiredPattern "project-template\.forgekit\state.json" '"managed_docs_root": ".forgekit/docs"' "State managed docs root"
     Test-RequiredPattern "project-template\.forgekit\state.json" '"change_root": ".forgekit/changes"' "State change root"
     Test-RequiredPattern "project-template\.forgekit\state.json" '"last_upgrade": null' "State last upgrade"
@@ -1139,7 +1139,7 @@ function Test-PluginDistribution {
     if ($codexPluginJson.name -ne "forgekit") {
         Add-Error "Unexpected Codex plugin name in root plugin.json: $($codexPluginJson.name)"
     }
-    if ($codexPluginJson.version -ne "0.42.0") {
+    if ($codexPluginJson.version -ne "0.43.0") {
         Add-Error "Unexpected Codex plugin version in root plugin.json: $($codexPluginJson.version)"
     }
     if ($codexPluginJson.skills -ne "./skills/") {
@@ -1150,7 +1150,7 @@ function Test-PluginDistribution {
     if ($claudePluginJson.name -ne "forgekit") {
         Add-Error "Unexpected Claude plugin name in root plugin.json: $($claudePluginJson.name)"
     }
-    if ($claudePluginJson.version -ne "0.42.0") {
+    if ($claudePluginJson.version -ne "0.43.0") {
         Add-Error "Unexpected Claude plugin version in root plugin.json: $($claudePluginJson.version)"
     }
     $claudeSkills = @($claudePluginJson.skills)
@@ -1489,6 +1489,33 @@ function Test-WorkSessionCheckpoint {
     Test-RequiredPattern "migrations\0.42.0\migration.json" '"usage_playbook"' "v0.42 playbook feature"
     Test-NoPattern "CHANGELOG.md" "## \[0.42.0\] - Project Capsule Bootstrap" "v0.42 must not claim Project Capsule Bootstrap"
 }
+
+function Test-MinimalProjectCapsuleBootstrap {
+    foreach ($path in @(
+        "scripts\bootstrap-project-capsule.py",
+        "project-template\scripts\bootstrap-project-capsule.py",
+        "migrations\0.43.0\migration.json",
+        "project-template\migrations\0.43.0\migration.json"
+    )) { Test-RequiredPath $path }
+    foreach ($marker in @("plan", "apply", "--project", "--confirm", "skipped_workspace_only", "completed_with_review_needed", "already-present", "review-needed")) {
+        Test-RequiredPattern "scripts\bootstrap-project-capsule.py" $marker "Capsule bootstrap marker $marker"
+    }
+    Test-NoPattern "scripts\bootstrap-project-capsule.py" 'add_argument\("--all"' "Capsule bootstrap must not support --all"
+    Test-NoPattern "scripts\bootstrap-project-capsule.py" 'add_argument\("--force"' "Capsule bootstrap must not support --force"
+    Test-RequiredPattern "project-template\.forgekit\docs\scoped-docs.md" "Minimal Project Capsule Bootstrap" "Scoped docs capsule bootstrap entry"
+    Test-RequiredPattern "project-template\.forgekit\docs\usage-playbook.md" "创建一个最小 Project Capsule" "Usage playbook capsule prompt"
+    foreach ($entry in @("project-template\AGENTS.md", "project-template\CLAUDE.md", "project-template\.codex\rules.md")) {
+        Test-RequiredPattern $entry "bootstrap-project-capsule.py" "Capsule bootstrap short entry"
+        Test-RequiredPattern $entry "--confirm" "Capsule bootstrap confirmation rule"
+    }
+    Test-RequiredPattern "migrations\0.43.0\migration.json" '"from": "0.42.0"' "v0.43 migration source"
+    Test-RequiredPattern "migrations\0.43.0\migration.json" '"to": "0.43.0"' "v0.43 migration target"
+    Test-RequiredPattern "migrations\0.43.0\migration.json" '"minimal_project_capsule_bootstrap"' "v0.43 capsule feature"
+    Test-NoPattern "migrations\0.43.0\migration.json" '"target": ".forgekit/projects/' "Migration must not create real capsules"
+    $rootScript = Get-Content -LiteralPath (Join-Path $repoRoot "scripts\bootstrap-project-capsule.py") -Raw
+    $templateScript = Get-Content -LiteralPath (Join-Path $repoRoot "project-template\scripts\bootstrap-project-capsule.py") -Raw
+    if ($rootScript -ne $templateScript) { Add-Error "Root and project-template bootstrap-project-capsule.py must stay identical" }
+}
 Test-RequiredPath "README.md"
 Test-RequiredPath "AGENTS.md"
 Test-RequiredPath "scripts\init-project-template.ps1"
@@ -1541,6 +1568,7 @@ Test-ProjectMaintenanceOperations
 Test-ReasoningReviewProtocol
 Test-MultiProjectScopedDocs
 Test-WorkSessionCheckpoint
+Test-MinimalProjectCapsuleBootstrap
 Test-AgentSuitability
 Test-ExecutableHarness
 Test-PluginDistribution

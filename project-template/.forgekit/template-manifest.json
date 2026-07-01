@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "template_version": "0.42.0",
+  "template_version": "0.43.0",
   "boundary_aware": true,
   "files": [
     {
@@ -9,7 +9,7 @@
       "role": "agent_entry",
       "update_policy": "ask",
       "render_mode": "copy",
-      "checksum": "sha256:6c084cdec52dcb40701f1400e10ef9900875765ed9208a2452b570669e3db919"
+      "checksum": "sha256:a8671d6847caf6d09ffe982dd7eac5b5bd8fd2c26951a6f17a89e91fefd1d4e8"
     },
     {
       "source_path": "CLAUDE.md",
@@ -17,7 +17,7 @@
       "role": "agent_entry",
       "update_policy": "ask",
       "render_mode": "copy",
-      "checksum": "sha256:c80fd807a07a0a844d46a4f4a557a2039db014208bef15dd5d88198735205e01"
+      "checksum": "sha256:dacb9123a43259d98e413699c5fd8ad41fdba67d09ae51ead71afa4ea0a7a969"
     },
     {
       "source_path": "README.md",
@@ -65,7 +65,7 @@
       "role": "managed_doc",
       "update_policy": "merge",
       "render_mode": "copy",
-      "checksum": "sha256:071ec161c0d9c380ac7b283a72cf20d6125848d53caf5196cba4387a81c07d16"
+      "checksum": "sha256:011f472054f784ebc942599283aab4978e84143ae6c89fc4bbbeefdd9963351c"
     },
     {
       "source_path": ".forgekit/archive/README.md",
@@ -97,7 +97,7 @@
       "role": "codex_rule",
       "update_policy": "ask",
       "render_mode": "copy",
-      "checksum": "sha256:b6fb737b08418a615352c055d2b54202e79114231554a6172e3f9cd20d33a701"
+      "checksum": "sha256:d623b87567766c064887a18a0c7c13d119d5fe73b0d0918cc79b20be7efdc58f"
     },
     {
       "source_path": ".codex/version-gates.md",
@@ -825,7 +825,7 @@
       "role": "managed_doc",
       "update_policy": "merge",
       "render_mode": "copy",
-      "checksum": "sha256:0cb1295dfb00b326720ac3d60378e466e50c985eaef218fedc0d05755cb41ce5"
+      "checksum": "sha256:50123293b4e99c8194657ecd641c71ba3faa9e16606bec2d5ad070899ea5606f"
     },
     {
       "source_path": ".forgekit/projects/_template/project-card.md",
@@ -882,6 +882,14 @@
       "update_policy": "replace",
       "render_mode": "copy",
       "checksum": "sha256:714624539e7a4c54775c5498d1bf0492cc6eccdb84673062b0e2aacd25f8a268"
+    },
+    {
+      "source_path": "scripts/bootstrap-project-capsule.py",
+      "target_path": "scripts/bootstrap-project-capsule.py",
+      "role": "script",
+      "update_policy": "replace",
+      "render_mode": "copy",
+      "checksum": "sha256:87363725279712f677ed9af9fd24c8570b92dc37425a4f7c686fccc487b1965d"
     },
     {
       "source_path": "migrations/0.41.0/migration.json",
@@ -1042,6 +1050,54 @@
       "update_policy": "readonly",
       "render_mode": "copy",
       "checksum": "sha256:071ec161c0d9c380ac7b283a72cf20d6125848d53caf5196cba4387a81c07d16"
+    },
+    {
+      "source_path": "migrations/0.43.0/migration.json",
+      "target_path": "migrations/0.43.0/migration.json",
+      "role": "metadata",
+      "update_policy": "readonly",
+      "render_mode": "copy",
+      "checksum": "sha256:7dd8390705a58e50d092a8a7c8690b44f21c7c8eafd7ac1dea3ca8f46cbd7056"
+    },
+    {
+      "source_path": "migrations/0.43.0/baseline/.forgekit/docs/scoped-docs.md",
+      "target_path": "migrations/0.43.0/baseline/.forgekit/docs/scoped-docs.md",
+      "role": "metadata",
+      "update_policy": "readonly",
+      "render_mode": "copy",
+      "checksum": "sha256:0cb1295dfb00b326720ac3d60378e466e50c985eaef218fedc0d05755cb41ce5"
+    },
+    {
+      "source_path": "migrations/0.43.0/baseline/.forgekit/docs/usage-playbook.md",
+      "target_path": "migrations/0.43.0/baseline/.forgekit/docs/usage-playbook.md",
+      "role": "metadata",
+      "update_policy": "readonly",
+      "render_mode": "copy",
+      "checksum": "sha256:071ec161c0d9c380ac7b283a72cf20d6125848d53caf5196cba4387a81c07d16"
+    },
+    {
+      "source_path": "migrations/0.43.0/files/scripts/bootstrap-project-capsule.py",
+      "target_path": "migrations/0.43.0/files/scripts/bootstrap-project-capsule.py",
+      "role": "metadata",
+      "update_policy": "readonly",
+      "render_mode": "copy",
+      "checksum": "sha256:87363725279712f677ed9af9fd24c8570b92dc37425a4f7c686fccc487b1965d"
+    },
+    {
+      "source_path": "migrations/0.43.0/files/.forgekit/docs/scoped-docs.md",
+      "target_path": "migrations/0.43.0/files/.forgekit/docs/scoped-docs.md",
+      "role": "metadata",
+      "update_policy": "readonly",
+      "render_mode": "copy",
+      "checksum": "sha256:50123293b4e99c8194657ecd641c71ba3faa9e16606bec2d5ad070899ea5606f"
+    },
+    {
+      "source_path": "migrations/0.43.0/files/.forgekit/docs/usage-playbook.md",
+      "target_path": "migrations/0.43.0/files/.forgekit/docs/usage-playbook.md",
+      "role": "metadata",
+      "update_policy": "readonly",
+      "render_mode": "copy",
+      "checksum": "sha256:011f472054f784ebc942599283aab4978e84143ae6c89fc4bbbeefdd9963351c"
     }
   ]
 }
