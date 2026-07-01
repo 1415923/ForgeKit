@@ -151,6 +151,7 @@ Use these short prompts for daily work.
 | Generate handoff | `Generate a review-ready handoff; mark missing evidence TODO_REVIEW and do not invent facts.` |
 | Multi-project read-only analysis | `Analyze only mapped project/repo scopes; do not enable the map or create capsules.` |
 | Before enabling multi-project map | `Run workspace integrity checks and provide adoption guidance only.` |
+| Create Project Capsule | `Create a minimal Project Capsule for <project-id>. First confirm the project is project-capsule in workspace-map, then run bootstrap plan. Do not apply yet.` |
 | First-principles analysis | `Analyze this from first principles: separate facts, assumptions, constraints, and the smallest correct mechanism.` |
 | Adversarial review | `Run an adversarial review and focus on failure paths, edge cases, and verification gaps.` |
 
@@ -220,6 +221,17 @@ python scripts/forgekit-upgrade.py apply --safe --repo-root <project>
 | `check` | Check version and migration eligibility without writing |
 | `plan` | Print a migration plan without writing |
 | `apply --safe` | Run only migration actions explicitly marked safe |
+
+### Create a minimal Project Capsule
+
+When one project needs its own local tasks, tests, risks, and decisions over time, first set it to `project-capsule` in `.forgekit/workspace-map.json`, then run:
+
+```powershell
+python .\scripts\bootstrap-project-capsule.py plan --repo-root "D:\path\to\workspace" --project backend
+python .\scripts\bootstrap-project-capsule.py apply --repo-root "D:\path\to\workspace" --project backend --confirm
+```
+
+This only creates the minimal Project Capsule. It does not split existing workspace docs, migrate tasks, or generate repo-local entries.
 
 ### Check current docs integrity
 
@@ -313,6 +325,8 @@ Common path:
 Register a project as workspace-only first.
 Switch only long-running independent projects to project-capsule later.
 ```
+
+A Project Capsule is not a full ForgeKit copy or an archive file. It is the smallest local documentation set for one subproject.
 
 ---
 
