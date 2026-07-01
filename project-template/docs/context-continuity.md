@@ -19,6 +19,8 @@
 
 First-Principles Pass 的关键机制推导，以及 Adversarial Review 的 blocking finding、失败路径和验证要求，都属于 Critical Facts。checkpoint 只记录结论摘要、证据路径、决策和 `TODO_REVIEW`，不复制完整推理或审查长日志。
 
+current docs integrity failure 也是 Critical Fact。task-intake 断链、risk-register/traceability 模板化、testing 缺少当前基线都必须 checkpoint。Current State Restoration Pass 完成后，应记录 restored `.forgekit/docs/` 是当前事实入口，并附检查证据路径。
+
 以下内容不能只留在聊天里：
 
 - 用户确认过的需求、范围和非目标。

@@ -72,6 +72,7 @@ REQUIRED_REPO_PATHS = [
     "project-template/docs/context-continuity.md",
     "project-template/docs/project-maintenance.md",
     "project-template/docs/archive-capsule.md",
+    "project-template/docs/current-docs-integrity.md",
     "project-template/docs/reasoning-review.md",
     "project-template/docs/maker-checker-protocol.md",
     "project-template/docs/native-agent-adapter.md",
@@ -96,21 +97,25 @@ REQUIRED_REPO_PATHS = [
     "project-template/migrations/0.39.0/migration.json",
     "project-template/migrations/0.40.0/migration.json",
     "project-template/migrations/0.40.1/migration.json",
+    "project-template/migrations/0.40.2/migration.json",
     "migrations/0.37.0/migration.json",
     "migrations/0.38.0/migration.json",
     "migrations/0.39.0/migration.json",
     "migrations/0.40.0/migration.json",
     "migrations/0.40.1/migration.json",
+    "migrations/0.40.2/migration.json",
     "project-template/scripts/check-codex-native-agents.py",
     "project-template/scripts/doc-health-report.py",
     "project-template/scripts/source-trace-report.py",
     "project-template/scripts/handoff-package.py",
     "project-template/scripts/archive-capsule.py",
+    "project-template/scripts/check-current-docs-integrity.py",
     "scripts/check-codex-native-agents.py",
     "scripts/doc-health-report.py",
     "scripts/source-trace-report.py",
     "scripts/handoff-package.py",
     "scripts/archive-capsule.py",
+    "scripts/check-current-docs-integrity.py",
     "scripts/forgekit-project.py",
     "scripts/forgekit-project.ps1",
     "scripts/forgekit-project.sh",
@@ -140,6 +145,7 @@ REQUIRED_GENERATED_PATHS = [
     ".forgekit/docs/context-continuity.md",
     ".forgekit/docs/project-maintenance.md",
     ".forgekit/docs/archive-capsule.md",
+    ".forgekit/docs/current-docs-integrity.md",
     ".forgekit/docs/reasoning-review.md",
     ".forgekit/docs/maker-checker-protocol.md",
     ".forgekit/docs/native-agent-adapter.md",
@@ -165,6 +171,7 @@ REQUIRED_GENERATED_PATHS = [
     "migrations/0.39.0/migration.json",
     "migrations/0.40.0/migration.json",
     "migrations/0.40.1/migration.json",
+    "migrations/0.40.2/migration.json",
     "governance/ai-engineering-loop.md",
     ".forgekit/changes/README.md",
     ".forgekit/changes/_template/proposal.md",
@@ -181,6 +188,7 @@ REQUIRED_GENERATED_PATHS = [
     "scripts/source-trace-report.py",
     "scripts/handoff-package.py",
     "scripts/archive-capsule.py",
+    "scripts/check-current-docs-integrity.py",
     "scripts/forgekit-upgrade.py",
     "migrations/0.36.0/migration.json",
     "scripts/archive-changes.py",
@@ -1335,8 +1343,8 @@ def assert_json(path):
 def assert_manifest_lock(target):
     lock_path = target / ".forgekit" / "template-lock.json"
     lock = json.loads(lock_path.read_text(encoding="utf-8"))
-    if lock.get("installed_version") != "0.40.1":
-        fail("template-lock installed_version must be 0.40.1")
+    if lock.get("installed_version") != "0.40.2":
+        fail("template-lock installed_version must be 0.40.2")
     if lock.get("managed_docs_root") != ".forgekit/docs":
         fail("template-lock managed_docs_root must match boundary")
     if lock.get("change_root") != ".forgekit/changes":
@@ -1355,7 +1363,7 @@ def assert_versioned_migration_upgrade(repo, target, temp_parent):
     state = json.loads(state_path.read_text(encoding="utf-8-sig"))
     expected = {
         "schema_version": 1,
-        "forgekit_version": "0.40.1",
+        "forgekit_version": "0.40.2",
         "managed_docs_root": ".forgekit/docs",
         "change_root": ".forgekit/changes",
         "mode": "Standard",
@@ -1376,6 +1384,8 @@ def assert_versioned_migration_upgrade(repo, target, temp_parent):
         fail("state.json must enable first_principles_adversarial_review")
     if state.get("features", {}).get("idempotent_safe_migrations") is not True:
         fail("state.json must enable idempotent_safe_migrations")
+    if state.get("features", {}).get("active_current_docs_integrity_guard") is not True:
+        fail("state.json must enable active_current_docs_integrity_guard")
 
     script = target / "scripts" / "forgekit-upgrade.py"
     before_state = state_path.read_bytes()
@@ -1385,8 +1395,8 @@ def assert_versioned_migration_upgrade(repo, target, temp_parent):
         if path.is_file()
     }
     check = run([sys.executable, str(script), "check", "--repo-root", "."], cwd=target)
-    if "Status: current" not in check.stdout or "Current version: 0.40.1" not in check.stdout:
-        fail("versioned migration check did not report current v0.40.1 state")
+    if "Status: current" not in check.stdout or "Current version: 0.40.2" not in check.stdout:
+        fail("versioned migration check did not report current v0.40.2 state")
     plan = run([sys.executable, str(script), "plan", "--repo-root", "."], cwd=target)
     for marker in ["Status: report-only", "Mode: versioned-migration-plan", "No files were changed."]:
         if marker not in plan.stdout:
@@ -1414,6 +1424,7 @@ def assert_versioned_migration_upgrade(repo, target, temp_parent):
     v036_state.setdefault("features", {}).pop("project_maintenance_operations", None)
     v036_state.setdefault("features", {}).pop("first_principles_adversarial_review", None)
     v036_state.setdefault("features", {}).pop("idempotent_safe_migrations", None)
+    v036_state.setdefault("features", {}).pop("active_current_docs_integrity_guard", None)
     v036_state_path.write_text(json.dumps(v036_state, indent=2) + "\n", encoding="utf-8")
     for introduced_file in [
         ".forgekit/docs/context-continuity.md",
@@ -1421,6 +1432,8 @@ def assert_versioned_migration_upgrade(repo, target, temp_parent):
         ".forgekit/docs/archive-capsule.md",
         "scripts/archive-capsule.py",
         ".forgekit/docs/reasoning-review.md",
+        ".forgekit/docs/current-docs-integrity.md",
+        "scripts/check-current-docs-integrity.py",
         ".claude/agents/forgekit-code-reviewer.md",
         ".codex/agents/forgekit-code-reviewer.toml",
     ]:
@@ -1439,8 +1452,8 @@ def assert_versioned_migration_upgrade(repo, target, temp_parent):
             shutil.rmtree(skill_path)
     run([sys.executable, str(v036_target / "scripts/forgekit-upgrade.py"), "apply", "--safe", "--repo-root", "."], cwd=v036_target)
     migrated = json.loads(v036_state_path.read_text(encoding="utf-8"))
-    if migrated.get("forgekit_version") != "0.40.1":
-        fail("version chain did not update state to v0.40.1")
+    if migrated.get("forgekit_version") != "0.40.2":
+        fail("version chain did not update state to v0.40.2")
     if migrated.get("features", {}).get("independent_code_review") is not True:
         fail("v0.37 migration did not enable independent_code_review")
     if migrated.get("features", {}).get("context_continuity") is not True:
@@ -1451,6 +1464,8 @@ def assert_versioned_migration_upgrade(repo, target, temp_parent):
         fail("v0.40 migration did not enable first_principles_adversarial_review")
     if migrated.get("features", {}).get("idempotent_safe_migrations") is not True:
         fail("v0.40.1 migration did not enable idempotent_safe_migrations")
+    if migrated.get("features", {}).get("active_current_docs_integrity_guard") is not True:
+        fail("v0.40.2 migration did not enable active_current_docs_integrity_guard")
 
     legacy = temp_parent / "pre-v036-adoption"
     (legacy / ".forgekit").mkdir(parents=True)
@@ -1467,14 +1482,14 @@ def assert_versioned_migration_upgrade(repo, target, temp_parent):
     apply_target = temp_parent / "versioned-apply"
     shutil.copytree(target, apply_target)
     migration_root = temp_parent / "migration-packages"
-    package = migration_root / "0.40.2"
+    package = migration_root / "0.40.3"
     package.mkdir(parents=True)
     (package / "proof.txt").write_text("safe migration\n", encoding="utf-8")
     migration = {
-        "id": "0.40.2-smoke",
+        "id": "0.40.3-smoke",
         "title": "Smoke safe migration",
-        "from": "0.40.1",
-        "to": "0.40.2",
+        "from": "0.40.2",
+        "to": "0.40.3",
         "risk": "low",
         "actions": [{
             "id": "copy-proof",
@@ -1492,13 +1507,13 @@ def assert_versioned_migration_upgrade(repo, target, temp_parent):
     apply_plan = run([
         sys.executable, str(apply_script), "plan", "--repo-root", ".", "--migration-root", str(migration_root)
     ], cwd=apply_target)
-    if "To: 0.40.2" not in apply_plan.stdout or (apply_target / ".forgekit" / "migration-proof.txt").exists():
+    if "To: 0.40.3" not in apply_plan.stdout or (apply_target / ".forgekit" / "migration-proof.txt").exists():
         fail("plan must show the safe migration without applying it")
     run([
         sys.executable, str(apply_script), "apply", "--safe", "--repo-root", ".", "--migration-root", str(migration_root)
     ], cwd=apply_target)
     applied_state = json.loads((apply_target / ".forgekit" / "state.json").read_text(encoding="utf-8"))
-    if applied_state.get("forgekit_version") != "0.40.2":
+    if applied_state.get("forgekit_version") != "0.40.3":
         fail("safe migration did not update state version")
     if not (apply_target / ".forgekit" / "migration-proof.txt").is_file():
         fail("safe migration did not apply the declared safe action")
@@ -1569,8 +1584,8 @@ def assert_unified_project_entry(repo, current_target, temp_parent):
         fail("safe apply must treat identical existing migration file as no-op")
     if same_maintenance.read_bytes() != same_before:
         fail("safe apply rewrote an identical existing managed doc")
-    if json.loads(same_state.read_text(encoding="utf-8"))["forgekit_version"] != "0.40.1":
-        fail("same-content idempotent migration did not reach v0.40.1")
+    if json.loads(same_state.read_text(encoding="utf-8"))["forgekit_version"] != "0.40.2":
+        fail("same-content idempotent migration did not reach v0.40.2")
 
     old = temp_parent / "unified-old-no-confirm"
     old_state = write_state(old, "0.38.0")
@@ -1604,7 +1619,7 @@ def assert_unified_project_entry(repo, current_target, temp_parent):
     if "Safe migration apply completed through forgekit-upgrade.py" not in applied.stdout:
         fail("unified --yes must delegate to forgekit-upgrade.py apply --safe")
     applied_state = json.loads(apply_state.read_text(encoding="utf-8"))
-    if applied_state.get("forgekit_version") != "0.40.1":
+    if applied_state.get("forgekit_version") != "0.40.2":
         fail("unified --yes did not advance state through safe migrations")
     if "skipped-existing-review-needed" not in applied.stdout:
         fail("partial-upgrade rerun must report the different existing file as review-needed")
@@ -1689,7 +1704,7 @@ def assert_upgrade_report(repo, target):
         fail("upgrade must not overwrite managed docs")
     assert_paths(target, [
         ".forgekit/upgrade-report.md",
-        ".forgekit/upgrade-export/0.40.1/.forgekit/docs/project-plan.md",
+        ".forgekit/upgrade-export/0.40.2/.forgekit/docs/project-plan.md",
     ])
 
 
@@ -1726,7 +1741,7 @@ def assert_guided_upgrade(repo, target):
         ".forgekit/upgrade/upgrade-plan.md",
         ".forgekit/upgrade/upgrade-actions.md",
         ".forgekit/upgrade/upgrade-inventory.json",
-        ".forgekit/upgrade/candidates/0.40.1/.forgekit/docs/project-plan.md",
+        ".forgekit/upgrade/candidates/0.40.2/.forgekit/docs/project-plan.md",
     ])
     plan = (target / ".forgekit" / "upgrade" / "upgrade-plan.md").read_text(encoding="utf-8")
     actions = (target / ".forgekit" / "upgrade" / "upgrade-actions.md").read_text(encoding="utf-8")
@@ -2315,6 +2330,122 @@ def assert_archive_capsule(target):
         fail("archive capsule must not modify current docs")
 
 
+def assert_current_docs_integrity(repo, target, temp_parent):
+    checker = repo / "scripts/check-current-docs-integrity.py"
+
+    def make_case(name, status="In Progress"):
+        case = temp_parent / name
+        shutil.copytree(target, case)
+        docs = case / ".forgekit/docs"
+        (docs / "task-board.md").write_text(
+            "# 项目任务看板\n\n## 当前重点\n\n"
+            "| Task ID | 标题 | 状态 | Source ID |\n| --- | --- | --- | --- |\n"
+            f"| TASK-20260611-001 | 当前任务 | {status} | SRC-20260611-001 |\n",
+            encoding="utf-8",
+        )
+        (docs / "task-intake.md").write_text(
+            "# 工作来源台账\n\n## Current Source Records\n\n"
+            "Source ID: SRC-20260611-001\nOriginal Text: 当前任务原文\nHuman Review: confirmed\n",
+            encoding="utf-8",
+        )
+        (docs / "risk-register.md").write_text(
+            "# 风险登记册\n\n| ID | 风险 | 状态 |\n| --- | --- | --- |\n"
+            "| RISK-20260611-001 | 当前交付风险 | Open |\n",
+            encoding="utf-8",
+        )
+        (docs / "traceability.md").write_text(
+            "# 追踪矩阵\n\n| ID | 关联 ID | 状态 |\n| --- | --- | --- |\n"
+            "| TASK-20260611-001 | SRC-20260611-001, TEST-20260611-001 | In Progress |\n",
+            encoding="utf-8",
+        )
+        (docs / "testing.md").write_text(
+            "# 测试文档\n\n## 当前验证基线\n\n"
+            "| 场景 | 命令 | 通过标准 |\n| --- | --- | --- |\n| API smoke | pytest -q | exit 0 |\n",
+            encoding="utf-8",
+        )
+        return case
+
+    normal = make_case("integrity-pass", "Review")
+    passed = run([sys.executable, str(checker), "--repo-root", str(normal)], cwd=repo)
+    if "Status: passed" not in passed.stdout:
+        fail("complete current docs fixture must pass integrity check")
+
+    source_broken = make_case("integrity-source-broken")
+    (source_broken / ".forgekit/docs/task-intake.md").write_text(
+        "# 工作来源台账\n\nSource ID: SRC-EXAMPLE-001\nOriginal Text: 待补充\n",
+        encoding="utf-8",
+    )
+    broken = run([sys.executable, str(checker), "--repo-root", str(source_broken)], cwd=repo, check=False)
+    if broken.returncode != 1 or "missing-source-record" not in broken.stdout:
+        fail("missing Source Record must be a blocking integrity failure")
+
+    risk_broken = make_case("integrity-risk-placeholder")
+    shutil.copyfile(repo / "project-template/docs/risk-register.md", risk_broken / ".forgekit/docs/risk-register.md")
+    risk = run([sys.executable, str(checker), "--repo-root", str(risk_broken)], cwd=repo, check=False)
+    if risk.returncode != 1 or "placeholder-only-risk-register" not in risk.stdout:
+        fail("placeholder-only risk-register must block active work integrity")
+
+    trace_broken = make_case("integrity-trace-placeholder")
+    shutil.copyfile(repo / "project-template/docs/traceability.md", trace_broken / ".forgekit/docs/traceability.md")
+    trace = run([sys.executable, str(checker), "--repo-root", str(trace_broken)], cwd=repo, check=False)
+    if trace.returncode != 1 or "placeholder-only-traceability" not in trace.stdout:
+        fail("placeholder-only traceability must block active work integrity")
+
+    testing_broken = make_case("integrity-testing-placeholder", "Backend Ready")
+    shutil.copyfile(repo / "project-template/docs/testing.md", testing_broken / ".forgekit/docs/testing.md")
+    testing = run([sys.executable, str(checker), "--repo-root", str(testing_broken)], cwd=repo, check=False)
+    if testing.returncode != 1 or "missing-testing-baseline" not in testing.stdout:
+        fail("review-ready task without testing baseline must block integrity")
+
+    examples = temp_parent / "integrity-examples"
+    shutil.copytree(target, examples)
+    examples_result = run([sys.executable, str(checker), "--repo-root", str(examples)], cwd=repo)
+    if "Active tasks: 0" not in examples_result.stdout or "Status: passed" not in examples_result.stdout:
+        fail("template example IDs must not be treated as real active tasks")
+
+    archive_case = source_broken
+    change = archive_case / ".forgekit/changes/blocked-capsule"
+    change.mkdir(parents=True)
+    (change / "proposal.md").write_text("Status: done\nRisk: medium\n", encoding="utf-8")
+    capsule_script = archive_case / "scripts/archive-capsule.py"
+    run([
+        sys.executable, str(capsule_script), "plan", "--repo-root", ".",
+        "--name", "evidence-snapshot", "--reason", "active-work evidence snapshot",
+        "--item", ".forgekit/changes/blocked-capsule",
+    ], cwd=archive_case)
+    refused = run([
+        sys.executable, str(capsule_script), "apply", "--repo-root", ".",
+        "--plan", ".forgekit/archive-capsule-plan.md", "--confirm",
+    ], cwd=archive_case, check=False)
+    if refused.returncode == 0 or "blocked by current docs integrity" not in (refused.stdout + refused.stderr):
+        fail("archive apply must stop on blocking current docs integrity failure")
+    if not change.is_dir():
+        fail("blocked archive apply must not move planned items")
+
+    migration_case = temp_parent / "integrity-migration"
+    shutil.copytree(target, migration_case)
+    state_path = migration_case / ".forgekit/state.json"
+    state = json.loads(state_path.read_text(encoding="utf-8-sig"))
+    state["forgekit_version"] = "0.40.1"
+    state["features"].pop("active_current_docs_integrity_guard", None)
+    state_path.write_text(json.dumps(state, indent=2) + "\n", encoding="utf-8")
+    existing = migration_case / ".forgekit/docs/current-docs-integrity.md"
+    existing.write_text("# User-owned integrity guidance\n", encoding="utf-8")
+    before = existing.read_bytes()
+    upgrade = repo / "scripts/forgekit-upgrade.py"
+    first = run([sys.executable, str(upgrade), "apply", "--safe", "--repo-root", str(migration_case)], cwd=repo)
+    if "skipped-existing-review-needed" not in first.stdout or existing.read_bytes() != before:
+        fail("v0.40.2 migration must preserve a different existing integrity guide")
+    migrated = json.loads(state_path.read_text(encoding="utf-8"))
+    if migrated.get("forgekit_version") != "0.40.2" or migrated["features"].get("active_current_docs_integrity_guard") is not True:
+        fail("v0.40.2 migration did not update state and feature")
+    second = run([sys.executable, str(upgrade), "apply", "--safe", "--repo-root", str(migration_case)], cwd=repo)
+    if "No migration is required; no files were changed" not in second.stdout:
+        fail("v0.40.2 migration rerun must be a no-op/current result")
+    if existing.read_bytes() != before:
+        fail("v0.40.2 migration rerun overwrote the user-owned guide")
+
+
 def assert_legacy_upgrade_no_lock(repo, target):
     target.mkdir(parents=True, exist_ok=True)
     (target / ".forgekit").mkdir(parents=True, exist_ok=True)
@@ -2430,6 +2561,8 @@ def main():
     assert_json(repo / "project-template" / "migrations" / "0.40.0" / "migration.json")
     assert_json(repo / "migrations" / "0.40.1" / "migration.json")
     assert_json(repo / "project-template" / "migrations" / "0.40.1" / "migration.json")
+    assert_json(repo / "migrations" / "0.40.2" / "migration.json")
+    assert_json(repo / "project-template" / "migrations" / "0.40.2" / "migration.json")
     assert_loop_docs(repo / "project-template", "docs/loop-readiness.md", "docs/loop-blueprint.md")
     assert_loop_operations(
         repo / "project-template",
@@ -2619,6 +2752,7 @@ def main():
         assert_no_noise_files(target)
         assert_no_forbidden_text(target, FORBIDDEN_LEGACY_REFS, "Forbidden legacy path text found in generated project")
         run_generated_checks(target)
+        assert_current_docs_integrity(repo, target, temp_parent)
         assert_archive_flow(target)
         assert_archive_capsule(target)
         assert_guided_upgrade(repo, target)

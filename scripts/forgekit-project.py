@@ -98,6 +98,23 @@ def run_stream(command, cwd=None):
         fail(f"Command failed with exit code {completed.returncode}: {' '.join(command)}")
 
 
+def show_current_docs_integrity(toolkit_root, target):
+    checker = toolkit_root / "scripts/check-current-docs-integrity.py"
+    if not checker.is_file():
+        print("Current docs integrity: unavailable (checker missing in ForgeKitRoot)")
+        return
+    completed = subprocess.run(
+        [sys.executable, str(checker), "--repo-root", str(target)],
+        text=True, encoding="utf-8", errors="replace",
+        stdout=subprocess.PIPE, stderr=subprocess.STDOUT, check=False,
+    )
+    print(completed.stdout.rstrip())
+    if completed.returncode == 1:
+        print("[needs-fix] Safe migration may continue, but run a Current State Restoration Pass before archive or cleanup.")
+    elif completed.returncode == 2:
+        print("[warn] Current docs integrity could not be evaluated; safe migration is not blocked.")
+
+
 def confirmed(prompt, assume_yes, non_writing):
     if non_writing:
         return False
@@ -178,6 +195,7 @@ def upgrade_project(args, toolkit_root, target, installed, toolkit):
     check_status = re.search(r"(?m)^Status:\s*(.+)$", check_output)
 
     print_detection(target, installed, toolkit, "upgrade-sync")
+    show_current_docs_integrity(toolkit_root, target)
     print(f"Check result: {check_status.group(1).strip() if check_status else 'unknown'}")
     print("Plan summary:")
     print(plan_output)

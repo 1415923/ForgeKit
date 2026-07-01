@@ -73,6 +73,7 @@
 | 阶段交付包 / reviewer handoff | `scripts/handoff-package.py`，汇总独立审查证据并输出 `.forgekit/handoff-package.md` 或 `.forgekit/changes/<change-id>/handoff.md` |
 | 项目维护意图 | `.forgekit/docs/project-maintenance.md`；先识别 `MaintenanceIntent`，再 plan / confirm / summary |
 | 阶段归档 capsule | `.forgekit/docs/archive-capsule.md`、`scripts/archive-capsule.py`；历史检索先看 `.forgekit/archive/index.md` |
+| 当前任务断链 / 归档后无法继续 | `.forgekit/docs/current-docs-integrity.md`、`scripts/check-current-docs-integrity.py`；先检查，再决定是否做 Current State Restoration Pass |
 | 中高风险变更过程 | `.forgekit/changes/<change-id>/` |
 | 有限授权连续推进规则 | `.forgekit/docs/bounded-auto-loop-policy.md` |
 | 原生 agent 配置适配 | `.forgekit/docs/native-agent-adapter.md` |

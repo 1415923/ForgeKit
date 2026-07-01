@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "template_version": "0.40.1",
+  "template_version": "0.40.2",
   "boundary_aware": true,
   "files": [
     {
@@ -9,7 +9,7 @@
       "role": "agent_entry",
       "update_policy": "ask",
       "render_mode": "copy",
-      "checksum": "sha256:5fe07b80ed4b1ba680f6e5871587ec0f54b2fc84e199793d11a426c2dedc1237"
+      "checksum": "sha256:0e4a20eaf16920534aa408ae82ad7d3ec933666f4d20cdf9ca60a6a4654680b6"
     },
     {
       "source_path": "CLAUDE.md",
@@ -17,7 +17,7 @@
       "role": "agent_entry",
       "update_policy": "ask",
       "render_mode": "copy",
-      "checksum": "sha256:aab78d0e9979687a59b283ec84efa15011fb79ea836c919a2d5597e6d676e0c3"
+      "checksum": "sha256:ef9c8bf4f52cfd1dfe6eff7a485d5ec850bc6d75212a085b0d9dca0c5082b5d5"
     },
     {
       "source_path": "README.md",
@@ -25,7 +25,7 @@
       "role": "readme",
       "update_policy": "ask",
       "render_mode": "copy",
-      "checksum": "sha256:f4cd92457aef941efd491ff4f18a5033ab27007c2c143caa5ac1bcd7397af6c1"
+      "checksum": "sha256:0f891833ba7ff230addc2b76d8c0d666a8979441e1a27c112db24e8962bdc2b8"
     },
     {
       "source_path": ".forgekit/project-boundary.yml",
@@ -41,7 +41,7 @@
       "role": "managed_doc",
       "update_policy": "merge",
       "render_mode": "copy",
-      "checksum": "sha256:8c27cf0ab4c5cbd1a8b21ef1c0e11f6dd776227c82bbe89eba2b81eb741322fd"
+      "checksum": "sha256:3f06d44d53ce000fe8c930a7650dadc6597f61cfcd5e4a2c83fe324aa62d2a8b"
     },
     {
       "source_path": ".forgekit/docs/document-lifecycle.md",
@@ -81,7 +81,7 @@
       "role": "codex_rule",
       "update_policy": "ask",
       "render_mode": "copy",
-      "checksum": "sha256:797ffcd2c3377757b2fddc0b02b49005da28cece677a2f2a7fd97164351f960f"
+      "checksum": "sha256:3d0104d230849698f7d74818f612ae7f7955c048b9c2ebf74b94dc1cf4d1c009"
     },
     {
       "source_path": ".codex/version-gates.md",
@@ -209,7 +209,7 @@
       "role": "managed_doc",
       "update_policy": "merge",
       "render_mode": "copy",
-      "checksum": "sha256:ad712236670977a1311468c54b36530a93e3291e9a3b9e69174ddf93d5fee3f4"
+      "checksum": "sha256:989191c3c5650f392af5417719f4e13452cea301515ae120d0336831c2b3b93c"
     },
     {
       "source_path": "docs/workflow-router.md",
@@ -217,7 +217,7 @@
       "role": "managed_doc",
       "update_policy": "merge",
       "render_mode": "copy",
-      "checksum": "sha256:dd44f9c9e708ec4766c5ccfb36747dbd8e7936b2745247106b1eac82673dc5df"
+      "checksum": "sha256:b4b704c49238198847cb8ccb0e1aff5c8ae0b0cf4897bd6235f0e33a8a1e596b"
     },
     {
       "source_path": "docs/work-log.md",
@@ -585,7 +585,7 @@
       "role": "managed_doc",
       "update_policy": "merge",
       "render_mode": "copy",
-      "checksum": "sha256:d486a065ce83cee95ef642f8e7921dc270d2b1f086f775c91436e3383fc7d17c"
+      "checksum": "sha256:d808537ddc123b4dfd17331dced435a4f3a4cd4b6b3a4082215866dd1fd107ae"
     },
     {
       "source_path": "migrations/0.38.0/migration.json",
@@ -609,7 +609,7 @@
       "role": "managed_doc",
       "update_policy": "merge",
       "render_mode": "copy",
-      "checksum": "sha256:58de364f747c21f18957b048a33b2995a3c5c6ac4ddfa93a49afc1520daa67f2"
+      "checksum": "sha256:bb98aa3a5fd543a1fecd9564f6b4b8d7851e27b2d8384ee611bea54ebf4f8fc5"
     },
     {
       "source_path": "docs/archive-capsule.md",
@@ -617,7 +617,7 @@
       "role": "managed_doc",
       "update_policy": "merge",
       "render_mode": "copy",
-      "checksum": "sha256:f562edf1178f0222884cafb85b813b8769533cd614f75f7d49a06ab1b44d1c03"
+      "checksum": "sha256:ac3455bd269ab5341b849c8ef99c7c063ffa293b8099db166e96d045e2bc5e05"
     },
     {
       "source_path": "scripts/archive-capsule.py",
@@ -625,7 +625,7 @@
       "role": "script",
       "update_policy": "replace",
       "render_mode": "copy",
-      "checksum": "sha256:82a51cb448c34095c3ee00271332fee87afd048a48dfa4485b06f6def3156ba1"
+      "checksum": "sha256:0a7a0409427e7520ef75c60d4667ee9b484172657bac8e3f23e585be9ee753c0"
     },
     {
       "source_path": ".claude/skills/forgekit-maintenance/SKILL.md",
@@ -681,7 +681,7 @@
       "role": "managed_doc",
       "update_policy": "merge",
       "render_mode": "copy",
-      "checksum": "sha256:8e9177bfbd213c5b75e4e6d9319279d3a4e29d2e231ff74dfd0b34d30a4ff9fe"
+      "checksum": "sha256:0aa85da0a989ce87b99705b87aebf310f902679d0be08d81a17b76cdf40f861e"
     },
     {
       "source_path": ".claude/skills/forgekit-first-principles/SKILL.md",
@@ -738,6 +738,62 @@
       "update_policy": "readonly",
       "render_mode": "copy",
       "checksum": "sha256:1e3604ccdb30757130609741bd308f237ce00589147d425ed5ed292ad07b7314"
+    },
+    {
+      "source_path": "docs/current-docs-integrity.md",
+      "target_path": "${managed_docs_root}/current-docs-integrity.md",
+      "role": "managed_doc",
+      "update_policy": "merge",
+      "render_mode": "copy",
+      "checksum": "sha256:4c3c36ba77e936bd82eb36a4517b03ec0efdc473a66afd9d84c907db47fb4d59"
+    },
+    {
+      "source_path": "scripts/check-current-docs-integrity.py",
+      "target_path": "scripts/check-current-docs-integrity.py",
+      "role": "script",
+      "update_policy": "replace",
+      "render_mode": "copy",
+      "checksum": "sha256:8538f34a83fa60dd998f25137179cd09404e36a881d3de8d02372209499cdc41"
+    },
+    {
+      "source_path": "migrations/0.40.2/migration.json",
+      "target_path": "migrations/0.40.2/migration.json",
+      "role": "metadata",
+      "update_policy": "readonly",
+      "render_mode": "copy",
+      "checksum": "sha256:c9020358c3a6c14b98bf5c0effcdcbcecde66a5f43b3093c52914f1a3e6e6c42"
+    },
+    {
+      "source_path": "migrations/0.40.2/files/.forgekit/docs/current-docs-integrity.md",
+      "target_path": "migrations/0.40.2/files/.forgekit/docs/current-docs-integrity.md",
+      "role": "metadata",
+      "update_policy": "readonly",
+      "render_mode": "copy",
+      "checksum": "sha256:4c3c36ba77e936bd82eb36a4517b03ec0efdc473a66afd9d84c907db47fb4d59"
+    },
+    {
+      "source_path": "migrations/0.40.2/files/.forgekit/docs/archive-capsule.md",
+      "target_path": "migrations/0.40.2/files/.forgekit/docs/archive-capsule.md",
+      "role": "metadata",
+      "update_policy": "readonly",
+      "render_mode": "copy",
+      "checksum": "sha256:ac3455bd269ab5341b849c8ef99c7c063ffa293b8099db166e96d045e2bc5e05"
+    },
+    {
+      "source_path": "migrations/0.40.2/files/.forgekit/docs/project-maintenance.md",
+      "target_path": "migrations/0.40.2/files/.forgekit/docs/project-maintenance.md",
+      "role": "metadata",
+      "update_policy": "readonly",
+      "render_mode": "copy",
+      "checksum": "sha256:bb98aa3a5fd543a1fecd9564f6b4b8d7851e27b2d8384ee611bea54ebf4f8fc5"
+    },
+    {
+      "source_path": "migrations/0.40.2/files/scripts/check-current-docs-integrity.py",
+      "target_path": "migrations/0.40.2/files/scripts/check-current-docs-integrity.py",
+      "role": "metadata",
+      "update_policy": "readonly",
+      "render_mode": "copy",
+      "checksum": "sha256:8538f34a83fa60dd998f25137179cd09404e36a881d3de8d02372209499cdc41"
     }
   ]
 }

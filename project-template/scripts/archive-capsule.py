@@ -4,8 +4,11 @@
 import argparse
 import datetime as dt
 import hashlib
+import json
 import re
 import shutil
+import subprocess
+import sys
 from pathlib import Path
 
 
@@ -18,6 +21,33 @@ DENIED_FILES = {
     ".forgekit/template-lock.json",
     ".forgekit/upgrade-report.md",
 }
+
+
+def integrity_check(root, archive_summary=None):
+    checker = Path(__file__).resolve().with_name("check-current-docs-integrity.py")
+    if not checker.is_file():
+        fail(f"Current docs integrity checker not found: {checker}")
+    command = [sys.executable, str(checker), "--repo-root", str(root), "--json"]
+    if archive_summary:
+        command.extend(["--archive-summary", str(archive_summary)])
+    completed = subprocess.run(
+        command, text=True, encoding="utf-8", errors="replace",
+        stdout=subprocess.PIPE, stderr=subprocess.STDOUT, check=False,
+    )
+    if completed.returncode == 2:
+        fail("Current docs integrity checker could not run: " + completed.stdout.strip())
+    try:
+        report = json.loads(completed.stdout)
+    except json.JSONDecodeError:
+        fail("Current docs integrity checker returned invalid JSON")
+    return report
+
+
+def print_integrity_summary(label, report):
+    print(f"Current docs integrity {label}: {report['status']}")
+    print(f"Active tasks: {len(report['active_tasks'])}; blocking: {report['blocking_count']}; warnings: {report['warning_count']}")
+    for item in report["findings"]:
+        print(f"[{item['severity']}] {item['code']}: {item['message']}")
 
 
 def fail(message):
@@ -86,6 +116,9 @@ def plan_command(args):
     if not args.item:
         fail("plan requires at least one explicit --item")
 
+    integrity = integrity_check(root)
+    print_integrity_summary("preflight", integrity)
+
     today = dt.date.today()
     name = args.name or "phase-close"
     slug = slugify(name)
@@ -130,6 +163,8 @@ def plan_command(args):
         f"Phase: {phase}",
         f"Reason: {reason}",
         f"Items: {len(entries)}",
+        f"Current-Docs-Integrity: {integrity['status']}",
+        f"Active-Tasks: {len(integrity['active_tasks'])}",
         "",
         "Plan only. No files were moved. Review every item before apply.",
         "",
@@ -168,6 +203,8 @@ def plan_command(args):
         print(f"[planned] {entry['from']} -> {entry['to']}")
     print(f"Plan path: {PLAN_REL.as_posix()}")
     print("No files were moved.")
+    if integrity["blocking_count"]:
+        print("[needs-fix] Apply will be blocked until a Current State Restoration Pass succeeds.")
 
 
 def parse_fields(lines):
@@ -248,6 +285,10 @@ def apply_command(args):
     root = Path(args.repo_root).resolve()
     if not root.is_dir() or not (root / ".forgekit").is_dir():
         fail(f"Project root with .forgekit directory is required: {root}")
+    preflight = integrity_check(root)
+    print_integrity_summary("preflight", preflight)
+    if preflight["blocking_count"]:
+        fail("Archive apply blocked by current docs integrity failures. Run a Current State Restoration Pass first.")
     plan_relative, plan_path = relative_safe(root, args.plan, "plan path")
     if plan_relative.as_posix() != PLAN_REL.as_posix():
         fail(f"Only {PLAN_REL.as_posix()} is accepted as the archive capsule plan")
@@ -315,6 +356,8 @@ def apply_command(args):
         f"- Phase / Version: {header['Phase']}",
         f"- Reason: {header['Reason']}",
         f"- Scope: {len(moved)} planned item(s)",
+        f"- Archive Status: {'provisional snapshot' if preflight['active_tasks'] else 'completed phase archive'}",
+        "- Current Facts Entry: `.forgekit/docs/`",
         "- Archived Items: `archived-items.md`",
         "- Key Decisions: TODO_REVIEW",
         "- Completed Work: TODO_REVIEW",
@@ -330,6 +373,12 @@ def apply_command(args):
     ]
     summary_path = capsule_path / "archive-summary.md"
     summary_path.write_text("\n".join(summary) + "\n", encoding="utf-8")
+    postflight = integrity_check(root, summary_path)
+    print_integrity_summary("postflight", postflight)
+    if postflight["blocking_count"]:
+        with summary_path.open("a", encoding="utf-8") as handle:
+            handle.write("\nArchive Status: needs-fix\nCurrent State Restoration Pass is required.\n")
+        fail("Archive postflight failed. Capsule is needs-fix; follow restoration guidance and do not treat it as completed.")
     append_index(index_path, header, capsule_relative / "archive-summary.md", moved)
 
     print("ForgeKit Archive Capsule Apply")
@@ -339,6 +388,7 @@ def apply_command(args):
     print(f"Summary: {(capsule_relative / 'archive-summary.md').as_posix()}")
     print(f"Items log: {(capsule_relative / 'archived-items.md').as_posix()}")
     print("Archive index: .forgekit/archive/index.md")
+    print("Current docs integrity postflight: passed")
     print("No business docs were modified. No Git commit was created.")
 
 

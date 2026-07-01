@@ -161,6 +161,12 @@ Generate a maintenance plan, but do not apply it.
 
 Upgrade sync reuses `forgekit-upgrade.py check / plan / apply --safe`. Phase archive uses `scripts/archive-capsule.py plan` and requires explicit `apply --confirm`. Archive is not deletion: apply creates a capsule summary, item log, and `.forgekit/archive/index.md` without reorganizing legacy archive or modifying business docs.
 
+v0.40.2 adds the Active Current Docs Integrity Guard. Archive apply checks the current Source / Task / Risk / Traceability / Testing chain before and after moving planned items. Active-work snapshots cannot be presented as completed phase archives; broken current docs require a Current State Restoration Pass first.
+
+Windows: `python .\scripts\check-current-docs-integrity.py --repo-root "D:\path\to\project"`
+
+macOS / Linux: `python3 ./scripts/check-current-docs-integrity.py --repo-root "/path/to/project"`
+
 ## Workflow
 
 ForgeKit recommends one traceable delivery chain:

@@ -32,6 +32,7 @@
 - 业务 `docs/` 默认是 read-mostly 证据源：允许读取、引用和抽取事实，不写 ForgeKit 治理模板。
 - `.forgekit/state.json` 是 v0.36+ versioned migration 状态。升级按 `forgekit-upgrade.py check -> plan -> apply --safe` 执行。
 - 用户表达安装、初始化、更新或同步 ForgeKit 时，优先使用 ForgeKitRoot 的 `forgekit-project.py --target <project-root>` 统一入口自动分流；升级必须先 plan，apply 必须确认。其他维护动作先识别 `MaintenanceIntent`；归档确认后生成 summary/items/index。归档不是删除。
+- archive / maintenance 前后必须检查 current docs integrity。task-board 的真实 Source ID 必须反链 task-intake，active tasks 不得只存在 archive；current docs 模板化或断链时先做 Current State Restoration Pass，不继续归档。示例 ID 不参与真实任务检查。
 - 缺少 state 或版本低于 v0.36 的项目按既有项目 adoption 处理；未经用户确认不得创建 state，不得声称已自动升级。
 - `upgrade-forgekit.*`、`.forgekit/upgrade-export/**` 和 `.forgekit/upgrade/**` 仅为 legacy 兼容；不得默认读取或导出全量 candidates，不得把它们当当前事实。
 - `.forgekit/template-lock.json` 是 legacy 安装基线；v0.36 migration 模型不更新它。

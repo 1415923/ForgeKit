@@ -51,6 +51,8 @@ python scripts/forgekit-upgrade.py apply --safe --repo-root .
 
 用户说“安装/初始化/更新/同步 ForgeKit”时，优先路由到 ForgeKitRoot 的统一入口并识别 `project-bootstrap`。用户说“整理一下升级”“阶段结束了”“归档一下”时，先读 `.forgekit/docs/project-maintenance.md` 并识别其他 `MaintenanceIntent`。所有维护动作先 plan；Archive Capsule 只有在用户确认后才 apply，并生成 summary、items log 和 archive index。
 
+Archive apply 前后运行 `python scripts/check-current-docs-integrity.py --repo-root .`。active work 的 Source / Task / Risk / Traceability / Testing 链路断裂时必须先做 Current State Restoration Pass，不能继续归档或把 snapshot 写成 completed phase archive。
+
 ## 根因与失败路径审查
 
 复杂问题、重复修补或高风险设计按需读取 `.forgekit/docs/reasoning-review.md`，先执行 First-Principles Pass；高风险收口前执行 Adversarial Review Pass。两者只输出推导、风险和验证项，不自动修代码，也不替代独立 reviewer。

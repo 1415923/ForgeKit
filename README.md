@@ -162,6 +162,12 @@ v0.40.0 增加两个按风险触发的审查协议：复杂问题先从事实、
 
 升级同步复用上面的 `forgekit-upgrade.py check / plan / apply --safe`。阶段归档使用 `scripts/archive-capsule.py plan`，确认后才运行 `apply --confirm`；归档不是删除，apply 会生成 capsule summary、items log 和 `.forgekit/archive/index.md`，不会整理旧 archive 或修改 business docs。
 
+v0.40.2 增加 Active Current Docs Integrity Guard。Archive apply 前后会检查 current Source / Task / Risk / Traceability / Testing 链路；active work 仍存在时不能把 snapshot 写成 completed phase archive，断链必须先做 Current State Restoration Pass。
+
+Windows：`python .\scripts\check-current-docs-integrity.py --repo-root "D:\path\to\project"`
+
+macOS / Linux：`python3 ./scripts/check-current-docs-integrity.py --repo-root "/path/to/project"`
+
 ## 工作流
 
 ForgeKit 推荐把项目推进拆成一条可追溯链路：

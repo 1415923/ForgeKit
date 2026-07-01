@@ -67,6 +67,7 @@ When a task names a ForgeKit skill, read the project-local `.agents/skills/<skil
 - Do not read all business `docs/` by default; use `.forgekit/docs/codebase-map.md` to choose what matters.
 - Treat `.forgekit/state.json` as the v0.36+ versioned migration state. For upgrades, use `scripts/forgekit-upgrade.py check`, then `plan`, then explicit `apply --safe`.
 - 用户表达安装、初始化、更新或同步 ForgeKit 时，优先使用 ForgeKitRoot 的 `forgekit-project.py --target <project-root>` 统一入口自动分流；升级必须先 plan，apply 必须确认。其他维护动作先识别 `MaintenanceIntent`；归档确认后生成 summary/items/index。归档不是删除。
+- archive / maintenance 前后必须检查 current docs integrity。task-board 的真实 Source ID 必须反链 task-intake，active tasks 不得只存在 archive；current docs 模板化或断链时先做 Current State Restoration Pass，不继续归档。示例 ID 不参与真实任务检查。
 - Projects without state or below v0.36 are existing-project adoption cases. Do not create state or claim an automatic upgrade without explicit user confirmation.
 - Treat `upgrade-forgekit.*`, `.forgekit/upgrade-export/**`, and `.forgekit/upgrade/**` as legacy compatibility. Do not read or export all candidates by default, and never treat them as current truth.
 - Treat `.forgekit/template-lock.json` as a legacy installation baseline; the v0.36 migration model does not update it.

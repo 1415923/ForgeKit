@@ -1,0 +1,54 @@
+{
+  "id": "0.40.2-active-current-docs-integrity-guard",
+  "title": "Active Current Docs Integrity Guard",
+  "from": "0.40.1",
+  "to": "0.40.2",
+  "risk": "low",
+  "actions": [
+    {
+      "id": "install-current-docs-integrity-guide",
+      "type": "copy_file_if_missing",
+      "safety": "safe",
+      "source": "files/.forgekit/docs/current-docs-integrity.md",
+      "target": ".forgekit/docs/current-docs-integrity.md"
+    },
+    {
+      "id": "install-current-docs-integrity-checker",
+      "type": "copy_file_if_missing",
+      "safety": "safe",
+      "source": "files/scripts/check-current-docs-integrity.py",
+      "target": "scripts/check-current-docs-integrity.py"
+    },
+    {
+      "id": "install-current-archive-capsule-guide",
+      "type": "copy_file_if_missing",
+      "safety": "safe",
+      "source": "files/.forgekit/docs/archive-capsule.md",
+      "target": ".forgekit/docs/archive-capsule.md"
+    },
+    {
+      "id": "install-current-project-maintenance-guide",
+      "type": "copy_file_if_missing",
+      "safety": "safe",
+      "source": "files/.forgekit/docs/project-maintenance.md",
+      "target": ".forgekit/docs/project-maintenance.md"
+    },
+    {
+      "id": "enable-active-current-docs-integrity-guard",
+      "type": "set_state_feature",
+      "safety": "safe",
+      "name": "active_current_docs_integrity_guard",
+      "value": true
+    }
+  ],
+  "manual_review": [
+    "Existing archive-capsule.md or project-maintenance.md files are user-owned and are not overwritten; merge Active Work Archive Guard guidance manually when reported as REVIEW-NEEDED.",
+    "If the checker reports blocking findings, run a Current State Restoration Pass before archive apply."
+  ],
+  "non_goals": [
+    "No overwrite of task-intake, task-board, risk-register, traceability, testing, or business docs",
+    "No automatic restoration or full archive copy-back",
+    "No automatic Git commit, push, or PR",
+    "No runner, daemon, or scheduler"
+  ]
+}

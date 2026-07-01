@@ -618,7 +618,7 @@ function Test-TemplateManifest {
     $manifestPath = Join-Path $repoRoot "project-template\.forgekit\template-manifest.json"
     if (Test-Path -LiteralPath $manifestPath) {
         $manifest = Get-Content -LiteralPath $manifestPath -Raw | ConvertFrom-Json
-        if ($manifest.template_version -ne "0.40.1") {
+        if ($manifest.template_version -ne "0.40.2") {
             Add-Error "Unexpected template manifest version: $($manifest.template_version)"
         }
         $sources = @($manifest.files | ForEach-Object { $_.source_path })
@@ -1075,7 +1075,7 @@ function Test-HarnessEntryConsistency {
     Test-RequiredPath "project-template\migrations\0.36.0\migration.json"
     Test-RequiredPath "project-template\.forgekit\state.json"
     Test-RequiredPattern "project-template\.forgekit\state.json" '"schema_version": 1' "State schema version"
-    Test-RequiredPattern "project-template\.forgekit\state.json" '"forgekit_version": "0.40.1"' "State ForgeKit version"
+    Test-RequiredPattern "project-template\.forgekit\state.json" '"forgekit_version": "0.40.2"' "State ForgeKit version"
     Test-RequiredPattern "project-template\.forgekit\state.json" '"managed_docs_root": ".forgekit/docs"' "State managed docs root"
     Test-RequiredPattern "project-template\.forgekit\state.json" '"change_root": ".forgekit/changes"' "State change root"
     Test-RequiredPattern "project-template\.forgekit\state.json" '"last_upgrade": null' "State last upgrade"
@@ -1139,7 +1139,7 @@ function Test-PluginDistribution {
     if ($codexPluginJson.name -ne "forgekit") {
         Add-Error "Unexpected Codex plugin name in root plugin.json: $($codexPluginJson.name)"
     }
-    if ($codexPluginJson.version -ne "0.40.1") {
+    if ($codexPluginJson.version -ne "0.40.2") {
         Add-Error "Unexpected Codex plugin version in root plugin.json: $($codexPluginJson.version)"
     }
     if ($codexPluginJson.skills -ne "./skills/") {
@@ -1150,7 +1150,7 @@ function Test-PluginDistribution {
     if ($claudePluginJson.name -ne "forgekit") {
         Add-Error "Unexpected Claude plugin name in root plugin.json: $($claudePluginJson.name)"
     }
-    if ($claudePluginJson.version -ne "0.40.1") {
+    if ($claudePluginJson.version -ne "0.40.2") {
         Add-Error "Unexpected Claude plugin version in root plugin.json: $($claudePluginJson.version)"
     }
     $claudeSkills = @($claudePluginJson.skills)
@@ -1292,12 +1292,15 @@ function Test-ProjectMaintenanceOperations {
     foreach ($path in @(
         "project-template\docs\project-maintenance.md",
         "project-template\docs\archive-capsule.md",
+        "project-template\docs\current-docs-integrity.md",
         "project-template\.claude\skills\forgekit-maintenance\SKILL.md",
         "scripts\forgekit-project.py",
         "scripts\forgekit-project.ps1",
         "scripts\forgekit-project.sh",
         "scripts\archive-capsule.py",
         "project-template\scripts\archive-capsule.py",
+        "scripts\check-current-docs-integrity.py",
+        "project-template\scripts\check-current-docs-integrity.py",
         "migrations\0.39.0\migration.json",
         "project-template\migrations\0.39.0\migration.json"
     )) { Test-RequiredPath $path }
@@ -1315,6 +1318,14 @@ function Test-ProjectMaintenanceOperations {
     Test-RequiredPattern "scripts\archive-capsule.py" "archive-summary.md" "Archive capsule summary"
     Test-RequiredPattern "scripts\archive-capsule.py" "archived-items.md" "Archive capsule items log"
     Test-RequiredPattern "scripts\archive-capsule.py" "archive/index.md" "Archive capsule index output"
+    foreach ($marker in @("Current Docs Invariants", "Active Work Guard", "Archive Preflight Check", "Archive Postflight Check", "Restoration Guidance", "Template Placeholder Rules")) {
+        Test-RequiredPattern "project-template\docs\current-docs-integrity.md" $marker "Current docs integrity $marker"
+    }
+    Test-RequiredPattern "scripts\check-current-docs-integrity.py" "missing-source-record" "Integrity Source backlink check"
+    Test-RequiredPattern "scripts\check-current-docs-integrity.py" 'f"placeholder-only-{name}"' "Integrity placeholder check"
+    Test-RequiredPattern "scripts\check-current-docs-integrity.py" '"risk-register"' "Integrity risk register check"
+    Test-RequiredPattern "scripts\check-current-docs-integrity.py" "missing-testing-baseline" "Integrity testing baseline check"
+    Test-RequiredPattern "scripts\archive-capsule.py" "Current State Restoration Pass" "Archive integrity blocking guidance"
     Test-RequiredPattern "project-template\docs\workflow-router.md" "MaintenanceIntent: upgrade-sync" "Workflow router upgrade sync intent"
     Test-RequiredPattern "project-template\docs\workflow-router.md" "MaintenanceIntent: archive-capsule" "Workflow router archive capsule intent"
     Test-RequiredPattern "project-template\docs\workflow-router.md" "MaintenanceIntent: project-bootstrap" "Workflow router unified bootstrap intent"
@@ -1333,6 +1344,7 @@ function Test-ProjectMaintenanceOperations {
     foreach ($entry in @("project-template\AGENTS.md", "project-template\CLAUDE.md", "project-template\.codex\rules.md")) {
         Test-RequiredPattern $entry "MaintenanceIntent" "Maintenance intent entry rule"
         Test-RequiredPattern $entry "归档不是删除" "Archive is not deletion entry rule"
+        Test-RequiredPattern $entry "current docs integrity" "Current docs integrity entry rule"
     }
     Test-RequiredPattern "project-template\.forgekit\state.json" '"project_maintenance_operations": true' "State project maintenance feature"
     Test-RequiredPattern "migrations\0.39.0\migration.json" '"from": "0.38.0"' "v0.39 migration source"
@@ -1340,6 +1352,16 @@ function Test-ProjectMaintenanceOperations {
     $rootCapsule = Get-Content -LiteralPath (Join-Path $repoRoot "scripts\archive-capsule.py") -Raw
     $templateCapsule = Get-Content -LiteralPath (Join-Path $repoRoot "project-template\scripts\archive-capsule.py") -Raw
     if ($rootCapsule -ne $templateCapsule) { Add-Error "Root and project-template archive-capsule.py must stay identical" }
+    $rootIntegrity = Get-Content -LiteralPath (Join-Path $repoRoot "scripts\check-current-docs-integrity.py") -Raw
+    $templateIntegrity = Get-Content -LiteralPath (Join-Path $repoRoot "project-template\scripts\check-current-docs-integrity.py") -Raw
+    if ($rootIntegrity -ne $templateIntegrity) { Add-Error "Root and project-template check-current-docs-integrity.py must stay identical" }
+    Test-RequiredPath "migrations\0.40.2\migration.json"
+    Test-RequiredPath "project-template\migrations\0.40.2\migration.json"
+    Test-RequiredPattern "migrations\0.40.2\migration.json" '"from": "0.40.1"' "v0.40.2 migration source"
+    Test-RequiredPattern "migrations\0.40.2\migration.json" '"to": "0.40.2"' "v0.40.2 migration target"
+    Test-RequiredPattern "project-template\.forgekit\state.json" '"active_current_docs_integrity_guard": true' "State integrity guard feature"
+    Test-RequiredPattern "README.md" 'python .\scripts\check-current-docs-integrity.py' "Windows integrity command"
+    Test-RequiredPattern "README.md" 'python3 ./scripts/check-current-docs-integrity.py' "macOS/Linux integrity command"
     foreach ($forbidden in @("scripts\maintenance-runner.py", "project-template\scripts\maintenance-runner.py", "scripts\archive-daemon.py", "project-template\scripts\archive-daemon.py")) {
         if (Test-Path -LiteralPath (Join-Path $repoRoot $forbidden)) { Add-Error "v0.39 must not add maintenance runner/daemon/scheduler: $forbidden" }
     }
