@@ -174,6 +174,8 @@ v0.41.0 增加 opt-in Multi-Project Workspace & Scoped Docs Protocol。Workspace
 
 新项目默认只安装 `.forgekit/workspace-map.json` 和 capsule 模板，`enabled` 保持 `false`，不会自动拆分现有文档或创建真实 project capsule。配置并显式启用后可运行：
 
+v0.41.1 hotfix 允许 Project 先使用 `docs_profile: "workspace-only"` 登记到 map，继续由 Workspace Docs 管理事实且不创建 capsule；切换为 `project-capsule` 后才要求对应 `docs_path` 存在。WorkspaceRoot 非 Git repo 只会提示 workspace 级 `.forgekit` 文档无法随 root 提交，不影响子 repo 独立使用 Git。
+
 ```powershell
 python .\scripts\check-workspace-integrity.py --repo-root "D:\path\to\workspace"
 ```

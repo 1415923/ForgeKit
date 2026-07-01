@@ -63,7 +63,7 @@ function Test-PluginManifest {
     if ($codexManifest.name -ne "forgekit") {
         Add-Error "Unexpected Codex plugin name: $($codexManifest.name)"
     }
-    if ($codexManifest.version -ne "0.41.0") {
+    if ($codexManifest.version -ne "0.41.1") {
         Add-Error "Unexpected Codex plugin version: $($codexManifest.version)"
     }
     if ($codexManifest.skills -ne "./skills/") {
@@ -74,7 +74,7 @@ function Test-PluginManifest {
     if ($claudeManifest.name -ne "forgekit") {
         Add-Error "Unexpected Claude plugin name: $($claudeManifest.name)"
     }
-    if ($claudeManifest.version -ne "0.41.0") {
+    if ($claudeManifest.version -ne "0.41.1") {
         Add-Error "Unexpected Claude plugin version: $($claudeManifest.version)"
     }
     $claudeSkills = @($claudeManifest.skills)

@@ -8,6 +8,7 @@
     "projects_path": ".forgekit/projects",
     "artifact_root": "artifacts",
     "archive_root": ".forgekit/archive",
+    "docs_profile": "workspace-full",
     "default_read_scope": "workspace"
   },
   "projects": [],

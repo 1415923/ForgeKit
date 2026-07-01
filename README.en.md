@@ -169,6 +169,8 @@ v0.41.0 adds an opt-in Multi-Project Workspace & Scoped Docs Protocol. Workspace
 
 New projects install a disabled `.forgekit/workspace-map.json` and capsule templates. ForgeKit does not split existing docs or create real project capsules automatically. After explicit configuration and enablement, run:
 
+The v0.41.1 hotfix allows a project to use `docs_profile: "workspace-only"` while its facts remain in Workspace Docs; no capsule is required until it switches to `project-capsule`. A non-Git WorkspaceRoot only warns that workspace-level `.forgekit` docs are not covered by a root commit; child repositories can still use Git independently.
+
 ```powershell
 python .\scripts\check-workspace-integrity.py --repo-root "D:\path\to\workspace"
 ```

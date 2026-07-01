@@ -1,0 +1,45 @@
+{
+  "id": "0.41.1-workspace-profile-hotfix",
+  "title": "Workspace Git Warning and Incremental Capsule Adoption",
+  "from": "0.41.0",
+  "to": "0.41.1",
+  "risk": "low",
+  "actions": [
+    {
+      "id": "update-workspace-integrity-checker",
+      "type": "replace_file_if_baseline_matches",
+      "safety": "safe",
+      "source": "files/scripts/check-workspace-integrity.py",
+      "baseline": "baseline/scripts/check-workspace-integrity.py",
+      "target": "scripts/check-workspace-integrity.py",
+      "skip_warning": "The workspace checker was not updated because its checksum differs from the v0.41.0 baseline; this project may still use v0.41.0 workspace Git/profile logic. Review and merge the new checker manually."
+    },
+    {
+      "id": "update-scoped-docs-guide",
+      "type": "replace_file_if_baseline_matches",
+      "safety": "safe",
+      "source": "files/.forgekit/docs/scoped-docs.md",
+      "baseline": "baseline/.forgekit/docs/scoped-docs.md",
+      "target": ".forgekit/docs/scoped-docs.md",
+      "skip_warning": "The scoped docs guide was not updated because its checksum differs from the v0.41.0 baseline; review and merge the workspace-only profile guidance manually."
+    },
+    {
+      "id": "update-versioned-migration-engine",
+      "type": "replace_file_if_baseline_matches",
+      "safety": "safe",
+      "source": "files/scripts/forgekit-upgrade.py",
+      "baseline": "baseline/scripts/forgekit-upgrade.py",
+      "target": "scripts/forgekit-upgrade.py",
+      "skip_warning": "The project-local migration engine was not updated because its checksum differs from the v0.41.0 baseline; keep using the current ForgeKitRoot unified entry and review the local script manually."
+    }
+  ],
+  "manual_review": [
+    "workspace-map.json is user configuration and is never overwritten by this hotfix.",
+    "Any skipped-existing-review-needed action means the project may still use v0.41.0 behavior; review the named file before treating the hotfix as fully installed."
+  ],
+  "non_goals": [
+    "No automatic creation of real project capsules or Repo Lite files",
+    "No split or migration of task, source, risk, testing, work-log, repository, artifact, or archive content",
+    "No automatic multi-project enablement, Git commit, push, PR, runner, daemon, UI, docs site, or YAML runtime parser"
+  ]
+}

@@ -156,6 +156,19 @@ def action_status(project_root, migration, action, state):
         if target.is_file() and sha256(target) == sha256(source):
             return "already-present", "same content; no write needed"
         return "review-needed", "target exists with different content; preserve and skip"
+    if action_type == "replace_file_if_baseline_matches":
+        source = migration_source(migration, action)
+        baseline = migration_source(migration, {"source": action["baseline"]})
+        target = safe_target(project_root, action["target"])
+        if not target.exists():
+            return "safe", "file will be installed"
+        if not target.is_file():
+            return "review-needed", "target exists and is not a file; preserve and skip"
+        if sha256(target) == sha256(source):
+            return "already-present", "same content; no write needed"
+        if sha256(target) == sha256(baseline):
+            return "safe", "target matches the known previous-version baseline and will be replaced"
+        return "review-needed", "checksum does not match the known baseline; preserve and skip"
     if action_type == "set_state_feature":
         if not action.get("name"):
             fail(f"Migration {migration['id']} has a state feature without a name")
@@ -200,7 +213,9 @@ def render_plan(project_root, state, migrations):
         for action, _, reason in already_present:
             lines.append(f"- ALREADY-PRESENT: {action.get('id', action.get('type', 'action'))} ({reason})")
         for action, _, reason in review_needed:
-            lines.append(f"- REVIEW-NEEDED: {action.get('id', action.get('type', 'action'))} ({reason})")
+            lines.append(f"- REVIEW-NEEDED: {action.get('id', action.get('type', 'action'))} ({reason}; apply result: skipped-existing-review-needed)")
+            if action.get("skip_warning"):
+                lines.append(f"  - WARNING: {action['skip_warning']}")
         for review in item["manual_review"]:
             lines.append(f"- REVIEW: {review}")
         lines.append("")
@@ -275,6 +290,20 @@ def apply_action(project_root, migration, action, state):
         target.parent.mkdir(parents=True, exist_ok=True)
         shutil.copyfile(source, target)
         return "applied"
+    if action_type == "replace_file_if_baseline_matches":
+        source = migration_source(migration, action)
+        baseline = migration_source(migration, {"source": action["baseline"]})
+        target = safe_target(project_root, action["target"])
+        if target.exists():
+            if not target.is_file():
+                return "skipped-existing-review-needed"
+            if sha256(target) == sha256(source):
+                return "already-present"
+            if sha256(target) != sha256(baseline):
+                return "skipped-existing-review-needed"
+        target.parent.mkdir(parents=True, exist_ok=True)
+        shutil.copyfile(source, target)
+        return "applied"
     if action_type == "set_state_feature":
         state.setdefault("features", {})[action["name"]] = action["value"]
         return "applied"
@@ -290,6 +319,11 @@ def preflight_action(project_root, migration, action):
         return
     if action_type == "copy_file_if_missing":
         migration_source(migration, action)
+        safe_target(project_root, action["target"])
+        return
+    if action_type == "replace_file_if_baseline_matches":
+        migration_source(migration, action)
+        migration_source(migration, {"source": action["baseline"]})
         safe_target(project_root, action["target"])
         return
     if action_type == "set_state_feature":
@@ -322,11 +356,16 @@ def command_apply(project_root, migration_root, safe):
         for action in migration["actions"]:
             preflight_action(project_root, migration, action)
     applied_ids = []
+    review_needed = []
     start = state["forgekit_version"]
     for migration in pending:
         for action in migration["actions"]:
             result = apply_action(project_root, migration, action, state)
             print(f"[{result}] {action.get('id', action.get('type'))}")
+            if result == "skipped-existing-review-needed":
+                review_needed.append(action)
+                if action.get("skip_warning"):
+                    print(f"[warning] {action['skip_warning']}")
         state["forgekit_version"] = migration["to"]
         applied_ids.append(migration["id"])
     state["last_upgrade"] = {
@@ -335,9 +374,12 @@ def command_apply(project_root, migration_root, safe):
         "applied_at": dt.datetime.now(dt.timezone.utc).replace(microsecond=0).isoformat().replace("+00:00", "Z"),
         "migrations": applied_ids,
         "mode": "safe",
+        "review_needed_actions": [action.get("id", action.get("type")) for action in review_needed],
     }
     write_state(project_root / STATE_RELATIVE_PATH, state)
     print(f"[ok] Applied {len(applied_ids)} safe migration(s); state is now {state['forgekit_version']}")
+    if review_needed:
+        print(f"[warning] {len(review_needed)} action(s) were skipped-existing-review-needed; the project requires manual review and is not fully updated.")
 
 
 def main():

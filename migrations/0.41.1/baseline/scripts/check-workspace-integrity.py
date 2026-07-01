@@ -11,7 +11,7 @@ from pathlib import Path
 
 STATE_PATH = Path(".forgekit/state.json")
 MAP_PATH = Path(".forgekit/workspace-map.json")
-ALLOWED_PROFILES = {"workspace-full", "workspace-only", "project-capsule", "repo-lite"}
+ALLOWED_PROFILES = {"workspace-full", "project-capsule", "repo-lite"}
 ALLOWED_READ_SCOPES = {"workspace", "project", "repo", "explicit"}
 CAPSULE_FILES = {
     "project-card.md",
@@ -144,7 +144,7 @@ def validate_profile_and_scope(item, label, findings):
         findings.append(finding("blocking", "invalid_read_scope", f"{label} has invalid default_read_scope: {scope}"))
 
 
-def git_warning(repo_path, repo_id, findings, *, workspace_root=False):
+def git_warning(repo_path, repo_id, findings):
     if not repo_path.exists():
         findings.append(finding("warning", "repo_missing", f"Repo {repo_id} is not checked out", repo_path))
         return
@@ -159,15 +159,7 @@ def git_warning(repo_path, repo_id, findings, *, workspace_root=False):
         findings.append(finding("warning", "git_unavailable", "Git status could not be checked"))
         return
     if result.returncode != 0:
-        if workspace_root:
-            findings.append(finding(
-                "warning",
-                "workspace_root_not_git",
-                "WorkspaceRoot is not a Git repository; workspace-level .forgekit docs may not be included in a root commit or push",
-                repo_path,
-            ))
-        else:
-            findings.append(finding("warning", "repo_not_git", f"Repo {repo_id} path is not a Git repository", repo_path))
+        findings.append(finding("warning", "repo_not_git", f"Repo {repo_id} path is not a Git repository", repo_path))
 
 
 def capsule_files(project_path):
@@ -247,8 +239,6 @@ def validate_references(root, workspace, projects, repos, findings):
         if archive and is_within(project_path, archive):
             findings.append(finding("blocking", "project_docs_in_archive", f"Project {project_id} docs cannot be located under ArchiveRoot"))
             continue
-        if project.get("docs_profile") == "workspace-only":
-            continue
         validate_capsule(project_id, project_path, findings)
         task_text = read_text(project_path / "task-board.md")
         source_text = read_text(project_path / "source-links.md")
@@ -307,9 +297,6 @@ def run_check(root):
     if is_placeholder_id(workspace_id):
         findings.append(finding("blocking", "placeholder_workspace_id", "enabled workspace requires a real workspace.id", MAP_PATH))
     validate_profile_and_scope(workspace, "workspace", findings)
-    if workspace.get("docs_profile") not in {None, "workspace-full"}:
-        findings.append(finding("blocking", "workspace_profile_mismatch", "Workspace must use workspace-full"))
-    git_warning(root, "workspace-root", findings, workspace_root=True)
 
     projects = validate_ids(data.get("projects", []), "project", findings)
     repos = validate_ids(data.get("repos", []), "repo", findings)
@@ -317,8 +304,8 @@ def run_check(root):
 
     for project_id, project in projects.items():
         validate_profile_and_scope(project, f"project {project_id}", findings)
-        if project.get("docs_profile") not in {"workspace-only", "project-capsule"}:
-            findings.append(finding("blocking", "project_profile_mismatch", f"Project {project_id} must use workspace-only or project-capsule"))
+        if project.get("docs_profile") not in {None, "project-capsule"}:
+            findings.append(finding("blocking", "project_profile_mismatch", f"Project {project_id} must use project-capsule"))
         for repo_id in project.get("repo_ids", []):
             if repo_id not in repos:
                 findings.append(finding("blocking", "unknown_repo", f"Project {project_id} references unknown Repo ID: {repo_id}"))
@@ -329,7 +316,7 @@ def run_check(root):
     repo_paths = {}
     for repo_id, repo in repos.items():
         validate_profile_and_scope(repo, f"repo {repo_id}", findings)
-        if repo.get("docs_profile") != "repo-lite":
+        if repo.get("docs_profile") not in {None, "repo-lite"}:
             findings.append(finding("blocking", "repo_profile_mismatch", f"Repo {repo_id} must use repo-lite"))
         if repo.get("project_id") not in projects:
             findings.append(finding("blocking", "unknown_repo_project", f"Repo {repo_id} references unknown Project ID: {repo.get('project_id')}"))

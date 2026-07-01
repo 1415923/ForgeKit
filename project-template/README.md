@@ -55,7 +55,7 @@ Archive apply 前后运行 `python scripts/check-current-docs-integrity.py --rep
 
 ## 多项目工作区
 
-v0.41 默认安装但不启用 multi-project scoped docs。需要管理多个项目或 Git repo 时，先配置 `.forgekit/workspace-map.json`，再显式启用 state feature，并读取 `.forgekit/docs/scoped-docs.md`。Workspace Docs 保存跨项目事实，`.forgekit/projects/<project-id>/` capsule 只保存局部事实；不会自动拆分现有文档或创建真实 capsule。
+v0.41 默认安装但不启用 multi-project scoped docs。需要管理多个项目或 Git repo 时，先配置 `.forgekit/workspace-map.json`，再显式启用 state feature，并读取 `.forgekit/docs/scoped-docs.md`。Project 可先使用 `workspace-only` 继续由 Workspace Docs 管理，改为 `project-capsule` 后才要求 capsule 存在。WorkspaceRoot 非 Git repo 只产生 warning，子 repo 仍可独立提交。ForgeKit 不会自动拆分现有文档或创建真实 capsule。
 
 ```bash
 python scripts/check-workspace-integrity.py --repo-root .

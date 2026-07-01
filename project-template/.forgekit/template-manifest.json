@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "template_version": "0.41.0",
+  "template_version": "0.41.1",
   "boundary_aware": true,
   "files": [
     {
@@ -25,7 +25,7 @@
       "role": "readme",
       "update_policy": "ask",
       "render_mode": "copy",
-      "checksum": "sha256:d7324ae4966bb81ad389ab247d9ce9a52b5ac42a5e1c689feeebf5c4358d73d4"
+      "checksum": "sha256:e0b2beda3ffcd48ed3f158b25901cfe0f242f34de9f1b1db3084b11b9b93fae5"
     },
     {
       "source_path": ".forgekit/project-boundary.yml",
@@ -417,7 +417,7 @@
       "role": "script",
       "update_policy": "replace",
       "render_mode": "copy",
-      "checksum": "sha256:88658a46a691f9cfb6754df127baa0221376c97fed17981ffeafb860b4edc654"
+      "checksum": "sha256:ef40e35eabe5d997c69e455577cdca5fdeaaba5fb4c2c5fc288b13738147373e"
     },
     {
       "source_path": "migrations/0.36.0/migration.json",
@@ -801,7 +801,7 @@
       "role": "metadata",
       "update_policy": "ask",
       "render_mode": "copy",
-      "checksum": "sha256:ce4173a38d540c3d04ec4c4ac022b1874866d4cdf459d685864953e17bb23349"
+      "checksum": "sha256:fa79d494e600193a5033613d48b2a51cf0d59d962326a81ea8fafca79c2a33ce"
     },
     {
       "source_path": ".forgekit/docs/scoped-docs.md",
@@ -809,7 +809,7 @@
       "role": "managed_doc",
       "update_policy": "merge",
       "render_mode": "copy",
-      "checksum": "sha256:f4f29ce1dd847029a66d9f20cbd22623fd5ee496963900ec91858c3e1e0d08da"
+      "checksum": "sha256:0cb1295dfb00b326720ac3d60378e466e50c985eaef218fedc0d05755cb41ce5"
     },
     {
       "source_path": ".forgekit/projects/_template/project-card.md",
@@ -865,7 +865,7 @@
       "role": "script",
       "update_policy": "replace",
       "render_mode": "copy",
-      "checksum": "sha256:ba457c059a648da9a92a07b9bcfee6239a9ae5d7195db94c07196b8622f6d54d"
+      "checksum": "sha256:714624539e7a4c54775c5498d1bf0492cc6eccdb84673062b0e2aacd25f8a268"
     },
     {
       "source_path": "migrations/0.41.0/migration.json",
@@ -946,6 +946,62 @@
       "update_policy": "readonly",
       "render_mode": "copy",
       "checksum": "sha256:ba457c059a648da9a92a07b9bcfee6239a9ae5d7195db94c07196b8622f6d54d"
+    },
+    {
+      "source_path": "migrations/0.41.1/migration.json",
+      "target_path": "migrations/0.41.1/migration.json",
+      "role": "metadata",
+      "update_policy": "readonly",
+      "render_mode": "copy",
+      "checksum": "sha256:bd24d43627b62eed8757ac4b38f3a61d141e038d2053d6873cd0ecc2f8ee6ea1"
+    },
+    {
+      "source_path": "migrations/0.41.1/baseline/scripts/check-workspace-integrity.py",
+      "target_path": "migrations/0.41.1/baseline/scripts/check-workspace-integrity.py",
+      "role": "metadata",
+      "update_policy": "readonly",
+      "render_mode": "copy",
+      "checksum": "sha256:ba457c059a648da9a92a07b9bcfee6239a9ae5d7195db94c07196b8622f6d54d"
+    },
+    {
+      "source_path": "migrations/0.41.1/baseline/scripts/forgekit-upgrade.py",
+      "target_path": "migrations/0.41.1/baseline/scripts/forgekit-upgrade.py",
+      "role": "metadata",
+      "update_policy": "readonly",
+      "render_mode": "copy",
+      "checksum": "sha256:88658a46a691f9cfb6754df127baa0221376c97fed17981ffeafb860b4edc654"
+    },
+    {
+      "source_path": "migrations/0.41.1/baseline/.forgekit/docs/scoped-docs.md",
+      "target_path": "migrations/0.41.1/baseline/.forgekit/docs/scoped-docs.md",
+      "role": "metadata",
+      "update_policy": "readonly",
+      "render_mode": "copy",
+      "checksum": "sha256:f4f29ce1dd847029a66d9f20cbd22623fd5ee496963900ec91858c3e1e0d08da"
+    },
+    {
+      "source_path": "migrations/0.41.1/files/scripts/check-workspace-integrity.py",
+      "target_path": "migrations/0.41.1/files/scripts/check-workspace-integrity.py",
+      "role": "metadata",
+      "update_policy": "readonly",
+      "render_mode": "copy",
+      "checksum": "sha256:714624539e7a4c54775c5498d1bf0492cc6eccdb84673062b0e2aacd25f8a268"
+    },
+    {
+      "source_path": "migrations/0.41.1/files/scripts/forgekit-upgrade.py",
+      "target_path": "migrations/0.41.1/files/scripts/forgekit-upgrade.py",
+      "role": "metadata",
+      "update_policy": "readonly",
+      "render_mode": "copy",
+      "checksum": "sha256:ef40e35eabe5d997c69e455577cdca5fdeaaba5fb4c2c5fc288b13738147373e"
+    },
+    {
+      "source_path": "migrations/0.41.1/files/.forgekit/docs/scoped-docs.md",
+      "target_path": "migrations/0.41.1/files/.forgekit/docs/scoped-docs.md",
+      "role": "metadata",
+      "update_policy": "readonly",
+      "render_mode": "copy",
+      "checksum": "sha256:0cb1295dfb00b326720ac3d60378e466e50c985eaef218fedc0d05755cb41ce5"
     }
   ]
 }

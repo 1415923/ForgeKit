@@ -103,6 +103,7 @@ REQUIRED_REPO_PATHS = [
     "project-template/migrations/0.40.1/migration.json",
     "project-template/migrations/0.40.2/migration.json",
     "project-template/migrations/0.41.0/migration.json",
+    "project-template/migrations/0.41.1/migration.json",
     "migrations/0.37.0/migration.json",
     "migrations/0.38.0/migration.json",
     "migrations/0.39.0/migration.json",
@@ -110,6 +111,7 @@ REQUIRED_REPO_PATHS = [
     "migrations/0.40.1/migration.json",
     "migrations/0.40.2/migration.json",
     "migrations/0.41.0/migration.json",
+    "migrations/0.41.1/migration.json",
     "project-template/scripts/check-codex-native-agents.py",
     "project-template/scripts/doc-health-report.py",
     "project-template/scripts/source-trace-report.py",
@@ -189,6 +191,7 @@ REQUIRED_GENERATED_PATHS = [
     "migrations/0.40.1/migration.json",
     "migrations/0.40.2/migration.json",
     "migrations/0.41.0/migration.json",
+    "migrations/0.41.1/migration.json",
     "governance/ai-engineering-loop.md",
     ".forgekit/changes/README.md",
     ".forgekit/changes/_template/proposal.md",
@@ -1068,7 +1071,9 @@ def assert_workspace_integrity(target, temp_parent):
     state_path.write_text(json.dumps(state, indent=2) + "\n", encoding="utf-8")
 
     project_path = workspace / ".forgekit/projects/backend"
-    shutil.copytree(workspace / ".forgekit/projects/_template", project_path)
+    repo_path = workspace / "backend-repo"
+    repo_path.mkdir()
+    run(["git", "init"], cwd=repo_path)
     workspace_map = {
         "schema_version": 1,
         "enabled": True,
@@ -1076,20 +1081,68 @@ def assert_workspace_integrity(target, temp_parent):
             "id": "delivery-workspace", "name": "Delivery Workspace",
             "docs_path": ".forgekit/docs", "projects_path": ".forgekit/projects",
             "artifact_root": "artifacts", "archive_root": ".forgekit/archive",
+            "docs_profile": "workspace-full",
             "default_read_scope": "workspace",
         },
         "projects": [{
             "id": "backend", "name": "Backend", "docs_path": ".forgekit/projects/backend",
-            "docs_profile": "project-capsule", "repo_ids": [], "depends_on": [],
+            "docs_profile": "workspace-only", "repo_ids": ["backend-repo"], "depends_on": [],
             "default_read_scope": "project",
         }],
-        "repos": [], "artifacts": [],
+        "repos": [{
+            "id": "backend-repo", "project_id": "backend", "repo_path": "backend-repo",
+            "docs_profile": "repo-lite", "default_read_scope": "repo",
+        }],
+        "artifacts": [],
     }
     map_path = workspace / ".forgekit/workspace-map.json"
     map_path.write_text(json.dumps(workspace_map, indent=2) + "\n", encoding="utf-8")
+
+    root_warning = run([sys.executable, str(checker), "--repo-root", str(workspace)], cwd=workspace)
+    if root_warning.returncode != 0 or "workspace_root_not_git" not in root_warning.stdout or "Status: warning" not in root_warning.stdout:
+        fail("non-Git WorkspaceRoot must warn without blocking")
+    strict_root = run([sys.executable, str(checker), "--repo-root", str(workspace), "--strict"], cwd=workspace, check=False)
+    if strict_root.returncode != 1 or "workspace_root_not_git" not in strict_root.stdout:
+        fail("--strict must promote the non-Git WorkspaceRoot warning to exit code 1")
+
+    run(["git", "init"], cwd=workspace)
+    workspace_only = run([sys.executable, str(checker), "--repo-root", str(workspace)], cwd=workspace)
+    if "Status: passed" not in workspace_only.stdout or "capsule_missing" in workspace_only.stdout:
+        fail("workspace-only project must not require or warn about a Project Capsule")
+
+    workspace_map["projects"][0]["docs_profile"] = "project-capsule"
+    map_path.write_text(json.dumps(workspace_map, indent=2) + "\n", encoding="utf-8")
+    missing_capsule = run([sys.executable, str(checker), "--repo-root", str(workspace)], cwd=workspace, check=False)
+    if missing_capsule.returncode != 1 or "capsule_missing" not in missing_capsule.stdout:
+        fail("project-capsule project without docs_path must be blocking")
+    shutil.copytree(workspace / ".forgekit/projects/_template", project_path)
     passed = run([sys.executable, str(checker), "--repo-root", str(workspace)], cwd=workspace)
     if "Status: passed" not in passed.stdout:
         fail("valid enabled workspace must pass integrity check")
+    if "workspace_root_not_git" in passed.stdout:
+        fail("Git WorkspaceRoot must not produce workspace_root_not_git")
+
+    workspace_map["projects"][0]["docs_profile"] = "invalid-profile"
+    map_path.write_text(json.dumps(workspace_map, indent=2) + "\n", encoding="utf-8")
+    invalid_profile = run([sys.executable, str(checker), "--repo-root", str(workspace)], cwd=workspace, check=False)
+    if invalid_profile.returncode != 1 or "invalid_docs_profile" not in invalid_profile.stdout:
+        fail("invalid project docs_profile must be blocking")
+    workspace_map["projects"][0]["docs_profile"] = "project-capsule"
+
+    workspace_map["workspace"]["docs_profile"] = "repo-lite"
+    map_path.write_text(json.dumps(workspace_map, indent=2) + "\n", encoding="utf-8")
+    wrong_workspace_profile = run([sys.executable, str(checker), "--repo-root", str(workspace)], cwd=workspace, check=False)
+    if wrong_workspace_profile.returncode != 1 or "workspace_profile_mismatch" not in wrong_workspace_profile.stdout:
+        fail("workspace profile used in the wrong position must be blocking")
+    workspace_map["workspace"]["docs_profile"] = "workspace-full"
+
+    workspace_map["repos"][0]["docs_profile"] = "workspace-only"
+    map_path.write_text(json.dumps(workspace_map, indent=2) + "\n", encoding="utf-8")
+    wrong_repo_profile = run([sys.executable, str(checker), "--repo-root", str(workspace)], cwd=workspace, check=False)
+    if wrong_repo_profile.returncode != 1 or "repo_profile_mismatch" not in wrong_repo_profile.stdout:
+        fail("repo profile used in the wrong position must be blocking")
+    workspace_map["repos"][0]["docs_profile"] = "repo-lite"
+    map_path.write_text(json.dumps(workspace_map, indent=2) + "\n", encoding="utf-8")
 
     extra = project_path / "notes.md"
     extra.write_text("# Local notes\n", encoding="utf-8")
@@ -1107,6 +1160,34 @@ def assert_workspace_integrity(target, temp_parent):
     if blocked.returncode != 1 or "full_forgekit_copy" not in blocked.stdout:
         fail("Project Capsule must not copy complete ForgeKit managed docs / AGENTS / CLAUDE / governance / skills / agents")
     forbidden.unlink()
+
+    workspace_map["artifacts"] = [{"id": "report", "project_id": "backend", "path": "backend-repo"}]
+    map_path.write_text(json.dumps(workspace_map, indent=2) + "\n", encoding="utf-8")
+    collision = run([sys.executable, str(checker), "--repo-root", str(workspace)], cwd=workspace, check=False)
+    if collision.returncode != 1 or "repo_artifact_collision" not in collision.stdout:
+        fail("artifact configured as a repo path must be blocking")
+    workspace_map["artifacts"] = []
+
+    workspace_map["repos"][0]["repo_path"] = ".forgekit/archive/backend-repo"
+    map_path.write_text(json.dumps(workspace_map, indent=2) + "\n", encoding="utf-8")
+    archived_repo = run([sys.executable, str(checker), "--repo-root", str(workspace)], cwd=workspace, check=False)
+    if archived_repo.returncode != 1 or "repo_in_archive" not in archived_repo.stdout:
+        fail("repo path under archive must be blocking")
+    workspace_map["repos"][0]["repo_path"] = "backend-repo"
+
+    workspace_map["projects"][0]["repo_ids"] = ["unknown-repo"]
+    map_path.write_text(json.dumps(workspace_map, indent=2) + "\n", encoding="utf-8")
+    unknown_repo = run([sys.executable, str(checker), "--repo-root", str(workspace)], cwd=workspace, check=False)
+    if unknown_repo.returncode != 1 or "unknown_repo" not in unknown_repo.stdout:
+        fail("unknown project repo id must be blocking")
+    workspace_map["projects"][0]["repo_ids"] = ["backend-repo"]
+
+    workspace_map["projects"][0]["docs_path"] = "../outside"
+    map_path.write_text(json.dumps(workspace_map, indent=2) + "\n", encoding="utf-8")
+    unsafe = run([sys.executable, str(checker), "--repo-root", str(workspace)], cwd=workspace, check=False)
+    if unsafe.returncode != 1 or "unsafe_path" not in unsafe.stdout:
+        fail("unsafe project docs path must be blocking")
+    workspace_map["projects"][0]["docs_path"] = ".forgekit/projects/backend"
 
     workspace_map["workspace"]["id"] = "TODO_REVIEW"
     map_path.write_text(json.dumps(workspace_map, indent=2) + "\n", encoding="utf-8")
@@ -1434,8 +1515,8 @@ def assert_json(path):
 def assert_manifest_lock(target):
     lock_path = target / ".forgekit" / "template-lock.json"
     lock = json.loads(lock_path.read_text(encoding="utf-8"))
-    if lock.get("installed_version") != "0.41.0":
-        fail("template-lock installed_version must be 0.41.0")
+    if lock.get("installed_version") != "0.41.1":
+        fail("template-lock installed_version must be 0.41.1")
     if lock.get("managed_docs_root") != ".forgekit/docs":
         fail("template-lock managed_docs_root must match boundary")
     if lock.get("change_root") != ".forgekit/changes":
@@ -1454,7 +1535,7 @@ def assert_versioned_migration_upgrade(repo, target, temp_parent):
     state = json.loads(state_path.read_text(encoding="utf-8-sig"))
     expected = {
         "schema_version": 1,
-        "forgekit_version": "0.41.0",
+        "forgekit_version": "0.41.1",
         "managed_docs_root": ".forgekit/docs",
         "change_root": ".forgekit/changes",
         "mode": "Standard",
@@ -1490,8 +1571,8 @@ def assert_versioned_migration_upgrade(repo, target, temp_parent):
         if path.is_file()
     }
     check = run([sys.executable, str(script), "check", "--repo-root", "."], cwd=target)
-    if "Status: current" not in check.stdout or "Current version: 0.41.0" not in check.stdout:
-        fail("versioned migration check did not report current v0.41.0 state")
+    if "Status: current" not in check.stdout or "Current version: 0.41.1" not in check.stdout:
+        fail("versioned migration check did not report current v0.41.1 state")
     plan = run([sys.executable, str(script), "plan", "--repo-root", "."], cwd=target)
     for marker in ["Status: report-only", "Mode: versioned-migration-plan", "No files were changed."]:
         if marker not in plan.stdout:
@@ -1547,8 +1628,8 @@ def assert_versioned_migration_upgrade(repo, target, temp_parent):
             shutil.rmtree(skill_path)
     run([sys.executable, str(v036_target / "scripts/forgekit-upgrade.py"), "apply", "--safe", "--repo-root", "."], cwd=v036_target)
     migrated = json.loads(v036_state_path.read_text(encoding="utf-8"))
-    if migrated.get("forgekit_version") != "0.41.0":
-        fail("version chain did not update state to v0.41.0")
+    if migrated.get("forgekit_version") != "0.41.1":
+        fail("version chain did not update state to v0.41.1")
     if migrated.get("features", {}).get("independent_code_review") is not True:
         fail("v0.37 migration did not enable independent_code_review")
     if migrated.get("features", {}).get("context_continuity") is not True:
@@ -1580,17 +1661,59 @@ def assert_versioned_migration_upgrade(repo, target, temp_parent):
     if (legacy / ".forgekit" / "state.json").exists():
         fail("pre-v0.36 check must not create state.json")
 
+    hotfix_target = temp_parent / "v0410-hotfix-baseline"
+    shutil.copytree(target, hotfix_target)
+    hotfix_state_path = hotfix_target / ".forgekit/state.json"
+    hotfix_state = json.loads(hotfix_state_path.read_text(encoding="utf-8-sig"))
+    hotfix_state["forgekit_version"] = "0.41.0"
+    hotfix_state_path.write_text(json.dumps(hotfix_state, indent=2) + "\n", encoding="utf-8")
+    baseline_root = repo / "migrations/0.41.1/baseline"
+    for relative in [
+        "scripts/check-workspace-integrity.py",
+        "scripts/forgekit-upgrade.py",
+        ".forgekit/docs/scoped-docs.md",
+    ]:
+        shutil.copyfile(baseline_root / relative, hotfix_target / relative)
+    hotfix_plan = run([sys.executable, str(repo / "scripts/forgekit-upgrade.py"), "plan", "--repo-root", str(hotfix_target)], cwd=repo)
+    if "SAFE: update-workspace-integrity-checker" not in hotfix_plan.stdout:
+        fail("v0.41.1 plan must classify an unchanged v0.41.0 checker as safe to replace")
+    hotfix_apply = run([sys.executable, str(repo / "scripts/forgekit-upgrade.py"), "apply", "--safe", "--repo-root", str(hotfix_target)], cwd=repo)
+    if "[applied] update-workspace-integrity-checker" not in hotfix_apply.stdout:
+        fail("v0.41.1 safe apply did not replace the unchanged v0.41.0 checker")
+    if (hotfix_target / "scripts/check-workspace-integrity.py").read_bytes() != (repo / "scripts/check-workspace-integrity.py").read_bytes():
+        fail("v0.41.1 safe apply installed the wrong workspace checker")
+
+    modified_target = temp_parent / "v0410-hotfix-modified"
+    shutil.copytree(target, modified_target)
+    modified_state_path = modified_target / ".forgekit/state.json"
+    modified_state = json.loads(modified_state_path.read_text(encoding="utf-8-sig"))
+    modified_state["forgekit_version"] = "0.41.0"
+    modified_state_path.write_text(json.dumps(modified_state, indent=2) + "\n", encoding="utf-8")
+    modified_checker = modified_target / "scripts/check-workspace-integrity.py"
+    modified_checker.write_text("# user-modified v0.41.0 checker\n", encoding="utf-8")
+    modified_before = modified_checker.read_bytes()
+    modified_plan = run([sys.executable, str(repo / "scripts/forgekit-upgrade.py"), "plan", "--repo-root", str(modified_target)], cwd=repo)
+    for marker in ["skipped-existing-review-needed", "may still use v0.41.0 workspace Git/profile logic"]:
+        if marker not in modified_plan.stdout:
+            fail(f"v0.41.1 modified-checker plan missing review-needed marker: {marker}")
+    modified_apply = run([sys.executable, str(repo / "scripts/forgekit-upgrade.py"), "apply", "--safe", "--repo-root", str(modified_target)], cwd=repo)
+    for marker in ["skipped-existing-review-needed", "may still use v0.41.0 workspace Git/profile logic", "not fully updated"]:
+        if marker not in modified_apply.stdout:
+            fail(f"v0.41.1 modified-checker apply missing review-needed marker: {marker}")
+    if modified_checker.read_bytes() != modified_before:
+        fail("v0.41.1 migration overwrote a user-modified workspace checker")
+
     apply_target = temp_parent / "versioned-apply"
     shutil.copytree(target, apply_target)
     migration_root = temp_parent / "migration-packages"
-    package = migration_root / "0.41.1"
+    package = migration_root / "0.41.2"
     package.mkdir(parents=True)
     (package / "proof.txt").write_text("safe migration\n", encoding="utf-8")
     migration = {
-        "id": "0.41.1-smoke",
+        "id": "0.41.2-smoke",
         "title": "Smoke safe migration",
-        "from": "0.41.0",
-        "to": "0.41.1",
+        "from": "0.41.1",
+        "to": "0.41.2",
         "risk": "low",
         "actions": [{
             "id": "copy-proof",
@@ -1608,13 +1731,13 @@ def assert_versioned_migration_upgrade(repo, target, temp_parent):
     apply_plan = run([
         sys.executable, str(apply_script), "plan", "--repo-root", ".", "--migration-root", str(migration_root)
     ], cwd=apply_target)
-    if "To: 0.41.1" not in apply_plan.stdout or (apply_target / ".forgekit" / "migration-proof.txt").exists():
+    if "To: 0.41.2" not in apply_plan.stdout or (apply_target / ".forgekit" / "migration-proof.txt").exists():
         fail("plan must show the safe migration without applying it")
     run([
         sys.executable, str(apply_script), "apply", "--safe", "--repo-root", ".", "--migration-root", str(migration_root)
     ], cwd=apply_target)
     applied_state = json.loads((apply_target / ".forgekit" / "state.json").read_text(encoding="utf-8"))
-    if applied_state.get("forgekit_version") != "0.41.1":
+    if applied_state.get("forgekit_version") != "0.41.2":
         fail("safe migration did not update state version")
     if not (apply_target / ".forgekit" / "migration-proof.txt").is_file():
         fail("safe migration did not apply the declared safe action")
@@ -1685,8 +1808,8 @@ def assert_unified_project_entry(repo, current_target, temp_parent):
         fail("safe apply must treat identical existing migration file as no-op")
     if same_maintenance.read_bytes() != same_before:
         fail("safe apply rewrote an identical existing managed doc")
-    if json.loads(same_state.read_text(encoding="utf-8"))["forgekit_version"] != "0.41.0":
-        fail("same-content idempotent migration did not reach v0.41.0")
+    if json.loads(same_state.read_text(encoding="utf-8"))["forgekit_version"] != "0.41.1":
+        fail("same-content idempotent migration did not reach v0.41.1")
 
     old = temp_parent / "unified-old-no-confirm"
     old_state = write_state(old, "0.38.0")
@@ -1720,7 +1843,7 @@ def assert_unified_project_entry(repo, current_target, temp_parent):
     if "Safe migration apply completed through forgekit-upgrade.py" not in applied.stdout:
         fail("unified --yes must delegate to forgekit-upgrade.py apply --safe")
     applied_state = json.loads(apply_state.read_text(encoding="utf-8"))
-    if applied_state.get("forgekit_version") != "0.41.0":
+    if applied_state.get("forgekit_version") != "0.41.1":
         fail("unified --yes did not advance state through safe migrations")
     if "skipped-existing-review-needed" not in applied.stdout:
         fail("partial-upgrade rerun must report the different existing file as review-needed")
@@ -1805,7 +1928,7 @@ def assert_upgrade_report(repo, target):
         fail("upgrade must not overwrite managed docs")
     assert_paths(target, [
         ".forgekit/upgrade-report.md",
-        ".forgekit/upgrade-export/0.41.0/.forgekit/docs/project-plan.md",
+        ".forgekit/upgrade-export/0.41.1/.forgekit/docs/project-plan.md",
     ])
 
 
@@ -1842,7 +1965,7 @@ def assert_guided_upgrade(repo, target):
         ".forgekit/upgrade/upgrade-plan.md",
         ".forgekit/upgrade/upgrade-actions.md",
         ".forgekit/upgrade/upgrade-inventory.json",
-        ".forgekit/upgrade/candidates/0.41.0/.forgekit/docs/project-plan.md",
+        ".forgekit/upgrade/candidates/0.41.1/.forgekit/docs/project-plan.md",
     ])
     plan = (target / ".forgekit" / "upgrade" / "upgrade-plan.md").read_text(encoding="utf-8")
     actions = (target / ".forgekit" / "upgrade" / "upgrade-actions.md").read_text(encoding="utf-8")
@@ -2540,8 +2663,8 @@ def assert_current_docs_integrity(repo, target, temp_parent):
     if "skipped-existing-review-needed" not in first.stdout or existing.read_bytes() != before:
         fail("v0.40.2 migration must preserve a different existing integrity guide")
     migrated = json.loads(state_path.read_text(encoding="utf-8"))
-    if migrated.get("forgekit_version") != "0.41.0" or migrated["features"].get("active_current_docs_integrity_guard") is not True:
-        fail("migration chain did not update state through v0.41.0")
+    if migrated.get("forgekit_version") != "0.41.1" or migrated["features"].get("active_current_docs_integrity_guard") is not True:
+        fail("migration chain did not update state through v0.41.1")
     second = run([sys.executable, str(upgrade), "apply", "--safe", "--repo-root", str(migration_case)], cwd=repo)
     if "No migration is required; no files were changed" not in second.stdout:
         fail("v0.40.2 migration rerun must be a no-op/current result")
@@ -2668,6 +2791,8 @@ def main():
     assert_json(repo / "project-template" / "migrations" / "0.40.2" / "migration.json")
     assert_json(repo / "migrations" / "0.41.0" / "migration.json")
     assert_json(repo / "project-template" / "migrations" / "0.41.0" / "migration.json")
+    assert_json(repo / "migrations" / "0.41.1" / "migration.json")
+    assert_json(repo / "project-template" / "migrations" / "0.41.1" / "migration.json")
     assert_loop_docs(repo / "project-template", "docs/loop-readiness.md", "docs/loop-blueprint.md")
     assert_loop_operations(
         repo / "project-template",
