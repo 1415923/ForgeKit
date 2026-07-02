@@ -1,0 +1,30 @@
+{
+  "id": "0.43.2-version-metadata-repair-hotfix",
+  "title": "Version Metadata Repair Hotfix",
+  "from": ["0.43.0", "0.43.1"],
+  "to": "0.43.2",
+  "risk": "low",
+  "actions": [
+    {
+      "id": "repair-version-metadata",
+      "type": "set_state_feature",
+      "safety": "safe",
+      "name": "version_metadata_repair",
+      "value": true
+    }
+  ],
+  "manual_review": [
+    "v0.43.1 is withdrawn/superseded and should not be used as a stable version.",
+    "If your forgekit_version still shows 0.43.0 after this migration, your state.json was not on the v0.43.0 baseline; review the diff manually.",
+    "The repair only affects version metadata; it does not change any functionality from v0.43.0/v0.43.1, including Project Capsule Bootstrap, review-needed, manual-merge, and CLI language."
+  ],
+  "non_goals": [
+    "No Project Capsule creation",
+    "No workspace-map modification",
+    "No workspace docs split",
+    "No automatic review-needed file handling",
+    "No automatic user content overwrite",
+    "No automatic Git operations",
+    "No new features beyond version metadata alignment"
+  ]
+}
