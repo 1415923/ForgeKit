@@ -111,7 +111,7 @@ Test-RequiredPath "project-template\scripts\run-harness-check.ps1"
 Test-RequiredPath "scripts\init-project-template.ps1"
 Test-RequiredPath "scripts\init-project-template.sh"
 
-Test-RequiredPattern "README.md" "Native Agent Adapter" "Current native adapter entry"
+Test-RequiredPattern "README.md" "可选原生 agent 配置" "Current native adapter entry"
 Test-RequiredPattern "scripts\init-project-template.ps1" "CLAUDE.md" "Unified initializer Claude guidance"
 Test-RequiredPattern "skills\project-init\SKILL.md" "Classify the discovery state" "Project init discovery state"
 Test-RequiredPattern "skills\project-suitability\SKILL.md" "Suitable, Conditional, or Custom" "Project suitability outcome"

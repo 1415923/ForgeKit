@@ -12,10 +12,78 @@ from pathlib import Path
 
 MIN_MIGRATION_VERSION = (0, 36, 0)
 STATE_RELATIVE_PATH = Path(".forgekit/state.json")
+LANGUAGES = {"en-US", "zh-CN"}
+
+MESSAGES = {
+    "en-US": {
+        "lang_prompt": "请选择显示语言 / Select display language:",
+        "lang_zh": "  [1] 中文",
+        "lang_en": "  [2] English",
+        "lang_choice": "Your choice: ",
+        "noninteractive_policy": "Review-needed item requires a policy in non-interactive mode.",
+        "run_one_of": "Run one of:",
+        "no_files_changed": "No files were changed.",
+        "safe_apply_prompt": "Continue with safe apply? [y/N]: ",
+        "init_prompt": "Continue with initialization? [y/N]: ",
+        "safe_apply_skipped": "Safe apply was not executed. The check and plan remain report-only.",
+        "init_skipped": "Initialization was not applied. No files were changed.",
+        "up_to_date_plan": "Plan summary: no migration is required.",
+        "manual_count": "Manual actions count: {count}",
+        "safe_count": "Safe actions count: {count}",
+        "check_result": "Check result: {status}",
+        "plan_summary": "Plan summary:",
+        "alias_keep_local": "keep-local is treated as manual-merge.",
+    },
+    "zh-CN": {
+        "lang_prompt": "请选择显示语言 / Select display language:",
+        "lang_zh": "  [1] 中文",
+        "lang_en": "  [2] English",
+        "lang_choice": "请输入选择：",
+        "noninteractive_policy": "非交互模式下，review-needed 项需要显式策略。",
+        "run_one_of": "请运行以下命令之一：",
+        "no_files_changed": "未修改文件。",
+        "safe_apply_prompt": "是否继续执行安全迁移？[y/N]: ",
+        "init_prompt": "是否继续初始化？[y/N]: ",
+        "safe_apply_skipped": "未执行安全迁移；check 和 plan 仍为只读报告。",
+        "init_skipped": "未执行初始化。未修改文件。",
+        "up_to_date_plan": "计划摘要：不需要迁移。",
+        "manual_count": "人工/复核项数量：{count}",
+        "safe_count": "安全动作数量：{count}",
+        "check_result": "检查结果：{status}",
+        "plan_summary": "计划摘要：",
+        "alias_keep_local": "keep-local is treated as manual-merge.",
+    },
+}
+
+
+def msg(lang, key, **kwargs):
+    template = MESSAGES.get(lang, MESSAGES["en-US"]).get(key, MESSAGES["en-US"].get(key, key))
+    return template.format(**kwargs)
 
 
 def fail(message):
     raise SystemExit(f"[fail] {message}")
+
+
+def validate_lang(value, label):
+    if value not in LANGUAGES:
+        fail(f"Invalid {label}: {value}. Allowed values: zh-CN, en-US")
+    return value
+
+
+def resolve_language(args):
+    if args.lang:
+        return validate_lang(args.lang, "--lang")
+    env_lang = os.environ.get("FORGEKIT_LANG")
+    if env_lang:
+        return validate_lang(env_lang, "FORGEKIT_LANG")
+    if args.yes or args.dry_run or args.no_apply or not sys.stdin.isatty():
+        return "en-US"
+    print(msg("en-US", "lang_prompt"))
+    print(msg("en-US", "lang_zh"))
+    print(msg("en-US", "lang_en"))
+    choice = input(msg("en-US", "lang_choice")).strip()
+    return "zh-CN" if choice == "1" else "en-US"
 
 
 def parse_version(value, label):
@@ -144,7 +212,7 @@ def default_project_name(target):
     return target.name[:-len(suffix)] if target.name.lower().endswith(suffix) else target.name
 
 
-def init_project(args, toolkit_root, target, toolkit):
+def init_project(args, toolkit_root, target, toolkit, lang):
     print_detection(target, None, toolkit, "init")
     nonempty = target_has_content(target)
     if nonempty and not args.force_init:
@@ -158,8 +226,8 @@ def init_project(args, toolkit_root, target, toolkit):
     print("Plan summary: initialize the ForgeKit project template using the existing init script.")
     print("Safe actions count: 1")
     print("Manual actions count: 0")
-    if not confirmed("Continue with initialization? [y/N]: ", args.yes, args.dry_run or args.no_apply):
-        print("Initialization was not applied. No files were changed.")
+    if not confirmed(msg(lang, "init_prompt"), args.yes, args.dry_run or args.no_apply):
+        print(msg(lang, "init_skipped"))
         return 0
     target.parent.mkdir(parents=True, exist_ok=True)
     if os.name == "nt":
@@ -186,7 +254,27 @@ def migration_counts(plan_output):
     return safe, non_safe + review_needed + reviews
 
 
-def upgrade_project(args, toolkit_root, target, installed, toolkit):
+def review_needed_count(plan_output):
+    return sum(int(value) for value in re.findall(r"(?m)^Review needed:\s*(\d+)\s*$", plan_output))
+
+
+def print_project_review_policy_help(target, lang):
+    print(msg(lang, "noninteractive_policy"))
+    print("")
+    print(msg(lang, "run_one_of"))
+    print("")
+    print(f'python .\\scripts\\forgekit-project.py --target "{target}" --yes --review-needed-policy manual-merge')
+    print(f'python .\\scripts\\forgekit-project.py --target "{target}" --yes --review-needed-policy replace-template')
+
+
+def normalize_review_policy(policy, lang):
+    if policy == "keep-local":
+        print(msg(lang, "alias_keep_local"))
+        return "manual-merge"
+    return policy
+
+
+def upgrade_project(args, toolkit_root, target, installed, toolkit, lang):
     upgrade_script = toolkit_root / "scripts/forgekit-upgrade.py"
     base = [sys.executable, str(upgrade_script)]
     check_output = run_capture(base + ["check", "--repo-root", str(target)], cwd=toolkit_root)
@@ -196,21 +284,30 @@ def upgrade_project(args, toolkit_root, target, installed, toolkit):
 
     print_detection(target, installed, toolkit, "upgrade-sync")
     show_current_docs_integrity(toolkit_root, target)
-    print(f"Check result: {check_status.group(1).strip() if check_status else 'unknown'}")
-    print("Plan summary:")
+    print(msg(lang, "check_result", status=check_status.group(1).strip() if check_status else "unknown"))
+    print(msg(lang, "plan_summary"))
     print(plan_output)
-    print(f"Safe actions count: {safe_count}")
-    print(f"Manual actions count: {manual_count}")
+    print(msg(lang, "safe_count", count=safe_count))
+    print(msg(lang, "manual_count", count=manual_count))
 
     planned_target = re.search(r"(?m)^To:\s*(\d+\.\d+\.\d+)\s*$", plan_output)
     if not planned_target or parse_version(planned_target.group(1), "planned target") != toolkit:
         print("[stop] The available migration chain does not reach the toolkit version. Manual review is required.")
         print("No files were changed.")
         return 2
-    if not confirmed("Continue with safe apply? [y/N]: ", args.yes, args.dry_run or args.no_apply):
-        print("Safe apply was not executed. The check and plan remain report-only.")
+    has_review_needed = review_needed_count(plan_output) > 0
+    if has_review_needed and args.review_needed_policy is None and (args.yes or not sys.stdin.isatty()):
+        print_project_review_policy_help(target, lang)
+        print(msg(lang, "no_files_changed"))
+        return 2
+    if not confirmed(msg(lang, "safe_apply_prompt"), args.yes, args.dry_run or args.no_apply):
+        print(msg(lang, "safe_apply_skipped"))
         return 0
-    run_stream(base + ["apply", "--safe", "--repo-root", str(target)], cwd=toolkit_root)
+    apply_command = base + ["apply", "--safe", "--repo-root", str(target)]
+    if args.review_needed_policy:
+        apply_command.extend(["--review-needed-policy", normalize_review_policy(args.review_needed_policy, lang)])
+    apply_command.extend(["--lang", lang])
+    run_stream(apply_command, cwd=toolkit_root)
     print("[ok] Safe migration apply completed through forgekit-upgrade.py.")
     print("Run ManagedDocsWriteback=minimal, then refresh the session before starting new work.")
     return 0
@@ -223,9 +320,12 @@ def main():
     parser.add_argument("--dry-run", action="store_true", help="Detect and show the plan without writing")
     parser.add_argument("--force-init", action="store_true", help="Allow initialization only when ForgeKit is not installed")
     parser.add_argument("--no-apply", action="store_true", help="Run detection/check/plan only")
+    parser.add_argument("--review-needed-policy", choices=["ask", "keep-local", "manual-merge", "replace-template", "abort"], help="How to resolve review-needed safe migration items during upgrade")
+    parser.add_argument("--lang", help="Display language: zh-CN or en-US")
     args = parser.parse_args()
     if args.yes and (args.dry_run or args.no_apply):
         fail("--yes cannot be combined with --dry-run or --no-apply")
+    lang = resolve_language(args)
 
     toolkit_root = Path(__file__).resolve().parents[1]
     toolkit = toolkit_version(toolkit_root)
@@ -236,7 +336,7 @@ def main():
     if args.force_init and status != "init":
         fail("--force-init is only valid when ForgeKit is not installed")
     if status == "init":
-        return init_project(args, toolkit_root, target, toolkit)
+        return init_project(args, toolkit_root, target, toolkit, lang)
     if status == "legacy-adoption":
         print_detection(target, installed, toolkit, "legacy-adoption")
         print("Check result: adoption-required")
@@ -251,13 +351,13 @@ def main():
         return 2
     if installed == toolkit:
         print_detection(target, installed, toolkit, "up-to-date")
-        print("Check result: current")
-        print("Plan summary: no migration is required.")
-        print("Safe actions count: 0")
-        print("Manual actions count: 0")
-        print("No files were changed.")
+        print(msg(lang, "check_result", status="current"))
+        print(msg(lang, "up_to_date_plan"))
+        print(msg(lang, "safe_count", count=0))
+        print(msg(lang, "manual_count", count=0))
+        print(msg(lang, "no_files_changed"))
         return 0
-    return upgrade_project(args, toolkit_root, target, installed, toolkit)
+    return upgrade_project(args, toolkit_root, target, installed, toolkit, lang)
 
 
 if __name__ == "__main__":

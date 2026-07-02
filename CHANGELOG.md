@@ -55,6 +55,15 @@ v0.43.0 只补一个单 project、plan-first、显式确认、幂等的最小创
 * 同内容 no-op，不同内容 `completed_with_review_needed` 且不覆盖。
 * 不支持 `--all`、`--force`、自动启用、文档拆分、Repo Lite、runner、daemon、scheduler 或自动 Git 操作。
 
+### Fixed
+
+* 修复 safe migration 遇到 `review-needed` 时只输出 `skipped-existing-review-needed`、缺少目标文件/原因/影响/下一步的问题。
+* 统一入口 `forgekit-project.py --target <project>` 会在同一轮处理 review-needed：交互式可选择 replace template、manual-merge、show diff 或 abort；非交互/`--yes` 必须显式传入 `--review-needed-policy manual-merge` 或 `replace-template`。
+* review-needed 不再只有 replace / keep；manual-merge 会保留本地文件，并把新版模板、当前本地副本、diff 和 README 导出到 `.forgekit/reports/review-needed/<action-id>/`，方便后续人工或 AI 辅助合并。
+* 新增 `.forgekit/reports/upgrade-review-needed.md` 和 `.forgekit/reports/upgrade-review-needed.json` 作为记录；报告不是独立入口，也不要求用户手动查 migration 文件。
+* manual-merge 后最终状态明确为需要后续手动合并；replace-template 后才声明 fully updated。ForgeKit 仍不自动合并，也不覆盖用户内容。
+* 初始化 / 升级工具支持 `--lang zh-CN`、`--lang en-US` 和 `FORGEKIT_LANG`，只切换用户可读说明，不翻译 action_id、路径、命令或 JSON 字段名。
+
 ---
 
 ## [0.42.0] - Work Session Checkpoint & Usage Playbook

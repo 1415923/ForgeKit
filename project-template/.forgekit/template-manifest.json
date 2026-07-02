@@ -65,7 +65,7 @@
       "role": "managed_doc",
       "update_policy": "merge",
       "render_mode": "copy",
-      "checksum": "sha256:011f472054f784ebc942599283aab4978e84143ae6c89fc4bbbeefdd9963351c"
+      "checksum": "sha256:b6b521e0481a8957372ab7d75e6a767da6de154e41330861122339b89f3bc362"
     },
     {
       "source_path": ".forgekit/archive/README.md",
@@ -433,7 +433,7 @@
       "role": "script",
       "update_policy": "replace",
       "render_mode": "copy",
-      "checksum": "sha256:ef40e35eabe5d997c69e455577cdca5fdeaaba5fb4c2c5fc288b13738147373e"
+      "checksum": "sha256:3ffb554e0d9c11ee91222be090580dfac70190b45bffa1a5834267d8460661e1"
     },
     {
       "source_path": "migrations/0.36.0/migration.json",
@@ -625,7 +625,7 @@
       "role": "managed_doc",
       "update_policy": "merge",
       "render_mode": "copy",
-      "checksum": "sha256:af43d2d311f4abaa88f7b04aa964767ad3ad5ba87f0d259b81f762be9ecc4853"
+      "checksum": "sha256:32f6e56a68920ab1a58dbf97912deb37c3403bb0f8b58ddb2c6ba333abb0b319"
     },
     {
       "source_path": "docs/archive-capsule.md",
@@ -1017,7 +1017,7 @@
       "role": "metadata",
       "update_policy": "readonly",
       "render_mode": "copy",
-      "checksum": "sha256:ef40e35eabe5d997c69e455577cdca5fdeaaba5fb4c2c5fc288b13738147373e"
+      "checksum": "sha256:3ffb554e0d9c11ee91222be090580dfac70190b45bffa1a5834267d8460661e1"
     },
     {
       "source_path": "migrations/0.41.1/files/.forgekit/docs/scoped-docs.md",
@@ -1097,7 +1097,7 @@
       "role": "metadata",
       "update_policy": "readonly",
       "render_mode": "copy",
-      "checksum": "sha256:011f472054f784ebc942599283aab4978e84143ae6c89fc4bbbeefdd9963351c"
+      "checksum": "sha256:b6b521e0481a8957372ab7d75e6a767da6de154e41330861122339b89f3bc362"
     }
   ]
 }

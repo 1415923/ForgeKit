@@ -16,6 +16,22 @@
 
 > 我已经更新外层 ForgeKit。请对 `<project-root>` 执行 upgrade check 和 plan，展示 safe/manual actions；没有我的确认不要 apply。升级后提醒我刷新会话。
 
+如果升级中出现 `review-needed` 文件，仍使用同一个统一入口在本轮处理，不要手动查 `migration.json`。交互式终端按提示选择：
+
+- `replace with current ForgeKit template`：确认该文件没有本地定制，使用当前 ForgeKit 模板替换。
+- `manual-merge`：确认该文件是本地定制，保留本地文件，并生成 `.local`、`.incoming`、`.diff` 和 README，方便后续手动或 AI 辅助合并。
+- `show diff`：先查看本地文件与 incoming template 的差异，再回到选择菜单。
+- `abort`：停止本轮升级，不继续写入迁移结果。
+
+非交互或 `--yes` 场景必须显式给出策略，例如：
+
+```bash
+python scripts/forgekit-project.py --target <project-root> --yes --review-needed-policy manual-merge
+python scripts/forgekit-project.py --target <project-root> --yes --review-needed-policy replace-template
+```
+
+初始化 / 升级工具支持 `--lang zh-CN` 和 `--lang en-US`；也可以用 `FORGEKIT_LANG` 选择本轮显示语言。
+
 ## 4. 开始今天工作
 
 > 请先按 workflow router 读取当前任务、最近 work-log、开放风险和必要验证入口，给我一个简短的当前状态与今天下一步；不要全量读取 `.forgekit/docs/**`。

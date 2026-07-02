@@ -229,13 +229,16 @@ REQUIRED_GENERATED_PATHS = [
 ]
 
 
-def run(cmd, cwd, check=True, input_text=None):
+def run(cmd, cwd, check=True, input_text=None, env_updates=None):
     environment = os.environ.copy()
     environment["GIT_CONFIG_GLOBAL"] = os.devnull
     environment["GIT_CONFIG_NOSYSTEM"] = "1"
     environment["PYTHONDONTWRITEBYTECODE"] = "1"
+    environment["PYTHONIOENCODING"] = "utf-8"
     environment["HOME"] = str(Path(cwd).resolve())
     environment["XDG_CONFIG_HOME"] = str(Path(cwd).resolve() / ".config")
+    if env_updates:
+        environment.update(env_updates)
     result = subprocess.run(
         cmd,
         cwd=cwd,
@@ -250,6 +253,65 @@ def run(cmd, cwd, check=True, input_text=None):
     if check and result.returncode != 0:
         print(result.stdout, end="")
         print(result.stderr, end="", file=sys.stderr)
+        raise SystemExit(f"Command failed ({result.returncode}): {' '.join(cmd)}")
+    return result
+
+
+def run_pty(cmd, cwd, input_text, check=True):
+    if os.name == "nt":
+        return types.SimpleNamespace(returncode=0, stdout="", stderr="")
+    import pty
+    import select
+    environment = os.environ.copy()
+    environment["GIT_CONFIG_GLOBAL"] = os.devnull
+    environment["GIT_CONFIG_NOSYSTEM"] = "1"
+    environment["PYTHONDONTWRITEBYTECODE"] = "1"
+    environment["PYTHONPYCACHEPREFIX"] = str(Path(tempfile.gettempdir()) / "forgekit-pycache")
+    environment["HOME"] = str(Path(cwd).resolve())
+    environment["XDG_CONFIG_HOME"] = str(Path(cwd).resolve() / ".config")
+    master, slave = pty.openpty()
+    process = subprocess.Popen(
+        cmd,
+        cwd=cwd,
+        env=environment,
+        text=False,
+        stdin=slave,
+        stdout=slave,
+        stderr=slave,
+        close_fds=True,
+    )
+    os.close(slave)
+    if input_text:
+        os.write(master, input_text.encode("utf-8"))
+    chunks = []
+    while True:
+        ready, _, _ = select.select([master], [], [], 0.2)
+        if ready:
+            try:
+                chunk = os.read(master, 4096)
+            except OSError:
+                break
+            if not chunk:
+                break
+            chunks.append(chunk)
+        if process.poll() is not None:
+            while True:
+                ready, _, _ = select.select([master], [], [], 0)
+                if not ready:
+                    break
+                try:
+                    chunk = os.read(master, 4096)
+                except OSError:
+                    break
+                if not chunk:
+                    break
+                chunks.append(chunk)
+            break
+    os.close(master)
+    stdout = b"".join(chunks).decode("utf-8", errors="replace")
+    result = types.SimpleNamespace(returncode=process.wait(), stdout=stdout, stderr="")
+    if check and result.returncode != 0:
+        print(result.stdout, end="")
         raise SystemExit(f"Command failed ({result.returncode}): {' '.join(cmd)}")
     return result
 
@@ -1778,7 +1840,7 @@ def assert_versioned_migration_upgrade(repo, target, temp_parent):
         skill_path = v036_target / ".claude/skills" / skill_name
         if skill_path.is_dir():
             shutil.rmtree(skill_path)
-    run([sys.executable, str(v036_target / "scripts/forgekit-upgrade.py"), "apply", "--safe", "--repo-root", "."], cwd=v036_target)
+    run([sys.executable, str(v036_target / "scripts/forgekit-upgrade.py"), "apply", "--safe", "--repo-root", ".", "--review-needed-policy", "replace-template"], cwd=v036_target)
     migrated = json.loads(v036_state_path.read_text(encoding="utf-8"))
     if migrated.get("forgekit_version") != "0.43.0":
         fail("version chain did not update state to v0.43.0")
@@ -1835,7 +1897,7 @@ def assert_versioned_migration_upgrade(repo, target, temp_parent):
     hotfix_plan = run([sys.executable, str(repo / "scripts/forgekit-upgrade.py"), "plan", "--repo-root", str(hotfix_target)], cwd=repo)
     if "SAFE: update-workspace-integrity-checker" not in hotfix_plan.stdout:
         fail("v0.41.1 plan must classify an unchanged v0.41.0 checker as safe to replace")
-    hotfix_apply = run([sys.executable, str(repo / "scripts/forgekit-upgrade.py"), "apply", "--safe", "--repo-root", str(hotfix_target)], cwd=repo)
+    hotfix_apply = run([sys.executable, str(repo / "scripts/forgekit-upgrade.py"), "apply", "--safe", "--repo-root", str(hotfix_target), "--review-needed-policy", "replace-template"], cwd=repo)
     if "[applied] update-workspace-integrity-checker" not in hotfix_apply.stdout:
         fail("v0.41.1 safe apply did not replace the unchanged v0.41.0 checker")
     if (hotfix_target / "scripts/check-workspace-integrity.py").read_bytes() != (repo / "scripts/check-workspace-integrity.py").read_bytes():
@@ -1854,12 +1916,29 @@ def assert_versioned_migration_upgrade(repo, target, temp_parent):
     for marker in ["skipped-existing-review-needed", "may still use v0.41.0 workspace Git/profile logic"]:
         if marker not in modified_plan.stdout:
             fail(f"v0.41.1 modified-checker plan missing review-needed marker: {marker}")
-    modified_apply = run([sys.executable, str(repo / "scripts/forgekit-upgrade.py"), "apply", "--safe", "--repo-root", str(modified_target)], cwd=repo)
-    for marker in ["skipped-existing-review-needed", "may still use v0.41.0 workspace Git/profile logic", "not fully updated"]:
+    modified_apply = run([
+        sys.executable, str(repo / "scripts/forgekit-upgrade.py"), "apply", "--safe",
+        "--repo-root", str(modified_target), "--review-needed-policy", "manual-merge",
+    ], cwd=repo)
+    for marker in ["resolved-manual-merge", "manual-merge item"]:
         if marker not in modified_apply.stdout:
             fail(f"v0.41.1 modified-checker apply missing review-needed marker: {marker}")
     if modified_checker.read_bytes() != modified_before:
         fail("v0.41.1 migration overwrote a user-modified workspace checker")
+    review_report = json.loads((modified_target / ".forgekit/reports/upgrade-review-needed.json").read_text(encoding="utf-8"))
+    checker_item = next((item for item in review_report["items"] if item["action_id"] == "update-workspace-integrity-checker"), None)
+    if checker_item is None:
+        fail("v0.41.1 review report missing update-workspace-integrity-checker item")
+    if checker_item["status"] != "resolved_manual_merge":
+        fail("v0.41.1 manual-merge must record resolved_manual_merge")
+    export_dir = modified_target / checker_item["export_path"]
+    exported = checker_item["exported_files"]
+    if (export_dir / exported["local"]).read_bytes() != modified_before:
+        fail("manual-merge .local must match the original target file")
+    if not (export_dir / exported["incoming"]).is_file() or not (export_dir / exported["diff"]).read_text(encoding="utf-8"):
+        fail("manual-merge must export incoming and diff files")
+    if "Please read the .local, .incoming, and .diff files" not in (export_dir / "README.md").read_text(encoding="utf-8"):
+        fail("manual-merge README must include the AI-assisted merge prompt")
 
     capsule_migration = temp_parent / "v0420-capsule-bootstrap-migration"
     shutil.copytree(target, capsule_migration)
@@ -1897,8 +1976,11 @@ def assert_versioned_migration_upgrade(repo, target, temp_parent):
     customized_guide = customized_capsule_migration / ".forgekit/docs/scoped-docs.md"
     customized_guide.write_text("# User-owned scoped docs\n", encoding="utf-8")
     customized_before = customized_guide.read_bytes()
-    customized_apply = run([sys.executable, str(repo / "scripts/forgekit-upgrade.py"), "apply", "--safe", "--repo-root", str(customized_capsule_migration)], cwd=repo)
-    if "skipped-existing-review-needed" not in customized_apply.stdout or customized_guide.read_bytes() != customized_before:
+    customized_apply = run([
+        sys.executable, str(repo / "scripts/forgekit-upgrade.py"), "apply", "--safe",
+        "--repo-root", str(customized_capsule_migration), "--review-needed-policy", "manual-merge",
+    ], cwd=repo)
+    if "resolved-manual-merge" not in customized_apply.stdout or customized_guide.read_bytes() != customized_before:
         fail("v0.43 migration must preserve and report a user-modified scoped docs guide")
 
     apply_target = temp_parent / "versioned-apply"
@@ -1979,6 +2061,25 @@ def assert_unified_project_entry(repo, current_target, temp_parent):
         fail("unified entry must report an up-to-date project without writes")
     if current_state.read_bytes() != current_before:
         fail("unified up-to-date check must not rewrite state.json")
+    zh_current = run([sys.executable, str(script), "--target", str(current_target), "--lang", "zh-CN"], cwd=repo)
+    if "检查结果：current" not in zh_current.stdout or "请选择显示语言" in zh_current.stdout:
+        fail("--lang zh-CN must use Chinese user-facing output without prompting")
+    en_current = run([sys.executable, str(script), "--target", str(current_target), "--lang", "en-US"], cwd=repo)
+    if "Check result: current" not in en_current.stdout or "请选择显示语言" in en_current.stdout:
+        fail("--lang en-US must use English user-facing output without prompting")
+    env_current = run([sys.executable, str(script), "--target", str(current_target)], cwd=repo, env_updates={"FORGEKIT_LANG": "zh-CN"})
+    if "检查结果：current" not in env_current.stdout:
+        fail("FORGEKIT_LANG=zh-CN must select Chinese output")
+    precedence_current = run(
+        [sys.executable, str(script), "--target", str(current_target), "--lang", "en-US"],
+        cwd=repo,
+        env_updates={"FORGEKIT_LANG": "zh-CN"},
+    )
+    if "Check result: current" not in precedence_current.stdout or "检查结果：current" in precedence_current.stdout:
+        fail("--lang must take precedence over FORGEKIT_LANG")
+    bad_lang = run([sys.executable, str(script), "--target", str(current_target), "--lang", "fr-FR"], cwd=repo, check=False)
+    if bad_lang.returncode == 0 or "Allowed values: zh-CN, en-US" not in (bad_lang.stdout + bad_lang.stderr):
+        fail("invalid --lang must fail with allowed values")
 
     def write_state(root, version):
         state_path = root / ".forgekit/state.json"
@@ -1989,20 +2090,20 @@ def assert_unified_project_entry(repo, current_target, temp_parent):
         return state_path
 
     same_target = temp_parent / "upgrade-same-existing"
-    same_state = write_state(same_target, "0.38.0")
+    same_state = write_state(same_target, "0.40.1")
     same_maintenance = same_target / ".forgekit/docs/project-maintenance.md"
     same_maintenance.parent.mkdir(parents=True, exist_ok=True)
     shutil.copyfile(
-        repo / "migrations/0.39.0/files/.forgekit/docs/project-maintenance.md",
+        repo / "migrations/0.40.2/files/.forgekit/docs/project-maintenance.md",
         same_maintenance,
     )
     same_before = same_maintenance.read_bytes()
     upgrade_script = repo / "scripts/forgekit-upgrade.py"
     same_plan = run([sys.executable, str(upgrade_script), "plan", "--repo-root", str(same_target)], cwd=repo)
-    if "ALREADY-PRESENT: install-project-maintenance-guide" not in same_plan.stdout:
+    if "ALREADY-PRESENT: install-current-project-maintenance-guide" not in same_plan.stdout:
         fail("plan must classify identical existing migration file as already-present")
-    same_apply = run([sys.executable, str(upgrade_script), "apply", "--safe", "--repo-root", str(same_target)], cwd=repo)
-    if "[already-present] install-project-maintenance-guide" not in same_apply.stdout:
+    same_apply = run([sys.executable, str(upgrade_script), "apply", "--safe", "--repo-root", str(same_target), "--review-needed-policy", "replace-template"], cwd=repo)
+    if "[already-present] install-current-project-maintenance-guide" not in same_apply.stdout:
         fail("safe apply must treat identical existing migration file as no-op")
     if same_maintenance.read_bytes() != same_before:
         fail("safe apply rewrote an identical existing managed doc")
@@ -2027,6 +2128,65 @@ def assert_unified_project_entry(repo, current_target, temp_parent):
     if old_state.read_bytes() != old_state_before or business.read_bytes() != business_before:
         fail("unified upgrade without explicit yes must not modify project files")
 
+    if os.name != "nt":
+        ask_target = temp_parent / "unified-old-ask-review"
+        ask_state = write_state(ask_target, "0.38.0")
+        ask_maintenance = ask_target / ".forgekit/docs/project-maintenance.md"
+        ask_maintenance.parent.mkdir(parents=True, exist_ok=True)
+        ask_maintenance.write_text("# User-maintained project guide\n", encoding="utf-8")
+        ask_before = ask_maintenance.read_bytes()
+        ask_result = run_pty([sys.executable, str(script), "--target", str(ask_target)], cwd=repo, input_text="2\ny\nd\nm\n")
+        for marker in [
+            "ForgeKit found 1 file that cannot be safely overwritten automatically.",
+            ".forgekit/docs/project-maintenance.md",
+            "Reason:",
+            "Impact:",
+            "Recommendation:",
+            "--- .forgekit/docs/project-maintenance.md",
+            "Choose an action:",
+            "[m] keep the local file and export the new template sample plus diff",
+            "manual-merge item",
+        ]:
+            if marker not in ask_result.stdout:
+                fail(f"interactive review-needed ask output missing marker: {marker}")
+        if ask_maintenance.read_bytes() != ask_before:
+            fail("show diff followed by manual-merge must not overwrite the review-needed file")
+        ask_review = json.loads((ask_target / ".forgekit/reports/upgrade-review-needed.json").read_text(encoding="utf-8"))
+        if not any(item["status"] == "resolved_manual_merge" for item in ask_review["items"]):
+            fail("interactive manual-merge must record resolved_manual_merge")
+        abort_target = temp_parent / "unified-old-ask-abort"
+        abort_state = write_state(abort_target, "0.38.0")
+        abort_maintenance = abort_target / ".forgekit/docs/project-maintenance.md"
+        abort_maintenance.parent.mkdir(parents=True, exist_ok=True)
+        abort_maintenance.write_text("# User-maintained project guide\n", encoding="utf-8")
+        abort_state_before = abort_state.read_bytes()
+        abort_file_before = abort_maintenance.read_bytes()
+        abort_result = run_pty([sys.executable, str(script), "--target", str(abort_target)], cwd=repo, input_text="2\ny\na\n", check=False)
+        if abort_result.returncode == 0 or "aborted" not in abort_result.stdout:
+            fail("interactive abort must stop the migration")
+        if abort_state.read_bytes() != abort_state_before or abort_maintenance.read_bytes() != abort_file_before:
+            fail("interactive abort must not write migration state or targets")
+        abort_review = json.loads((abort_target / ".forgekit/reports/upgrade-review-needed.json").read_text(encoding="utf-8"))
+        if not any(item["status"] == "aborted" for item in abort_review["items"]):
+            fail("interactive abort must record aborted status")
+        zh_ask_target = temp_parent / "unified-old-ask-review-zh"
+        write_state(zh_ask_target, "0.38.0")
+        zh_maintenance = zh_ask_target / ".forgekit/docs/project-maintenance.md"
+        zh_maintenance.parent.mkdir(parents=True, exist_ok=True)
+        zh_maintenance.write_text("# User-maintained project guide\n", encoding="utf-8")
+        zh_result = run_pty([sys.executable, str(script), "--target", str(zh_ask_target)], cwd=repo, input_text="1\ny\nm\n")
+        for marker in [
+            "请选择显示语言 / Select display language:",
+            "[warning] ForgeKit 发现 1 个文件不能安全自动覆盖。",
+            "原因：",
+            "影响：",
+            "建议：",
+            "[m] 保留本地文件，并生成新版模板参考文件和差异文件",
+            "项目已升级到 0.43.0",
+        ]:
+            if marker not in zh_result.stdout:
+                fail(f"Chinese interactive review-needed output missing marker: {marker}")
+
     apply_target = temp_parent / "unified-old-apply"
     apply_state = write_state(apply_target, "0.38.0")
     existing_maintenance = apply_target / ".forgekit/docs/project-maintenance.md"
@@ -2037,24 +2197,75 @@ def assert_unified_project_entry(repo, current_target, temp_parent):
     apply_business.parent.mkdir(parents=True)
     apply_business.write_text("business truth\n", encoding="utf-8")
     apply_business_before = apply_business.read_bytes()
-    applied = run([sys.executable, str(script), "--target", str(apply_target), "--yes"], cwd=repo)
+    apply_state_before_no_policy = apply_state.read_bytes()
+    no_policy = run([sys.executable, str(script), "--target", str(apply_target), "--yes"], cwd=repo, check=False)
+    if no_policy.returncode == 0 or "Review-needed item requires a policy in non-interactive mode" not in no_policy.stdout:
+        fail("unified --yes without review-needed policy must stop before writing")
+    for marker in ["--review-needed-policy manual-merge", "--review-needed-policy replace-template"]:
+        if marker not in no_policy.stdout:
+            fail(f"unified no-policy stop missing one-line command marker: {marker}")
+    if apply_state.read_bytes() != apply_state_before_no_policy:
+        fail("unified --yes without policy must not rewrite state")
+    if existing_maintenance.read_bytes() != existing_maintenance_before or apply_business.read_bytes() != apply_business_before:
+        fail("unified --yes without policy must not write migration targets")
+    applied = run([
+        sys.executable, str(script), "--target", str(apply_target), "--yes",
+        "--review-needed-policy", "manual-merge",
+    ], cwd=repo)
     if "Safe migration apply completed through forgekit-upgrade.py" not in applied.stdout:
-        fail("unified --yes must delegate to forgekit-upgrade.py apply --safe")
+        fail("unified --yes with manual-merge policy must delegate to forgekit-upgrade.py apply --safe")
     applied_state = json.loads(apply_state.read_text(encoding="utf-8"))
     if applied_state.get("forgekit_version") != "0.43.0":
         fail("unified --yes did not advance state through safe migrations")
-    if "skipped-existing-review-needed" not in applied.stdout:
-        fail("partial-upgrade rerun must report the different existing file as review-needed")
+    if "manual-merge item" not in applied.stdout or "fully updated" in applied.stdout:
+        fail("manual-merge upgrade must report manual-merge item without claiming fully updated")
     if existing_maintenance.read_bytes() != existing_maintenance_before:
         fail("partial-upgrade rerun overwrote a user-modified managed doc")
     if apply_business.read_bytes() != apply_business_before:
         fail("unified safe apply must not modify business docs")
+    keep_report = json.loads((apply_target / ".forgekit/reports/upgrade-review-needed.json").read_text(encoding="utf-8"))
+    if not any(item["status"] == "resolved_manual_merge" for item in keep_report["items"]):
+        fail("unified manual-merge must record resolved_manual_merge")
+    alias_target = temp_parent / "unified-old-keep-local-alias"
+    write_state(alias_target, "0.38.0")
+    alias_maintenance = alias_target / ".forgekit/docs/project-maintenance.md"
+    alias_maintenance.parent.mkdir(parents=True, exist_ok=True)
+    alias_maintenance.write_text("# User-maintained project guide\n", encoding="utf-8")
+    alias_result = run([
+        sys.executable, str(script), "--target", str(alias_target), "--yes",
+        "--review-needed-policy", "keep-local",
+    ], cwd=repo)
+    if "keep-local is treated as manual-merge" not in alias_result.stdout or "manual-merge item" not in alias_result.stdout:
+        fail("keep-local policy alias must behave as manual-merge")
     applied_state_before = apply_state.read_bytes()
     rerun = run([sys.executable, str(script), "--target", str(apply_target), "--yes"], cwd=repo)
     if "Detected action: up-to-date" not in rerun.stdout or "No files were changed" not in rerun.stdout:
         fail("successful upgrade rerun must report up-to-date without writes")
     if apply_state.read_bytes() != applied_state_before:
         fail("up-to-date rerun rewrote state.json")
+
+    replace_target = temp_parent / "unified-old-replace-template"
+    write_state(replace_target, "0.38.0")
+    replace_maintenance = replace_target / ".forgekit/docs/project-maintenance.md"
+    replace_maintenance.parent.mkdir(parents=True, exist_ok=True)
+    replace_maintenance.write_text("# User-maintained project guide\n", encoding="utf-8")
+    replace_business = replace_target / "docs/business.md"
+    replace_business.parent.mkdir(parents=True)
+    replace_business.write_text("business truth\n", encoding="utf-8")
+    replace_business_before = replace_business.read_bytes()
+    replaced = run([
+        sys.executable, str(script), "--target", str(replace_target), "--yes",
+        "--review-needed-policy", "replace-template",
+    ], cwd=repo)
+    if "project is fully updated to 0.43.0" not in replaced.stdout:
+        fail("replace-template upgrade must report fully updated")
+    if replace_maintenance.read_bytes() == b"# User-maintained project guide\n":
+        fail("replace-template policy did not replace the review-needed target file")
+    if replace_business.read_bytes() != replace_business_before:
+        fail("replace-template policy must not modify unrelated files")
+    replace_report = json.loads((replace_target / ".forgekit/reports/upgrade-review-needed.json").read_text(encoding="utf-8"))
+    if not any(item["status"] == "resolved_replace_template" for item in replace_report["items"]):
+        fail("replace-template must record resolved_replace_template")
 
     legacy = temp_parent / "unified-legacy"
     (legacy / ".forgekit").mkdir(parents=True)
@@ -2857,8 +3068,11 @@ def assert_current_docs_integrity(repo, target, temp_parent):
     existing.write_text("# User-owned integrity guidance\n", encoding="utf-8")
     before = existing.read_bytes()
     upgrade = repo / "scripts/forgekit-upgrade.py"
-    first = run([sys.executable, str(upgrade), "apply", "--safe", "--repo-root", str(migration_case)], cwd=repo)
-    if "skipped-existing-review-needed" not in first.stdout or existing.read_bytes() != before:
+    first = run([
+        sys.executable, str(upgrade), "apply", "--safe", "--repo-root", str(migration_case),
+        "--review-needed-policy", "manual-merge",
+    ], cwd=repo)
+    if "resolved-manual-merge" not in first.stdout or existing.read_bytes() != before:
         fail("v0.40.2 migration must preserve a different existing integrity guide")
     migrated = json.loads(state_path.read_text(encoding="utf-8"))
     if migrated.get("forgekit_version") != "0.43.0" or migrated["features"].get("active_current_docs_integrity_guard") is not True:

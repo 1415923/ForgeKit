@@ -40,6 +40,12 @@ python scripts/forgekit-project.py --target <project-root>
 
 `--dry-run` 和 `--no-apply` 只检测/展示；非交互环境默认不 apply，只有显式 `--yes` 才执行初始化或 safe apply。升级写入前必须显示 ProjectRoot、已安装版本、工具版本、检测动作、check、plan、safe/manual 数量，并以默认 No 的确认结束。
 
+如果 safe migration 遇到 `review-needed` 文件，统一入口必须在同一轮解释目标文件、原因、影响和推荐选择，并让用户选择 replace template、manual-merge、show diff 或 abort。`manual-merge` 会保留本地文件，并导出 `.local`、`.incoming`、`.diff` 和 README，方便后续人工或 AI 辅助合并；`replace-template` 只覆盖该 action 对应的目标文件。非交互或 `--yes` 下遇到 review-needed 时，必须显式传入 `--review-needed-policy manual-merge` 或 `--review-needed-policy replace-template`，否则停止并输出可复制命令。`keep-local` 只作为兼容别名，按 `manual-merge` 处理。
+
+初始化 / 升级工具支持 `--lang zh-CN` 和 `--lang en-US`；未显式指定时，交互式终端会询问本轮显示语言，非交互或 `--yes` 默认 `en-US`。
+
+review-needed 记录写入 `.forgekit/reports/upgrade-review-needed.md` 和 `.forgekit/reports/upgrade-review-needed.json`，只作为审查记录，不要求用户手动查 migration 文件，也不是独立 resolve 入口。
+
 该脚本只属于 ForgeKitRoot，不复制进 ProjectRoot。旧 `init-project-template.*` 与 `forgekit-upgrade.py` 继续作为底层和高级入口。
 
 ## Upgrade Sync
@@ -52,8 +58,9 @@ python scripts/forgekit-project.py --target <project-root>
 4. 运行 `python scripts/forgekit-upgrade.py plan --repo-root <ProjectRoot>`。
 5. 展示一屏迁移计划、冲突和人工项。
 6. 只有用户确认，或 bounded-auto 的授权明确覆盖该次升级时，才运行 `apply --safe`。
-7. apply 后执行 `ManagedDocsWriteback: minimal`，输出 upgrade summary。
-8. 按 `context-continuity.md` 执行 Post-Upgrade Session Refresh。
+7. 如果出现 review-needed，在同一轮完成选择、记录和后续 safe migration；不要新增独立 resolve 命令。
+8. apply 后执行 `ManagedDocsWriteback: minimal`，输出 upgrade summary。
+9. 按 `context-continuity.md` 执行 Post-Upgrade Session Refresh。
 
 v0.35.x 及更早项目按既有项目接手，不假装自动升级。
 
