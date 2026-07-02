@@ -33,6 +33,8 @@ MESSAGES = {
         "check_result": "Check result: {status}",
         "plan_summary": "Plan summary:",
         "alias_keep_local": "keep-local is treated as manual-merge.",
+        "upgrade_done": "[ok] Upgrade completed. You can continue using this project normally.",
+        "upgrade_next": "[next] If your current AI session was opened before the upgrade, start a new session or ask the agent to reload the project entry docs before continuing.",
     },
     "zh-CN": {
         "lang_prompt": "请选择显示语言 / Select display language:",
@@ -52,6 +54,8 @@ MESSAGES = {
         "check_result": "检查结果：{status}",
         "plan_summary": "计划摘要：",
         "alias_keep_local": "keep-local is treated as manual-merge.",
+        "upgrade_done": "[ok] 升级已完成，可以正常继续使用。",
+        "upgrade_next": "[next] 如果当前 AI 会话是在升级前打开的，建议新开会话，或让当前 AI 重新读取项目入口文档后再继续工作。",
     },
 }
 
@@ -309,7 +313,8 @@ def upgrade_project(args, toolkit_root, target, installed, toolkit, lang):
     apply_command.extend(["--lang", lang])
     run_stream(apply_command, cwd=toolkit_root)
     print("[ok] Safe migration apply completed through forgekit-upgrade.py.")
-    print("Run ManagedDocsWriteback=minimal, then refresh the session before starting new work.")
+    print(msg(lang, "upgrade_done"))
+    print(msg(lang, "upgrade_next"))
     return 0
 
 

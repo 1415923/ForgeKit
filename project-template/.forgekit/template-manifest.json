@@ -33,7 +33,7 @@
       "role": "boundary_config",
       "update_policy": "ask",
       "render_mode": "render",
-      "checksum": "sha256:2f141163adffeeef040058f718d500a24e63741d49faa5bece6904b84189ba7a"
+      "checksum": "sha256:0251af74852c477eee9a26d1e110cadf9119eb42408311536977d3e25dc206b1"
     },
     {
       "source_path": ".forgekit/docs/document-responsibility.md",
@@ -65,7 +65,7 @@
       "role": "managed_doc",
       "update_policy": "merge",
       "render_mode": "copy",
-      "checksum": "sha256:b6b521e0481a8957372ab7d75e6a767da6de154e41330861122339b89f3bc362"
+      "checksum": "sha256:d1c5f59afa7fb1166fcb302700d27e0404e1b974a8d861661ab752d4e87f094b"
     },
     {
       "source_path": ".forgekit/archive/README.md",

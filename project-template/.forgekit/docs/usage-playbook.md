@@ -30,6 +30,8 @@ python scripts/forgekit-project.py --target <project-root> --yes --review-needed
 python scripts/forgekit-project.py --target <project-root> --yes --review-needed-policy replace-template
 ```
 
+升级完成后项目可以正常使用。如果当前 AI 会话是在升级前打开的，建议新开会话，或让当前 AI 重新读取项目入口文档后再继续工作。新任务建议新开会话启动。
+
 初始化 / 升级工具支持 `--lang zh-CN` 和 `--lang en-US`；也可以用 `FORGEKIT_LANG` 选择本轮显示语言。
 
 ## 4. 开始今天工作

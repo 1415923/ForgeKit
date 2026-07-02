@@ -1,5 +1,7 @@
+# Version used when this project boundary file was created.
+# Current ForgeKit version is tracked in .forgekit/state.json.
 forgekit:
-  version: "0.39.0"
+  version: "0.43.2"
   mode: "Standard"
 
 roots:

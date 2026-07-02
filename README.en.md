@@ -208,6 +208,15 @@ python3 ./scripts/forgekit-project.py --target "/path/to/project"
 bash ./scripts/forgekit-project.sh --target "/path/to/project"
 ```
 
+### After an upgrade
+
+After the upgrade completes, the project can be used normally.
+If the current AI session was opened before the upgrade, start a new session or ask the agent to reload the project entry docs before continuing, so it does not keep following pre-upgrade rules.
+
+Copyable prompt:
+
+> ForgeKit has been upgraded. Reload the current project context using the latest ForgeKit rules. Re-read the project entry docs and the current task-related docs. Do not change files yet. After the refresh, summarize the current project state and suggested next step.
+
 ### Lower-level upgrade commands
 
 ```bash
@@ -355,6 +364,7 @@ Use `retro` only after major changes, incidents, failed deliveries, or explicit 
 | Multi-project mode automatically splits docs | It does not; it only adds map, templates, and checks |
 | Project Capsule is a full ForgeKit copy | No; it is a minimal local fact set |
 | Codex / Claude automatically reloads new rules | Not guaranteed; after upgrade, start a new session for new work |
+| The version in `.forgekit/project-boundary.yml` is the current ForgeKit version | No. It only records the template version used when the project boundary file was created. The current ForgeKit version is tracked in `.forgekit/state.json`. |
 
 ---
 

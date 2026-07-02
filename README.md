@@ -214,6 +214,15 @@ python3 ./scripts/forgekit-project.py --target "/path/to/project"
 bash ./scripts/forgekit-project.sh --target "/path/to/project"
 ```
 
+### 升级完成后怎么继续
+
+升级完成后，项目可以正常继续使用。
+如果当前 AI 会话是在升级前打开的，建议新开会话，或让当前 AI 重新读取项目入口文档后再继续工作，避免旧会话继续沿用升级前的规则。
+
+可复制给 AI：
+
+> ForgeKit 已升级。请按新版 ForgeKit 规则刷新当前项目上下文：重新读取项目入口文档和当前任务相关文档。只做上下文刷新，不要改文件。刷新完成后告诉我当前项目状态和下一步建议。
+
 ### 低层升级入口
 
 ```bash
@@ -361,6 +370,7 @@ ForgeKit v0.41 起支持可选的多项目工作区。
 | 多项目模式会自动拆文档 | 不会，只提供地图、模板和检查器 |
 | 子项目文档包是完整 ForgeKit 副本 | 不是，它只是最小局部事实集 |
 | Codex / Claude 自动读取了新规则 | 不一定，升级后新任务建议新开会话 |
+| `.forgekit/project-boundary.yml` 里的版本号就是当前 ForgeKit 版本 | 不是。它只表示项目边界文件创建时的模板版本；当前 ForgeKit 版本以 `.forgekit/state.json` 为准。 |
 
 ---
 
