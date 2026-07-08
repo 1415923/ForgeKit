@@ -99,6 +99,7 @@ esac
 
 script_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 repo_root="$(cd "$script_dir/.." && pwd)"
+forgekit_version="$(cat "$repo_root/VERSION" | tr -d '[:space:]')"
 project_template_dir="$repo_root/project-template"
 templates_dir="$repo_root/templates"
 questionnaires_dir="$repo_root/questionnaires"
@@ -183,7 +184,7 @@ write_boundary_config() {
   mkdir -p "$(dirname "$boundary_file")"
   cat > "$boundary_file" <<EOF
 forgekit:
-  version: "0.43.2"
+  version: "$forgekit_version"
   mode: "$mode"
 
 roots:
@@ -236,7 +237,7 @@ write_forgekit_state() {
   cat > "$state_file" <<EOF
 {
   "schema_version": 1,
-  "forgekit_version": "0.43.2",
+  "forgekit_version": "$forgekit_version",
   "managed_docs_root": ".forgekit/docs",
   "change_root": ".forgekit/changes",
   "mode": "$mode",

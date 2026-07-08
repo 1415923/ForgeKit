@@ -3,6 +3,7 @@
 $ErrorActionPreference = "Stop"
 
 $repoRoot = Split-Path -Parent (Split-Path -Parent $MyInvocation.MyCommand.Path)
+$forgekitVersion = (Get-Content (Join-Path $repoRoot "VERSION") -Raw).Trim()
 $errors = New-Object System.Collections.Generic.List[string]
 
 function Add-Error {
@@ -63,8 +64,8 @@ function Test-PluginManifest {
     if ($codexManifest.name -ne "forgekit") {
         Add-Error "Unexpected Codex plugin name: $($codexManifest.name)"
     }
-    if ($codexManifest.version -ne "0.43.2") {
-        Add-Error "Unexpected Codex plugin version: $($codexManifest.version)"
+    if ($codexManifest.version -ne $forgekitVersion) {
+        Add-Error "Codex plugin version ($($codexManifest.version)) does not match VERSION ($forgekitVersion)"
     }
     if ($codexManifest.skills -ne "./skills/") {
         Add-Error "Codex plugin skills must point to ./skills/"
@@ -74,8 +75,8 @@ function Test-PluginManifest {
     if ($claudeManifest.name -ne "forgekit") {
         Add-Error "Unexpected Claude plugin name: $($claudeManifest.name)"
     }
-    if ($claudeManifest.version -ne "0.43.2") {
-        Add-Error "Unexpected Claude plugin version: $($claudeManifest.version)"
+    if ($claudeManifest.version -ne $forgekitVersion) {
+        Add-Error "Claude plugin version ($($claudeManifest.version)) does not match VERSION ($forgekitVersion)"
     }
     $claudeSkills = @($claudeManifest.skills)
     if ($claudeSkills.Count -ne 1 -or $claudeSkills[0] -ne "./skills/") {

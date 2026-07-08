@@ -889,7 +889,7 @@
       "role": "script",
       "update_policy": "replace",
       "render_mode": "copy",
-      "checksum": "sha256:87363725279712f677ed9af9fd24c8570b92dc37425a4f7c686fccc487b1965d"
+      "checksum": "sha256:15ce8f2297e2dd2c2c69935493827cf0bc4bd37278fb368330cae651eb5283b4"
     },
     {
       "source_path": "migrations/0.41.0/migration.json",

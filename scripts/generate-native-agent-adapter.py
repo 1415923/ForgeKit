@@ -4,8 +4,9 @@ import shutil
 import sys
 from pathlib import Path
 
+from forgekit_version import get_version
 
-VERSION = "0.43.2"
+VERSION = get_version()
 
 TARGET_FILES = {
     "claude-code": [

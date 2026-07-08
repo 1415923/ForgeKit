@@ -6,6 +6,7 @@ $ErrorActionPreference = "Stop"
 
 $scriptRoot = Split-Path -Parent $MyInvocation.MyCommand.Path
 $repoRoot = Split-Path -Parent $scriptRoot
+$forgekitVersion = (Get-Content (Join-Path $repoRoot "VERSION") -Raw).Trim()
 $projectTemplate = Join-Path $repoRoot "project-template"
 $errors = New-Object System.Collections.Generic.List[string]
 
@@ -618,8 +619,8 @@ function Test-TemplateManifest {
     $manifestPath = Join-Path $repoRoot "project-template\.forgekit\template-manifest.json"
     if (Test-Path -LiteralPath $manifestPath) {
         $manifest = Get-Content -LiteralPath $manifestPath -Raw | ConvertFrom-Json
-        if ($manifest.template_version -ne "0.43.2") {
-            Add-Error "Unexpected template manifest version: $($manifest.template_version)"
+        if ($manifest.template_version -ne $forgekitVersion) {
+            Add-Error "template-manifest version ($($manifest.template_version)) does not match VERSION ($forgekitVersion)"
         }
         $sources = @($manifest.files | ForEach-Object { $_.source_path })
         if ($sources -contains ".forgekit/template-manifest.json") {
@@ -1075,7 +1076,7 @@ function Test-HarnessEntryConsistency {
     Test-RequiredPath "project-template\migrations\0.36.0\migration.json"
     Test-RequiredPath "project-template\.forgekit\state.json"
     Test-RequiredPattern "project-template\.forgekit\state.json" '"schema_version": 1' "State schema version"
-    Test-RequiredPattern "project-template\.forgekit\state.json" '"forgekit_version": "0.43.2"' "State ForgeKit version"
+    Test-RequiredPattern "project-template\.forgekit\state.json" "`"forgekit_version`": `"$forgekitVersion`"" "State ForgeKit version (must match VERSION)"
     Test-RequiredPattern "project-template\.forgekit\state.json" '"managed_docs_root": ".forgekit/docs"' "State managed docs root"
     Test-RequiredPattern "project-template\.forgekit\state.json" '"change_root": ".forgekit/changes"' "State change root"
     Test-RequiredPattern "project-template\.forgekit\state.json" '"last_upgrade": null' "State last upgrade"
@@ -1139,8 +1140,8 @@ function Test-PluginDistribution {
     if ($codexPluginJson.name -ne "forgekit") {
         Add-Error "Unexpected Codex plugin name in root plugin.json: $($codexPluginJson.name)"
     }
-    if ($codexPluginJson.version -ne "0.43.2") {
-        Add-Error "Unexpected Codex plugin version in root plugin.json: $($codexPluginJson.version)"
+    if ($codexPluginJson.version -ne $forgekitVersion) {
+        Add-Error "Root Codex plugin version ($($codexPluginJson.version)) does not match VERSION ($forgekitVersion)"
     }
     if ($codexPluginJson.skills -ne "./skills/") {
         Add-Error "Root Codex plugin skills must be ./skills/"
@@ -1150,8 +1151,8 @@ function Test-PluginDistribution {
     if ($claudePluginJson.name -ne "forgekit") {
         Add-Error "Unexpected Claude plugin name in root plugin.json: $($claudePluginJson.name)"
     }
-    if ($claudePluginJson.version -ne "0.43.2") {
-        Add-Error "Unexpected Claude plugin version in root plugin.json: $($claudePluginJson.version)"
+    if ($claudePluginJson.version -ne $forgekitVersion) {
+        Add-Error "Root Claude plugin version ($($claudePluginJson.version)) does not match VERSION ($forgekitVersion)"
     }
     $claudeSkills = @($claudePluginJson.skills)
     if ($claudeSkills.Count -ne 1 -or $claudeSkills[0] -ne "./skills/") {
@@ -1512,14 +1513,14 @@ function Test-MinimalProjectCapsuleBootstrap {
     Test-RequiredPattern "migrations\0.43.0\migration.json" '"to": "0.43.0"' "v0.43 migration target"
     Test-RequiredPattern "migrations\0.43.0\migration.json" '"minimal_project_capsule_bootstrap"' "v0.43 capsule feature"
     Test-NoPattern "migrations\0.43.0\migration.json" '"target": ".forgekit/projects/' "Migration must not create real capsules"
-    Test-RequiredPath "migrations\0.43.2\migration.json"
-    Test-RequiredPattern "migrations\0.43.2\migration.json" '"0.43.0"' "v0.43.2 migration source reference"
-    Test-RequiredPattern "migrations\0.43.2\migration.json" '"0.43.1"' "v0.43.2 migration includes 0.43.1"
-    Test-RequiredPattern "migrations\0.43.2\migration.json" '"to": "0.43.2"' "v0.43.2 migration target"
-    Test-RequiredPath "project-template\migrations\0.43.2\migration.json"
-    Test-RequiredPattern "project-template\migrations\0.43.2\migration.json" '"0.43.0"' "Template v0.43.2 migration source reference"
-    Test-RequiredPattern "project-template\migrations\0.43.2\migration.json" '"0.43.1"' "Template v0.43.2 migration includes 0.43.1"
-    Test-RequiredPattern "project-template\migrations\0.43.2\migration.json" '"to": "0.43.2"' "Template v0.43.2 migration target"
+    Test-RequiredPath "migrations\$forgekitVersion\migration.json"
+    Test-RequiredPattern "migrations\$forgekitVersion\migration.json" '"0.43.0"' "Latest migration source reference"
+    Test-RequiredPattern "migrations\$forgekitVersion\migration.json" '"0.43.1"' "Latest migration includes 0.43.1"
+    Test-RequiredPattern "migrations\$forgekitVersion\migration.json" "`"to`": `"$forgekitVersion`"" "Latest migration target"
+    Test-RequiredPath "project-template\migrations\$forgekitVersion\migration.json"
+    Test-RequiredPattern "project-template\migrations\$forgekitVersion\migration.json" '"0.43.0"' "Template latest migration source reference"
+    Test-RequiredPattern "project-template\migrations\$forgekitVersion\migration.json" '"0.43.1"' "Template latest migration includes 0.43.1"
+    Test-RequiredPattern "project-template\migrations\$forgekitVersion\migration.json" "`"to`": `"$forgekitVersion`"" "Template latest migration target"
     $rootScript = Get-Content -LiteralPath (Join-Path $repoRoot "scripts\bootstrap-project-capsule.py") -Raw
     $templateScript = Get-Content -LiteralPath (Join-Path $repoRoot "project-template\scripts\bootstrap-project-capsule.py") -Raw
     if ($rootScript -ne $templateScript) { Add-Error "Root and project-template bootstrap-project-capsule.py must stay identical" }

@@ -150,7 +150,7 @@ function Write-BoundaryConfig {
 
     $lines = @(
         'forgekit:',
-        '  version: "0.43.2"',
+        "  version: `"$forgekitVersion`"",
         "  mode: `"$SelectedMode`"",
         '',
         'roots:',
@@ -236,7 +236,7 @@ function Write-ForgeKitState {
     }
     $state = [ordered]@{
         schema_version = 1
-        forgekit_version = "0.43.2"
+        forgekit_version = "$forgekitVersion"
         managed_docs_root = ".forgekit/docs"
         change_root = ".forgekit/changes"
         mode = $SelectedMode
@@ -435,6 +435,7 @@ function Write-ClaudeInitMetadata {
 
 $scriptRoot = Split-Path -Parent $MyInvocation.MyCommand.Path
 $templateRoot = Split-Path -Parent $scriptRoot
+$forgekitVersion = (Get-Content (Join-Path $templateRoot "VERSION") -Raw).Trim()
 $projectTemplateDir = Join-Path $templateRoot "project-template"
 $templatesDir = Join-Path $templateRoot "templates"
 $questionnairesDir = Join-Path $templateRoot "questionnaires"

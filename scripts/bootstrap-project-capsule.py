@@ -22,11 +22,19 @@ CAPSULE_FILES = (
 FORBIDDEN_FILES = {
     "AGENTS.md",
     "CLAUDE.md",
+    "archive-capsule.md",
     "workflow-router.md",
     "document-responsibility.md",
-    "archive-capsule.md",
+    "scoped-docs.md",
+    "project-maintenance.md",
+    "current-docs-integrity.md",
+    "reasoning-review.md",
+    "bounded-auto-loop-policy.md",
+    "loop-operations.md",
+    "maker-checker-protocol.md",
+    "native-agent-adapter.md",
 }
-FORBIDDEN_DIRS = {"governance", "skills", "agents", "docs"}
+FORBIDDEN_DIRS = {"governance", "skills", "agents", ".agents", ".claude", ".codex", "archive"}
 
 
 class BootstrapError(Exception):
