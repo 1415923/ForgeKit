@@ -32,6 +32,20 @@ Reason: <short reason>
 
 If `Risk:` is missing, treat the change as needing review before coding.
 
+## Freeze Before Implementation
+
+For medium and high risk changes, confirm the proposal's scope, trust boundary, non-goals, and stage authorization before implementation. Freeze a risk-proportional acceptance matrix in `verification.md`; each ID needs a positive case, a key rejection case, and evidence from the real entry or orchestration path. Low risk changes may keep the lightweight flow.
+
+Changing a frozen contract returns the change to design/acceptance. Do not smuggle a larger contract into review findings.
+
+## Review Convergence
+
+The first independent review checks the frozen contract and may also block a newly discovered issue only when it can cause data leakage or contamination, wrong training/evaluation/checkpoint behavior, artifact overwrite, unauthorized work through the formal entry point, false success, or clearly untrustworthy conclusions. Other matrix-external hardening, observability, style, abstraction, or defense against a developer deliberately calling an internal helper is a follow-up unless the frozen trust boundary says otherwise.
+
+After one normal maker fix round, re-review defaults to the previous blocking findings and marks each Closed, Partially closed, or Still open. A regression introduced by that fix may still block when it violates the frozen contract or causes a real Critical consequence. Unrelated new suggestions are follow-ups. Do not reopen architecture review or expand the trust boundary. If several Major findings remain after the normal fix round, return to design to simplify, split, or refactor instead of extending an indefinite patch loop.
+
+Review pass authorizes only the stage named in the proposal. `ready-for-commit`, `ready-for-minimal-real-smoke`, and `ready-for-full-execution` are separate decisions.
+
 ## Completion
 
 - Do not stop at "tests passed" for medium or high risk changes.
@@ -39,4 +53,3 @@ If `Risk:` is missing, treat the change as needing review before coding.
 - Record review notes and residual risk in `review.md`.
 - For high risk changes, record release and rollback notes in `ship.md`.
 - Use `retro.md` only when the change was high risk, major, surprising, or explicitly requested.
-

@@ -7,7 +7,7 @@ Python tool that needs the current ForgeKit version should import
 
 Usage:
     from forgekit_version import get_version
-    version = get_version()   # "0.43.2"
+    version = get_version()   # "0.44.0"
 """
 
 from pathlib import Path

@@ -17,10 +17,13 @@
 Maker 应该：
 
 - 复述请求范围和风险等级
+- 对 medium/high risk change，以已冻结的 scope、trust boundary、non-goals、stage authorization 和 acceptance matrix 为实现合同
 - 只修改确认范围内需要修改的文件
+- 将每个 acceptance ID 映射到代码与测试，并确认正式入口接入被测试的真实路径
 - 可行时运行约定的基础验证命令
 - 记录修改文件、实现摘要、验证运行、已知风险和未验证项
 - 将变更标记为 `ready-for-check`、`blocked` 或 `partial`
+- 矩阵外改进只记 follow-up；不得运行 proposal 未授权的 commit、smoke 或 full execution 阶段
 
 Maker 不能把自己的实现视为最终批准。Maker 能给出的最强结论是 `ready-for-check`。
 
@@ -35,8 +38,29 @@ Checker 使用 `forgekit-code-reviewer` 和 `.claude/skills/forgekit-code-review
 - 检查是否意外修改了敏感信息、业务文档、secrets、deploy 文件或 CI
 - 尽量用文件和行号报告发现的问题
 - 给出 `pass`、`needs-fix` 或 `manual-review` 建议
+- 首审优先执行 acceptance matrix 的关键拒绝反例，并检查正式 CLI/API/orchestration，而不只检查 helper
 
 Checker 必须保持 read-only，不修改文件、不修代码、不扩大范围。不得因为 Maker 声称“已修复”就默认相信；必须以 diff 和验证证据为准。
+
+## Finding 分类与审查边界
+
+首审 findings 分三类：
+
+1. 违反冻结 proposal 或 acceptance matrix：blocking。
+2. 矩阵未列出，但会造成数据泄漏/污染、错误训练或评估、错误 checkpoint、artifact 覆盖、正式入口意外执行未授权任务、失败写成成功或实验结论明显不可信：可作为 blocking Critical finding。
+3. 其余为 Minor/Follow-up，例如更强内部 token、抵抗开发者主动调用内部 helper、密码学级 provenance、更多日志字段、不影响正式路径的平台限制、风格或额外抽象。
+
+Reviewer 不得擅自扩大冻结的 trust boundary。新问题仍可报告，但只有前两类自动阻塞。
+
+## 限定复审与收敛
+
+Maker 完成一轮正常修复后，Checker 使用 `blocker-recheck`，默认只复核上一轮 blocking findings，并逐项输出 `Closed`、`Partially closed` 或 `Still open`。本轮修复新引入且违反冻结合同或会造成真实错误的回归可以继续阻塞；与修复无关的新建议只能记为 follow-up。不得重新进行开放式架构审查或扩大 trust boundary。
+
+若一轮修复后仍有多个 Major，不继续第三、第四轮无界小补丁；返回设计阶段，判断是否简化、拆分或重构。
+
+## 阶段授权
+
+以下阶段相互独立：`design-ready`、`implementation-ready-for-review`、`ready-for-commit`、`ready-for-minimal-real-smoke`、`ready-for-full-execution`。Checker 的 pass 只授权 proposal 声明的阶段。可提交不等于可真实 smoke，最小 smoke 通过也不等于完整执行获批。
 
 ## 默认触发
 
@@ -96,7 +120,7 @@ Review type:
 
 Gate:
 
-- `pass`：可以进入 handoff 或 commit 准备。
+- `pass`：可以进入 proposal 中明确声明的下一阶段；不隐式授权 commit、真实 smoke 或完整执行。
 - `needs-fix`：Maker 必须修复，或由用户明确接受风险；之后重新请求 review。
 - `manual-review`：不得自动通过，必须人工确认。
 

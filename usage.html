@@ -386,10 +386,13 @@
           <p class="muted">v0.12.0 起仓库根目录就是统一 plugin 表面：<code>.codex-plugin/plugin.json</code>、<code>.claude-plugin/plugin.json</code> 和共享 <code>skills/</code> 同时服务 Codex 与 Claude Code。plugin 不包含 <code>user-rules/</code> 或外部开发记录，也不默认启用 hook、MCP 或外部写操作。</p>
 
           <h3>v0.36+ 升级</h3>
-          <p class="muted">统一的是入口语义，不是 shell 语法。Windows PowerShell 使用 <code>python .\scripts\forgekit-project.py --target "D:\path\to\project"</code> 或 <code>forgekit-project.ps1</code>；macOS / Linux 使用 <code>python3 ./scripts/forgekit-project.py --target "/path/to/project"</code> 或 <code>bash ./scripts/forgekit-project.sh --target "/path/to/project"</code>。入口会识别初始化、无需更新、升级计划或 legacy adoption；默认不 apply。</p>
+          <p class="muted">统一的是入口语义，不是 shell 语法。Windows PowerShell 使用 <code>python .\scripts\forgekit-project.py --target "D:\path\to\project"</code> 或 <code>forgekit-project.ps1</code>；macOS / Linux 使用 <code>python3 ./scripts/forgekit-project.py --target "/path/to/project"</code> 或 <code>bash ./scripts/forgekit-project.sh --target "/path/to/project"</code>。入口会识别初始化、无需更新、升级计划或 legacy adoption；在同一个交互会话中完成 preview、diff、replace/manual-merge/cancel 和结果汇总。<code>--dry-run</code> 与底层 apply 仅作为高级或非交互能力。</p>
 
           <h3>根因与失败路径审查</h3>
           <p class="muted">复杂问题可说“从第一性原理出发，重新分析这个 bug 的根因”；高风险收口可说“做一次对抗式审查，专门找失败路径”。两者按风险触发，不替代独立代码审查，也不自动修复或提交。</p>
+
+          <h3>冻结验收与限定复审</h3>
+          <p class="muted">中高风险 change 先在现有 proposal 冻结范围、信任边界、非目标和阶段授权，并在 verification 写轻量 Frozen Acceptance Matrix。首审阻塞合同违例和会造成真实错误的 Critical 问题；修复后的复审默认只闭合上一轮 blocker。review pass 不自动等于可 commit、可真实 smoke 或可完整执行。</p>
         </div>
       </div>
     </section>

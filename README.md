@@ -84,6 +84,8 @@ python3 ./scripts/forgekit-project.py --target "/path/to/project"
 
 默认不会直接写入。需要你确认，或显式传入 `--yes`，才会执行安全操作。
 
+普通交互使用只需要这一条统一命令：同一界面会完成检测、迁移预览、SAFE / REVIEW-NEEDED 展示、diff 查看、replace / manual-merge / cancel 选择和结果汇总。`--dry-run`、底层 `apply --safe` 与非交互策略是 CI 或高级排查能力，不是普通用户必须执行的第二条标准命令。
+
 只有 v0.36.0 及以后初始化、且具有 `.forgekit/state.json` 的项目支持安全迁移。v0.35.x 及更早项目按“接手已有项目”处理，不自动升级。
 
 需要在首次初始化时同时生成 Claude Code / Codex 的可审查 agent 配置，可以使用底层高级入口：
@@ -313,6 +315,7 @@ python3 ./scripts/check-workspace-integrity.py --repo-root "/path/to/workspace"
 | 项目维护流程 | 统一初始化、升级、归档、交接和报告入口 |
 | 可选原生 agent 配置 | 可选生成 Claude Code / Codex agent 配置，是否注册和调用仍需验证 |
 | 独立代码审查 | 实现者和只读审查者分离，避免自审冒充独立审查 |
+| 冻结验收与审查收敛 | 中高风险变更先冻结范围、信任边界、验收和阶段授权；首审分类、复审只闭合 blocker |
 | 第一性原理分析 | 复杂问题先从事实、假设、约束推导最小正确机制 |
 | 对抗式审查 | 高风险收口前主动找失败路径 |
 | 多项目分层文档 | 区分总工作区、子项目、代码仓库、证据目录和历史归档 |
@@ -354,6 +357,8 @@ ForgeKit v0.41 起支持可选的多项目工作区。
 | high | proposal / design / tasks / verification / review / ship |
 
 `retro` 只在重大变更、事故、失败交付或团队明确要求时使用。
+
+medium/high risk change 在实现前还应在现有 proposal 中冻结 scope、trust boundary、non-goals 和 stage authorization，并在 verification 中维护轻量 Frozen Acceptance Matrix。独立首审可以阻塞合同违例和会造成真实错误的 Critical 问题；修复后的复审默认只复核上一轮 blocker。`pass` 只授权声明的阶段，不自动等于可 commit、可真实 smoke 或可完整执行。
 
 ---
 

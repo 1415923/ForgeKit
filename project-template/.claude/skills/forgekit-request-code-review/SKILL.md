@@ -18,6 +18,7 @@ Use this skill from the maker context. Do not perform the independent review you
 Provide only:
 
 1. Task or requirement summary.
+   Include frozen scope, trust boundary, non-goals, acceptance IDs, authorized stage, and review mode for medium/high risk changes.
 2. Base/head range, staged range, or an explicit diff boundary.
 3. `git diff --stat`.
 4. `git diff` or the exact changed files.
@@ -45,6 +46,7 @@ Do not convert fallback or same-context self-review into independent review.
 
 - `pass`: allow handoff or commit preparation.
 - `needs-fix`: return findings to the maker; fix or obtain explicit user risk acceptance, then request review again.
+- After the normal maker fix round, request `blocker-recheck` with the prior blocking findings instead of a fresh open-ended review. If several Major findings remain, return to design rather than extending an indefinite patch loop.
 - `manual-review`: stop the gate and request human confirmation.
 
 Record the result in the active change `review.md` when a change folder exists. Otherwise report it in the final handoff.

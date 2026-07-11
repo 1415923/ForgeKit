@@ -32,6 +32,38 @@ README 只保留当前定位、快速开始和常用入口；完整版本历史�
 
 ---
 
+## [0.44.0] - Maker–Checker Review Convergence
+
+### 问题背景
+
+中高风险 change 可能跨越多层合同，而 Maker 的测试容易停在局部 helper；独立 Reviewer 又可能在每轮扩大信任边界和验收标准，导致多轮 `needs-fix`、低收益加固和阶段授权混淆。
+
+### 设计结论
+
+不新增 review 体系或 skill。扩展现有 proposal、verification、review、Maker/Checker 协议和 usage playbook：实现前冻结 scope、trust boundary、non-goals、stage authorization 与轻量 acceptance matrix；首审只把冻结合同违例和会造成真实错误的 Critical consequence 作为 blocker；复审默认只闭合上一轮 blocker。
+
+### Added
+
+- proposal 增加信任边界、阶段授权和冻结规则。
+- verification 增加风险相称的 Frozen Acceptance Matrix。
+- usage playbook 增加 Maker、Reviewer 首审和 Reviewer 限定复审三个短提示词。
+- v0.44.0 安全迁移包，可将规则下发到已有 v0.43.2 项目。
+
+### Changed
+
+- review pass 只授权 proposal 声明的阶段；commit、minimal real smoke 和 full execution 分开判断。
+- 一轮正常修复后的复审使用 blocker recheck；仍有多个 Major 时返回设计阶段，避免无限小补丁。
+- 原统一入口保持单命令交互：同一会话完成 preview、diff、replace/manual-merge/cancel 和结果汇总；取消不写 state、target 或 review report。
+- 升级结果明确列出自动更新、本地保留、manual merge、AGENTS 入口动作、版本/feature、治理 commit 建议和会话刷新提示。
+
+### 边界
+
+- 不新增安全 token、权限系统、Agent 框架、runner 或强制长期文档。
+- low-risk change 仍可使用轻量流程。
+- 定制受管文件升级时保留原内容并进入 review-needed，不覆盖项目业务规则或真实 change 工件。
+
+---
+
 ## [0.43.2] - Version Metadata Repair Hotfix
 
 ### 问题背景

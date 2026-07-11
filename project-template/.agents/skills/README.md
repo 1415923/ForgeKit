@@ -12,7 +12,7 @@
 | `document-backfill` | 逐篇阅读既有文档并回填 ForgeKit managed docs root |
 | `handover-review` | 接手既有项目时审计现状、兼容边界和修复计划 |
 | `large-change-planning` | 大范围、迁移、重构或高风险任务前的探索和实施计划 |
-| `code-review` | 审查 diff、回归、安全风险和测试缺口 |
+| `code-review` | 按冻结边界审查 diff、回归和测试缺口，并限定 blocker 复审 |
 | `forgekit-request-code-review` / `forgekit-code-review` | Claude Code 专用的 Maker 请求与独立只读 Reviewer gate；位于 `.claude/skills/` |
 | `release-check` | 发布前检查版本、文档、测试、构建和部署风险 |
 | `security-review` | 审查凭据、权限、外部输入、依赖和外部动作 |

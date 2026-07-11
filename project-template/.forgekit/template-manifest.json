@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "template_version": "0.43.2",
+  "template_version": "0.44.0",
   "boundary_aware": true,
   "files": [
     {
@@ -9,7 +9,7 @@
       "role": "agent_entry",
       "update_policy": "ask",
       "render_mode": "copy",
-      "checksum": "sha256:a8671d6847caf6d09ffe982dd7eac5b5bd8fd2c26951a6f17a89e91fefd1d4e8"
+      "checksum": "sha256:e3fb19418f0827681c519f9e99f5e86a2dc201c1861a2e2d7a586700a0e95374"
     },
     {
       "source_path": "CLAUDE.md",
@@ -25,7 +25,7 @@
       "role": "readme",
       "update_policy": "ask",
       "render_mode": "copy",
-      "checksum": "sha256:f8bc3fa18ffd437fb07e679ebf759631d42899ca86f7ab81b6dd9befee1ed698"
+      "checksum": "sha256:48a3016a11513deefff121beebf74bde3568b7a4e5d9a32e783949184b82b960"
     },
     {
       "source_path": ".forgekit/project-boundary.yml",
@@ -33,7 +33,7 @@
       "role": "boundary_config",
       "update_policy": "ask",
       "render_mode": "render",
-      "checksum": "sha256:0251af74852c477eee9a26d1e110cadf9119eb42408311536977d3e25dc206b1"
+      "checksum": "sha256:c781e6b7f99b5d1ab82d425d9272ca5804d96f3fdbe48bfee1fd831a38ecb8d4"
     },
     {
       "source_path": ".forgekit/docs/document-responsibility.md",
@@ -65,7 +65,7 @@
       "role": "managed_doc",
       "update_policy": "merge",
       "render_mode": "copy",
-      "checksum": "sha256:d1c5f59afa7fb1166fcb302700d27e0404e1b974a8d861661ab752d4e87f094b"
+      "checksum": "sha256:46266676e855500a00b3b94dfa191e75410d3484091c72b413eba9e294221e79"
     },
     {
       "source_path": ".forgekit/archive/README.md",
@@ -153,7 +153,7 @@
       "role": "change_template",
       "update_policy": "replace",
       "render_mode": "copy",
-      "checksum": "sha256:d22291268a1de36bc357753b79b55a9e3bcae5e9d42f7df4ba23e44576725333"
+      "checksum": "sha256:3aea88c0926c4df5111f04ef0174b6e6dcdb01999a44958624bd9f076fc014fa"
     },
     {
       "source_path": "changes/_template/design.md",
@@ -177,7 +177,7 @@
       "role": "change_template",
       "update_policy": "replace",
       "render_mode": "copy",
-      "checksum": "sha256:11d3623c236abe763651b4e5c8b18f086e9c0a10a6aac2d040f4b94ac3a5aa6e"
+      "checksum": "sha256:1ead4c2655729076c9cd6da8c41536de234eef9d8882e553d15a46a486a54f1e"
     },
     {
       "source_path": "changes/_template/review.md",
@@ -185,7 +185,7 @@
       "role": "change_template",
       "update_policy": "replace",
       "render_mode": "copy",
-      "checksum": "sha256:56035522bf14a64b279c094641696e6a43bf997eaed4602cac890377bc6bad93"
+      "checksum": "sha256:4559d4d70cdb02ded2fbefdd7d40d1e9195da83274f4f7839fc6d120a4b3d894"
     },
     {
       "source_path": "changes/_template/ship.md",
@@ -297,7 +297,7 @@
       "role": "managed_doc",
       "update_policy": "merge",
       "render_mode": "copy",
-      "checksum": "sha256:e804a14af04b2b9f7a2fd7631d24941d7734758fbfb6324afe3927579a18ea9c"
+      "checksum": "sha256:7ed79586845505e8a49cf879ed39f3bb10825b5c10b64c8d8858bdaba2af7b2d"
     },
     {
       "source_path": "docs/native-agent-adapter.md",
@@ -361,7 +361,7 @@
       "role": "governance",
       "update_policy": "replace",
       "render_mode": "copy",
-      "checksum": "sha256:4eca3b98cbe259cae4b7c38ae4ae68c81cf62a8948b1eb13c09a2394fdb1d7be"
+      "checksum": "sha256:5ee07a66317258372310650da563b522f184ac2fbf3e8d82f8cc955f388df370"
     },
     {
       "source_path": "governance/agent-harness.md",
@@ -433,7 +433,7 @@
       "role": "script",
       "update_policy": "replace",
       "render_mode": "copy",
-      "checksum": "sha256:3ffb554e0d9c11ee91222be090580dfac70190b45bffa1a5834267d8460661e1"
+      "checksum": "sha256:cee019bc135c1baa84cd48631a7e54a00bcf7daf946c4ca034e66ebc7efbc1e8"
     },
     {
       "source_path": "migrations/0.36.0/migration.json",
@@ -497,7 +497,7 @@
       "role": "skill",
       "update_policy": "ask",
       "render_mode": "copy",
-      "checksum": "sha256:d257fc2fd7ed59ee3eee49ff50966ee900ba891409d5248533c121622f731ccb"
+      "checksum": "sha256:a4f915bf00ac98eb8a0a915eee21f7fbff69b32ce39e2bb5413952cdf8107934"
     },
     {
       "source_path": ".claude/skills/forgekit-code-review/SKILL.md",
@@ -505,7 +505,7 @@
       "role": "skill",
       "update_policy": "ask",
       "render_mode": "copy",
-      "checksum": "sha256:ec13264349c714ccf3675858ff8006a741e96881472f43cf48fc54afc0674fda"
+      "checksum": "sha256:7a16512f6fc09f4b41db69b2edb98f3a1f884e26f3c6044d15e20ee73f499166"
     },
     {
       "source_path": ".claude/skills/forgekit-code-review/references/universal-review.md",

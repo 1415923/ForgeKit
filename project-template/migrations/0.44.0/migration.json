@@ -1,0 +1,137 @@
+{
+  "id": "0.44.0-maker-checker-review-convergence",
+  "title": "Maker Checker Review Convergence",
+  "from": "0.43.2",
+  "to": "0.44.0",
+  "risk": "medium",
+  "actions": [
+    {
+      "id": "update-maker-checker-1",
+      "type": "replace_file_if_baseline_matches",
+      "safety": "safe",
+      "source": "files/changes/_template/proposal.md",
+      "baseline": "baseline/changes/_template/proposal.md",
+      "target": ".forgekit/changes/_template/proposal.md",
+      "skip_warning": "changes/_template/proposal.md differs from the v0.43.2 baseline; preserve it and merge the v0.44.0 review-convergence rules manually.",
+      "review_impact": "Adds frozen acceptance, bounded blocker classification, limited re-review, or stage authorization rules.",
+      "recommended_action": "Review the incoming diff; replace only if no project-specific rules would be lost."
+    },
+    {
+      "id": "update-maker-checker-2",
+      "type": "replace_file_if_baseline_matches",
+      "safety": "safe",
+      "source": "files/changes/_template/verification.md",
+      "baseline": "baseline/changes/_template/verification.md",
+      "target": ".forgekit/changes/_template/verification.md",
+      "skip_warning": "changes/_template/verification.md differs from the v0.43.2 baseline; preserve it and merge the v0.44.0 review-convergence rules manually.",
+      "review_impact": "Adds frozen acceptance, bounded blocker classification, limited re-review, or stage authorization rules.",
+      "recommended_action": "Review the incoming diff; replace only if no project-specific rules would be lost."
+    },
+    {
+      "id": "update-maker-checker-3",
+      "type": "replace_file_if_baseline_matches",
+      "safety": "safe",
+      "source": "files/changes/_template/review.md",
+      "baseline": "baseline/changes/_template/review.md",
+      "target": ".forgekit/changes/_template/review.md",
+      "skip_warning": "changes/_template/review.md differs from the v0.43.2 baseline; preserve it and merge the v0.44.0 review-convergence rules manually.",
+      "review_impact": "Adds frozen acceptance, bounded blocker classification, limited re-review, or stage authorization rules.",
+      "recommended_action": "Review the incoming diff; replace only if no project-specific rules would be lost."
+    },
+    {
+      "id": "update-maker-checker-4",
+      "type": "replace_file_if_baseline_matches",
+      "safety": "safe",
+      "source": "files/governance/ai-engineering-loop.md",
+      "baseline": "baseline/governance/ai-engineering-loop.md",
+      "target": "governance/ai-engineering-loop.md",
+      "skip_warning": "governance/ai-engineering-loop.md differs from the v0.43.2 baseline; preserve it and merge the v0.44.0 review-convergence rules manually.",
+      "review_impact": "Adds frozen acceptance, bounded blocker classification, limited re-review, or stage authorization rules.",
+      "recommended_action": "Review the incoming diff; replace only if no project-specific rules would be lost."
+    },
+    {
+      "id": "update-maker-checker-5",
+      "type": "replace_file_if_baseline_matches",
+      "safety": "safe",
+      "source": "files/docs/maker-checker-protocol.md",
+      "baseline": "baseline/docs/maker-checker-protocol.md",
+      "target": ".forgekit/docs/maker-checker-protocol.md",
+      "skip_warning": "docs/maker-checker-protocol.md differs from the v0.43.2 baseline; preserve it and merge the v0.44.0 review-convergence rules manually.",
+      "review_impact": "Adds frozen acceptance, bounded blocker classification, limited re-review, or stage authorization rules.",
+      "recommended_action": "Review the incoming diff; replace only if no project-specific rules would be lost."
+    },
+    {
+      "id": "update-maker-checker-6",
+      "type": "replace_file_if_baseline_matches",
+      "safety": "safe",
+      "source": "files/.forgekit/docs/usage-playbook.md",
+      "baseline": "baseline/.forgekit/docs/usage-playbook.md",
+      "target": ".forgekit/docs/usage-playbook.md",
+      "skip_warning": ".forgekit/docs/usage-playbook.md differs from the v0.43.2 baseline; preserve it and merge the v0.44.0 review-convergence rules manually.",
+      "review_impact": "Adds frozen acceptance, bounded blocker classification, limited re-review, or stage authorization rules.",
+      "recommended_action": "Review the incoming diff; replace only if no project-specific rules would be lost."
+    },
+    {
+      "id": "update-maker-checker-8",
+      "type": "replace_file_if_baseline_matches",
+      "safety": "safe",
+      "source": "files/.agents/skills/code-review/SKILL.md",
+      "baseline": "baseline/.agents/skills/code-review/SKILL.md",
+      "target": ".agents/skills/code-review/SKILL.md",
+      "skip_warning": ".agents/skills/code-review/SKILL.md differs from the v0.43.2 baseline; preserve it and merge the v0.44.0 review-convergence rules manually.",
+      "review_impact": "Adds frozen acceptance, bounded blocker classification, limited re-review, or stage authorization rules.",
+      "recommended_action": "Review the incoming diff; replace only if no project-specific rules would be lost."
+    },
+    {
+      "id": "update-maker-checker-9",
+      "type": "replace_file_if_baseline_matches",
+      "safety": "safe",
+      "source": "files/.claude/skills/forgekit-code-review/SKILL.md",
+      "baseline": "baseline/.claude/skills/forgekit-code-review/SKILL.md",
+      "target": ".claude/skills/forgekit-code-review/SKILL.md",
+      "skip_warning": ".claude/skills/forgekit-code-review/SKILL.md differs from the v0.43.2 baseline; preserve it and merge the v0.44.0 review-convergence rules manually.",
+      "review_impact": "Adds frozen acceptance, bounded blocker classification, limited re-review, or stage authorization rules.",
+      "recommended_action": "Review the incoming diff; replace only if no project-specific rules would be lost."
+    },
+    {
+      "id": "update-maker-checker-10",
+      "type": "replace_file_if_baseline_matches",
+      "safety": "safe",
+      "source": "files/.claude/skills/forgekit-request-code-review/SKILL.md",
+      "baseline": "baseline/.claude/skills/forgekit-request-code-review/SKILL.md",
+      "target": ".claude/skills/forgekit-request-code-review/SKILL.md",
+      "skip_warning": ".claude/skills/forgekit-request-code-review/SKILL.md differs from the v0.43.2 baseline; preserve it and merge the v0.44.0 review-convergence rules manually.",
+      "review_impact": "Adds frozen acceptance, bounded blocker classification, limited re-review, or stage authorization rules.",
+      "recommended_action": "Review the incoming diff; replace only if no project-specific rules would be lost."
+    },
+    {
+      "id": "update-maker-checker-11",
+      "type": "replace_file_if_baseline_matches",
+      "safety": "safe",
+      "source": "files/scripts/forgekit-upgrade.py",
+      "baseline": "baseline/scripts/forgekit-upgrade.py",
+      "target": "scripts/forgekit-upgrade.py",
+      "skip_warning": "scripts/forgekit-upgrade.py differs from the v0.43.2 baseline; preserve it and merge the v0.44.0 cancel-without-write behavior manually.",
+      "review_impact": "Keeps the existing advanced upgrade entry aligned with the unified interactive cancel contract.",
+      "recommended_action": "Replace when unmodified; otherwise merge the abort-without-write change into the project-maintained script."
+    },
+    {
+      "id": "register-review-convergence",
+      "type": "set_state_feature",
+      "safety": "safe",
+      "name": "maker_checker_review_convergence",
+      "value": true
+    }
+  ],
+  "manual_review": [
+    "A review pass authorizes only the stage frozen in the active proposal.",
+    "Customized managed files are preserved and reported as review-needed; merge the incoming rules without deleting project business rules.",
+    "AGENTS manual-merge snippet: For medium/high risk changes, read .forgekit/docs/maker-checker-protocol.md and the active change artifacts; freeze scope, trust boundary, non-goals, stage authorization, and acceptance matrix; re-review defaults to prior blockers, while fix-introduced contract/real-error regressions may block and unrelated suggestions stay follow-up.",
+    "After upgrade, close the current AI session after a minimal checkpoint and start a fresh session before new work."
+  ],
+  "non_goals": [
+    "No automatic commit, push, real smoke, full execution, agent scheduling, or review invocation",
+    "No overwrite of active project change records or business rules",
+    "No security token, permission system, or production threat-model expansion"
+  ]
+}

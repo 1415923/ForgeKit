@@ -125,9 +125,13 @@ When a task names a ForgeKit skill, read the project-local `.agents/skills/<skil
 - Bounded-auto or loop execution must record `agent_mode`; native custom agents start as `native_agent_status: unverified` until observed.
 - Do not modify business docs, secrets, deploy files, CI, or `.forgekit/template-lock.json` by default.
 - Medium or high risk code changes should separate Maker phase and Checker phase.
+- Before medium/high risk implementation, freeze scope, trust boundary, non-goals, stage authorization, and a risk-proportional acceptance matrix in the existing change artifacts.
 - Maker phase may say `ready for check`, but must not declare final pass.
+- Map each acceptance ID to code and tests; verify the formal CLI/API/orchestration uses the tested path. Do not run a stage that the proposal has not authorized.
 - Checker phase should review diff, validation, risks, and document sync; it should output `pass`, `needs-fix`, or `manual-review`.
 - Checker should not expand scope or implement new features unless the user explicitly asks.
+- Initial review blocks frozen-contract violations and newly found Critical consequences; other matrix-external improvements are follow-ups. Re-review defaults to the prior blockers and must not reopen an unbounded architecture review.
+- A review pass authorizes only the proposal's declared stage; commit, minimal real smoke, and full execution are separate gates.
 - Code changes require independent review by default; core logic, API, data, permissions, scripts, release/tag, and bounded-auto closure require it.
 - When the user asks for first-principles analysis, run the First-Principles Pass in `.forgekit/docs/reasoning-review.md`. Before high-risk design, derive the root mechanism; before high-risk completion, run the Adversarial Review Pass.
 - Checkpoint critical conclusions and blocking findings with evidence paths and `TODO_REVIEW`. Do not write unverified derivations as facts or copy full review logs into persistent docs.

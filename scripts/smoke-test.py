@@ -1,6 +1,10 @@
 #!/usr/bin/env python3
 import argparse
+import builtins
+import contextlib
 import hashlib
+import importlib.util
+import io
 import json
 import os
 import re
@@ -111,6 +115,7 @@ REQUIRED_REPO_PATHS = [
     "project-template/migrations/0.41.1/migration.json",
     "project-template/migrations/0.42.0/migration.json",
     "project-template/migrations/0.43.0/migration.json",
+    "project-template/migrations/0.44.0/migration.json",
     "migrations/0.37.0/migration.json",
     "migrations/0.38.0/migration.json",
     "migrations/0.39.0/migration.json",
@@ -121,6 +126,7 @@ REQUIRED_REPO_PATHS = [
     "migrations/0.41.1/migration.json",
     "migrations/0.42.0/migration.json",
     "migrations/0.43.0/migration.json",
+    "migrations/0.44.0/migration.json",
     "project-template/scripts/check-codex-native-agents.py",
     "project-template/scripts/doc-health-report.py",
     "project-template/scripts/source-trace-report.py",
@@ -1959,13 +1965,13 @@ def assert_versioned_migration_upgrade(repo, target, temp_parent):
         repo / "migrations/0.43.0/baseline/.forgekit/docs/usage-playbook.md",
         capsule_migration / ".forgekit/docs/usage-playbook.md",
     )
-    capsule_apply = run([sys.executable, str(repo / "scripts/forgekit-upgrade.py"), "apply", "--safe", "--repo-root", str(capsule_migration)], cwd=repo)
+    capsule_apply = run([sys.executable, str(repo / "scripts/forgekit-upgrade.py"), "apply", "--safe", "--repo-root", str(capsule_migration), "--review-needed-policy", "replace-template"], cwd=repo)
     capsule_state = json.loads(capsule_state_path.read_text(encoding="utf-8"))
     if capsule_state.get("forgekit_version") != FORGEKIT_VERSION or capsule_state["features"].get("minimal_project_capsule_bootstrap") is not True:
         fail("v0.43 migration did not register minimal Project Capsule Bootstrap")
     if not (capsule_migration / "scripts/bootstrap-project-capsule.py").is_file():
         fail("v0.43 migration did not install bootstrap-project-capsule.py")
-    capsule_rerun = run([sys.executable, str(repo / "scripts/forgekit-upgrade.py"), "apply", "--safe", "--repo-root", str(capsule_migration)], cwd=repo)
+    capsule_rerun = run([sys.executable, str(repo / "scripts/forgekit-upgrade.py"), "apply", "--safe", "--repo-root", str(capsule_migration), "--review-needed-policy", "replace-template"], cwd=repo)
     if "No migration is required; no files were changed" not in capsule_rerun.stdout:
         fail("v0.43 migration rerun must be an up-to-date no-op")
 
@@ -1988,6 +1994,10 @@ def assert_versioned_migration_upgrade(repo, target, temp_parent):
 
     apply_target = temp_parent / "versioned-apply"
     shutil.copytree(target, apply_target)
+    apply_state_path = apply_target / ".forgekit/state.json"
+    apply_state = json.loads(apply_state_path.read_text(encoding="utf-8-sig"))
+    apply_state["forgekit_version"] = "0.43.0"
+    apply_state_path.write_text(json.dumps(apply_state, indent=2) + "\n", encoding="utf-8")
     migration_root = temp_parent / "migration-packages"
     package = migration_root / FORGEKIT_VERSION
     package.mkdir(parents=True)
@@ -2024,6 +2034,237 @@ def assert_versioned_migration_upgrade(repo, target, temp_parent):
         fail("safe migration did not update state version")
     if not (apply_target / ".forgekit" / "migration-proof.txt").is_file():
         fail("safe migration did not apply the declared safe action")
+
+
+def assert_0440_review_convergence_migration(repo, current_target, temp_parent):
+    root_package = repo / "migrations/0.44.0"
+    template_package = repo / "project-template/migrations/0.44.0"
+    root_files = sorted(path.relative_to(root_package) for path in root_package.rglob("*") if path.is_file())
+    template_files = sorted(path.relative_to(template_package) for path in template_package.rglob("*") if path.is_file())
+    if root_files != template_files:
+        fail("0.44.0 migration mirrors have different file inventories")
+    for relative in root_files:
+        if (root_package / relative).read_bytes() != (template_package / relative).read_bytes():
+            fail(f"0.44.0 migration mirrors differ: {relative}")
+
+    migration = json.loads((root_package / "migration.json").read_text(encoding="utf-8"))
+    file_actions = [action for action in migration["actions"] if action["type"] == "replace_file_if_baseline_matches"]
+    if len(file_actions) != 10:
+        fail("0.44.0 migration must keep ten guarded managed-file updates")
+
+    def prepare(name):
+        case = temp_parent / name
+        shutil.copytree(current_target, case)
+        state_path = case / ".forgekit/state.json"
+        state = json.loads(state_path.read_text(encoding="utf-8-sig"))
+        state["forgekit_version"] = "0.43.2"
+        state.setdefault("features", {}).pop("maker_checker_review_convergence", None)
+        state_path.write_text(json.dumps(state, indent=2) + "\n", encoding="utf-8")
+        for action in file_actions:
+            source = root_package / action["baseline"]
+            destination = case / action["target"]
+            destination.parent.mkdir(parents=True, exist_ok=True)
+            shutil.copy2(source, destination)
+        shutil.copy2(root_package / "baseline/AGENTS.md", case / "AGENTS.md")
+        legacy_agents = (case / "AGENTS.md").read_text(encoding="utf-8")
+        if ".forgekit/docs/maker-checker-protocol.md" not in legacy_agents:
+            fail("0.43.2 AGENTS baseline must route to the managed Maker/Checker protocol")
+        return case
+
+    unified = repo / "scripts/forgekit-project.py"
+    clean = prepare("v0432-to-v0440-clean")
+    before_plan = {action["target"]: (clean / action["target"]).read_bytes() for action in file_actions}
+    clean_plan = run([sys.executable, str(unified), "--target", str(clean), "--lang", "en-US", "--dry-run"], cwd=repo)
+    for marker in ["From: 0.43.2", "To: 0.44.0", "Safe actions: 11", "Review needed: 0", "No files were changed by plan."]:
+        if marker not in clean_plan.stdout:
+            fail(f"0.44.0 clean unified plan missing marker: {marker}")
+    for relative, content in before_plan.items():
+        if (clean / relative).read_bytes() != content:
+            fail(f"0.44.0 report-only plan modified {relative}")
+
+    run([sys.executable, str(unified), "--target", str(clean), "--lang", "en-US", "--yes"], cwd=repo)
+    clean_state = json.loads((clean / ".forgekit/state.json").read_text(encoding="utf-8-sig"))
+    if clean_state.get("forgekit_version") != "0.44.0" or clean_state.get("features", {}).get("maker_checker_review_convergence") is not True:
+        fail("0.44.0 clean apply did not advance version and feature state")
+    for action in file_actions:
+        if (clean / action["target"]).read_bytes() != (root_package / action["source"]).read_bytes():
+            fail(f"0.44.0 clean apply payload mismatch: {action['target']}")
+    rerun = run([sys.executable, str(unified), "--target", str(clean), "--lang", "en-US", "--dry-run"], cwd=repo)
+    if "Detected action: up-to-date" not in rerun.stdout:
+        fail("0.44.0 unified rerun must be current/no-op")
+
+    customized = prepare("v0432-to-v0440-customized")
+    custom_target = customized / file_actions[0]["target"]
+    custom_content = custom_target.read_bytes() + b"\nproject-local-customization\n"
+    custom_target.write_bytes(custom_content)
+    custom_plan = run([sys.executable, str(unified), "--target", str(customized), "--lang", "en-US", "--dry-run"], cwd=repo, check=False)
+    if custom_plan.returncode != 2:
+        fail("0.44.0 customized unified dry-run must signal review-needed")
+    for marker in ["Safe actions: 10", "Review needed: 1", "REVIEW-NEEDED: update-maker-checker-1", "No files were changed by plan."]:
+        if marker not in custom_plan.stdout:
+            fail(f"0.44.0 customized unified plan missing marker: {marker}")
+    if custom_target.read_bytes() != custom_content:
+        fail("0.44.0 customized plan modified project content")
+    run([
+        sys.executable, str(unified), "--target", str(customized), "--lang", "en-US", "--yes",
+        "--review-needed-policy", "manual-merge",
+    ], cwd=repo)
+    if custom_target.read_bytes() != custom_content:
+        fail("0.44.0 customized apply overwrote project content")
+    custom_state = json.loads((customized / ".forgekit/state.json").read_text(encoding="utf-8-sig"))
+    if custom_state.get("forgekit_version") != "0.44.0" or custom_state.get("features", {}).get("maker_checker_review_convergence") is not True:
+        fail("0.44.0 customized apply did not advance version and feature state")
+
+    abort_case = prepare("v0432-to-v0440-controller-abort")
+    abort_target = abort_case / file_actions[0]["target"]
+    abort_target.write_bytes(abort_target.read_bytes() + b"\nproject-local-customization\n")
+    abort_business = abort_case / "docs/business.md"
+    abort_business.parent.mkdir(parents=True, exist_ok=True)
+    abort_business.write_text("business truth\n", encoding="utf-8")
+    abort_before = {
+        ".forgekit/state.json": (abort_case / ".forgekit/state.json").read_bytes(),
+        file_actions[0]["target"]: abort_target.read_bytes(),
+        "docs/business.md": abort_business.read_bytes(),
+    }
+    abort_result = run([
+        sys.executable, str(unified), "--target", str(abort_case), "--lang", "en-US", "--yes",
+        "--review-needed-policy", "abort",
+    ], cwd=repo, check=False)
+    if abort_result.returncode == 0 or "aborted" not in (abort_result.stdout + abort_result.stderr):
+        fail("0.44.0 controller abort must stop the upgrade")
+    for relative, content in abort_before.items():
+        if (abort_case / relative).read_bytes() != content:
+            fail(f"0.44.0 controller abort modified {relative}")
+    if (abort_case / ".forgekit/reports/upgrade-review-needed.json").exists():
+        fail("0.44.0 controller abort must not write review reports")
+
+    interactive_abort = prepare("v0432-to-v0440-direct-interactive-abort")
+    interactive_abort_target = interactive_abort / file_actions[0]["target"]
+    interactive_abort_target.write_bytes(interactive_abort_target.read_bytes() + b"\nproject-local-customization\n")
+    interactive_abort_before = {
+        ".forgekit/state.json": (interactive_abort / ".forgekit/state.json").read_bytes(),
+        file_actions[0]["target"]: interactive_abort_target.read_bytes(),
+    }
+    spec = importlib.util.spec_from_file_location("forgekit_upgrade_interactive_abort_smoke", repo / "scripts/forgekit-upgrade.py")
+    upgrade_module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(upgrade_module)
+    module_state, module_status = upgrade_module.state_status(interactive_abort)
+    if module_status != "supported":
+        fail("0.44.0 direct interactive abort fixture is not migration-supported")
+    module_migrations = upgrade_module.load_migrations(repo / "migrations")
+    module_pending, module_target = upgrade_module.pending_migrations(upgrade_module.parse_version(module_state["forgekit_version"]), module_migrations)
+    review_pending, review_decisions, _ = upgrade_module.collect_review_needed(interactive_abort, module_pending, module_state, "en-US")
+    original_stdin = upgrade_module.sys.stdin
+    original_input = builtins.input
+    upgrade_module.sys.stdin = types.SimpleNamespace(isatty=lambda: True)
+    builtins.input = lambda _prompt="": "a"
+    interactive_abort_stopped = False
+    try:
+        try:
+            with contextlib.redirect_stdout(io.StringIO()):
+                upgrade_module.resolve_review_needed(
+                    interactive_abort, review_pending, review_decisions,
+                    upgrade_module.version_text(module_target), "ask", "en-US",
+                )
+        except SystemExit:
+            interactive_abort_stopped = True
+    finally:
+        upgrade_module.sys.stdin = original_stdin
+        builtins.input = original_input
+    if not interactive_abort_stopped:
+        fail("0.44.0 direct interactive abort unexpectedly continued")
+    for relative, content in interactive_abort_before.items():
+        if (interactive_abort / relative).read_bytes() != content:
+            fail(f"0.44.0 direct interactive abort modified {relative}")
+    if (interactive_abort / ".forgekit/reports/upgrade-review-needed.json").exists():
+        fail("0.44.0 direct interactive abort must not write review reports")
+
+    single = prepare("v0432-to-v0440-single-command")
+    single_target = single / file_actions[0]["target"]
+    single_custom = single_target.read_bytes() + b"\nproject-local-customization\n"
+    single_target.write_bytes(single_custom)
+    single_business = single / "docs/business.md"
+    single_business.parent.mkdir(parents=True, exist_ok=True)
+    single_business.write_text("business truth\n", encoding="utf-8")
+    single_change = single / ".forgekit/changes/real-change/proposal.md"
+    single_change.parent.mkdir(parents=True, exist_ok=True)
+    single_change.write_text("project change truth\n", encoding="utf-8")
+    single_result = run([
+        sys.executable, str(unified), "--target", str(single), "--lang", "en-US", "--yes",
+        "--review-needed-policy", "manual-merge",
+    ], cwd=repo)
+    for marker in [
+        "From: 0.43.2", "To: 0.44.0", "resolved-manual-merge", "Upgrade result summary:",
+        "Automatically updated/template-aligned files:", "Preserved local customizations:",
+        "Files still requiring manual merge:", "AGENTS entry action: merge the snippet below",
+        "ForgeKit version: 0.44.0", "maker_checker_review_convergence: True",
+        "Governance commit suggestion:", "start a new session",
+    ]:
+        if marker not in single_result.stdout:
+            fail(f"0.44.0 single-command controller flow missing marker: {marker}")
+    if single_target.read_bytes() != single_custom:
+        fail("0.44.0 single-command manual-merge overwrote customized content")
+    if single_business.read_text(encoding="utf-8") != "business truth\n" or single_change.read_text(encoding="utf-8") != "project change truth\n":
+        fail("0.44.0 single-command flow modified business files or a real change artifact")
+    single_report = json.loads((single / ".forgekit/reports/upgrade-review-needed.json").read_text(encoding="utf-8"))
+    single_exports = [item.get("export_path") for item in single_report.get("items", []) if item.get("status") == "resolved_manual_merge"]
+    if not single_exports or not all((single / path).is_dir() for path in single_exports):
+        fail("0.44.0 single-command manual-merge did not export incoming/diff evidence")
+
+    if os.name != "nt":
+        cancelled = prepare("v0432-to-v0440-interactive-cancel")
+        cancelled_business = cancelled / "docs/business.md"
+        cancelled_business.parent.mkdir(parents=True, exist_ok=True)
+        cancelled_business.write_text("business truth\n", encoding="utf-8")
+        cancelled_change = cancelled / ".forgekit/changes/real-change/proposal.md"
+        cancelled_change.parent.mkdir(parents=True, exist_ok=True)
+        cancelled_change.write_text("project change truth\n", encoding="utf-8")
+        cancel_before = {
+            ".forgekit/state.json": (cancelled / ".forgekit/state.json").read_bytes(),
+            "docs/business.md": cancelled_business.read_bytes(),
+            ".forgekit/changes/real-change/proposal.md": cancelled_change.read_bytes(),
+            ".forgekit/changes/_template/proposal.md": (cancelled / ".forgekit/changes/_template/proposal.md").read_bytes(),
+        }
+        cancelled_result = run_pty([sys.executable, str(unified), "--target", str(cancelled), "--lang", "en-US"], cwd=repo, input_text="n\n")
+        for marker in ["From: 0.43.2", "To: 0.44.0", "Continue with safe apply?", "Safe apply was not executed"]:
+            if marker not in cancelled_result.stdout:
+                fail(f"0.44.0 interactive cancel missing marker: {marker}")
+        for relative, content in cancel_before.items():
+            if (cancelled / relative).read_bytes() != content:
+                fail(f"0.44.0 interactive cancel modified {relative}")
+
+        interactive = prepare("v0432-to-v0440-interactive-apply")
+        interactive_target = interactive / file_actions[0]["target"]
+        interactive_custom = interactive_target.read_bytes() + b"\nproject-local-customization\n"
+        interactive_target.write_bytes(interactive_custom)
+        business = interactive / "docs/business.md"
+        business.parent.mkdir(parents=True, exist_ok=True)
+        business.write_text("business truth\n", encoding="utf-8")
+        real_change = interactive / ".forgekit/changes/real-change/proposal.md"
+        real_change.parent.mkdir(parents=True, exist_ok=True)
+        real_change.write_text("project change truth\n", encoding="utf-8")
+        interactive_result = run_pty(
+            [sys.executable, str(unified), "--target", str(interactive), "--lang", "en-US"],
+            cwd=repo,
+            input_text="y\nd\nm\n",
+        )
+        for marker in [
+            "From: 0.43.2", "To: 0.44.0", "Show diff", "resolved-manual-merge",
+            "Upgrade result summary:", "Automatically updated/template-aligned files:",
+            "Preserved local customizations:", "Files still requiring manual merge:",
+            "AGENTS entry action: merge the snippet below", "maker_checker_review_convergence: True",
+            "Governance commit suggestion:", "start a new session",
+        ]:
+            if marker not in interactive_result.stdout:
+                fail(f"0.44.0 single-command interactive upgrade missing marker: {marker}")
+        if interactive_target.read_bytes() != interactive_custom:
+            fail("0.44.0 interactive manual-merge overwrote customized content")
+        if business.read_text(encoding="utf-8") != "business truth\n" or real_change.read_text(encoding="utf-8") != "project change truth\n":
+            fail("0.44.0 interactive upgrade modified business files or a real change artifact")
+        interactive_report = json.loads((interactive / ".forgekit/reports/upgrade-review-needed.json").read_text(encoding="utf-8"))
+        interactive_exports = [item.get("export_path") for item in interactive_report.get("items", []) if item.get("status") == "resolved_manual_merge"]
+        if not interactive_exports or not all((interactive / path).is_dir() for path in interactive_exports):
+            fail("0.44.0 interactive manual-merge did not export incoming/diff evidence")
 
 
 def assert_unified_project_entry(repo, current_target, temp_parent):
@@ -2169,9 +2410,8 @@ def assert_unified_project_entry(repo, current_target, temp_parent):
             fail("interactive abort must stop the migration")
         if abort_state.read_bytes() != abort_state_before or abort_maintenance.read_bytes() != abort_file_before:
             fail("interactive abort must not write migration state or targets")
-        abort_review = json.loads((abort_target / ".forgekit/reports/upgrade-review-needed.json").read_text(encoding="utf-8"))
-        if not any(item["status"] == "aborted" for item in abort_review["items"]):
-            fail("interactive abort must record aborted status")
+        if (abort_target / ".forgekit/reports/upgrade-review-needed.json").exists():
+            fail("interactive abort must not write a review report")
         zh_ask_target = temp_parent / "unified-old-ask-review-zh"
         write_state(zh_ask_target, "0.38.0")
         zh_maintenance = zh_ask_target / ".forgekit/docs/project-maintenance.md"
@@ -2220,8 +2460,8 @@ def assert_unified_project_entry(repo, current_target, temp_parent):
     applied_state = json.loads(apply_state.read_text(encoding="utf-8"))
     if applied_state.get("forgekit_version") != FORGEKIT_VERSION:
         fail("unified --yes did not advance state through safe migrations")
-    if "manual-merge item" not in applied.stdout or "fully updated" in applied.stdout:
-        fail("manual-merge upgrade must report manual-merge item without claiming fully updated")
+    if "resolved-manual-merge" not in applied.stdout:
+        fail("manual-merge upgrade must report the resolved manual-merge item")
     if existing_maintenance.read_bytes() != existing_maintenance_before:
         fail("partial-upgrade rerun overwrote a user-modified managed doc")
     if apply_business.read_bytes() != apply_business_before:
@@ -2238,7 +2478,7 @@ def assert_unified_project_entry(repo, current_target, temp_parent):
         sys.executable, str(script), "--target", str(alias_target), "--yes",
         "--review-needed-policy", "keep-local",
     ], cwd=repo)
-    if "keep-local is treated as manual-merge" not in alias_result.stdout or "manual-merge item" not in alias_result.stdout:
+    if "keep-local is treated as manual-merge" not in alias_result.stdout or "resolved-manual-merge" not in alias_result.stdout:
         fail("keep-local policy alias must behave as manual-merge")
     applied_state_before = apply_state.read_bytes()
     rerun = run([sys.executable, str(script), "--target", str(apply_target), "--yes"], cwd=repo)
@@ -2260,8 +2500,9 @@ def assert_unified_project_entry(repo, current_target, temp_parent):
         sys.executable, str(script), "--target", str(replace_target), "--yes",
         "--review-needed-policy", "replace-template",
     ], cwd=repo)
-    if f"project is fully updated to {FORGEKIT_VERSION}" not in replaced.stdout:
-        fail("replace-template upgrade must report fully updated")
+    replaced_state = json.loads((replace_target / ".forgekit/state.json").read_text(encoding="utf-8-sig"))
+    if replaced_state.get("forgekit_version") != FORGEKIT_VERSION:
+        fail("replace-template upgrade must advance the state version")
     if replace_maintenance.read_bytes() == b"# User-maintained project guide\n":
         fail("replace-template policy did not replace the review-needed target file")
     if replace_business.read_bytes() != replace_business_before:
@@ -2295,7 +2536,7 @@ def assert_unified_project_entry(repo, current_target, temp_parent):
         fail("early legacy detection must not create state.json")
 
     future = temp_parent / "unified-future"
-    write_state(future, "0.44.0")
+    write_state(future, "0.45.0")
     future_result = run([sys.executable, str(script), "--target", str(future)], cwd=repo, check=False)
     if future_result.returncode == 0 or "Detected action: stop-toolkit-too-old" not in (future_result.stdout + future_result.stderr):
         fail("unified entry must stop when the project version is newer than ForgeKitRoot")
@@ -2340,7 +2581,7 @@ def assert_upgrade_report(repo, target):
         fail("upgrade must not overwrite managed docs")
     assert_paths(target, [
         ".forgekit/upgrade-report.md",
-        ".forgekit/upgrade-export/0.43.0/.forgekit/docs/project-plan.md",
+        f".forgekit/upgrade-export/{FORGEKIT_VERSION}/.forgekit/docs/project-plan.md",
     ])
 
 
@@ -2377,7 +2618,7 @@ def assert_guided_upgrade(repo, target):
         ".forgekit/upgrade/upgrade-plan.md",
         ".forgekit/upgrade/upgrade-actions.md",
         ".forgekit/upgrade/upgrade-inventory.json",
-        ".forgekit/upgrade/candidates/0.43.0/.forgekit/docs/project-plan.md",
+        f".forgekit/upgrade/candidates/{FORGEKIT_VERSION}/.forgekit/docs/project-plan.md",
     ])
     plan = (target / ".forgekit" / "upgrade" / "upgrade-plan.md").read_text(encoding="utf-8")
     actions = (target / ".forgekit" / "upgrade" / "upgrade-actions.md").read_text(encoding="utf-8")
@@ -3212,6 +3453,8 @@ def main():
     assert_json(repo / "project-template" / "migrations" / "0.42.0" / "migration.json")
     assert_json(repo / "migrations" / "0.43.0" / "migration.json")
     assert_json(repo / "project-template" / "migrations" / "0.43.0" / "migration.json")
+    assert_json(repo / "migrations" / "0.44.0" / "migration.json")
+    assert_json(repo / "project-template" / "migrations" / "0.44.0" / "migration.json")
     assert_loop_docs(repo / "project-template", "docs/loop-readiness.md", "docs/loop-blueprint.md")
     assert_loop_operations(
         repo / "project-template",
@@ -3400,6 +3643,7 @@ def main():
         ])
         assert_manifest_lock(target)
         assert_versioned_migration_upgrade(repo, target, temp_parent)
+        assert_0440_review_convergence_migration(repo, target, temp_parent)
         assert_unified_project_entry(repo, target, temp_parent)
         assert_no_escaped_filenames(target)
         assert_no_noise_files(target)

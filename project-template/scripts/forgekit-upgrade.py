@@ -753,12 +753,6 @@ def resolve_review_needed(project_root, pending, decisions, target_version, poli
     print(msg(lang, "review_found_one") if len(items) == 1 else msg(lang, "review_found_many", count=len(items)))
     resolved = []
     if policy == "abort":
-        now = utc_now()
-        for item in items:
-            item["status"] = "aborted"
-            item["resolved_at"] = now
-            resolved.append(item)
-        merge_review_items(project_root, target_version, resolved)
         fail(msg(lang, "abort_policy"))
     if policy in {"manual-merge", "replace-template"}:
         now = utc_now()
@@ -795,9 +789,6 @@ def resolve_review_needed(project_root, pending, decisions, target_version, poli
                 show_diff(project_root, migration, action, lang)
                 continue
             if choice == "a":
-                item["status"] = "aborted"
-                item["resolved_at"] = now
-                merge_review_items(project_root, target_version, [item])
                 fail(msg(lang, "abort_interactive"))
             if choice in {"r", "m"}:
                 decision = "replace-template" if choice == "r" else "manual-merge"

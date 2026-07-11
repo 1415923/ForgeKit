@@ -91,7 +91,7 @@ python scripts/check-workspace-integrity.py --repo-root .
 - `.forgekit/docs/context-continuity.md`：定义关键事实、checkpoint 触发和上下文存活位置，防止结论只留在聊天里。
 - `.forgekit/docs/local-toolchain.md`：记录各技术栈 LSP、lint、test、build 和局部验证能力。
 - `governance/agent-harness.md`：说明 AGENTS 分层、agentic search、停止编码条件和输出要求。
-- `governance/ai-engineering-loop.md`：说明 low / medium / high 风险分级、change 工件和交付闭环。
+- `governance/ai-engineering-loop.md`：说明 low / medium / high 风险分级、冻结验收、审查收敛、阶段授权和交付闭环。
 - `governance/large-change-execution.md`：说明大任务探索、计划、分会话执行和 review 闸门。
 - `governance/team-agent-rollout.md`：说明 commands、hooks、plugin、MCP、CI 和团队推广的启用顺序。
 - `governance/agent-suitability.md`：说明项目是否适合直接套用 Codex agent 工作流。
@@ -103,7 +103,8 @@ python scripts/check-workspace-integrity.py --repo-root .
 - `.forgekit/docs/bounded-auto-loop-policy.md`：定义有限授权的多阶段推进边界、预算、停止条件和 handoff；它不是自动 runner。
 - Managed docs 写回默认是 `minimal`：业务文件范围不会隐式禁止 `work-log.md`、必要的 `task-board.md` / `changelog.md` / 当前 change 写回；`review-only` 和 report-only 报告仍不写或自动修复文档。
 - `.forgekit/docs/native-agent-adapter.md`：说明 Claude Code / Codex 原生 agent 配置适配、验证清单和 fallback 记录规则；生成配置不等于 runtime 已注册，只有 invoked 才能记录为 native 可用。
-- `.forgekit/docs/maker-checker-protocol.md`：定义 Maker 与独立只读 Checker 的审查协议；代码默认 independent review，self-review 不能冒充独立审查。
+- `.forgekit/docs/maker-checker-protocol.md`：定义 Maker 与独立只读 Checker 的审查协议；中高风险 change 先冻结边界和 acceptance matrix，复审默认只闭合 blocker；self-review 不能冒充独立审查。
+- ForgeKit 升级仍从 ForgeKitRoot 使用一个 `forgekit-project.py --target <project-root>` 交互会话完成 preview、diff、apply/manual-merge/cancel 和结果汇总；`--dry-run` 与底层 apply 仅用于高级或非交互场景。
 - `.claude/skills/forgekit-request-code-review/`：Maker 组装最小 review packet 并请求 `forgekit-code-reviewer`；`.claude/skills/forgekit-code-review/`：Reviewer 的只读流程和按需 references。
 - `.forgekit/docs/worktree-playbook.md`：定义手动 worktree 并行隔离、命名、检查、Maker/Checker 用法和清理规则；它不是自动调度器。
 - `.forgekit/docs/task-intake.md`：记录工作来源原文或原始想法、Update Notes、Task Decision、Derived Task IDs 和人工确认状态；它不是需求文档、任务看板或 changelog。`.forgekit/docs/task-board.md` 只接收有动作、owner、下一步、Source ID 和验证方式的可执行任务。

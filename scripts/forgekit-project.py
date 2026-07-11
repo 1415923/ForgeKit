@@ -35,6 +35,13 @@ MESSAGES = {
         "alias_keep_local": "keep-local is treated as manual-merge.",
         "upgrade_done": "[ok] Upgrade completed. You can continue using this project normally.",
         "upgrade_next": "[next] If your current AI session was opened before the upgrade, start a new session or ask the agent to reload the project entry docs before continuing.",
+        "summary_title": "Upgrade result summary:",
+        "summary_auto": "Automatically updated/template-aligned files:",
+        "summary_preserved": "Preserved local customizations:",
+        "summary_manual": "Files still requiring manual merge:",
+        "summary_agents_yes": "AGENTS entry action: merge the snippet below into the project AGENTS.md.",
+        "summary_agents_no": "AGENTS entry action: none; the project entry already routes to the managed Maker/Checker protocol.",
+        "summary_commit": "Governance commit suggestion: review the upgrade diff and create a dedicated governance upgrade commit if appropriate; ForgeKit did not commit or push.",
     },
     "zh-CN": {
         "lang_prompt": "请选择显示语言 / Select display language:",
@@ -56,6 +63,13 @@ MESSAGES = {
         "alias_keep_local": "keep-local is treated as manual-merge.",
         "upgrade_done": "[ok] 升级已完成，可以正常继续使用。",
         "upgrade_next": "[next] 如果当前 AI 会话是在升级前打开的，建议新开会话，或让当前 AI 重新读取项目入口文档后再继续工作。",
+        "summary_title": "升级结果汇总：",
+        "summary_auto": "自动更新或已与模板对齐的文件：",
+        "summary_preserved": "保留的本地定制：",
+        "summary_manual": "仍需人工合并的文件：",
+        "summary_agents_yes": "AGENTS 入口动作：请把下面的短入口合并到项目 AGENTS.md。",
+        "summary_agents_no": "AGENTS 入口动作：无需处理；项目入口已能路由到受管 Maker/Checker 协议。",
+        "summary_commit": "治理提交建议：复查升级 diff 后，可按项目惯例创建独立 governance upgrade commit；ForgeKit 未自动 commit 或 push。",
     },
 }
 
@@ -278,6 +292,55 @@ def normalize_review_policy(policy, lang):
     return policy
 
 
+AGENTS_MAKER_CHECKER_MARKER = "Before medium/high risk implementation, freeze scope"
+AGENTS_MAKER_CHECKER_SNIPPET = """- For medium/high risk changes, read `.forgekit/docs/maker-checker-protocol.md` and the active `.forgekit/changes/<id>/` artifacts.
+- Before implementation, freeze scope, trust boundary, non-goals, stage authorization, and a risk-proportional acceptance matrix.
+- Re-review defaults to prior blockers; fix-introduced contract/real-error regressions may still block, while unrelated suggestions stay follow-up."""
+
+
+def print_upgrade_summary(toolkit_root, target, lang):
+    state = load_json(target / STATE_RELATIVE_PATH, "project state")
+    last_upgrade = state.get("last_upgrade") or {}
+    migration_ids = set(last_upgrade.get("migrations") or [])
+    actions = []
+    for manifest_path in (toolkit_root / "migrations").glob("*/migration.json"):
+        manifest = load_json(manifest_path, "migration manifest")
+        if manifest.get("id") in migration_ids:
+            actions.extend(action for action in manifest.get("actions", []) if action.get("target"))
+    report_path = target / ".forgekit/reports/upgrade-review-needed.json"
+    report = load_json(report_path, "upgrade review report") if report_path.is_file() else {"items": []}
+    review_items = [item for item in (report.get("items") or []) if item.get("source_migration") in migration_ids]
+    preserved = sorted({item.get("target_path") for item in review_items if item.get("status") in {"resolved_manual_merge", "skipped_existing_review_needed"} and item.get("target_path")})
+    manual = sorted({item.get("target_path") for item in review_items if item.get("status") == "resolved_manual_merge" and item.get("target_path")})
+    automated = sorted({action.get("target") for action in actions if action.get("target") and action.get("target") not in preserved})
+
+    print(msg(lang, "summary_title"))
+    print(msg(lang, "summary_auto"))
+    for path in automated:
+        print(f"- {path}")
+    if not automated:
+        print("- none")
+    print(msg(lang, "summary_preserved"))
+    for path in preserved:
+        print(f"- {path}")
+    if not preserved:
+        print("- none")
+    print(msg(lang, "summary_manual"))
+    for path in manual:
+        print(f"- {path}")
+    if not manual:
+        print("- none")
+    agents_text = (target / "AGENTS.md").read_text(encoding="utf-8", errors="replace") if (target / "AGENTS.md").is_file() else ""
+    if AGENTS_MAKER_CHECKER_MARKER in agents_text:
+        print(msg(lang, "summary_agents_no"))
+    else:
+        print(msg(lang, "summary_agents_yes"))
+        print(AGENTS_MAKER_CHECKER_SNIPPET)
+    print(f"ForgeKit version: {state.get('forgekit_version')}")
+    print(f"maker_checker_review_convergence: {state.get('features', {}).get('maker_checker_review_convergence', False)}")
+    print(msg(lang, "summary_commit"))
+
+
 def upgrade_project(args, toolkit_root, target, installed, toolkit, lang):
     upgrade_script = toolkit_root / "scripts/forgekit-upgrade.py"
     base = [sys.executable, str(upgrade_script)]
@@ -313,6 +376,7 @@ def upgrade_project(args, toolkit_root, target, installed, toolkit, lang):
     apply_command.extend(["--lang", lang])
     run_stream(apply_command, cwd=toolkit_root)
     print("[ok] Safe migration apply completed through forgekit-upgrade.py.")
+    print_upgrade_summary(toolkit_root, target, lang)
     print(msg(lang, "upgrade_done"))
     print(msg(lang, "upgrade_next"))
     return 0

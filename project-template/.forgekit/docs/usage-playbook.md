@@ -16,6 +16,8 @@
 
 > 我已经更新外层 ForgeKit。请对 `<project-root>` 执行 upgrade check 和 plan，展示 safe/manual actions；没有我的确认不要 apply。升级后提醒我刷新会话。
 
+普通用户直接运行统一入口即可；它在同一个交互会话中完成 preview、diff、replace/manual-merge/cancel 和结果汇总，不要求先退出再执行第二条 apply 命令。下面的 `--yes`、`--dry-run` 和显式 policy 只用于非交互、CI 或高级排查。
+
 如果升级中出现 `review-needed` 文件，仍使用同一个统一入口在本轮处理，不要手动查 `migration.json`。交互式终端按提示选择：
 
 - `replace with current ForgeKit template`：确认该文件没有本地定制，使用当前 ForgeKit 模板替换。
@@ -31,6 +33,14 @@ python scripts/forgekit-project.py --target <project-root> --yes --review-needed
 ```
 
 升级完成后项目可以正常使用。如果当前 AI 会话是在升级前打开的，建议新开会话，或让当前 AI 重新读取项目入口文档后再继续工作。新任务建议新开会话启动。
+
+如果升级结果提示项目根 `AGENTS.md` 仍需人工合并，直接加入下面三行；不要覆盖项目已有业务规则：
+
+```text
+- For medium/high risk changes, read `.forgekit/docs/maker-checker-protocol.md` and the active `.forgekit/changes/<id>/` artifacts.
+- Before implementation, freeze scope, trust boundary, non-goals, stage authorization, and a risk-proportional acceptance matrix.
+- Re-review defaults to prior blockers; fix-introduced contract/real-error regressions may still block, while unrelated suggestions stay follow-up.
+```
 
 初始化 / 升级工具支持 `--lang zh-CN` 和 `--lang en-US`；也可以用 `FORGEKIT_LANG` 选择本轮显示语言。
 
@@ -57,6 +67,18 @@ python scripts/forgekit-project.py --target <project-root> --yes --review-needed
 ## 8. 提交前检查
 
 > 提交前检查本次 diff、验证证据、独立 review gate、开放风险和最小 managed docs 写回。不要自动 commit；给出可审查摘要和建议 commit message。
+
+## 8.1 Maker 实现
+
+> 按已冻结的 proposal 和 Frozen Acceptance Matrix 实现，不扩大范围。把每个 acceptance ID 映射到代码和测试，确认正式入口接入被测试的真实路径；矩阵外改进只记 follow-up，不运行当前 Stage Authorization 未授权的任务。
+
+## 8.2 Reviewer 首审
+
+> 在独立上下文中按冻结合同只读首审。违反合同或会造成数据污染、错误执行/结果、artifact 覆盖或虚假成功的问题才作为 blocker；其他新增建议记 follow-up，不扩大 trust boundary。优先验证矩阵中的拒绝反例，并检查正式入口而不只检查 helper。
+
+## 8.3 Reviewer 限定复审
+
+> 默认只复核上一轮 blocking findings，逐项标记 Closed、Partially closed 或 Still open。本轮修复新引入且违反冻结合同或会造成真实错误的回归可以继续阻塞；与修复无关的新建议只记 follow-up。不要重新开放式审查或扩大 trust boundary。原 blocker 全部关闭后，按冻结边界和当前 Stage Authorization 给出结论。
 
 ## 9. 阶段结束归档
 

@@ -18,6 +18,7 @@ Do not trust maker conclusions by default. Inspect the diff and evidence directl
 For a high-risk change, use the Adversarial Review Pass from `.forgekit/docs/reasoning-review.md` when failure-path analysis is required. Keep this read-only and return fixes to the maker.
 
 1. Read the task summary and review boundary.
+   For medium/high risk changes, also read the frozen proposal boundary, acceptance IDs, authorized stage, and whether this is `initial` or `blocker-recheck`.
 2. Inspect `git diff --stat`, the exact diff, and changed files.
 3. Read [references/universal-review.md](references/universal-review.md).
 4. Read [references/security-review.md](references/security-review.md) only for auth, permissions, input, secrets, external commands, data exposure, dependencies, or security-sensitive code.
@@ -31,6 +32,9 @@ For a high-risk change, use the Adversarial Review Pass from `.forgekit/docs/rea
 - `manual-review`: scope, evidence, ownership, runtime behavior, or independent execution cannot be verified.
 - `self-review` can inform the maker but cannot satisfy an independent-review gate.
 - A blocking adversarial finding requires `needs-fix` or `manual-review`. Reviewer unavailability must not be reported as pass.
+- In initial review, block frozen-contract violations. A matrix-external issue blocks only when it can cause data leakage/contamination, wrong execution/training/evaluation/checkpoint, artifact overwrite, unauthorized formal-entry execution, false success, or clearly untrustworthy conclusions. Keep other hardening and observability ideas as follow-ups and do not expand the frozen trust boundary.
+- In `blocker-recheck`, default to the prior blocking findings and mark each Closed, Partially closed, or Still open. A regression introduced by the fix may block if it violates the frozen contract or causes a real Critical consequence. Keep unrelated new suggestions as follow-up; do not reopen architecture review or expand the trust boundary.
+- Pass applies only to the supplied authorized stage.
 
 ## Output contract
 
@@ -38,7 +42,10 @@ For a high-risk change, use the Adversarial Review Pass from `.forgekit/docs/rea
 ReviewDecision: pass | needs-fix | manual-review
 ReviewType: independent | self-review
 ReviewerAgent:
+ReviewMode: initial | blocker-recheck
 ReviewedRange:
+FrozenAcceptanceIDs:
+AuthorizedStage:
 Summary:
 Findings:
 - severity: blocking | important | nit | suggestion | praise
@@ -49,6 +56,7 @@ Findings:
   suggested_fix:
   evidence:
 VerificationGaps:
+FollowUps:
 TODO_REVIEW:
 FinalVerdict:
 ```
