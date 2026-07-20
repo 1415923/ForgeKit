@@ -1,0 +1,9 @@
+schema_version: 1
+roots:
+  forgekit_root: "."
+  project_root: "."
+  managed_docs_root: ".forgekit/docs"
+  change_root: ".forgekit/changes"
+write_policy:
+  default: "task_scoped"
+  business_docs: "read_mostly"

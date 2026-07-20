@@ -155,6 +155,8 @@ REQUIRED_REPO_PATHS = [
     "config/skill-projections.json",
     "scripts/sync-skill-projections.py",
     "scripts/validate-rule-ownership.py",
+    "scripts/validate-agent-entries.py",
+    "scripts/validate-stage-b-entry-migration.py",
     "scripts/test-skill-behavior.py",
     "scripts/skill_behavior_adapters/codex.py",
     "scripts/skill_behavior_adapters/claude.py",
@@ -556,8 +558,6 @@ def assert_loop_docs(root, readiness_path, blueprint_path):
 def assert_loop_operations(root, operations_path, blueprint_path, agents_path, claude_path, rules_path):
     operations = (root / operations_path).read_text(encoding="utf-8")
     blueprint = (root / blueprint_path).read_text(encoding="utf-8")
-    agents = (root / agents_path).read_text(encoding="utf-8")
-    claude = (root / claude_path).read_text(encoding="utf-8")
     rules = (root / rules_path).read_text(encoding="utf-8")
     operations_required = [
         "Loop 默认关闭",
@@ -597,20 +597,6 @@ def assert_loop_operations(root, operations_path, blueprint_path, agents_path, c
         "StopOnUnclearScope: yes",
         "StopOnValidationFailure: yes",
     ]
-    entry_required = [
-        "Do not enter loop mode unless the user explicitly asks for loop dry-run, one-step, bounded-auto, review-only, continue, or stop/handoff.",
-        "Before one-step or bounded-auto, restate scope",
-        "Bounded-auto must stop",
-        "Review-only must not modify files",
-        "Loop continue must not run continuously",
-        "Stop and escalate on unclear scope, budget overrun, validation failure, or forbidden path contact.",
-        "Loop output must write back",
-        "Generated native agent config is not proof of runtime registration.",
-        "Bounded-auto or loop execution must record `agent_mode`",
-        "Implementation Scope from Governance Writeback Scope",
-        "ManagedDocsWriteback: minimal",
-        "Review-only writes nothing, and report-only outputs never trigger automatic fixes.",
-    ]
     rules_required = [
         "不得自行进入 loop mode",
         "bounded-auto、review-only",
@@ -631,10 +617,6 @@ def assert_loop_operations(root, operations_path, blueprint_path, agents_path, c
     missing_blueprint = [item for item in blueprint_required if item not in blueprint]
     if missing_blueprint:
         fail(f"loop-blueprint.md missing loop operation fields:\n" + "\n".join(missing_blueprint))
-    for label, text in [("AGENTS.md", agents), ("CLAUDE.md", claude)]:
-        missing_entry = [item for item in entry_required if item not in text]
-        if missing_entry:
-            fail(f"{label} missing loop operation rules:\n" + "\n".join(missing_entry))
     missing_rules = [item for item in rules_required if item not in rules]
     if missing_rules:
         fail(".codex/rules.md missing loop operation rules:\n" + "\n".join(missing_rules))
@@ -932,8 +914,6 @@ def assert_handoff_package(target):
 def assert_maker_checker_protocol(root, protocol_path, review_path, agents_path, claude_path, rules_path):
     protocol = (root / protocol_path).read_text(encoding="utf-8")
     review = (root / review_path).read_text(encoding="utf-8")
-    agents = (root / agents_path).read_text(encoding="utf-8")
-    claude = (root / claude_path).read_text(encoding="utf-8")
     rules = (root / rules_path).read_text(encoding="utf-8")
     protocol_required = [
         "Maker / Checker 协议",
@@ -968,13 +948,6 @@ def assert_maker_checker_protocol(root, protocol_path, review_path, agents_path,
         "RequiredFixes:",
         "FinalRecommendation:",
     ]
-    entry_required = [
-        "Maker phase and Checker phase",
-        "ready for check",
-        "pass",
-        "needs-fix",
-        "manual-review",
-    ]
     rules_required = [
         "Maker phase",
         "Checker phase",
@@ -987,10 +960,6 @@ def assert_maker_checker_protocol(root, protocol_path, review_path, agents_path,
     missing_review = [item for item in review_required if item not in review]
     if missing_review:
         fail(f"review.md missing Maker/Checker fields:\n" + "\n".join(missing_review))
-    for label, text in [("AGENTS.md", agents), ("CLAUDE.md", claude)]:
-        missing_entry = [item for item in entry_required if item not in text]
-        if missing_entry:
-            fail(f"{label} missing Maker/Checker entry rules:\n" + "\n".join(missing_entry))
     missing_rules = [item for item in rules_required if item not in rules]
     if missing_rules:
         fail(".codex/rules.md missing Maker/Checker rules:\n" + "\n".join(missing_rules))
@@ -1042,7 +1011,7 @@ def assert_independent_code_review(root):
     for marker in ("mandatory independent review", "ReviewType: self-review", "reviewer agent 不可用时", "read-only"):
         if marker not in protocol:
             fail(f"Independent review protocol missing marker: {marker}")
-    for entry in ("AGENTS.md", "CLAUDE.md", ".codex/rules.md"):
+    for entry in (".codex/rules.md",):
         entry_text = (root / entry).read_text(encoding="utf-8")
         for marker in ("self-review", "manual-review", "needs-fix"):
             if marker not in entry_text:
@@ -1071,11 +1040,6 @@ def assert_context_continuity(root, doc_path):
     if missing:
         fail("context-continuity.md missing expected sections:\n" + "\n".join(missing))
 
-    for entry in ("AGENTS.md", "CLAUDE.md"):
-        entry_text = (root / entry).read_text(encoding="utf-8")
-        for marker in ("Critical conclusions must not live only in chat", "After a ForgeKit upgrade", "updated disk files do not prove", "Summarize large outputs", "TODO_REVIEW"):
-            if marker not in entry_text:
-                fail(f"{entry} missing context continuity rule: {marker}")
     rules = (root / ".codex/rules.md").read_text(encoding="utf-8")
     for marker in ("关键结论不能只留在聊天里", "新任务应新开会话", "不假设当前会话自动加载新规则", "长工具输出只保留摘要", "TODO_REVIEW"):
         if marker not in rules:
@@ -1109,7 +1073,7 @@ def assert_work_session_checkpoint(root, docs_prefix):
     ]:
         if marker not in playbook:
             fail(f"usage-playbook.md missing scenario: {marker}")
-    for entry in ["AGENTS.md", "CLAUDE.md", ".codex/rules.md"]:
+    for entry in [".codex/rules.md"]:
         text = (root / entry).read_text(encoding="utf-8")
         for marker in ["work-session-checkpoint.md", "pre-compact checkpoint", "post-compact recovery check"]:
             if marker not in text:
@@ -1133,7 +1097,7 @@ def assert_reasoning_review(root, doc_path):
         raw = skill_path.read_bytes()
         if any(byte > 127 for byte in raw):
             fail(f"Reasoning/review skill must be ASCII-only: {skill_path}")
-    for entry in ["AGENTS.md", "CLAUDE.md", ".codex/rules.md"]:
+    for entry in [".codex/rules.md"]:
         text = (root / entry).read_text(encoding="utf-8")
         if "First-Principles Pass" not in text or "Adversarial Review Pass" not in text:
             fail(f"{entry} missing short reasoning/review rules")
@@ -1165,7 +1129,7 @@ def assert_project_maintenance(root):
     for marker in ["project-bootstrap", "upgrade-sync", "archive-capsule", "context-checkpoint", "handoff", "doc-health", "source-trace"]:
         if marker not in skill:
             fail(f"forgekit-maintenance skill missing intent: {marker}")
-    for entry in ["AGENTS.md", "CLAUDE.md", ".codex/rules.md"]:
+    for entry in [".codex/rules.md"]:
         text = (root / entry).read_text(encoding="utf-8")
         for marker in ["MaintenanceIntent", "plan", "归档不是删除"]:
             if marker not in text:
@@ -1433,8 +1397,6 @@ def assert_worktree_playbook(root, playbook_path, blueprint_path, maker_checker_
     playbook = (root / playbook_path).read_text(encoding="utf-8")
     blueprint = (root / blueprint_path).read_text(encoding="utf-8")
     maker_checker = (root / maker_checker_path).read_text(encoding="utf-8")
-    agents = (root / agents_path).read_text(encoding="utf-8")
-    claude = (root / claude_path).read_text(encoding="utf-8")
     rules = (root / rules_path).read_text(encoding="utf-8")
     playbook_required = [
         "# Worktree 手册",
@@ -1461,13 +1423,6 @@ def assert_worktree_playbook(root, playbook_path, blueprint_path, maker_checker_
         "CleanupRule:",
         "这些字段只描述可审查的隔离意图",
     ]
-    entry_required = [
-        "Do not create a worktree unless the user explicitly asks.",
-        "Before creating a worktree, confirm `git status --short` is clean",
-        "base branch, worktree path, branch name, allowed paths, validation command, and cleanup plan",
-        "Do not automatically merge, push, delete branches, remove worktrees, create PRs, start agents, or schedule worktree tasks.",
-        "Worktree results must be written to `.forgekit/docs/work-log.md` or the scoped change review.",
-    ]
     rules_required = [
         "不得自行创建 worktree",
         "git status --short",
@@ -1483,10 +1438,6 @@ def assert_worktree_playbook(root, playbook_path, blueprint_path, maker_checker_
         fail(f"loop-blueprint.md missing worktree strategy fields:\n" + "\n".join(missing_blueprint))
     if "Worktree 隔离" not in maker_checker or "不会自动创建 worktree" not in maker_checker:
         fail("maker-checker-protocol.md missing worktree isolation boundary")
-    for label, text in [("AGENTS.md", agents), ("CLAUDE.md", claude)]:
-        missing_entry = [item for item in entry_required if item not in text]
-        if missing_entry:
-            fail(f"{label} missing worktree safety rules:\n" + "\n".join(missing_entry))
     missing_rules = [item for item in rules_required if item not in rules]
     if missing_rules:
         fail(".codex/rules.md missing worktree safety rules:\n" + "\n".join(missing_rules))
@@ -1499,8 +1450,6 @@ def assert_task_intake(root, intake_path, task_board_path, requirements_path, ch
     work_log = (root / work_log_path).read_text(encoding="utf-8")
     requirements = (root / requirements_path).read_text(encoding="utf-8")
     changelog = (root / changelog_path).read_text(encoding="utf-8")
-    agents = (root / agents_path).read_text(encoding="utf-8")
-    claude = (root / claude_path).read_text(encoding="utf-8")
     rules = (root / rules_path).read_text(encoding="utf-8")
     intake_required = [
         "Source Record",
@@ -1555,19 +1504,6 @@ def assert_task_intake(root, intake_path, task_board_path, requirements_path, ch
         fail("requirements.md must not imply it replaces task-intake.md")
     if "task-intake.md" not in changelog or "不替代" not in changelog:
         fail("changelog.md must not imply it replaces task-intake.md")
-    entry_required = [
-        ".forgekit/docs/task-intake.md",
-        "先归并来源，再生成任务",
-        "Update Notes",
-        "不要默认创建新任务",
-        "task-board.md",
-        "拆解任务必须引用 Source ID",
-        "Human Review: pending",
-    ]
-    for label, text in [("AGENTS.md", agents), ("CLAUDE.md", claude)]:
-        missing_entry = [item for item in entry_required if item not in text]
-        if missing_entry:
-            fail(f"{label} missing task-intake rules:\n" + "\n".join(missing_entry))
     rules_required = [
         ".forgekit/docs/task-intake.md",
         "先归并来源，再生成任务",
@@ -1586,8 +1522,6 @@ def assert_task_intake(root, intake_path, task_board_path, requirements_path, ch
 def assert_managed_docs_responsibility_v2(root, responsibility_path, codebase_path, agents_path, claude_path, rules_path):
     responsibility = (root / responsibility_path).read_text(encoding="utf-8")
     codebase = (root / codebase_path).read_text(encoding="utf-8")
-    agents = (root / agents_path).read_text(encoding="utf-8")
-    claude = (root / claude_path).read_text(encoding="utf-8")
     rules = (root / rules_path).read_text(encoding="utf-8")
 
     responsibility_required = [
@@ -1625,16 +1559,6 @@ def assert_managed_docs_responsibility_v2(root, responsibility_path, codebase_pa
     if missing_codebase:
         fail("codebase-map.md missing responsibility-v2 boundaries:\n" + "\n".join(missing_codebase))
 
-    entry_required = [
-        "默认不要读取全部 `.forgekit/docs/**`",
-        "document-responsibility.md",
-        "不要把同一事实重复写进多个文档",
-        "触发式文档只有对应事件发生时才更新",
-    ]
-    for label, text in [("AGENTS.md", agents), ("CLAUDE.md", claude)]:
-        missing_entry = [item for item in entry_required if item not in text]
-        if missing_entry:
-            fail(f"{label} missing managed-docs v2 entry rules:\n" + "\n".join(missing_entry))
 
     rules_required = [
         "不要默认全量读取 `.forgekit/docs/**`",
@@ -1708,18 +1632,6 @@ def assert_workflow_router(root, router_path, responsibility_path, codebase_path
     if missing_codebase:
         fail("codebase-map.md missing workflow-router index:\n" + "\n".join(missing_codebase))
 
-    entry_required = [
-        "workflow-router.md",
-        "intent routing",
-        "Read Targets",
-        "Write Targets",
-        "Do Not Write",
-        "没有写入触发条件",
-    ]
-    for label, text in [("AGENTS.md", agents), ("CLAUDE.md", claude)]:
-        missing_entry = [item for item in entry_required if item not in text]
-        if missing_entry:
-            fail(f"{label} missing workflow-router entry rules:\n" + "\n".join(missing_entry))
 
     rules_required = [
         "workflow-router.md",
@@ -3493,6 +3405,8 @@ def main():
 
     repo = Path(args.repo_root).resolve()
     assert_paths(repo, REQUIRED_REPO_PATHS)
+    run([sys.executable, "-B", str(repo / "scripts/validate-agent-entries.py"), "--repo-root", str(repo)], cwd=repo)
+    run([sys.executable, "-B", str(repo / "scripts/validate-stage-b-entry-migration.py"), "--repo-root", str(repo)], cwd=repo)
     assert_no_escaped_filenames(repo)
     assert_no_noise_files(repo / "project-template")
     assert_no_forbidden_text(repo, FORBIDDEN_LEGACY_REFS, "Forbidden legacy path text found", LEGACY_REF_ALLOWLIST)

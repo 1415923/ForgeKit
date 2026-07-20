@@ -1,0 +1,541 @@
+#!/usr/bin/env python3
+import argparse
+import hashlib
+import json
+import shutil
+import subprocess
+import sys
+import uuid
+from pathlib import Path
+
+
+APPROVED_STAGE_A_COMMIT = "506cecf8d377a17a2616bf3b9eeea483ee4039a4"
+DRAFT_RELATIVE = Path(
+    ".forgekit/changes/v045-rule-ownership-skill-convergence/"
+    "stage-b-migration-draft/0.45.0"
+)
+ENTRY_NAMES = ("AGENTS.md", "CLAUDE.md")
+REPORT_JSON = Path(".forgekit/reports/upgrade-review-needed.json")
+REPORT_MD = Path(".forgekit/reports/upgrade-review-needed.md")
+
+
+def sha256_bytes(data):
+    return hashlib.sha256(data).hexdigest()
+
+
+def sha256(path):
+    return sha256_bytes(path.read_bytes())
+
+
+def make_temp_root(prefix, repo_root, temp_parent=None):
+    # Default beside the candidate repository so the formal gate works under a
+    # workspace-only sandbox. Callers may supply a shorter isolated parent.
+    parent = Path(temp_parent) if temp_parent else Path(repo_root)
+    parent.mkdir(parents=True, exist_ok=True)
+    for _ in range(20):
+        candidate = parent / f"{prefix}{uuid.uuid4().hex[:8]}"
+        try:
+            candidate.mkdir()
+            return candidate
+        except FileExistsError:
+            continue
+    raise RuntimeError(f"cannot allocate isolated Stage B validator directory under {parent}")
+
+
+def git_blob(repo_root, relative):
+    command = [
+        "git",
+        "-C",
+        str(repo_root),
+        "show",
+        f"{APPROVED_STAGE_A_COMMIT}:{relative.as_posix()}",
+    ]
+    result = subprocess.run(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE, check=False, timeout=30)
+    if result.returncode != 0:
+        message = result.stderr.decode("utf-8", errors="replace").strip()
+        raise RuntimeError(f"git show failed for {relative}: {message}")
+    return result.stdout
+
+
+def validate_draft(repo_root, package_root=None):
+    repo_root = Path(repo_root).resolve()
+    package = Path(package_root).resolve() if package_root else repo_root / DRAFT_RELATIVE
+    errors = []
+    descriptor_path = package / "migration.json"
+    if not descriptor_path.is_file():
+        return [f"missing Stage B migration draft: {descriptor_path}"]
+    try:
+        descriptor = json.loads(descriptor_path.read_text(encoding="utf-8"))
+    except Exception as exc:
+        return [f"invalid Stage B migration draft JSON: {exc}"]
+
+    version_path = repo_root / "VERSION"
+    if not version_path.is_file() or version_path.read_text(encoding="utf-8").strip() != "0.44.1":
+        errors.append("Stage B must keep VERSION at 0.44.1")
+    for formal in (repo_root / "migrations/0.45.0", repo_root / "project-template/migrations/0.45.0"):
+        if formal.exists():
+            errors.append(f"formal v0.45.0 migration must not exist during Stage B: {formal}")
+    if descriptor.get("from") != "0.44.1" or descriptor.get("to") != "0.45.0":
+        errors.append("Stage B migration draft must describe 0.44.1 -> 0.45.0")
+    if descriptor.get("development_status") != "fixture-only-not-released":
+        errors.append("Stage B migration draft must be marked fixture-only-not-released")
+    if descriptor.get("source_commit") != APPROVED_STAGE_A_COMMIT:
+        errors.append(
+            "Stage B migration draft source_commit must equal approved Stage A commit "
+            f"{APPROVED_STAGE_A_COMMIT}; descriptor={descriptor.get('source_commit')!r}"
+        )
+
+    actions = descriptor.get("actions")
+    if not isinstance(actions, list) or len(actions) != 2:
+        errors.append("Stage B migration draft must contain exactly two entry actions")
+        return errors
+    by_target = {action.get("target"): action for action in actions if isinstance(action, dict)}
+    if set(by_target) != set(ENTRY_NAMES):
+        errors.append("Stage B migration draft targets must be AGENTS.md and CLAUDE.md")
+        return errors
+
+    for target, action in by_target.items():
+        expected_source = f"files/{target}"
+        expected_baseline = f"baseline/{target}"
+        if action.get("type") != "replace_file_if_baseline_matches" or action.get("safety") != "safe":
+            errors.append(f"{target}: migration action must use safe baseline-guarded replacement")
+        if action.get("source") != expected_source or action.get("baseline") != expected_baseline:
+            errors.append(f"{target}: unexpected source/baseline path")
+            continue
+        source = package / expected_source
+        baseline = package / expected_baseline
+        template_entry = repo_root / "project-template" / target
+        if not source.is_file() or not baseline.is_file():
+            errors.append(f"{target}: source or baseline fixture is missing")
+            continue
+        try:
+            git_bytes = git_blob(repo_root, Path("project-template") / target)
+        except RuntimeError as exc:
+            errors.append(str(exc))
+            continue
+        baseline_bytes = baseline.read_bytes()
+        descriptor_baseline = action.get("baseline_sha256")
+        git_sha = sha256_bytes(git_bytes)
+        draft_sha = sha256_bytes(baseline_bytes)
+        if baseline_bytes != git_bytes or descriptor_baseline != git_sha:
+            errors.append(
+                f"{target}: approved baseline mismatch; managed path={target}; "
+                f"approved source commit={APPROVED_STAGE_A_COMMIT}; expected Git SHA-256={git_sha}; "
+                f"draft baseline SHA-256={draft_sha}; descriptor SHA-256={descriptor_baseline}"
+            )
+
+        if not template_entry.is_file():
+            errors.append(f"{target}: current project-template entry is missing")
+            continue
+        incoming_bytes = source.read_bytes()
+        template_bytes = template_entry.read_bytes()
+        descriptor_incoming = action.get("incoming_sha256")
+        template_sha = sha256_bytes(template_bytes)
+        draft_incoming_sha = sha256_bytes(incoming_bytes)
+        if incoming_bytes != template_bytes or descriptor_incoming != template_sha:
+            errors.append(
+                f"{target}: current incoming mismatch; managed path={target}; "
+                f"current template SHA-256={template_sha}; draft incoming SHA-256={draft_incoming_sha}; "
+                f"descriptor SHA-256={descriptor_incoming}"
+            )
+        if incoming_bytes == baseline_bytes:
+            errors.append(f"{target}: baseline and incoming fixture must differ")
+    return errors
+
+
+def write_state(project):
+    state = {
+        "schema_version": 1,
+        "forgekit_version": "0.44.1",
+        "managed_docs_root": ".forgekit/docs",
+        "change_root": ".forgekit/changes",
+        "mode": "standard",
+        "features": {},
+        "last_upgrade": None,
+    }
+    state_path = project / ".forgekit/state.json"
+    state_path.parent.mkdir(parents=True, exist_ok=True)
+    state_path.write_text(json.dumps(state, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+    return state_path.read_bytes()
+
+
+def file_snapshot(root):
+    return {
+        path.relative_to(root).as_posix(): path.read_bytes()
+        for path in sorted(root.rglob("*"))
+        if path.is_file()
+    }
+
+
+def run_cli(script, arguments, cwd):
+    command = [sys.executable, "-B", str(script), *map(str, arguments)]
+    return subprocess.run(command, cwd=cwd, text=True, capture_output=True, check=False, timeout=60)
+
+
+def validate_production_discovery(repo_root, temp_parent=None):
+    repo_root = Path(repo_root).resolve()
+    errors = []
+    evidence = {}
+    temp_root = make_temp_root(".fb45d-", repo_root, temp_parent)
+    evidence["temp_root"] = str(temp_root)
+    try:
+        isolated = temp_root / "repo"
+        (isolated / "scripts").mkdir(parents=True)
+        for name in ("forgekit-upgrade.py", "upgrade_review_packets.py"):
+            shutil.copy2(repo_root / "scripts" / name, isolated / "scripts" / name)
+        shutil.copytree(repo_root / "migrations", isolated / "migrations")
+        draft_source = repo_root / DRAFT_RELATIVE.parent
+        draft_target = isolated / DRAFT_RELATIVE.parent
+        draft_target.parent.mkdir(parents=True, exist_ok=True)
+        shutil.copytree(draft_source, draft_target)
+
+        project = temp_root / "project"
+        state_before = write_state(project)
+        before = file_snapshot(project)
+        result = run_cli(
+            isolated / "scripts/forgekit-upgrade.py",
+            ["check", "--repo-root", project],
+            isolated,
+        )
+        after = file_snapshot(project)
+        evidence.update({
+            "returncode": result.returncode,
+            "stdout": result.stdout,
+            "stderr": result.stderr,
+            "state_before": state_before,
+            "state_after": (project / ".forgekit/state.json").read_bytes(),
+            "project_unchanged": before == after,
+        })
+        if result.returncode != 0:
+            errors.append(f"production discovery check returned {result.returncode}: {result.stdout}{result.stderr}")
+            return errors, evidence
+        fields = {}
+        for line in result.stdout.splitlines():
+            if ":" in line:
+                key, value = line.split(":", 1)
+                fields[key.strip()] = value.strip()
+        expected = {
+            "Current version": "0.44.1",
+            "Latest available": "0.44.1",
+            "Planned target": "0.44.1",
+            "Pending migrations": "0",
+        }
+        evidence["fields"] = fields
+        for key, value in expected.items():
+            if fields.get(key) != value:
+                errors.append(f"production discovery {key} expected {value}, got {fields.get(key)!r}")
+        lowered = (result.stdout + result.stderr).casefold()
+        if "stage-b-migration-draft" in lowered or str(DRAFT_RELATIVE.parent).casefold() in lowered:
+            errors.append("production discovery exposed the change-local Stage B draft path")
+        if "0.45.0" in lowered:
+            errors.append("production discovery incorrectly exposed Stage B target 0.45.0")
+        if before != after:
+            errors.append("production check modified project state, files, or reports")
+        if (project / ".forgekit/reports").exists():
+            errors.append("production check created reports")
+        if evidence["state_after"] != state_before:
+            errors.append("production check modified state.json")
+    except Exception as exc:
+        errors.append(f"production discovery gate failed: {type(exc).__name__}: {exc}")
+    finally:
+        shutil.rmtree(temp_root, ignore_errors=False)
+        evidence["cleaned"] = not temp_root.exists()
+    return errors, evidence
+
+
+def create_scenario(temp_root, name, package_root, entries, remove_baseline=None):
+    scenario = temp_root / name
+    migrations = scenario / "migrations"
+    package = migrations / "0.45.0"
+    shutil.copytree(package_root, package)
+    if remove_baseline:
+        (package / "baseline" / remove_baseline).unlink()
+    project = scenario / "project"
+    state_before = write_state(project)
+    for target, content in entries.items():
+        if content is not None:
+            (project / target).write_bytes(content)
+    return project, migrations, package, state_before, file_snapshot(project)
+
+
+def read_behavior_evidence(project, result, before_entries, state_before, before_snapshot):
+    report_path = project / REPORT_JSON
+    report_text = report_path.read_text(encoding="utf-8")
+    report = json.loads(report_text)
+    reports_root = project / ".forgekit/reports"
+    packets = {}
+    for item in report.get("items", []):
+        packet_path = reports_root / item["packet_artifacts"]["packet"]
+        packet = json.loads(packet_path.read_text(encoding="utf-8"))
+        artifacts = {}
+        for key, relative in packet["artifacts"].items():
+            artifacts[key] = None if relative is None else (reports_root / relative).read_bytes()
+        packets[item["target_path"]] = {"metadata": packet, "artifacts": artifacts}
+    return {
+        "project_root": str(project),
+        "returncode": result.returncode,
+        "stdout": result.stdout,
+        "stderr": result.stderr,
+        "before_entries": before_entries,
+        "after_entries": {
+            target: (project / target).read_bytes() if (project / target).is_file() else None
+            for target in ENTRY_NAMES
+        },
+        "state_before": state_before,
+        "state_after": (project / ".forgekit/state.json").read_bytes(),
+        "state": json.loads((project / ".forgekit/state.json").read_text(encoding="utf-8")),
+        "before_snapshot": before_snapshot,
+        "report": report,
+        "report_text": report_text,
+        "report_markdown": (project / REPORT_MD).read_text(encoding="utf-8"),
+        "packets": packets,
+    }
+
+
+def validate_scenario(name, evidence, incoming, expected_classifications):
+    errors = []
+    if evidence["returncode"] != 0:
+        return [f"{name}: upgrader returned {evidence['returncode']}: {evidence['stdout']}{evidence['stderr']}"]
+    items = evidence["report"].get("items", [])
+    by_target = {item.get("target_path"): item for item in items}
+    if set(by_target) != set(ENTRY_NAMES):
+        errors.append(f"{name}: report targets differ from AGENTS.md/CLAUDE.md")
+        return errors
+    for target, expected_classification in expected_classifications.items():
+        item = by_target[target]
+        packet_record = evidence["packets"].get(target)
+        if item.get("classification") != expected_classification:
+            errors.append(
+                f"{name}/{target}: expected classification {expected_classification}, got {item.get('classification')}"
+            )
+        if not packet_record:
+            errors.append(f"{name}/{target}: packet is missing")
+            continue
+        packet = packet_record["metadata"]
+        artifacts = packet_record["artifacts"]
+        if packet.get("classification") != item.get("classification"):
+            errors.append(f"{name}/{target}: packet/report classification mismatch")
+        if packet.get("packet_id") != item.get("packet_id"):
+            errors.append(f"{name}/{target}: packet/report identity mismatch")
+        if packet.get("managed_path") != target:
+            errors.append(f"{name}/{target}: packet managed path mismatch")
+        if artifacts.get("incoming") != incoming[target]:
+            errors.append(f"{name}/{target}: packet incoming bytes mismatch")
+        if packet.get("incoming_sha256") != sha256_bytes(incoming[target]):
+            errors.append(f"{name}/{target}: packet incoming checksum mismatch")
+        for artifact_name, checksum_name in (
+            ("local", "local_sha256"),
+            ("incoming", "incoming_sha256"),
+            ("diff", "diff_sha256"),
+            ("rollback", "rollback_sha256"),
+        ):
+            artifact_bytes = artifacts.get(artifact_name)
+            expected_checksum = None if artifact_bytes is None else sha256_bytes(artifact_bytes)
+            if packet.get(checksum_name) != expected_checksum:
+                errors.append(f"{name}/{target}: {artifact_name} artifact checksum mismatch")
+        if expected_classification == "missing":
+            if evidence["after_entries"][target] != incoming[target]:
+                errors.append(f"{name}/{target}: missing target was not installed")
+            if artifacts.get("local") is not None or artifacts.get("rollback") is not None:
+                errors.append(f"{name}/{target}: missing classification fabricated local/rollback bytes")
+            if packet.get("rollback_action") != "delete_upgrade_created_file":
+                errors.append(f"{name}/{target}: missing rollback action is not delete_upgrade_created_file")
+        else:
+            original = evidence["before_entries"][target]
+            if artifacts.get("local") != original or artifacts.get("rollback") != original:
+                errors.append(f"{name}/{target}: packet local/rollback bytes differ from upgrade origin")
+            if expected_classification == "stock":
+                if evidence["after_entries"][target] != incoming[target]:
+                    errors.append(f"{name}/{target}: stock target was not updated")
+            elif evidence["after_entries"][target] != original:
+                errors.append(f"{name}/{target}: {expected_classification} target was overwritten")
+            if packet.get("rollback_sha256") != sha256_bytes(original):
+                errors.append(f"{name}/{target}: rollback checksum differs from upgrade origin")
+        if expected_classification in {"custom", "unknown-baseline"}:
+            if not artifacts.get("diff"):
+                errors.append(f"{name}/{target}: manual-merge diff is missing or empty")
+        if target not in evidence["report_markdown"] or expected_classification not in evidence["report_markdown"]:
+            errors.append(f"{name}/{target}: Markdown summary lacks target/classification")
+    if evidence["state"].get("forgekit_version") != "0.45.0":
+        errors.append(f"{name}: state target version is not 0.45.0")
+    if evidence["project_root"].casefold() in evidence["report_text"].casefold():
+        errors.append(f"{name}: report leaked an absolute project path")
+    for item in items:
+        for relative in item.get("packet_artifacts", {}).values():
+            if relative is not None and (Path(relative).is_absolute() or not relative.startswith("review-needed/")):
+                errors.append(f"{name}/{item.get('target_path')}: non-portable packet artifact path: {relative}")
+    return errors
+
+
+def rollback_from_packets(project, evidence):
+    for target, packet_record in evidence["packets"].items():
+        packet = packet_record["metadata"]
+        path = project / target
+        if packet["rollback_action"] == "restore_original_bytes":
+            path.write_bytes(packet_record["artifacts"]["rollback"])
+        elif packet["rollback_action"] == "delete_upgrade_created_file":
+            if path.exists():
+                path.unlink()
+        else:
+            raise RuntimeError(f"unsupported rollback action: {packet['rollback_action']}")
+    (project / ".forgekit/state.json").write_bytes(evidence["state_before"])
+    shutil.rmtree(project / ".forgekit/reports")
+
+
+def run_chain_gate(temp_root, repo_root):
+    root = temp_root / "chain"
+    migrations = root / "migrations"
+    project = root / "project"
+    state_before = write_state(project)
+    original = b"stage-a-origin\r\n"
+    intermediate = b"stage-b-intermediate\n"
+    final = b"stage-b-final\n"
+    (project / "AGENTS.md").write_bytes(original)
+    before = file_snapshot(project)
+    for folder, from_version, to_version, baseline, incoming in (
+        ("0.44.2", "0.44.1", "0.44.2", original, intermediate),
+        ("0.45.0", "0.44.2", "0.45.0", intermediate, final),
+    ):
+        package = migrations / folder
+        (package / "baseline").mkdir(parents=True)
+        (package / "files").mkdir()
+        (package / "baseline/AGENTS.md").write_bytes(baseline)
+        (package / "files/AGENTS.md").write_bytes(incoming)
+        descriptor = {
+            "id": f"stage-b-chain-{folder}",
+            "title": "Stage B same-path origin rollback gate",
+            "from": from_version,
+            "to": to_version,
+            "risk": "high",
+            "actions": [{
+                "id": f"agents-{folder}",
+                "type": "replace_file_if_baseline_matches",
+                "safety": "safe",
+                "source": "files/AGENTS.md",
+                "baseline": "baseline/AGENTS.md",
+                "target": "AGENTS.md",
+            }],
+            "manual_review": [],
+            "non_goals": [],
+        }
+        (package / "migration.json").write_text(json.dumps(descriptor), encoding="utf-8")
+    result = run_cli(
+        repo_root / "scripts/forgekit-upgrade.py",
+        ["apply", "--safe", "--repo-root", project, "--migration-root", migrations,
+         "--review-needed-policy", "manual-merge"],
+        repo_root,
+    )
+    if result.returncode != 0:
+        return [f"chain: upgrader returned {result.returncode}: {result.stdout}{result.stderr}"], {}
+    report = json.loads((project / REPORT_JSON).read_text(encoding="utf-8"))
+    item = next(item for item in report["items"] if item["target_path"] == "AGENTS.md")
+    reports_root = project / ".forgekit/reports"
+    packet_path = reports_root / item["packet_artifacts"]["packet"]
+    packet = json.loads(packet_path.read_text(encoding="utf-8"))
+    rollback = (reports_root / packet["artifacts"]["rollback"]).read_bytes()
+    errors = []
+    if (project / "AGENTS.md").read_bytes() != final:
+        errors.append("chain: final AGENTS bytes are incorrect")
+    if rollback != original or packet.get("rollback_sha256") != sha256_bytes(original):
+        errors.append("chain: packet did not retain complete upgrade-start origin bytes")
+    chain_evidence = {
+        "state_before": state_before,
+        "before_snapshot": before,
+        "final": (project / "AGENTS.md").read_bytes(),
+        "rollback": rollback,
+        "packet": packet,
+    }
+    (project / "AGENTS.md").write_bytes(rollback)
+    (project / ".forgekit/state.json").write_bytes(state_before)
+    shutil.rmtree(project / ".forgekit/reports")
+    chain_evidence["rollback_restored"] = file_snapshot(project) == before
+    if not chain_evidence["rollback_restored"]:
+        errors.append("chain: rollback did not restore complete upgrade-start state")
+    return errors, chain_evidence
+
+
+def validate_migration_behavior(repo_root, package_root=None, temp_parent=None):
+    repo_root = Path(repo_root).resolve()
+    package_root = Path(package_root).resolve() if package_root else repo_root / DRAFT_RELATIVE
+    errors = []
+    evidence = {"scenarios": {}}
+    temp_root = make_temp_root(".fb45m-", repo_root, temp_parent)
+    evidence["temp_root"] = str(temp_root)
+    try:
+        baseline = {name: (package_root / "baseline" / name).read_bytes() for name in ENTRY_NAMES}
+        incoming = {name: (package_root / "files" / name).read_bytes() for name in ENTRY_NAMES}
+        scenarios = {
+            "stock": ({name: baseline[name] for name in ENTRY_NAMES}, None,
+                      {name: "stock" for name in ENTRY_NAMES}),
+            "custom": ({"AGENTS.md": b"custom agents\r\n", "CLAUDE.md": b"custom claude\n"}, None,
+                       {name: "custom" for name in ENTRY_NAMES}),
+            "unknown": ({"AGENTS.md": baseline["AGENTS.md"], "CLAUDE.md": b"unknown claude\n"},
+                        "CLAUDE.md", {"AGENTS.md": "stock", "CLAUDE.md": "unknown-baseline"}),
+            "missing": ({name: None for name in ENTRY_NAMES}, None,
+                        {name: "missing" for name in ENTRY_NAMES}),
+            "mixed": ({"AGENTS.md": baseline["AGENTS.md"], "CLAUDE.md": b"mixed custom claude\r\n"}, None,
+                      {"AGENTS.md": "stock", "CLAUDE.md": "custom"}),
+        }
+        for name, (entries, removed_baseline, expected) in scenarios.items():
+            project, migrations, _package, state_before, before = create_scenario(
+                temp_root, name, package_root, entries, removed_baseline
+            )
+            result = run_cli(
+                repo_root / "scripts/forgekit-upgrade.py",
+                ["apply", "--safe", "--repo-root", project, "--migration-root", migrations,
+                 "--review-needed-policy", "manual-merge"],
+                repo_root,
+            )
+            if result.returncode != 0 or not (project / REPORT_JSON).is_file():
+                errors.append(f"{name}: upgrader/report failure: {result.stdout}{result.stderr}")
+                continue
+            evidence_item = read_behavior_evidence(project, result, entries, state_before, before)
+            evidence["scenarios"][name] = evidence_item
+            errors.extend(validate_scenario(name, evidence_item, incoming, expected))
+            if name == "stock" and evidence_item["state"].get("last_upgrade", {}).get("review_needed_actions"):
+                errors.append("stock: unresolved REVIEW-NEEDED actions were produced")
+            if name in {"missing", "mixed"}:
+                rollback_from_packets(project, evidence_item)
+                evidence_item["rollback_restored"] = file_snapshot(project) == before
+                if not evidence_item["rollback_restored"]:
+                    errors.append("mixed: rollback did not restore complete upgrade-start state")
+        chain_errors, chain_evidence = run_chain_gate(temp_root, repo_root)
+        errors.extend(chain_errors)
+        evidence["chain"] = chain_evidence
+    except Exception as exc:
+        errors.append(f"migration behavior gate failed: {type(exc).__name__}: {exc}")
+    finally:
+        shutil.rmtree(temp_root, ignore_errors=False)
+        evidence["cleaned"] = not temp_root.exists()
+    return errors, evidence
+
+
+def validate_repo(repo_root):
+    repo_root = Path(repo_root).resolve()
+    errors = validate_draft(repo_root)
+    discovery_errors, _ = validate_production_discovery(repo_root)
+    behavior_errors, _ = validate_migration_behavior(repo_root)
+    errors.extend(discovery_errors)
+    errors.extend(behavior_errors)
+    return errors
+
+
+def main():
+    parser = argparse.ArgumentParser(
+        description="Validate Stage B entry draft identity, production isolation, and real migration behavior."
+    )
+    parser.add_argument("--repo-root", default=Path(__file__).resolve().parents[1])
+    args = parser.parse_args()
+    errors = validate_repo(Path(args.repo_root))
+    if errors:
+        for error in errors:
+            print(f"[fail] {error}")
+        raise SystemExit(1)
+    print(
+        "[ok] Stage B entry migration draft passed: Git/current anchors, production discovery, "
+        "stock/custom/unknown/missing/mixed/rollback, and same-path origin rollback"
+    )
+
+
+if __name__ == "__main__":
+    main()

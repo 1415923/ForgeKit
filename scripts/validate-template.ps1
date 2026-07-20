@@ -55,6 +55,26 @@ function Test-RequiredPattern {
     }
 }
 
+function Test-AgentEntryContracts {
+    $validator = Join-Path $repoRoot "scripts\validate-agent-entries.py"
+    Test-RequiredPath "scripts\validate-agent-entries.py"
+    if (-not (Test-Path -LiteralPath $validator)) {
+        return
+    }
+    $output = & python -B $validator --repo-root $repoRoot 2>&1
+    if ($LASTEXITCODE -ne 0) {
+        Add-Error "Agent entry contract validation failed: $($output -join [Environment]::NewLine)"
+    }
+    $migrationValidator = Join-Path $repoRoot "scripts\validate-stage-b-entry-migration.py"
+    Test-RequiredPath "scripts\validate-stage-b-entry-migration.py"
+    if (Test-Path -LiteralPath $migrationValidator) {
+        $migrationOutput = & python -B $migrationValidator --repo-root $repoRoot 2>&1
+        if ($LASTEXITCODE -ne 0) {
+            Add-Error "Stage B entry migration validation failed: $($migrationOutput -join [Environment]::NewLine)"
+        }
+    }
+}
+
 function Test-SkillAscii {
     $skillFiles = Get-ChildItem -LiteralPath (Join-Path $projectTemplate ".agents\skills") -Recurse -Filter "SKILL.md"
     foreach ($file in $skillFiles) {
@@ -270,20 +290,6 @@ function Test-AgentsHarness {
     Test-RequiredPath "project-template\governance\team-agent-rollout.md"
     Test-RequiredPath "project-template\.codex\commands-catalog.md"
     Test-RequiredPath "project-template\.codex\hooks.md"
-    Test-RequiredPattern "project-template\AGENTS.md" "Do not read every file" "Governance context guard"
-    Test-RequiredPattern "project-template\AGENTS.md" (Get-CodebaseMapRef) "Codebase map routing"
-    Test-RequiredPattern "project-template\AGENTS.md" (Get-LocalToolchainRef) "Local toolchain routing"
-    Test-RequiredPattern "project-template\AGENTS.md" "governance/agent-harness.md" "Agent harness routing"
-    Test-RequiredPattern "project-template\AGENTS.md" ".forgekit/project-boundary.yml" "Boundary routing"
-    Test-RequiredPattern "project-template\AGENTS.md" "governance/ai-engineering-loop.md" "AI engineering loop routing"
-    Test-RequiredPattern "project-template\AGENTS.md" "governance/large-change-execution.md" "Large-change routing"
-    Test-RequiredPattern "project-template\AGENTS.md" "governance/team-agent-rollout.md" "Team rollout routing"
-    Test-RequiredPattern "project-template\AGENTS.md" "governance/agent-suitability.md" "Agent suitability routing"
-    Test-RequiredPattern "project-template\AGENTS.md" (Get-SuitabilityRef) "Suitability document routing"
-    Test-RequiredPattern "project-template\AGENTS.md" (Get-CodexNextWorkOrderRef) "Codex next work order routing"
-    Test-RequiredPattern "project-template\AGENTS.md" (Get-ExplorationReportRef) "Exploration report routing"
-    Test-RequiredPattern "project-template\AGENTS.md" (Get-ImplementationPlanRef) "Implementation plan routing"
-    Test-RequiredPattern "project-template\AGENTS.md" ".agents/skills/<skill>/SKILL.md" "AGENTS project-local skill resolution"
 }
 
 function Test-AIEngineeringLoop {
@@ -352,19 +358,6 @@ function Test-AIEngineeringLoop {
     Test-RequiredPattern "project-template\docs\workflow-router.md" "maker-checker-protocol.md" "Workflow router maker-checker coverage"
     Test-RequiredPattern "project-template\docs\workflow-router.md" "worktree-playbook.md" "Workflow router worktree coverage"
     Test-RequiredPattern "project-template\docs\workflow-router.md" "handoff" "Workflow router handoff coverage"
-    Test-RequiredPattern "project-template\AGENTS.md" "workflow-router.md" "AGENTS workflow router routing"
-    Test-RequiredPattern "project-template\AGENTS.md" "intent routing" "AGENTS intent routing rule"
-    Test-RequiredPattern "project-template\AGENTS.md" "doc-health-report.py" "AGENTS doc health report rule"
-    Test-RequiredPattern "project-template\AGENTS.md" ".forgekit/doc-health-report.md" "AGENTS doc health generated report rule"
-    Test-RequiredPattern "project-template\AGENTS.md" "source-trace-report.py" "AGENTS source trace report rule"
-    Test-RequiredPattern "project-template\AGENTS.md" ".forgekit/source-trace-report.md" "AGENTS source trace generated report rule"
-    Test-RequiredPattern "project-template\AGENTS.md" "handoff-package.py" "AGENTS handoff package rule"
-    Test-RequiredPattern "project-template\AGENTS.md" ".forgekit/handoff-package.md" "AGENTS handoff generated report rule"
-    Test-RequiredPattern "project-template\CLAUDE.md" "workflow-router.md" "CLAUDE workflow router routing"
-    Test-RequiredPattern "project-template\CLAUDE.md" "intent routing" "CLAUDE intent routing rule"
-    Test-RequiredPattern "project-template\CLAUDE.md" "doc-health-report.py" "CLAUDE doc health report rule"
-    Test-RequiredPattern "project-template\CLAUDE.md" "source-trace-report.py" "CLAUDE source trace report rule"
-    Test-RequiredPattern "project-template\CLAUDE.md" "handoff-package.py" "CLAUDE handoff package rule"
     Test-RequiredPattern "project-template\.codex\rules.md" "workflow-router.md" "Rules workflow router routing"
     Test-RequiredPattern "project-template\.codex\rules.md" "intent routing" "Rules intent routing rule"
     Test-RequiredPattern "project-template\.codex\rules.md" "doc-health-report.py" "Rules doc health report rule"
@@ -420,8 +413,6 @@ function Test-AIEngineeringLoop {
     Test-RequiredPattern "project-template\changes\README.md" "Status" "Change README status lifecycle"
     Test-RequiredPattern "project-template\changes\README.md" "done" "Change README done status"
     Test-RequiredPattern "project-template\changes\README.md" "archived" "Change README archived status"
-    Test-RequiredPattern "project-template\AGENTS.md" ".forgekit/archive/**" "AGENTS archive default-read rule"
-    Test-RequiredPattern "project-template\CLAUDE.md" ".forgekit/archive/**" "CLAUDE archive default-read rule"
     Test-RequiredPattern "project-template\.codex\rules.md" ".forgekit/archive/**" "Rules archive default-read rule"
     Test-RequiredPath "project-template\docs\loop-readiness.md"
     Test-RequiredPath "project-template\docs\loop-blueprint.md"
@@ -556,42 +547,18 @@ function Test-AIEngineeringLoop {
     Test-RequiredPattern "project-template\changes\_template\review.md" "DocsReviewed: yes `| no" "Review docs reviewed"
     Test-RequiredPattern "project-template\changes\_template\review.md" "RisksReviewed: yes `| no" "Review risks reviewed"
     Test-RequiredPattern "project-template\changes\_template\review.md" "FinalRecommendation:" "Review final recommendation"
-    Test-RequiredPattern "project-template\AGENTS.md" "A loop must have a state file, validation command, stop condition, and human escalation path" "AGENTS loop short rule"
-    Test-RequiredPattern "project-template\CLAUDE.md" "A loop must have a state file, validation command, stop condition, and human escalation path" "CLAUDE loop short rule"
     Test-RequiredPattern "project-template\.codex\rules.md" "loop" "Rules loop short rule"
-    Test-RequiredPattern "project-template\AGENTS.md" "Do not enter loop mode unless the user explicitly asks for loop dry-run, one-step, bounded-auto, review-only, continue, or stop/handoff." "AGENTS loop operation trigger rule"
-    Test-RequiredPattern "project-template\CLAUDE.md" "Do not enter loop mode unless the user explicitly asks for loop dry-run, one-step, bounded-auto, review-only, continue, or stop/handoff." "CLAUDE loop operation trigger rule"
-    Test-RequiredPattern "project-template\AGENTS.md" "Bounded-auto must stop" "AGENTS bounded auto stop rule"
-    Test-RequiredPattern "project-template\CLAUDE.md" "Bounded-auto must stop" "CLAUDE bounded auto stop rule"
     Test-RequiredPattern "project-template\.codex\rules.md" "bounded-auto 遇到范围不清" "Rules bounded auto stop rule"
     Test-RequiredPattern "project-template\.codex\rules.md" "loop mode" "Rules loop operation trigger rule"
-    Test-RequiredPattern "project-template\AGENTS.md" "Loop continue must not run continuously" "AGENTS loop continue rule"
-    Test-RequiredPattern "project-template\CLAUDE.md" "Loop continue must not run continuously" "CLAUDE loop continue rule"
     Test-RequiredPattern "project-template\.codex\rules.md" "loop continue" "Rules loop continue rule"
-    Test-RequiredPattern "project-template\AGENTS.md" "Loop output must write back" "AGENTS loop writeback rule"
-    Test-RequiredPattern "project-template\CLAUDE.md" "Loop output must write back" "CLAUDE loop writeback rule"
     Test-RequiredPattern "project-template\.codex\rules.md" "work-log.md" "Rules loop writeback rule"
-    Test-RequiredPattern "project-template\AGENTS.md" "Implementation Scope from Governance Writeback Scope" "AGENTS writeback scope separation"
-    Test-RequiredPattern "project-template\CLAUDE.md" "Implementation Scope from Governance Writeback Scope" "CLAUDE writeback scope separation"
     Test-RequiredPattern "project-template\.codex\rules.md" "ManagedDocsWriteback: minimal" "Rules minimal writeback"
-    Test-RequiredPattern "project-template\AGENTS.md" "Generated native agent config is not proof of runtime registration" "AGENTS native adapter runtime boundary"
-    Test-RequiredPattern "project-template\CLAUDE.md" "Generated native agent config is not proof of runtime registration" "CLAUDE native adapter runtime boundary"
     Test-RequiredPattern "project-template\.codex\rules.md" "生成 native agent 配置不等于 runtime 已注册" "Rules native adapter runtime boundary"
     Test-RequiredPattern "project-template\.codex\rules.md" "agent_mode" "Rules loop agent mode record"
-    Test-RequiredPattern "project-template\AGENTS.md" "Medium or high risk code changes should separate Maker phase and Checker phase" "AGENTS maker checker short rule"
-    Test-RequiredPattern "project-template\CLAUDE.md" "Medium or high risk code changes should separate Maker phase and Checker phase" "CLAUDE maker checker short rule"
     Test-RequiredPattern "project-template\.codex\rules.md" "Maker phase" "Rules maker checker short rule"
-    Test-RequiredPattern "project-template\AGENTS.md" "Checker should not expand scope or implement new features unless the user explicitly asks" "AGENTS checker scope rule"
-    Test-RequiredPattern "project-template\CLAUDE.md" "Checker should not expand scope or implement new features unless the user explicitly asks" "CLAUDE checker scope rule"
     Test-RequiredPattern "project-template\.codex\rules.md" "Checker" "Rules checker scope rule"
-    Test-RequiredPattern "project-template\AGENTS.md" "Do not create a worktree unless the user explicitly asks." "AGENTS worktree explicit rule"
-    Test-RequiredPattern "project-template\CLAUDE.md" "Do not create a worktree unless the user explicitly asks." "CLAUDE worktree explicit rule"
     Test-RequiredPattern "project-template\.codex\rules.md" "worktree" "Rules worktree explicit rule"
-    Test-RequiredPattern "project-template\AGENTS.md" "Before creating a worktree, confirm ``git status --short`` is clean" "AGENTS worktree clean status rule"
-    Test-RequiredPattern "project-template\CLAUDE.md" "Before creating a worktree, confirm ``git status --short`` is clean" "CLAUDE worktree clean status rule"
     Test-RequiredPattern "project-template\.codex\rules.md" "git status --short" "Rules worktree clean status rule"
-    Test-RequiredPattern "project-template\AGENTS.md" "Do not automatically merge, push, delete branches, remove worktrees, create PRs, start agents, or schedule worktree tasks." "AGENTS worktree no automation rule"
-    Test-RequiredPattern "project-template\CLAUDE.md" "Do not automatically merge, push, delete branches, remove worktrees, create PRs, start agents, or schedule worktree tasks." "CLAUDE worktree no automation rule"
     Test-RequiredPattern "project-template\.codex\rules.md" "push" "Rules worktree no automation rule"
     Test-RequiredPattern "project-template\.forgekit\docs\document-responsibility.md" "maker-checker-protocol.md" "Document responsibility maker checker"
     Test-RequiredPattern "project-template\.forgekit\docs\document-responsibility.md" "loop-operations.md" "Document responsibility loop operations"
@@ -881,8 +848,6 @@ function Test-TeamToolingProtocol {
     Test-RequiredPattern "project-template\scripts\check-doc-sync.ps1" ".forgekit/codex-native-agent-report.md" "PowerShell Codex native report exclusion"
     Test-RequiredPattern "project-template\scripts\check-doc-sync.sh" ".forgekit/codex-native-agent-report.md" "Bash Codex native report exclusion"
     Test-RequiredPattern "scripts\generate-native-agent-adapter.py" "present" "Native adapter generator present status"
-    Test-RequiredPattern "project-template\AGENTS.md" "commands-catalog.md" "Commands catalog routing"
-    Test-RequiredPattern "project-template\AGENTS.md" "hooks.md" "Hooks routing"
     Test-RequiredPattern "project-template\.codex\security.md" "config.example.toml" "Security MCP config guard"
     Test-RequiredPattern "project-template\.codex\rules.md" "team-agent-rollout.md" "Rules team rollout guard"
 
@@ -1047,7 +1012,6 @@ function Test-StaleText {
     Test-RequiredPattern "project-template\.agents\skills\project-init\SKILL.md" "options-needed" "Project init options state"
     Test-RequiredPattern "project-template\.agents\skills\project-init\SKILL.md" "research-needed" "Project init research state"
     Test-RequiredPath "project-template\.codex\stacks\README.md"
-    Test-RequiredPattern "project-template\AGENTS.md" "execution summary" "AGENTS execution summary gate"
     Test-RequiredPattern (Get-CodexNextWorkOrderPath) "Execution Confirmation" "Next work order execution confirmation gate"
     Test-RequiredPattern (Get-ProjectPlanPath) "Product Shape Options" "Project plan product-shape section"
     Test-RequiredPattern "project-template\.codex\scope.md" "Execution Confirmation" "Scope execution confirmation gate"
@@ -1312,12 +1276,6 @@ function Test-ContextContinuityProtocol {
     Test-RequiredPattern "project-template\docs\context-continuity.md" "upgrade 后旧会话只用于收口" "Post-upgrade old-session closure rule"
     Test-RequiredPattern "project-template\docs\context-continuity.md" "新任务应新开会话" "Post-upgrade new-session rule"
     Test-RequiredPattern "project-template\docs\context-continuity.md" "不假设当前会话自动加载新规则" "Post-upgrade reload boundary"
-    Test-RequiredPattern "project-template\AGENTS.md" "Critical conclusions must not live only in chat" "AGENTS context checkpoint rule"
-    Test-RequiredPattern "project-template\AGENTS.md" "After a ForgeKit upgrade" "AGENTS post-upgrade refresh rule"
-    Test-RequiredPattern "project-template\AGENTS.md" "Summarize large outputs" "AGENTS large output rule"
-    Test-RequiredPattern "project-template\CLAUDE.md" "Critical conclusions must not live only in chat" "CLAUDE context checkpoint rule"
-    Test-RequiredPattern "project-template\CLAUDE.md" "After a ForgeKit upgrade" "CLAUDE post-upgrade refresh rule"
-    Test-RequiredPattern "project-template\CLAUDE.md" "Summarize large outputs" "CLAUDE large output rule"
     Test-RequiredPattern "project-template\.codex\rules.md" "关键结论不能只留在聊天里" "Rules context checkpoint rule"
     Test-RequiredPattern "project-template\.codex\rules.md" "新任务应新开会话" "Rules post-upgrade refresh rule"
     Test-RequiredPattern "project-template\.codex\rules.md" "长工具输出只保留摘要" "Rules large output rule"
@@ -1406,7 +1364,7 @@ function Test-ProjectMaintenanceOperations {
     Test-RequiredPattern "scripts\forgekit-upgrade.py" "already-present" "Idempotent same-content migration result"
     Test-RequiredPattern "scripts\forgekit-upgrade.py" "skipped-existing-review-needed" "Idempotent different-content migration result"
     Test-NoPattern "project-template\.forgekit\template-manifest.json" '"source_path": "scripts/forgekit-project.py"' "ForgeKitRoot unified entry must not enter project manifest"
-    foreach ($entry in @("project-template\AGENTS.md", "project-template\CLAUDE.md", "project-template\.codex\rules.md")) {
+    foreach ($entry in @("project-template\.codex\rules.md")) {
         Test-RequiredPattern $entry "MaintenanceIntent" "Maintenance intent entry rule"
         Test-RequiredPattern $entry "归档不是删除" "Archive is not deletion entry rule"
         Test-RequiredPattern $entry "current docs integrity" "Current docs integrity entry rule"
@@ -1445,7 +1403,7 @@ function Test-ReasoningReviewProtocol {
         "Failure Scenario", "Trigger Condition", "Expected Failure", "Evidence / Reproduction",
         "Verification Needed", "Relationship to Independent Code Review", "Critical Facts"
     )) { Test-RequiredPattern "project-template\docs\reasoning-review.md" $marker "Reasoning/review marker $marker" }
-    foreach ($entry in @("project-template\AGENTS.md", "project-template\CLAUDE.md", "project-template\.codex\rules.md")) {
+    foreach ($entry in @("project-template\.codex\rules.md")) {
         Test-RequiredPattern $entry "First-Principles Pass" "First-principles entry rule"
         Test-RequiredPattern $entry "Adversarial Review Pass" "Adversarial-review entry rule"
     }
@@ -1516,7 +1474,7 @@ function Test-MultiProjectScopedDocs {
     foreach ($forbidden in @(".forgekit/projects/backend", "repo-lite/FORGEKIT.md", "move_file", "business docs")) {
         if ($forbidden -ne "business docs" -and $migrationText.Contains($forbidden)) { Add-Error "v0.41 migration contains forbidden automatic scope action: $forbidden" }
     }
-    foreach ($entry in @("project-template\AGENTS.md", "project-template\CLAUDE.md", "project-template\.codex\rules.md")) {
+    foreach ($entry in @("project-template\.codex\rules.md")) {
         Test-RequiredPattern $entry "multi-project" "Multi-project short entry rule"
         Test-RequiredPattern $entry "single-project" "Legacy single-project compatibility rule"
     }
@@ -1543,7 +1501,7 @@ function Test-WorkSessionCheckpoint {
     foreach ($marker in @("初始化新项目", "接手已有项目", "更新项目中的 ForgeKit", "开始今天工作", "执行具体任务", "文档 Checkpoint", "Compact / Clear", "提交前检查", "阶段结束归档", "生成 Handoff", "多项目 Workspace", "启用 Multi-Project Map")) {
         Test-RequiredPattern "project-template\.forgekit\docs\usage-playbook.md" $marker "Usage playbook scenario $marker"
     }
-    foreach ($entry in @("project-template\AGENTS.md", "project-template\CLAUDE.md", "project-template\.codex\rules.md")) {
+    foreach ($entry in @("project-template\.codex\rules.md")) {
         Test-RequiredPattern $entry "work-session-checkpoint.md" "Checkpoint entry reference"
         Test-RequiredPattern $entry "pre-compact checkpoint" "Pre-compact entry rule"
         Test-RequiredPattern $entry "post-compact recovery check" "Post-compact entry rule"
@@ -1569,7 +1527,7 @@ function Test-MinimalProjectCapsuleBootstrap {
     Test-NoPattern "scripts\bootstrap-project-capsule.py" 'add_argument\("--force"' "Capsule bootstrap must not support --force"
     Test-RequiredPattern "project-template\.forgekit\docs\scoped-docs.md" "Minimal Project Capsule Bootstrap" "Scoped docs capsule bootstrap entry"
     Test-RequiredPattern "project-template\.forgekit\docs\usage-playbook.md" "创建一个最小 Project Capsule" "Usage playbook capsule prompt"
-    foreach ($entry in @("project-template\AGENTS.md", "project-template\CLAUDE.md", "project-template\.codex\rules.md")) {
+    foreach ($entry in @("project-template\.codex\rules.md")) {
         Test-RequiredPattern $entry "bootstrap-project-capsule.py" "Capsule bootstrap short entry"
         Test-RequiredPattern $entry "--confirm" "Capsule bootstrap confirmation rule"
     }
@@ -1620,6 +1578,7 @@ Test-TemplateManifest
 Test-StackTemplates
 Test-PromptTemplates
 Test-AgentsHarness
+Test-AgentEntryContracts
 Test-HarnessEntryConsistency
 Test-StackHarnessDetails
 Test-LargeChangeProtocol

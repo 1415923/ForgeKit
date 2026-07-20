@@ -31,6 +31,7 @@ function Test-FileContains {
 }
 
 Test-PathRequired "AGENTS.md"
+Test-PathRequired "CLAUDE.md"
 Test-PathRequired ".codex\commands.md"
 Test-PathRequired ".codex\commands-catalog.md"
 Test-PathRequired ".codex\hooks.md"
@@ -38,6 +39,7 @@ Test-PathRequired ".codex\automation-decision.md"
 Test-PathRequired ".forgekit\project-boundary.yml"
 Test-PathRequired ".forgekit\docs"
 Test-PathRequired "governance\agent-harness.md"
+Test-PathRequired "governance\agent-entry-contract.md"
 Test-PathRequired "governance\large-change-execution.md"
 Test-PathRequired "governance\team-agent-rollout.md"
 Test-PathRequired "governance\agent-suitability.md"
@@ -54,9 +56,24 @@ if (Test-Path -LiteralPath $agentsPath) {
     }
 }
 
-Test-FileContains "AGENTS.md" "Do not read every file"
-Test-FileContains "AGENTS.md" "large-change-execution.md"
-Test-FileContains "AGENTS.md" "team-agent-rollout.md"
+$entryAnchors = @(
+    "project-and-write-boundary",
+    "evidence-and-no-fabrication",
+    "audit-default",
+    "bounded-local-authorization",
+    "external-and-irreversible-actions",
+    "minimum-evidence-based-writeback",
+    "skill-routing"
+)
+foreach ($entry in @("AGENTS.md", "CLAUDE.md")) {
+    Test-FileContains $entry "governance/agent-entry-contract.md"
+    Test-FileContains $entry ".forgekit/docs/codebase-map.md"
+    foreach ($anchor in $entryAnchors) {
+        Test-FileContains $entry "governance/agent-entry-contract.md#$anchor"
+    }
+}
+Test-FileContains "AGENTS.md" ".agents/skills/<skill>/SKILL.md"
+Test-FileContains "CLAUDE.md" ".claude/skills/"
 Test-FileContains ".codex\hooks.md" "Opt-in only"
 Test-FileContains ".codex\hooks.md" "check-doc-sync.ps1"
 Test-FileContains ".codex\hooks.md" "install-hooks.sh"

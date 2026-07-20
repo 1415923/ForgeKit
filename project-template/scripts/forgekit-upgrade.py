@@ -23,6 +23,7 @@ from upgrade_review_packets import (
 MIN_SUPPORTED_VERSION = (0, 36, 0)
 STATE_RELATIVE_PATH = Path(".forgekit/state.json")
 SAFE_ROOTS = {".forgekit", ".codex", ".agents", ".claude", "governance", "scripts", "migrations"}
+SAFE_ROOT_FILES = {"AGENTS.md", "CLAUDE.md"}
 REVIEW_REPORT_MD = Path(".forgekit/reports/upgrade-review-needed.md")
 REVIEW_REPORT_JSON = Path(".forgekit/reports/upgrade-review-needed.json")
 REVIEW_EXPORT_ROOT = Path(".forgekit/reports/review-needed")
@@ -352,7 +353,7 @@ def safe_target(project_root, relative):
     path = Path(relative)
     if path.is_absolute() or ".." in path.parts or not path.parts:
         fail(f"Unsafe migration target: {relative}")
-    if path.parts[0] not in SAFE_ROOTS:
+    if path.parts[0] not in SAFE_ROOTS and not (len(path.parts) == 1 and path.name in SAFE_ROOT_FILES):
         fail(f"Safe migration target is outside ForgeKit governance roots: {relative}")
     target = (project_root / path).resolve()
     try:

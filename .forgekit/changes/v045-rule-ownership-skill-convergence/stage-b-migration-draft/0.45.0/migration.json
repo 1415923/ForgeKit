@@ -1,0 +1,47 @@
+{
+  "id": "0.45.0-stage-b-entry-lightweight-draft",
+  "title": "Stage B Lightweight Agent Entries (Development Fixture)",
+  "from": "0.44.1",
+  "to": "0.45.0",
+  "source_commit": "506cecf8d377a17a2616bf3b9eeea483ee4039a4",
+  "risk": "high",
+  "development_status": "fixture-only-not-released",
+  "actions": [
+    {
+      "id": "update-agents-entry",
+      "type": "replace_file_if_baseline_matches",
+      "safety": "safe",
+      "source": "files/AGENTS.md",
+      "baseline": "baseline/AGENTS.md",
+      "baseline_sha256": "e3fb19418f0827681c519f9e99f5e86a2dc201c1861a2e2d7a586700a0e95374",
+      "incoming_sha256": "7812abe759870806ff939645ff19345c6108b71c66eacbff87ed23388b1577b1",
+      "target": "AGENTS.md",
+      "skip_warning": "AGENTS.md differs from the v0.44.1 baseline; preserve it and merge the lightweight entry manually.",
+      "review_impact": "Moves conditional workflows out of the always-on Codex entry while retaining the shared entry contract.",
+      "recommended_action": "Review the incoming diff and preserve project-specific rules during manual merge."
+    },
+    {
+      "id": "update-claude-entry",
+      "type": "replace_file_if_baseline_matches",
+      "safety": "safe",
+      "source": "files/CLAUDE.md",
+      "baseline": "baseline/CLAUDE.md",
+      "baseline_sha256": "dacb9123a43259d98e413699c5fd8ad41fdba67d09ae51ead71afa4ea0a7a969",
+      "incoming_sha256": "b9873ee5cbc0b85a3d2f62851981f114b90ff9822c98367c4facdc6a53f5c503",
+      "target": "CLAUDE.md",
+      "skip_warning": "CLAUDE.md differs from the v0.44.1 baseline; preserve it and merge the lightweight entry manually.",
+      "review_impact": "Moves conditional workflows out of the always-on Claude entry while retaining shared boundaries and Claude invocation adaptation.",
+      "recommended_action": "Review the incoming diff and preserve project-specific Claude routing during manual merge."
+    }
+  ],
+  "manual_review": [
+    "Customized or unknown-baseline entries are never overwritten automatically.",
+    "After entry migration, close the current AI session after a minimal checkpoint and start a fresh session."
+  ],
+  "non_goals": [
+    "No released v0.45.0 migration registration",
+    "No Skill body or metadata change",
+    "No prompt migration",
+    "No version, plugin, marketplace, commit, push, tag, or release action"
+  ]
+}

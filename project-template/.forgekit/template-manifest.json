@@ -9,7 +9,7 @@
       "role": "agent_entry",
       "update_policy": "ask",
       "render_mode": "copy",
-      "checksum": "sha256:e3fb19418f0827681c519f9e99f5e86a2dc201c1861a2e2d7a586700a0e95374"
+      "checksum": "sha256:7812abe759870806ff939645ff19345c6108b71c66eacbff87ed23388b1577b1"
     },
     {
       "source_path": "CLAUDE.md",
@@ -17,7 +17,7 @@
       "role": "agent_entry",
       "update_policy": "ask",
       "render_mode": "copy",
-      "checksum": "sha256:dacb9123a43259d98e413699c5fd8ad41fdba67d09ae51ead71afa4ea0a7a969"
+      "checksum": "sha256:b9873ee5cbc0b85a3d2f62851981f114b90ff9822c98367c4facdc6a53f5c503"
     },
     {
       "source_path": "README.md",
@@ -441,7 +441,7 @@
       "role": "script",
       "update_policy": "replace",
       "render_mode": "copy",
-      "checksum": "sha256:83680d38552809ff664a2a20de67a3d7a2c29abfef8150b2288daac305e5ad9a"
+      "checksum": "sha256:56f07745333df286b037e7a7dd8b1a67aaae14db278bf99cb1c4015c8c1a41d1"
     },
     {
       "source_path": "scripts/upgrade_review_packets.py",
@@ -473,7 +473,7 @@
       "role": "script",
       "update_policy": "replace",
       "render_mode": "copy",
-      "checksum": "sha256:0011342dff47f9c037b8fee0e0506728f251a736d76024041e7836ebb8ca1c77"
+      "checksum": "sha256:1c8d47434f48f35977abfeaf556ccf59a02bb767da7aec449c7670670f2427e9"
     },
     {
       "source_path": ".agents/skills/project-init/SKILL.md",

@@ -1,11 +1,11 @@
 # v0.45.0 验证与验收设计
 
 DesignStatus: design-approved-for-stage-a
-ImplementationStatus: stage-a-implemented-awaiting-independent-check
+ImplementationStatus: stage-b-implemented-awaiting-independent-check
 
 ## 1. 状态说明
 
-本文件冻结 v0.45.0 的验收合同，并记录阶段 A maker 的确定性实施证据。真实 Codex/Claude 行为合同仍为 `NEEDS_TEST`，不得把基础设施通过解释为 A01-A22 全部通过。
+本文件冻结 v0.45.0 的验收合同，并记录阶段 A 与阶段 B maker 的确定性实施证据。阶段 A 已通过独立 checker；阶段 B 正等待独立 checker。真实 Codex/Claude 行为合同仍为 `NEEDS_TEST`，不得把静态与基础设施通过解释为 A01-A22 全部通过。
 
 本验收合同应用已经冻结的 DECISION-01、DECISION-02 和 DECISION-03：不把三项决定重新列为选择题，也不以测试结果反向授权阶段 A。
 
@@ -259,3 +259,174 @@ evidence 写入和 stdout 输出都只调用 `serialize_sanitized`；序列化�
 checker 报告的主机 TEMP 中 3 个由无效沙箱测试进程持续重建的 fixture 继续作为外部环境噪声记录。本轮未终止未知主机进程、未删除仍被外部进程使用的目录，也不声称全主机 TEMP 清洁；仅验证本轮自己的定向测试、dry-run 和 smoke 临时目录均已清理。
 
 真实 Codex/Claude prompt 和完整行为矩阵仍未执行。状态保持 `stage-a-implemented-awaiting-independent-check`，等待 checker 仅复核 M-02、M-06、M-10。
+
+## 13. 阶段 B maker 验证记录
+
+### 13.1 基线与范围
+
+- 初始分支为 `main`；最近三个提交为 `506cecf`（阶段 A 独立提交）、`077fcfa`、`9e6c407`。
+- 初始 `VERSION` 为 `0.44.1`；初始工作树除用户原有 `D usage.html` 外为空；初始 `git diff --check` 通过。
+- Stage A Independent Review 最终状态为 `stage-a-approved-for-stage-b`；阶段 B 未编辑 `review.md`。
+- 根 `AGENTS.md` 是 55 行的 ForgeKit 仓库维护入口，不是 generated-project runtime entry，按相称去重检查后保持不变；只修改设计矩阵列出的模板入口。
+- 未修改 `skills/`、`project-template/.agents/skills/` 或 `project-template/.claude/skills/`，未修改任何 Skill name、description、display name、metadata 或 implicit policy。
+
+### 13.2 入口体量与规则类别
+
+| Entry | 修改前 | 修改后 | 七项 always-on | validator 可检测的完整条件协议/重复规范类别 |
+| --- | --- | --- | --- | --- |
+| `project-template/AGENTS.md` | 181 行 / 25,003 UTF-8 bytes | 36 行 / 4,831 UTF-8 bytes | 7/7 -> 7/7，改为逐项引用共享 contract anchor | 8 -> 0 |
+| `project-template/CLAUDE.md` | 166 行 / 23,279 UTF-8 bytes | 37 行 / 5,027 UTF-8 bytes | 7/7 -> 7/7，改为逐项引用共享 contract anchor | 7 -> 0 |
+
+七项始终生效合同是：project/write boundary、evidence/no fabrication、audit default、bounded local authorization、external/irreversible actions、minimum evidence-based writeback、Skill routing。完整 archive、checkpoint、worktree、loop、maker-checker、code-review convergence、固定数量门槛和重复确认流程已从常驻入口下沉；入口只保留短路由。
+
+CLAUDE 与 AGENTS 的共享边界等价。CLAUDE 额外保留 `.claude/skills/` adapter、`forgekit-project-workflow`、request/reviewer adapter、maintenance、first-principles/adversarial 路由，以及“metadata/agent wiring/permission mode 不扩大授权”的平台边界；这些是 Claude 的调用适配，不复制共享规范或 Claude Skill 正文。
+
+### 13.3 migration 与 validator
+
+- 正式版本仍为 `0.44.1`，没有创建根或 template 的正式 `migrations/0.45.0`。开发中草案仅位于 change-local `stage-b-migration-draft/`，明确标记 `development-fixture-only`。
+- baseline 是阶段 A 提交中的 v0.44.1 AGENTS/CLAUDE 原始字节；incoming 与当前模板入口逐字节一致，descriptor 冻结 source/target version、managed path 和 SHA-256。
+- 复用现有 upgrader/packet/rollback/summary 系统，只把根级 allowlist 精确扩为 `AGENTS.md`、`CLAUDE.md`。stock 精确 baseline 才自动更新；custom/unknown-baseline 不覆盖并进入 REVIEW-NEEDED；missing 不伪造 local/rollback；rollback 保留升级开始前原始字节。
+- `scripts/validate-agent-entries.py` 只检查共享 contract、七个 anchor、最小 startup/routing/upgrade marker 和禁止协议模式；政策正文仍由 `agent-entry-contract.md` 拥有。
+- `scripts/validate-stage-b-entry-migration.py` 检查 0.44.1 版本边界、正式 0.45 migration 不存在、草案身份、baseline/incoming checksum 和精确安全动作。
+
+### 13.4 确定性测试结果
+
+| Command / check | Result |
+| --- | --- |
+| 两个 Stage B validator | PASS |
+| `python -B -m unittest tests.test_agent_entries tests.test_stage_b_entry_migration -v` | PASS；12/12 |
+| `python -B -m unittest discover -s tests -p "test_*.py" -v` | PASS；56/56 |
+| Stage A projection check | PASS；9 Skill / 18 文件逐字节一致 |
+| 41-rule ownership | PASS；41 个唯一 rule、一个具体 owner |
+| behavior validate/list | PASS；3 cases；入口 fixture 含当前 AGENTS、CLAUDE 和共享 contract |
+| behavior dry-run | PASS；未调用真实客户端；三个记录均为 `GRADER_UNCERTAIN/not-run`，隔离目录已清理 |
+| template manifest | PASS；入口、template upgrader、generated harness checksum 已刷新；版本仍 0.44.1 |
+| plugin validator | PASS |
+| template validator | PASS；在含 tracked `usage.html` 的 `D:\tmp` 隔离副本运行 |
+| release consistency / mutation | PASS；新增四个 Stage B mutation 与既有 mutation 全部失败后逐字节恢复 |
+| generated-project smoke | PASS；在 `D:\tmp` 隔离副本运行，只在副本保留 HEAD 的 `usage.html`；最终使用短 TEMP `D:\tmp\fb` 通过 |
+| `git diff --check` | PASS |
+
+mutation 覆盖 AGENTS 必要 anchor 缺失、CLAUDE 必要 anchor 缺失、完整 code-review convergence 回流、stock baseline 漂移和 custom 文件错误覆盖 oracle。unit/release harness 的 `finally` 校验恢复后 bytes；同路径多 migration、packet/summary、Windows/Unicode 路径继续由 Stage A upgrade tests 回归。
+
+一次以较长系统 TEMP 前缀重跑 smoke 时，Windows 在深层 manual-merge incoming 路径按预期返回 `WinError 206` 并失败关闭；没有把该环境限制写成产品失败或绕过路径保护。换用短且全新的 `D:\tmp\fb` 后完整 smoke PASS，目录随后清理。
+
+### 13.5 未验证与后续边界
+
+- `NEEDS_TEST`：A01-A03、A19-A20、A22 的真实 Codex/Claude 行为；本轮只更新 cases/fixture 并运行 dry-run，没有执行真实 prompt。
+- `NEEDS_TEST`：精简入口的实际 token/context 改善与真实 selector/Skill 来源。行数和 bytes 只是静态证据。
+- 阶段 C 才调整 A08-A11 的具体通用 Skill 工作流；阶段 D 才调整 A12-A16 的 code/security/release/suitability/first-principles 工作流；阶段 E 才处理 A17/A21 的 prompts 与 plugin/project-local 职责拆分。
+- 当前状态为 `stage-b-implemented-awaiting-independent-check`；不表示 `stage-b-approved`、`stage-c-authorized`、`v0.45.0 complete` 或 `release-ready`。
+
+## 14. Stage B validator MAJOR 定向修复验证
+
+### 14.1 M-B1：入口 validator
+
+- `validate-agent-entries.py` 每次从 `config/skill-projections.json` 读取通用 Skill 名称，在实际 Markdown routing section 中识别精确 inline-code route；没有新增九项硬编码清单。AGENTS 和 CLAUDE 各逐项删除 9 个 route，18 个 subtest 全部按预期失败；Claude 专属 route 不能代替缺失的通用 route。
+- contradiction gate 是小型数据驱动反向模式表，只拒绝 audit、bounded authorization、external/irreversible、evidence、boundary 和 minimum writeback 的明确反向声明；它不复制共享合同全文，也不尝试解释任意自然语言。扫描前剔除 fenced code block。
+- 独立 audit 反例 `Audits may automatically modify files without a repair request.` 和 checker 使用的 `audits may edit automatically` 均失败；external-no-auth 和 evidence-fabrication 反例失败。等价安全措辞与 fenced 反例通过。
+
+### 14.2 M-B2：migration validator
+
+- 已审批 Stage A 信任锚点冻结为完整 SHA `506cecf8d377a17a2616bf3b9eeea483ee4039a4`。validator 通过 `git show <sha>:project-template/AGENTS.md` 和 `CLAUDE.md` 读取独立 Git bytes；draft baseline bytes 和 descriptor checksum 必须同时等于 Git bytes/checksum。baseline 与 checksum 同步篡改仍失败，错误包含 managed path、approved commit、Git/draft/descriptor 三方 SHA-256。
+- draft incoming 分别逐字节锚定当前 `project-template/AGENTS.md` 和 `project-template/CLAUDE.md`；incoming 与 checksum 同步漂移仍失败。descriptor 的 `source_commit` 只是可审计元数据，validator 不以它替代冻结 SHA 或 Git blob。
+- production discovery gate 在隔离副本中运行真实 `forgekit-upgrade.py check`，不传 development migration 参数；验证 current/latest/planned 均为 `0.44.1`、pending 为 0、无 draft/0.45.0 暴露，并以完整文件快照确认 state、项目文件和 reports 未变化。将默认 discovery 重定向到 change-local draft 时，实际 check 暴露 0.45.0，validator 非零。
+- migration behavior gate 默认调用真实 upgrader和 draft，验证 stock、custom、unknown-baseline、missing、AGENTS-stock/CLAUDE-custom mixed、packet JSON/Markdown summary、artifact bytes/checksum/portable path、state 和 rollback。missing rollback 实际删除 upgrade-created 文件；mixed rollback 恢复完整升级起点；两段同路径 migration 的 packet 保留最初 origin bytes。
+- validator 使用显式 UUID 临时目录并在正常/异常路径清理；subprocess 有确定性超时。production 异常清理测试和 behavior gate 清理测试均通过。
+
+### 14.3 定向、回归与 mutation 结果
+
+| Command / gate | Result |
+| --- | --- |
+| 两个增强 validator | PASS；migration validator 默认执行 Git/current anchor、production discovery 和完整 behavior gate |
+| `python -B -m unittest tests.test_agent_entries tests.test_stage_b_entry_migration` | PASS；32/32（入口 15、migration 17） |
+| `python -B -m unittest discover -s tests -p "test_*.py"` | PASS；76/76 |
+| audit contradiction mutation | PASS；正式 validator 非零，原始 AGENTS bytes 恢复 |
+| manifest-derived 单项 route deletion mutation | PASS；正式 validator 非零，原始 AGENTS bytes 恢复 |
+| baseline + descriptor checksum 同步 mutation | PASS；Git anchor 拒绝，baseline/descriptor 均逐字节恢复 |
+| production discovery redirect mutation | PASS；实际 production check 暴露目标漂移并失败，upgrader 逐字节恢复 |
+| stock/custom/unknown/missing/mixed/rollback gate | PASS；真实 bytes、classification、packet、summary、state 和恢复结果一致 |
+| projection / ownership / behavior validate-list-dry-run | PASS；18 files、41 rules、3 cases；dry-run 未调用真实模型且为 `GRADER_UNCERTAIN/not-run` |
+| plugin / template (`-NoProfile`) / manifest / release consistency | PASS |
+| 短路径完整 smoke | PASS；本地 clone 保留 Stage A Git 对象，覆盖全部当前 tracked/untracked Stage B 文件；只在副本保留 HEAD `usage.html`，副本和 TEMP 已删除 |
+| `git diff --check` | PASS（最终工件写回后再次执行） |
+
+第一次 smoke 尝试用不含 `.git` 的 archive 副本，Git baseline gate 按设计失败关闭；该副本已清理，不计为有效 smoke。随后用含独立 Git 对象的本地 clone 重跑并通过。restricted sandbox 的默认 TEMP 曾造成无输出阻塞；权威测试在精确短路径 TEMP 中运行，所有本轮创建的失败 fixture 均按路径清理。
+
+真实 Codex/Claude prompt、selector/Skill source、实际 context/token 收益和 manual merge 可读性继续为 `NEEDS_TEST`/NOTE。本轮未执行真实模型 prompt，未调整任何 Skill、入口正文或 upgrader产品行为。当前状态仍为 `stage-b-implemented-awaiting-independent-check`，只等待原 checker 定向复核 M-B1/M-B2。
+
+## 15. M-B1 剩余 contradiction 漏检定向修复验证
+
+### 15.1 根因与实现
+
+- checker 复核后 M-B2 保持 CLOSED，M-B1 只剩 audit-default 的组合覆盖不足：旧 gate 能识别 audit 的少量固定表达，但没有统一组合 assessment/diagnosis/planning 等只读 subject、自动写入 action 与无 repair request 写入语义。
+- `validate-agent-entries.py` 现使用一个 `AUDIT_DEFAULT_CONTRADICTION` 数据表。subject family 覆盖 audit/review/assessment/diagnosis/planning 的指定词形；action family 覆盖 automatically/auto/direct/default write/fix 形式；no-repair family 独立与 modify/edit/write/change/apply-fixes 组合。它只扫描剔除 fenced code block 后的逻辑行/句，不复制共享合同全文，也不尝试解释任意自然语言。
+- 明确否定词 `must not`、`never`、`cannot`/`can''t`、`may not`、`do/does not`、普通 `not` 和 `no <subject>` 会抑制同一逻辑段的命中；`not required` 被保留给“repair authorization is not required”反向规则。正常 Skill 名、路径、heading、Markdown link 和 inline code 不会仅因包含 plan/review 而触发。
+- 错误现在同时给出 rule ID、文件、`audit-default` category 与规范化后的命中正文。入口正文、manifest、migration、M-B2 validator、upgrader、Skills、prompts、VERSION、`review.md` 和 `usage.html` 均未由本轮修改。
+
+### 15.2 checker 五例与防误报
+
+| 独立反例 | 预期退出码 | 实际退出码 | Category / 摘要 |
+| --- | ---: | ---: | --- |
+| `Assessments may automatically modify files without a repair request.` | 非零 | 1 | `audit-auto-write [audit-default]`；准确回显命中正文 |
+| `Diagnosis may automatically modify files.` | 非零 | 1 | `audit-auto-write [audit-default]`；准确回显命中正文 |
+| `Planning may edit files automatically.` | 非零 | 1 | `audit-auto-write [audit-default]`；准确回显命中正文 |
+| `Reviews should directly apply fixes by default.` | 非零 | 1 | `audit-auto-write [audit-default]`；准确回显命中正文 |
+| `Files may be written even when no repair request was made.` | 非零 | 1 | `audit-auto-write [audit-default]`；无 read-only subject 时仍由 no-repair + write 命中 |
+
+既有 `Audits may automatically modify files without a repair request.` 与 `audits may edit automatically` 继续失败。must-not assessment、never review、cannot planning、no-audit、普通 not、propose-but-must-not-apply、recommend-but-do-not-modify，以及正常 read-only audit/diagnosis 全部通过。fenced assessment 反例和包含 `large-change-planning`、`handover-review`、`code-review` 路由/路径/link 的正文通过。
+
+### 15.3 测试、mutation 与完整门禁
+
+| Command / gate | Result |
+| --- | --- |
+| `python -B scripts/validate-agent-entries.py` | PASS |
+| `python -B -m unittest tests.test_agent_entries` | PASS；31/31（较上一轮 15 项新增 16 项） |
+| `python -B -m unittest discover -s tests -p "test_*.py"` | PASS；92/92 |
+| AGENTS / CLAUDE manifest route deletion | PASS；各 9 项、共 18 个 subtest 均使 validator 失败；Claude 专属 route 不能替代通用 route |
+| release contradiction mutation | PASS；保留 audit mutation，并新增 assessment 与 generic no-repair-write 两项；均非零、category/命中正文正确、AGENTS 逐字节恢复，恢复后基线 validator 通过 |
+| `validate-stage-b-entry-migration.py` | PASS；M-B2 Git/current anchors、production discovery、stock/custom/unknown/missing/mixed/rollback 回归未改 |
+| projection / ownership / behavior validate-list-dry-run | PASS；18 files、41 rules、3 cases；dry-run 未调用真实模型，仍为 `GRADER_UNCERTAIN/not-run` |
+| plugin / template (`-NoProfile`) / manifest / release consistency | PASS |
+| 短路径完整 smoke | PASS；本地 clone 保留 `.git`，覆盖全部当前 tracked/untracked Stage B 文件；clone/TEMP 已删除 |
+| `git diff --check` | PASS（最终工件写回后再次执行） |
+
+本轮所有定向 CLI fixture、unit TEMP、gate TEMP、smoke clone/TEMP 和 release mutation 均已清理或逐字节恢复；没有生成真实工作树 packet、evidence 或模型运行结果。当前状态保持 `stage-b-implemented-awaiting-independent-check`，只等待原 checker 复核 M-B1；maker 不宣布 Stage B 通过或授权 Stage C。
+
+## 16. M-B1 Markdown 导航误报定向修复验证
+
+### 16.1 根因与 policy-prose 分层
+
+- checker 已确认 contradiction subject/action/no-repair/negation family 正确；剩余根因是 detector 只经过 fenced stripping 后直接扫描原始 Markdown，把 heading、inline code、link/path/Skill navigation token 与普通 `auto-edit` 术语错误组合。
+- validator 现明确分为两层：`extract_policy_prose(...)` 只处理 Markdown/navigation 结构，`detect_policy_contradictions(...)` 只扫描提取后的普通政策正文。required marker、anchor、routing 和 forbidden-protocol 校验仍使用 fenced-stripped structural text，不因 prose 提取丢失 route 证据。
+- 提取器排除 backtick/tilde fenced block、ATX heading、Setext heading 和 reference definition；中性化单/多反引号 inline code、image、autolink、link destination/title、reference link navigation label、URL、Windows/POSIX/relative path、文件 token 与动态 Skill ID。普通文字 link label 保留，因此政策句不会藏在 link 中。
+- 通用 Skill ID 继续从 `config/skill-projections.json` 读取；Claude 专属 ID 从实际 `project-template/.claude/skills/` 目录动态发现。没有第二份 Skill 清单、checker 示例白名单、第三方 Markdown 依赖或 subject/action 缩减。
+
+### 16.2 独立 CLI 结果
+
+| Group | Cases | Result |
+| --- | --- | --- |
+| checker false positives | inline-code `code-review`、`handover-review` Markdown link、`skills/code-review/SKILL.md`、ATX heading | 4/4 exit 0 |
+| original contradictions | assessment、diagnosis、planning、review-default-fix、generic no-repair write | 5/5 exit 1；均为 `audit-auto-write [audit-default]` 且 matched text 准确 |
+| independent combinations | Auditing+automatically write、Review+directly fix、Assessing+modify by default、Diagnostic+auto-edit、Plans+apply fixes by default | 5/5 exit 1；category/matched text 准确 |
+| safe negations | must not、never、cannot、can't、may not、do not、普通 not、no audit、propose-but-not-apply、recommend-but-do-not-modify | 10/10 exit 0 |
+| anti-escape | heading、link、inline code 后的普通 prose contradiction | 3/3 exit 1；matched text 只指向真实政策句 |
+| route regression | manifest-derived AGENTS 9 项、CLAUDE 9 项逐项删除 | 18/18 exit 1；缺失 Skill 精确定位 |
+
+补充结构覆盖包括 multi-backtick inline code、tilde fence、reference link、image、autolink、link destination、动态 Claude Skill token、Setext heading、list contradiction、table contradiction 与 navigation-only table。提取器边界 fixture 确认 heading/Skill/link/path 不进入 prose，而最后一条真实 review-default-fix 句保留。
+
+### 16.3 完整门禁
+
+| Command / gate | Result |
+| --- | --- |
+| `python -B scripts/validate-agent-entries.py` | PASS |
+| `python -B -m unittest tests.test_agent_entries` | PASS；58/58（较上一轮 31 项新增 27 项） |
+| `python -B -m unittest discover -s tests -p "test_*.py"` | PASS；119/119 |
+| `python -B scripts/validate-stage-b-entry-migration.py` | PASS；M-B2 保持 CLOSED |
+| projection / ownership / behavior validate-list-dry-run | PASS；18 files、41 rules、3 cases；dry-run 未调用真实模型且为 `GRADER_UNCERTAIN/not-run` |
+| plugin / template (`-NoProfile`) / manifest | PASS；template gate 执行 119 项 suite，包括 expected-pass Markdown false-positive guard |
+| release consistency | PASS；原 audit、assessment、generic no-repair 三个真实 contradiction mutation 均失败后逐字节恢复；恢复后 validator 通过 |
+| 短路径完整 smoke | PASS；本地 clone 保留 `.git`，覆盖全部当前 tracked/untracked Stage B 文件；clone/TEMP 已删除 |
+| `git diff --check` | PASS（最终工件写回后再次执行） |
+
+本轮未修改 release mutation 脚本：expected-pass guard 位于 `tests.test_agent_entries`，并由正式 `validate-template.ps1` 的 unittest gate 执行；它使用临时最小仓库运行真实 CLI，退出后自动清理。所有定向证据、focused/full-unit、gate、template 和 smoke 临时目录均已清理，没有工作树 packet、evidence、mutation 或缓存残留。当前状态仍为 `stage-b-implemented-awaiting-independent-check`，只等待原 checker 复核 Markdown 误报修复。

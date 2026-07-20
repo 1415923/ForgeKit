@@ -1,16 +1,16 @@
 # v0.45.0 发布 / 交接设计
 
-Status: stage-a-implemented-awaiting-independent-check
+Status: stage-b-implemented-awaiting-independent-check
 DesignStatus: design-approved-for-stage-a
-AuthorizedStage: stage-a
+AuthorizedStage: stage-b
 
 ## 发布 / 交接步骤
 
-当前不得发布。阶段 A maker 已完成实施和确定性自验，等待独立 checker；后续交接条件为：
+当前不得发布。阶段 A 已通过独立 checker；阶段 B maker 已完成实施和确定性自验，等待独立 checker；阶段 C-E 未进入。后续交接条件为：
 
 1. DECISION-01 至 DECISION-03 已冻结，不再作为未决项退回。
 2. M-01、M-03、A21 保持上一轮已关闭；`review.md` 的两次 blocker-recheck 已关闭 M-02、M-04，设计状态为 `design-approved-for-stage-a`。
-3. 阶段 A 的独立 checker 必须复核 maker 结果；阶段 B-E 仍需逐段授权、实现、验证和独立复查。
+3. 阶段 B 的独立 checker 必须复核入口、migration、mutation、回归和残留证据；阶段 C-E 仍需逐段授权、实现、验证和独立复查。
 4. 完成新安装、新项目、v0.44.1 stock/custom 升级、plugin+local、Codex-only 和 Claude-only 验收。
 5. 执行完整 template/plugin/release smoke 与 mutation，确认自动恢复。
 6. 最后才更新正式版本元数据、changelog 和发布说明。
@@ -32,6 +32,40 @@ M-02 已按冻结合同沿用 `.forgekit/reports/upgrade-review-needed.md`、`.f
 M-02、M-06、M-10 已完成最后一次定向修复和 maker 自验。packet 的提交点现在位于 canonical packet、Markdown、JSON 全部发布并完成身份/classification/checksum/artifact 交叉验证之后；提交后的 `.old-*` 清理失败只记录 cleanup-pending warning，不得回滚已一致提交的新状态。behavior record 在 evidence/stdout 序列化前经过最终整对象递归脱敏，嵌套 environment/auth 敏感键的任意类型值均替换为稳定占位符。全量单测为 44/44，正式门禁和隔离 smoke 通过。
 
 checker 报告的主机 TEMP 三个外部 fixture 仍诚实记录为环境噪声；本轮未终止未知进程或删除被外部进程使用的目录。真实模型行为矩阵仍未执行。状态继续为 `stage-a-implemented-awaiting-independent-check`，只等待 checker 对 M-02、M-06、M-10 复核。
+
+## 阶段 B maker 交接
+
+模板 `AGENTS.md` 和 `CLAUDE.md` 已收敛为共享合同应用、最小 startup/routing 和 upgrade 入口。七项 always-on 规则均指向 `governance/agent-entry-contract.md` 的唯一 anchor；完整 archive/checkpoint/worktree/loop/maker-checker/code-review convergence、固定数量门槛和重复本地授权确认不再常驻。CLAUDE 仅额外保留可定位的平台 adapter/agent 路由和“不扩大共享授权”的边界。
+
+change-local `stage-b-migration-draft/` 冻结 v0.44.1 baseline 和阶段 B incoming；它只是开发 fixture，不是已发布的 0.45.0 migration。现有 upgrader 的安全 root-file allowlist 只增加 AGENTS/CLAUDE：stock 精确匹配才更新，custom/unknown 不覆盖，missing 不伪造原始字节，rollback/packet/summary 沿用阶段 A 合同。VERSION、plugin/marketplace 版本和正式 migration 均未更新。
+
+两个 Stage B validator、12 个定向单测、56 个全量单测、41-rule ownership、18-file projection、behavior dry-run、template/plugin/release/manifest、可恢复 mutation 和隔离 smoke 已通过。真实 Codex/Claude prompt 未执行，相关行为保持 `NEEDS_TEST`，不能由 dry-run 或行数/bytes 推断通过。
+
+阶段 B 未修改任何通用或 Claude Skill 正文/metadata，未修改 prompts、README 或用户原有 `usage.html` 删除，未执行 commit、push、tag、release。当前只能交给新鲜只读独立 checker，不得写成 `stage-b-approved` 或授权阶段 C。
+
+### Stage B validator MAJOR 修复交接
+
+独立 checker 的 M-B1、M-B2 已由 maker 做封闭定向修复和自验，产品入口正文、迁移动作语义与 upgrader运行行为未重新设计。入口 validator 从唯一 `config/skill-projections.json` 派生全部通用 route，并新增明确反向语义 gate；migration validator 以完整 Stage A commit `506cecf8d377a17a2616bf3b9eeea483ee4039a4` 的 Git blob 和当前模板分别锚定 baseline/incoming，默认执行 production discovery 及 stock/custom/unknown/missing/mixed/rollback 真实 gate。
+
+两个定向测试模块 32/32、全量单测 76/76、18-file projection、41-rule ownership、behavior dry-run、plugin/template/manifest、release mutation 和含 Git 锚点的短路径完整 smoke 已通过。audit contradiction、manifest-derived 单 route 删除、baseline+checksum 同步篡改和 production discovery 重定向均失败后逐字节恢复。真实模型 prompt、selector/Skill source、context/token 收益和 manual merge 体验仍为 NOTE / `NEEDS_TEST`。
+
+状态仍是 `stage-b-implemented-awaiting-independent-check`；maker 不宣布 Stage B 通过，不授权 Stage C。VERSION 仍为 `0.44.1`，未 commit、push、tag、release。
+
+### M-B1 contradiction family 最后修复交接
+
+原 checker 已关闭九个通用 route 完整性和 M-B2；本轮只修复 audit-default 对明确反向写入声明的剩余漏检。入口 validator 现在由小型数据表组合 audit/review/assessment/diagnosis/planning subject、automatic/direct/default write/fix action、无 repair request 写入短语与明确否定词；错误包含 rule ID、`audit-default` category、文件和命中正文。它继续剔除 fenced code block，不把 Skill route、路径、heading、link 或正常否定安全措辞当成矛盾，也没有修改产品入口正文。
+
+checker 五个漏检反例均由正式 CLI 以退出码 1 拒绝；must not、never、cannot、no audit、propose-but-not-apply、recommend-but-do-not-modify 等安全措辞通过。入口定向单测 31/31、全量单测 92/92；AGENTS/CLAUDE 的 9+9 route deletion 回归继续失败关闭。release consistency 新增 assessment 与 generic no-repair-write 两个 mutation，均验证 category/命中正文并逐字节恢复。M-B2 回归、projection、41-rule ownership、behavior dry-run、plugin/template/manifest、release consistency 和含 `.git` 的短路径 smoke 全部通过，所有本轮临时目录已清理。
+
+真实 Codex/Claude prompt 未执行，selector/Skill source、context/token 收益和 manual merge 体验仍为 NOTE / `NEEDS_TEST`。M-B2 保持 CLOSED；状态仍是 `stage-b-implemented-awaiting-independent-check`，只等待原 checker 复核 M-B1。VERSION 仍为 `0.44.1`，未进入 Stage C，未 commit、push、tag 或 release。
+
+### M-B1 Markdown/prose separation 最后修复交接
+
+原 checker 已确认五个漏检、subject/action family、generic no-repair、否定句、fenced code、九项 route 和 M-B2；本轮只关闭 Markdown/navigation 系统性误报。validator 现在先由 `extract_policy_prose` 排除 heading/fence/reference definition，并中性化 inline code、link/image destination、URL、path/file 与动态 Skill navigation token，再由独立 `detect_policy_contradictions` 执行既有 family。通用 Skill 名仍由 manifest 派生，Claude 专属名由实际目录发现；未建立白名单、第二份 Skill 清单或 Markdown 第三方依赖。
+
+四个 checker 误报均由真实 CLI 以 exit 0 通过；原五例和五个独立组合均以 exit 1 返回 `audit-default` category 与准确 matched text；十类否定以 exit 0 通过；heading/link/inline 后真实矛盾继续以 exit 1 失败关闭。AGENTS/CLAUDE 各 9 项 route deletion 回归继续通过。focused tests 58/58、全量 119/119，M-B2、projection、41-rule ownership、behavior dry-run、plugin/template/manifest、release consistency 与含 `.git` 的短路径 smoke 全部通过。原三个 release contradiction mutation 均逐字节恢复；expected-pass Markdown guard 由 template gate 的正式 unittest suite 执行并清理临时仓库。
+
+状态仍是 `stage-b-implemented-awaiting-independent-check`，只等待原 checker 复核 Markdown 误报修复。M-B2 保持 CLOSED；VERSION 仍为 `0.44.1`；未修改入口、migration、upgrader、Skills、prompts、`review.md` 或 `usage.html`，未进入 Stage C，未执行真实模型 prompt，未 commit、push、tag 或 release。
 
 ## 回滚
 

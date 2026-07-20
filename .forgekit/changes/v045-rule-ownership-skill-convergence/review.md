@@ -644,3 +644,299 @@ None.
 M-02, M-06, and M-10 are CLOSED. Stage A passes with notes. Status is `stage-a-approved-for-stage-b`; Stage B may begin, but this checker did not enter or implement Stage B.
 
 `VERSION` remains correctly at `0.44.1`. This is an in-development v0.45.0 stage result; the real model behavior matrix has not run, v0.45.0 release preparation has not begun, and v0.45.0 is not release-ready. This checker did not commit, push, tag, or release.
+
+## Stage B Independent Review
+
+ReviewedOn: 2026-07-20
+ReviewType: independent
+ReviewerAgent: Codex independent checker (/root)
+BaselineCommit: 506cecf8d377a17a2616bf3b9eeea483ee4039a4
+ReviewDecision: FAIL
+ArtifactStatus: stage-b-implemented-awaiting-independent-check
+StageBApproved: no
+StageCAuthorized: no
+
+### Baseline, scope, and task mapping
+
+- Branch main; HEAD and Stage-A baseline commit 506cecf; VERSION remains 0.44.1.
+- Read all six change artifacts, the Stage-B task--acceptance mapping, all 41 ownership rows, the seven always-on anchors, Stage-A final approval, A01--A22 Stage-B portions, every tracked diff, and every untracked file.
+- SB-01: project-template/AGENTS.md, project-template/CLAUDE.md, template manifest, and generated-project harness. These are necessary entry/runtime-routing changes and do not change Skill bodies.
+- SB-02: root/template forgekit-upgrade.py and change-local stage-b-migration-draft. These are necessary safe root-entry and development fixture changes.
+- SB-03: both validators/tests, behavior cases/fixture, run-harness-check, validate-template, release-consistency, and smoke. These are necessary deterministic gates; two gate-coverage MAJOR findings remain.
+- SB-04: tasks.md, verification.md, and ship.md. These are necessary maker status/evidence writeback and do not change user runtime.
+- Root AGENTS.md, nine shared Skills, six Claude Skills, metadata, prompts, README, formal migrations, and release/version metadata are unchanged. The user's D usage.html stayed deleted and was materialized only inside the smoke copy.
+
+### Entry size and conditional-flow result
+
+| Entry | Before | After | H1/H2 | Conditional categories | Skill/governance path references total/unique |
+| --- | --- | --- | --- | --- | --- |
+| AGENTS | 181 lines / 25,003 bytes | 36 lines / 4,831 bytes | 1/5 -> 1/3 | 8 -> 0 | 16/9 -> 11/3 |
+| CLAUDE | 166 lines / 23,279 bytes | 37 lines / 5,027 bytes | 1/4 -> 1/3 | 7 -> 0 | 14/8 -> 11/3 |
+
+Maker size claims are exact. Full archive, checkpoint, worktree, loop, maker-checker, review-convergence, large-change, release, backfill, handover, project-init, security, first-principles, and old-prompt protocols are no longer always-on. Short routes remain. No fixed file/module/question/eight-section threshold, universal independent review, repeated bounded-write confirmation, audit auto-fix, universal artifact chain, or fabricated-fact writeback remains in either entry.
+
+### Seven always-on contracts and platform comparison
+
+Project/write boundary, evidence/no fabrication, audit default, bounded local authorization, external/irreversible actions, minimum evidence-based writeback, and Skill routing each have a readable entry summary plus the correct agent-entry-contract anchor. AGENTS and CLAUDE are semantically equivalent for all seven. Both preserve read-only audit, do not repeat an already granted bounded local authorization, protect release/push/deploy/destructive actions, and do not treat routing as authorization.
+
+All nine portable Skills are discoverable from both intent tables. Claude-only project-workflow, request/reviewer, maintenance, first-principles, and adversarial routes resolve to real repository paths. The metadata/agent-wiring/permission-mode statement limits these to invocation mechanics and does not create a Claude authorization policy.
+
+### Counterfactual cases
+
+1. Skill-not-triggered read-only diagnosis: PASS; read-only, evidence, no auto-fix, and no fabrication follow directly.
+2. Authorized low-risk local fix: PASS; bounded reversible edits and proportionate validation proceed without repeated confirmation or forced full planning/checker.
+3. Insufficiently specific “release it too”: PASS; release remains a specifically authorized external action.
+4. Single-file auth/permission/migration/public API: PASS; objective impact, not count, controls risk.
+5. Eighteen deterministic projection files: PASS; count alone does not force heavy flow.
+6. Adjacent project: PASS; the project/task boundary forbids automatic inclusion.
+7. Document writeback: PASS; only minimum confirmed facts go to the owning document, never business facts into governance.
+
+### Authority, migration identity, and actual behavior
+
+- The seven ENTRY/WRITEBACK/SKILL-ROUTING rules remain owned by project-template/governance/agent-entry-contract.md. AGENTS/CLAUDE are application sites. ai-engineering-loop.md does not re-own ENTRY rules. REVIEW-CONVERGENCE remains mapped to skills/code-review/SKILL.md; Stage B did not modify it.
+- The draft is change-local and marked development-fixture-only / fixture-only-not-released. Default production discovery scans only formal migrations/*/migration.json. Independent production check reported latest/planned 0.44.1 and zero pending migrations.
+- Baseline AGENTS/CLAUDE are byte-identical to commit 506cecf with SHA-256 e3fb...5374 and dacb...a969. Incoming files are byte-identical to current template entries with SHA-256 7812...7b1 and b987...503.
+- Descriptor actions are the existing safe replace_file_if_baseline_matches type and target only AGENTS.md/CLAUDE.md. Root/template upgraders are byte-identical; the only product change is the exact SAFE_ROOT_FILES allowlist for those two names.
+- Independent real fixtures passed stock, custom, unknown-baseline, missing, and mixed AGENTS-stock/CLAUDE-custom. Custom/unknown were preserved. Missing created no fake local/rollback bytes. Mixed rollback matched upgrade-start bytes. AGENTS and CLAUDE packet IDs were distinct and stable; both appeared in one summary; JSON artifact paths were relative with no machine root.
+
+### Independent mutations
+
+Twenty-seven assertions ran only in D:\tmp\fb-b-review and were restored before the copy was deleted.
+
+- Missing AGENTS/CLAUDE anchors, copied blocker-recheck protocol, old 5-files/2-modules threshold, one-byte baseline drift, formal migrations/0.45.0, and behavior-fixture drift all failed as expected.
+- Custom AGENTS, custom CLAUDE, mixed stock/custom, unknown, missing, rollback, stable/distinct packet IDs, relative summary, and production discovery behaved correctly.
+- Two negative entry mutations incorrectly passed: retaining markers while adding “audits may edit automatically,” and deleting the individual project-bootstrap-fill route.
+- Two negative migration mutations incorrectly passed: changing baseline bytes together with descriptor checksum so the baseline no longer came from 506cecf, and redirecting production default discovery to the change-local draft.
+
+### Gates and smoke
+
+| Gate | Result |
+| --- | --- |
+| Stage-B validators | PASS, subject to the MAJOR coverage gaps below |
+| Projection / ownership | PASS; 18 files / 41 rules |
+| Behavior validate/list/dry-run | PASS; 3 GRADER_UNCERTAIN/not-run records; no real client |
+| Unit tests | PASS; 56/56 using D:\tmp\fb-stageb-unittest |
+| Plugin/template/manifest | PASS; template ran with -NoProfile; version 0.44.1 |
+| Release-consistency mutation | PASS; all bytes restored |
+| Full smoke | PASS; copy D:\tmp\fb-b-review; generated D:\tmp\frt\forgekit-smoke-d_s5aq6x\generated; entries, contract, manifest, upgrader, harness checked |
+| git diff --check | PASS |
+
+The authoritative D:\tmp runs passed and cleaned. Earlier sandbox-TEMP permission failures were invalid environment attempts, not product results. The 22 TEMP directories created by those attempts were precisely removed; earlier host TEMP noise was not changed. All checker-owned copies, generated projects, runtime packets, evidence, caches, and temporary directories are gone.
+
+### BLOCKER
+
+None. Actual entry safety, production isolation, custom/unknown preservation, baseline identity, and rollback behavior pass.
+
+### MAJOR
+
+1. scripts/validate-agent-entries.py remains a marker plus limited-regex gate. It does not validate all nine individual routes and ignores explicit contradictory prose when the markers remain. Removing project-bootstrap-fill or adding audit auto-write text both passed. tests/test_agent_entries.py lacks these negative paths.
+2. scripts/validate-stage-b-entry-migration.py does not bind baseline bytes to commit 506cecf, inspect production discovery, or run stock/custom/unknown/missing/mixed/rollback behavior. A coherently changed baseline/checksum and a production-discovery redirect both passed. Current product behavior passes separate tests, but this validator and tests/test_stage_b_entry_migration.py do not meet the frozen Stage-B migration-gate scope.
+
+### NOTE
+
+1. Real Codex/Claude prompts, selector/Skill-source observations, and actual token/context improvement remain NEEDS_TEST; this is not the failure reason.
+2. Historical Stage-A paragraphs in ship.md retain stale “not entered Stage B / awaiting Stage-A checker” wording, while its header and Stage-B handoff are current. This is a readability note only.
+
+### Stage decision
+
+Stage B FAIL. There are 0 BLOCKER and 2 MAJOR. Status remains stage-b-implemented-awaiting-independent-check and Stage C is not authorized.
+
+VERSION remains 0.44.1. No real model prompt was executed; no formal v0.45.0 release migration was created or updated; v0.45.0 is not release-ready. This checker did not fix implementation, enter Stage C, commit, push, tag, or release.
+
+## Stage B Findings Recheck
+
+ReviewedOn: 2026-07-20
+ReviewType: final directed findings recheck
+ReviewerAgent: Codex independent checker (/root)
+BaselineCommit: 506cecf8d377a17a2616bf3b9eeea483ee4039a4
+ReviewDecision: FAIL
+ArtifactStatus: stage-b-implemented-awaiting-independent-check
+StageBApproved: no
+StageCAuthorized: no
+
+### Actual recheck scope
+
+本轮严格限定为上轮两个 validator 级 finding：M-B1（入口 validator）与 M-B2（Stage-B migration validator），以及它们的定向测试、正式门禁接入、release mutations 和含 `.git` 的隔离 smoke。未重新打开已通过的入口正文、七项 always-on 合同、条件流程下沉、平台语义、规则所有权、migration 产品语义或 Stage A 基础设施。
+
+基线为 `main` / `506cecf8d377a17a2616bf3b9eeea483ee4039a4`；`VERSION` 仍为 `0.44.1`。未发现 Stage C、Skill 或正式 `migrations/0.45.0` 变更。用户原有 `usage.html` 仍保持删除。
+
+### M-B1: OPEN
+
+- 通用 Skill 名称由 `config/skill-projections.json` 动态读取；validator 和测试中没有 `EXPECTED_SKILLS`、手写九项 collection 或第二份清单。测试的九项循环同样由 manifest 派生。
+- AGENTS 与 CLAUDE 的九项 inline-code route 逐项删除 mutation 全部得到 exit 1，并定位 `missing manifest Skill route: <skill>`；`project-bootstrap-fill`、任意其他 route、CLAUDE 通用 route 及 Claude-only route 不能替代缺失通用 route 均符合预期。重复引用不能掩盖另一项缺失，routing parser 不依赖固定行号。
+- 指定 audit 反例 `Audits may automatically modify files without a repair request.` 与短句 `audits may edit automatically` 均得到 exit 1；fenced code block 中同一反例得到 exit 0；正常只读/外部授权措辞得到 exit 0。
+- 但 contradiction gate 仍未满足冻结范围中的完整 Audit 最小集合。保留全部正向 marker 时，以下明确反向声明均得到 exit 0：`Assessments may automatically modify files without a repair request.`、`Diagnosis may automatically modify files without a repair request.`、`Planning may automatically modify files without a repair request.`、`Reviews may directly fix files by default.`、`Files may be written without a repair request.`。因此 assessment/diagnosis/planning 自动写、review 默认直接修复、无 repair request 仍可写文件仍可绕过。
+- 其他抽查的 bounded authorization、external authorization、evidence、boundary 与 writeback 明确反向声明均被识别。实现保持小型、数据驱动且未复制共享合同全文，但上述明确漏检使 M-B1 的关闭条件不成立。
+
+### M-B2: CLOSED
+
+- Validator 内置且不接受 descriptor 改写的审批锚点 `506cecf8d377a17a2616bf3b9eeea483ee4039a4`，通过 `git show <approved commit>:project-template/<entry>` 读取 Git object，而不是当前工作树。Descriptor `source_commit` 必须精确等于该完整 SHA。
+- 独立重算 Git baseline：AGENTS `e3fb19418f0827681c519f9e99f5e86a2dc201c1861a2e2d7a586700a0e95374`；CLAUDE `dacb9123a43259d98e413699c5fd8ad41fdba67d09ae51ead71afa4ea0a7a969`。两份 draft baseline 与 Git bytes、descriptor checksum 均一致。
+- Incoming 与当前模板逐字节一致：AGENTS `7812abe759870806ff939645ff19345c6108b71c66eacbff87ed23388b1577b1`；CLAUDE `b9873ee5cbc0b85a3d2f62851981f114b90ff9822c98367c4facdc6a53f5c503`。
+- 隔离 mutation：baseline AGENTS 与 descriptor checksum 同步篡改得到 exit 1，错误同时报告 managed path、approved commit、Git/draft/descriptor SHA；`source_commit` 改为另一真实 SHA 得到 exit 1；incoming CLAUDE 与 checksum 同步篡改得到 exit 1。每项后均逐字节恢复并复跑通过。
+- 实际 production `check` 未传 development migration source，返回 Current/Latest/Planned `0.44.1`、Pending `0`，无 0.45.0/draft 暴露，state、项目与 reports 不变。将默认 discovery 重定向到 change-local draft 后，实际结果暴露 Latest/Planned `0.45.0`、Pending `1`，validator 得到 exit 1；upgrader 随后逐字节恢复。
+- Validator 默认真实执行 stock、custom、unknown-baseline、missing、mixed 与 same-path multi-migration behavior。分类分别正确；custom/unknown 保留，missing 无伪造 local/rollback bytes，mixed rollback 恢复升级起点，chain rollback 保留 `stage-a-origin\r\n`。所有 fixture 在正常与异常路径均清理。无 `.git` 的 archive 副本因无法读取审批 Git object 而按预期拒绝。
+
+### Directed tests and formal gates
+
+- `tests.test_agent_entries`: PASS，15/15。
+- `tests.test_stage_b_entry_migration`: PASS，17/17。
+- 定向合计：PASS，32/32。测试真实覆盖 manifest 派生 route 删除、指定 audit contradiction、fenced/safe wording、baseline+checksum、incoming+checksum、source commit、真实 discovery redirect、stock/custom/unknown/missing/mixed/rollback 与清理；但没有覆盖本次发现的五个 Audit 同义明确反例。
+- 全量 unittest：PASS，76/76。
+- 两个增强 validator、Skill projection、41-rule ownership、behavior validate/list/dry-run、plugin assets、template、manifest、release consistency 和 `git diff --check` 全部 PASS。Dry-run 仍为 `GRADER_UNCERTAIN/not-run`。
+- Release consistency 已接入 audit contradiction、manifest-derived 单项 route 删除、baseline+checksum 同步篡改和 production discovery redirect；所有 mutation 后均验证逐字节恢复。
+- `validate-template.ps1` 在 `powershell -NoProfile` 下通过，并在 `D:\tmp\复核 空格` 的空格/非 ASCII 路径副本通过。
+- 完整 smoke 在含 `.git`、全部 tracked/untracked Stage-B 文件且仅在副本恢复 HEAD `usage.html` 的短路径 `D:\tmp\fbr` 中通过。记录的生成项目为 `D:\tmp\fbr-smoke-record\forgekit-smoke-k2e16kwp\generated`；AGENTS、CLAUDE 与 shared contract 存在，完整 smoke 通过后已清理。
+
+### BLOCKER
+
+None.
+
+### MAJOR
+
+1. M-B1 remains OPEN. The route-completeness half is fixed, but the contradiction gate still accepts explicit unauthorized-write reversals for assessment, diagnosis, planning, direct-by-default review repair, and generic writes without a repair request while all positive markers remain. The frozen M-B1 closure conditions therefore are not satisfied.
+
+### NOTE
+
+1. Real Codex/Claude prompts were not executed. Selector behavior, actual Skill source/context/token benefit, and manual-merge readability remain NEEDS_TEST and do not cause this failure.
+2. Historical Stage-A wording in `ship.md` remains a non-blocking readability note; its header and current handoff are not reopened here.
+3. All checker-owned mutation, runtime, smoke, path, and no-Git copies were deleted. No packet, report, evidence, cache, `.pyc`, `__pycache__`, or temporary residue remains in the real worktree.
+
+### Stage decision
+
+M-B1 is OPEN and M-B2 is CLOSED. Stage B findings recheck FAILS with 0 BLOCKER and 1 MAJOR. Status remains `stage-b-implemented-awaiting-independent-check`; Stage B is not approved and Stage C is not authorized.
+
+`VERSION` remains `0.44.1`. No real model prompt was executed; no formal v0.45.0 release migration was created or updated; v0.45.0 is not release-ready. This checker did not fix implementation, enter Stage C, commit, push, tag, or release.
+
+## Stage B Final M-B1 Recheck
+
+ReviewedOn: 2026-07-20
+ReviewType: final single-finding recheck
+ReviewerAgent: Codex independent checker (/root)
+Finding: M-B1 validate-agent-entries.py contradiction gate
+ReviewDecision: FAIL
+ArtifactStatus: stage-b-implemented-awaiting-independent-check
+M-B1: OPEN
+StageBApproved: no
+StageCAuthorized: no
+
+### Scope and baseline
+
+本轮只复核 M-B1 contradiction gate、对应测试、release mutation 和必要回归门禁。未重新打开九项 route 架构、M-B2、migration/upgrader 产品行为、入口正文、Claude 平台适配或 Stage A。分支为 `main`，`VERSION` 为 `0.44.1`；AGENTS、CLAUDE 和两份 upgrader 的 bytes/hash 与上轮一致，Skills、prompts 和正式 migrations 无新增 diff。M-B2 保持 CLOSED。
+
+### Required contradictions and independent combinations
+
+- 五个原漏检反例均在保留全部正向 marker 的真实 CLI mutation 中得到 exit 1，错误包含文件、`audit-auto-write` rule ID、`audit-default` category 和完整 matched text：assessment 自动修改、diagnosis 自动修改、planning 自动编辑、review 默认直接应用修复、generic no-repair write 全部通过预期。
+- 五个独立组合也全部得到 exit 1：`Auditing can automatically write project files.`、`A review may directly fix files.`、`Assessing quality will modify files by default.`、`Diagnostic checks should auto-edit files.`、`Plans can apply fixes by default.`。
+- 实现使用 subject、automatic action、generic write、no-repair request 和 explicit-negation 数据族进行句段组合，不是五个完整句子的逐字硬编码；合理大小写、单复数与 may/can/should/will 抽查通过。
+
+### Safe negation and preprocessing
+
+- 提示要求的八条安全句以及额外普通 `not` 句全部得到 exit 0：read-only unless repair、must not、never、cannot、do not、普通 not 和 `No audit` 的否定作用域抽查通过。
+- Fenced code block 中的 assessment 反例得到 exit 0；当前正式 AGENTS 与 CLAUDE 均通过。
+- 但 Markdown/Skill 预处理仍不符合冻结条件。真实 CLI 对以下四条本应安全的名词性/导航文本错误返回 exit 1：`The \`code-review\` route documents auto-edit behavior.`、`See [handover-review](.agents/skills/handover-review/SKILL.md) for auto-edit guidance.`、`.agents/skills/code-review/SKILL.md documents auto-edit terminology.`、`## Review auto-edit terminology`。输出把 Skill 名、link/path 或 heading 中的 `review` 与 `auto-edit` 词共现误判为授权写入。
+- 代码仅调用 `strip_fenced_code_blocks`；没有排除 inline code、Markdown link/path 或 heading 后再做 contradiction 判断。现有 path/link 测试只使用不含 action-family 词的样例，因此未覆盖该系统性误报边界。
+
+### Skill route minimal regression
+
+- AGENTS 随机删除 manifest-derived `project-suitability`：exit 1，正确报告缺失 route。
+- CLAUDE 随机删除 `security-review`：exit 1；用 Claude-only `forgekit-project-workflow` 替代 `project-bootstrap-fill`：exit 1。
+- Skill 名继续从 `config/skill-projections.json` 动态派生；未发现第二份九项硬编码清单。Route finding 不重新打开。
+
+### Tests, release mutation, gates, and smoke
+
+- `python -B scripts/validate-agent-entries.py`: PASS。
+- `python -B -m unittest tests.test_agent_entries`: PASS，31/31；相较上轮新增 16 项。五个旧漏检、subject/action、generic no-repair、安全否定、fenced、基础 Skill/path/link 和 route deletion 均有覆盖，但没有覆盖带 action-family 词的 Markdown/Skill 名词性引用误报。
+- 全量 unittest：PASS，92/92。
+- Release consistency 包含原 audit、assessment 和 generic no-repair 三类真实 CLI mutation；均返回非零，新增两项断言 category/matched text，所有文件逐字节恢复，恢复后 validator 通过。
+- Agent-entry validator、M-B2 validator、projection、41-rule ownership、behavior validate/list/dry-run、plugin assets、template、manifest、release consistency 和 `git diff --check` 全部 PASS。Dry-run 仍为 `GRADER_UNCERTAIN/not-run`，未执行真实模型。
+- 完整 smoke 在包含 `.git`、全部 tracked/untracked Stage-B 文件且仅在副本恢复 HEAD `usage.html` 的 `D:\tmp\fb1` 中通过；生成项目为 `D:\tmp\fb1-gates\forgekit-smoke-_14ixv03\generated`，AGENTS、CLAUDE 和 shared contract 存在。所有 smoke/mutation/temp 目录已删除。
+
+### BLOCKER
+
+None.
+
+### MAJOR
+
+1. M-B1 remains OPEN because the contradiction scanner does not exclude inline-code Skill names, Markdown link/path text, or headings before subject/action matching. Ordinary documentation/navigation text containing a `review`-family Skill reference and an `auto-edit`-family term is rejected even though it does not authorize writes. This is a systematic false-positive class explicitly prohibited by the final M-B1 acceptance scope.
+
+### NOTE
+
+1. More complex natural-language contradiction detection remains outside this deterministic gate.
+2. Real Codex/Claude behavior, selector/Skill-source observations, token/context benefit, and manual-merge readability remain NEEDS_TEST and do not cause this failure.
+3. Historical Stage-A wording in `ship.md` remains a non-blocking note.
+
+### Stage decision
+
+M-B1 remains OPEN. Stage B final M-B1 recheck FAILS with 0 BLOCKER and 1 MAJOR. Status remains `stage-b-implemented-awaiting-independent-check`; Stage B is not approved and Stage C is not authorized. M-B2 remains CLOSED.
+
+`VERSION` remains `0.44.1`. No real model prompt was executed; no formal v0.45.0 release migration was created or updated; v0.45.0 is not release-ready. This checker did not modify implementation, enter Stage C, commit, push, tag, or release.
+
+## Stage B Markdown Structure Recheck
+
+ReviewedOn: 2026-07-20
+ReviewType: final M-B1 Markdown structure recheck
+ReviewerAgent: Codex independent checker (/root)
+ReviewDecision: PASS WITH NOTES
+ArtifactStatus: stage-b-approved-for-stage-c
+M-B1: CLOSED
+StageBApproved: yes
+StageCAuthorized: yes
+
+### Actual scope and implementation structure
+
+本轮仅复核 `validate-agent-entries.py` 的 Markdown/navigation policy-prose 提取与 contradiction detection 分层、对应测试及必要回归。未重新打开 M-B2、route 设计、产品入口正文、migration/upgrader、Stage A 或其他已通过范围。分支为 `main`；`VERSION` 为 `0.44.1`。AGENTS、CLAUDE、两份 upgrader 与 M-B2 validator 的 bytes/hash 均与上轮一致，Skills、prompts 和正式 migrations 无新增 diff；M-B2 保持 CLOSED。
+
+代码已清晰分为 `extract_policy_prose(...)` 与 `detect_policy_contradictions(...)`。Anchor、route 和 forbidden-protocol 检查继续使用结构文本；contradiction detector 只扫描已提取 prose。提取器只处理中性化/排除 Markdown 导航结构，不拥有 contradiction 语义；subject/action family 未缩小，也没有四个 checker 句子的完整字符串白名单。
+
+### Markdown/navigation extraction
+
+- 三反引号、三波浪号及带语言标记 fence 内文本均排除。
+- ATX 1--6 级 heading（含可选 closing 语法）和 Setext heading 本身排除；heading 后普通正文仍扫描。
+- 单/多反引号 inline code 中性化，内部 Skill、path、review/planning/auto-edit 术语均不参与匹配。
+- Inline/reference links 保留非导航自然语言 label，同时中性化 destination、URL/title、Skill/navigation label；images 与 autolink 中性化。Link 后 prose 不被整行跳过。
+- 九个通用 Skill 从 `config/skill-projections.json` 动态派生；Claude Skill 从实际 `project-template/.claude/skills/` 目录发现，无第二份手写清单。Skill ID、SKILL.md、Windows/POSIX/repo-relative path、URL/file token 均中性化；普通 prose 中的 review/assessment 等保留。
+- 提取器不跳过全部 routing section、列表或表格；真实 policy list/table 仍进入 detector。
+
+### Independent Markdown mutations
+
+- 四个原结构误报均为 expected 0 / actual 0，stdout 为 `[ok] Agent entry contracts passed`，stderr 无失败；每次 AGENTS 均逐字节恢复：inline `code-review`、handover-review Markdown link、skills/code-review/SKILL.md path、ATX review/auto-edit heading。
+- 六个补充导航样例全部 exit 0：inline link 与独立 adapter term、Claude reviewer path、ATX planning heading、Setext heading、navigation-only table、handover-review list/link。精确反引号 table 另行复测仍为 exit 0。
+- Backtick 与 tilde fenced contradiction 均 exit 0；image、reference link、autolink、多反引号、动态 Claude Skill navigation 均有正式 CLI 测试覆盖。
+
+### Contradiction anti-escape and safety
+
+- 原五个 contradiction 全部 expected nonzero / actual exit 1，输出包含文件、`audit-auto-write`、`audit-default` 和 matched text。
+- 导航后、heading 后、inline code 后、link 后、list 中、table 中及自然语言 link label 内的真实 contradiction 七项全部 exit 1；提取器没有粗暴跳过整行或 block。
+- Auditing/automatically write、Review/directly fix、Assessing/modify by default、Diagnostic/auto-edit、Plans/apply fixes by default 五项词族组合全部 exit 1，证明不是完整句硬编码。
+- 十条安全否定句全部 exit 0，覆盖 read-only、must not、never、cannot、can't、may not、do not 和 `No audit`；无系统性否定误报。
+
+### Route regression, tests, and formal gates
+
+- AGENTS 删除 manifest-derived `project-suitability`、CLAUDE 删除 `security-review`、Claude-only route 替代 `project-bootstrap-fill` 均 exit 1；route finding 保持 CLOSED。
+- `tests.test_agent_entries`: PASS，58/58，较上轮新增 27 项。测试使用真实 CLI 临时入口副本并检查 exit code、category 与 matched text；覆盖四个误报、ATX/Setext、inline code、links/images/paths、navigation table/list、防逃逸、五个 contradiction、安全否定和九项 route 删除。
+- 全量 unittest：PASS，119/119。
+- `validate-template.ps1` 调用全量 unittest discovery，因此 Markdown expected-pass guards 属于正式门禁。
+- Release consistency 的 audit、assessment、generic no-repair mutations 全部按预期失败并逐字节恢复；恢复后 validator 通过。
+- Agent-entry validator、M-B2 validator、projection、41-rule ownership、behavior validate/list/dry-run、plugin assets、template、manifest、release consistency 与 `git diff --check` 全部 PASS。Dry-run 仍为 `GRADER_UNCERTAIN/not-run`。
+- 完整 smoke 在含 `.git`、全部 tracked/untracked Stage-B 文件且仅在副本恢复 HEAD `usage.html` 的 `D:\tmp\fbm` 通过；生成项目为 `D:\tmp\fbm-g\forgekit-smoke-8mztx3zt\generated`，AGENTS、CLAUDE 与 shared contract 存在。所有 mutation/smoke/temp 目录均已删除。
+
+### BLOCKER
+
+None.
+
+### MAJOR
+
+None.
+
+### NOTE
+
+1. 更复杂自然语言仍可能超出该小型确定性 gate 的识别范围。
+2. 真实 Codex/Claude 行为、selector/Skill-source、实际 token/context 收益和 manual-merge 体验仍为 NEEDS_TEST；这些不阻塞 Stage B。
+3. `ship.md` 的历史 Stage-A 时态仍是非阻塞可读性 note。
+
+### Stage decision
+
+M-B1 is CLOSED and M-B2 remains CLOSED. Stage B passes with notes. Status is `stage-b-approved-for-stage-c`; Stage C is authorized, but this checker did not enter or implement Stage C.
+
+`VERSION` remains `0.44.1`. No real model prompt was executed; no formal v0.45.0 release migration was created or updated; v0.45.0 is not release-ready. This checker did not commit, push, tag, or release.
