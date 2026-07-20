@@ -1139,6 +1139,7 @@ function Test-PluginDistribution {
     Test-RequiredPath "skills\release-check\SKILL.md"
     Test-RequiredPath "skills\security-review\SKILL.md"
     Test-RequiredPath "scripts\validate-plugin-assets.ps1"
+    Test-RequiredPath "scripts\test-release-consistency.ps1"
     Test-RequiredPattern "skills\project-init\SKILL.md" "existing-project-scan" "Root project-init discovery state"
     Test-RequiredPattern "skills\project-init\SKILL.md" "evidence extracted" "Root project-init evidence summary"
     Test-RequiredPattern "skills\handover-review\SKILL.md" "Evidence-first gate" "Root handover evidence-first gate"
@@ -1147,6 +1148,14 @@ function Test-PluginDistribution {
     Test-RequiredPattern "skills\document-backfill\SKILL.md" "Process exactly one source document at a time" "Root document backfill one-source rule"
     Test-RequiredPattern "skills\project-suitability\SKILL.md" "Suitable, Conditional, or Custom" "Root project suitability outcome"
     Test-RequiredPattern "skills\large-change-planning\SKILL.md" "staged implementation plan" "Root large-change planning output"
+
+    $pluginValidatorPath = Join-Path $repoRoot "scripts\validate-plugin-assets.ps1"
+    if (Test-Path -LiteralPath $pluginValidatorPath) {
+        $pluginValidationOutput = & powershell -NoProfile -ExecutionPolicy Bypass -File $pluginValidatorPath 2>&1
+        if ($LASTEXITCODE -ne 0) {
+            Add-Error "Plugin distribution validation failed: $($pluginValidationOutput -join ' | ')"
+        }
+    }
     if (Test-Path -LiteralPath (Join-Path $repoRoot "plugins\forgekit-codex-workflow")) {
         Add-Error "Codex plugin subdirectory must not exist in unified 0.12.0 surface"
     }
@@ -1532,10 +1541,10 @@ function Test-MinimalProjectCapsuleBootstrap {
     Test-RequiredPattern "migrations\0.43.0\migration.json" '"minimal_project_capsule_bootstrap"' "v0.43 capsule feature"
     Test-NoPattern "migrations\0.43.0\migration.json" '"target": ".forgekit/projects/' "Migration must not create real capsules"
     Test-RequiredPath "migrations\$forgekitVersion\migration.json"
-    Test-RequiredPattern "migrations\$forgekitVersion\migration.json" '"from": "0.43.2"' "Latest migration source reference"
+    Test-RequiredPattern "migrations\$forgekitVersion\migration.json" '"from": "0.44.0"' "Latest migration source reference"
     Test-RequiredPattern "migrations\$forgekitVersion\migration.json" "`"to`": `"$forgekitVersion`"" "Latest migration target"
     Test-RequiredPath "project-template\migrations\$forgekitVersion\migration.json"
-    Test-RequiredPattern "project-template\migrations\$forgekitVersion\migration.json" '"from": "0.43.2"' "Template latest migration source reference"
+    Test-RequiredPattern "project-template\migrations\$forgekitVersion\migration.json" '"from": "0.44.0"' "Template latest migration source reference"
     Test-RequiredPattern "project-template\migrations\$forgekitVersion\migration.json" "`"to`": `"$forgekitVersion`"" "Template latest migration target"
     $rootScript = Get-Content -LiteralPath (Join-Path $repoRoot "scripts\bootstrap-project-capsule.py") -Raw
     $templateScript = Get-Content -LiteralPath (Join-Path $repoRoot "project-template\scripts\bootstrap-project-capsule.py") -Raw

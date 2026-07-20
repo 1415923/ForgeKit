@@ -32,6 +32,30 @@ README 只保留当前定位、快速开始和常用入口；完整版本历史�
 
 ---
 
+## [0.44.1] - Distribution Consistency Hotfix
+
+### 问题背景
+
+v0.44.0 发布元数据存在分发漂移：两个 marketplace 仍停留在 v0.43.2，根级 `code-review` Skill 也缺少模板副本中已经确认的审查收敛规则；现有发布校验未能发现这两类不一致。
+
+### 设计结论
+
+v0.44.1 只修复已确认的分发漂移，并在现有校验入口中增加正式发布版本一致性与 `code-review` 共享副本一致性检查。补丁不改变现有流程语义，也不建立新的 Skill 生成或权威源架构。
+
+### Fixed
+
+- 将 v0.44.0 已确认的初审、blocker recheck 与阶段授权规则同步到根级 `code-review` Skill。
+- 将 `VERSION`、插件 manifest、两个 marketplace、模板状态与模板 manifest 的当前发布版本统一为 v0.44.1。
+- 发布校验现在会报告具体的不一致字段或共享文件、期望值与实际值，并通过 mutation 回归测试验证失败路径。
+
+### 边界
+
+- 不重构 Skills、AGENTS.md、CLAUDE.md、风险模型或 prompts。
+- 不调整 Skill 触发方式或平台专属适配。
+- 不执行自动 Git、tag 或 release 操作。
+
+---
+
 ## [0.44.0] - Maker–Checker Review Convergence
 
 ### 问题背景

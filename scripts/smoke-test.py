@@ -116,6 +116,7 @@ REQUIRED_REPO_PATHS = [
     "project-template/migrations/0.42.0/migration.json",
     "project-template/migrations/0.43.0/migration.json",
     "project-template/migrations/0.44.0/migration.json",
+    "project-template/migrations/0.44.1/migration.json",
     "migrations/0.37.0/migration.json",
     "migrations/0.38.0/migration.json",
     "migrations/0.39.0/migration.json",
@@ -127,6 +128,7 @@ REQUIRED_REPO_PATHS = [
     "migrations/0.42.0/migration.json",
     "migrations/0.43.0/migration.json",
     "migrations/0.44.0/migration.json",
+    "migrations/0.44.1/migration.json",
     "project-template/scripts/check-codex-native-agents.py",
     "project-template/scripts/doc-health-report.py",
     "project-template/scripts/source-trace-report.py",
@@ -146,6 +148,7 @@ REQUIRED_REPO_PATHS = [
     "scripts/forgekit-project.py",
     "scripts/forgekit-project.ps1",
     "scripts/forgekit-project.sh",
+    "scripts/test-release-consistency.ps1",
     ".codex-plugin/plugin.json",
     ".claude-plugin/plugin.json",
 ]
@@ -213,6 +216,7 @@ REQUIRED_GENERATED_PATHS = [
     "migrations/0.41.1/migration.json",
     "migrations/0.42.0/migration.json",
     "migrations/0.43.0/migration.json",
+    "migrations/0.44.1/migration.json",
     "governance/ai-engineering-loop.md",
     ".forgekit/changes/README.md",
     ".forgekit/changes/_template/proposal.md",
@@ -1726,6 +1730,50 @@ def assert_json(path):
         fail(f"Invalid JSON: {path}: {exc}")
 
 
+def assert_release_distribution_consistency(repo):
+    expected = FORGEKIT_VERSION
+    checks = [
+        (".codex-plugin/plugin.json [version]", json.loads((repo / ".codex-plugin/plugin.json").read_text(encoding="utf-8"))["version"]),
+        (".claude-plugin/plugin.json [version]", json.loads((repo / ".claude-plugin/plugin.json").read_text(encoding="utf-8"))["version"]),
+        ("project-template/.forgekit/state.json [forgekit_version]", json.loads((repo / "project-template/.forgekit/state.json").read_text(encoding="utf-8"))["forgekit_version"]),
+        ("project-template/.forgekit/template-manifest.json [template_version]", json.loads((repo / "project-template/.forgekit/template-manifest.json").read_text(encoding="utf-8"))["template_version"]),
+    ]
+
+    agents_marketplace = json.loads((repo / ".agents/plugins/marketplace.json").read_text(encoding="utf-8"))
+    agents_plugins = [item for item in agents_marketplace.get("plugins", []) if item.get("name") == "forgekit"]
+    if len(agents_plugins) != 1:
+        fail(f".agents/plugins/marketplace.json expected one forgekit plugin, actual {len(agents_plugins)}")
+    checks.append((".agents/plugins/marketplace.json [plugins[forgekit].version]", agents_plugins[0].get("version")))
+
+    claude_marketplace = json.loads((repo / ".claude-plugin/marketplace.json").read_text(encoding="utf-8"))
+    checks.append((".claude-plugin/marketplace.json [version]", claude_marketplace.get("version")))
+    claude_plugins = [item for item in claude_marketplace.get("plugins", []) if item.get("name") == "forgekit"]
+    if len(claude_plugins) != 1:
+        fail(f".claude-plugin/marketplace.json expected one forgekit plugin, actual {len(claude_plugins)}")
+    checks.append((".claude-plugin/marketplace.json [plugins[forgekit].version]", claude_plugins[0].get("version")))
+
+    mismatches = [f"{label}: expected {expected}, actual {actual}" for label, actual in checks if actual != expected]
+    if mismatches:
+        fail("Release version metadata mismatch:\n" + "\n".join(mismatches))
+
+    root_skill = repo / "skills/code-review/SKILL.md"
+    template_skill = repo / "project-template/.agents/skills/code-review/SKILL.md"
+    if root_skill.read_bytes() != template_skill.read_bytes():
+        fail(
+            "Shared skill drift: skills/code-review/SKILL.md must match "
+            "project-template/.agents/skills/code-review/SKILL.md; "
+            f"expected SHA256 {sha256_file(template_skill)}, actual SHA256 {sha256_file(root_skill)}"
+        )
+
+    root_migration = repo / "migrations/0.44.1/migration.json"
+    template_migration = repo / "project-template/migrations/0.44.1/migration.json"
+    if root_migration.read_bytes() != template_migration.read_bytes():
+        fail("v0.44.1 root and template migration descriptors must stay identical")
+    migration = json.loads(root_migration.read_text(encoding="utf-8"))
+    if migration.get("from") != "0.44.0" or migration.get("to") != expected or migration.get("actions") != []:
+        fail(f"v0.44.1 migration must be an action-free 0.44.0 -> {expected} patch")
+
+
 def assert_manifest_lock(target):
     lock_path = target / ".forgekit" / "template-lock.json"
     lock = json.loads(lock_path.read_text(encoding="utf-8"))
@@ -2075,7 +2123,7 @@ def assert_0440_review_convergence_migration(repo, current_target, temp_parent):
     clean = prepare("v0432-to-v0440-clean")
     before_plan = {action["target"]: (clean / action["target"]).read_bytes() for action in file_actions}
     clean_plan = run([sys.executable, str(unified), "--target", str(clean), "--lang", "en-US", "--dry-run"], cwd=repo)
-    for marker in ["From: 0.43.2", "To: 0.44.0", "Safe actions: 11", "Review needed: 0", "No files were changed by plan."]:
+    for marker in ["From: 0.43.2", f"To: {FORGEKIT_VERSION}", "Safe actions: 11", "Review needed: 0", "No files were changed by plan."]:
         if marker not in clean_plan.stdout:
             fail(f"0.44.0 clean unified plan missing marker: {marker}")
     for relative, content in before_plan.items():
@@ -2084,7 +2132,7 @@ def assert_0440_review_convergence_migration(repo, current_target, temp_parent):
 
     run([sys.executable, str(unified), "--target", str(clean), "--lang", "en-US", "--yes"], cwd=repo)
     clean_state = json.loads((clean / ".forgekit/state.json").read_text(encoding="utf-8-sig"))
-    if clean_state.get("forgekit_version") != "0.44.0" or clean_state.get("features", {}).get("maker_checker_review_convergence") is not True:
+    if clean_state.get("forgekit_version") != FORGEKIT_VERSION or clean_state.get("features", {}).get("maker_checker_review_convergence") is not True:
         fail("0.44.0 clean apply did not advance version and feature state")
     for action in file_actions:
         if (clean / action["target"]).read_bytes() != (root_package / action["source"]).read_bytes():
@@ -2097,7 +2145,12 @@ def assert_0440_review_convergence_migration(repo, current_target, temp_parent):
     custom_target = customized / file_actions[0]["target"]
     custom_content = custom_target.read_bytes() + b"\nproject-local-customization\n"
     custom_target.write_bytes(custom_content)
-    custom_plan = run([sys.executable, str(unified), "--target", str(customized), "--lang", "en-US", "--dry-run"], cwd=repo, check=False)
+    custom_plan = run(
+        [sys.executable, str(unified), "--target", str(customized), "--lang", "en-US", "--dry-run"],
+        cwd=repo,
+        check=False,
+        input_text="",
+    )
     if custom_plan.returncode != 2:
         fail("0.44.0 customized unified dry-run must signal review-needed")
     for marker in ["Safe actions: 10", "Review needed: 1", "REVIEW-NEEDED: update-maker-checker-1", "No files were changed by plan."]:
@@ -2112,7 +2165,7 @@ def assert_0440_review_convergence_migration(repo, current_target, temp_parent):
     if custom_target.read_bytes() != custom_content:
         fail("0.44.0 customized apply overwrote project content")
     custom_state = json.loads((customized / ".forgekit/state.json").read_text(encoding="utf-8-sig"))
-    if custom_state.get("forgekit_version") != "0.44.0" or custom_state.get("features", {}).get("maker_checker_review_convergence") is not True:
+    if custom_state.get("forgekit_version") != FORGEKIT_VERSION or custom_state.get("features", {}).get("maker_checker_review_convergence") is not True:
         fail("0.44.0 customized apply did not advance version and feature state")
 
     abort_case = prepare("v0432-to-v0440-controller-abort")
@@ -2194,10 +2247,10 @@ def assert_0440_review_convergence_migration(repo, current_target, temp_parent):
         "--review-needed-policy", "manual-merge",
     ], cwd=repo)
     for marker in [
-        "From: 0.43.2", "To: 0.44.0", "resolved-manual-merge", "Upgrade result summary:",
+        "From: 0.43.2", f"To: {FORGEKIT_VERSION}", "resolved-manual-merge", "Upgrade result summary:",
         "Automatically updated/template-aligned files:", "Preserved local customizations:",
         "Files still requiring manual merge:", "AGENTS entry action: merge the snippet below",
-        "ForgeKit version: 0.44.0", "maker_checker_review_convergence: True",
+        f"ForgeKit version: {FORGEKIT_VERSION}", "maker_checker_review_convergence: True",
         "Governance commit suggestion:", "start a new session",
     ]:
         if marker not in single_result.stdout:
@@ -2226,7 +2279,7 @@ def assert_0440_review_convergence_migration(repo, current_target, temp_parent):
             ".forgekit/changes/_template/proposal.md": (cancelled / ".forgekit/changes/_template/proposal.md").read_bytes(),
         }
         cancelled_result = run_pty([sys.executable, str(unified), "--target", str(cancelled), "--lang", "en-US"], cwd=repo, input_text="n\n")
-        for marker in ["From: 0.43.2", "To: 0.44.0", "Continue with safe apply?", "Safe apply was not executed"]:
+        for marker in ["From: 0.43.2", f"To: {FORGEKIT_VERSION}", "Continue with safe apply?", "Safe apply was not executed"]:
             if marker not in cancelled_result.stdout:
                 fail(f"0.44.0 interactive cancel missing marker: {marker}")
         for relative, content in cancel_before.items():
@@ -2249,7 +2302,7 @@ def assert_0440_review_convergence_migration(repo, current_target, temp_parent):
             input_text="y\nd\nm\n",
         )
         for marker in [
-            "From: 0.43.2", "To: 0.44.0", "Show diff", "resolved-manual-merge",
+            "From: 0.43.2", f"To: {FORGEKIT_VERSION}", "Show diff", "resolved-manual-merge",
             "Upgrade result summary:", "Automatically updated/template-aligned files:",
             "Preserved local customizations:", "Files still requiring manual merge:",
             "AGENTS entry action: merge the snippet below", "maker_checker_review_convergence: True",
@@ -3428,6 +3481,8 @@ def main():
     assert_no_forbidden_text(repo / "templates", FORBIDDEN_PRIVATE_PATHS, "Private machine paths found in templates")
     assert_json(repo / ".codex-plugin" / "plugin.json")
     assert_json(repo / ".claude-plugin" / "plugin.json")
+    assert_json(repo / ".agents" / "plugins" / "marketplace.json")
+    assert_json(repo / ".claude-plugin" / "marketplace.json")
     assert_json(repo / "project-template" / ".forgekit" / "template-manifest.json")
     assert_manifest_checksum_stability(repo)
     assert_json(repo / "project-template" / ".forgekit" / "state.json")
@@ -3455,6 +3510,9 @@ def main():
     assert_json(repo / "project-template" / "migrations" / "0.43.0" / "migration.json")
     assert_json(repo / "migrations" / "0.44.0" / "migration.json")
     assert_json(repo / "project-template" / "migrations" / "0.44.0" / "migration.json")
+    assert_json(repo / "migrations" / "0.44.1" / "migration.json")
+    assert_json(repo / "project-template" / "migrations" / "0.44.1" / "migration.json")
+    assert_release_distribution_consistency(repo)
     assert_loop_docs(repo / "project-template", "docs/loop-readiness.md", "docs/loop-blueprint.md")
     assert_loop_operations(
         repo / "project-template",

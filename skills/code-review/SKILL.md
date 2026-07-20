@@ -17,6 +17,7 @@ description: Review code changes for bugs, regressions, security risks, compatib
    - exploration report in `.forgekit/docs/`
    - implementation plan in `.forgekit/docs/`
    - staged validation and review notes
+   - frozen scope, trust boundary, non-goals, stage authorization, and acceptance IDs
 5. Prioritize findings in this order:
    - correctness bugs
    - behavioral regressions
@@ -28,6 +29,9 @@ description: Review code changes for bugs, regressions, security risks, compatib
    - missing tests
 6. Cite file paths and line numbers when possible.
 7. Do not lead with style comments unless they cause real risk.
+8. For initial review, block frozen-contract violations and matrix-external issues only when they can cause data contamination, wrong execution/results, artifact overwrite, unauthorized formal-entry execution, false success, or untrustworthy conclusions. Keep other hardening as follow-up and do not expand the trust boundary.
+9. For blocker recheck, default to the prior blockers and mark them Closed, Partially closed, or Still open. A regression introduced by the fix may block if it violates the frozen contract or causes a real Critical consequence. Keep unrelated new suggestions as follow-up; do not reopen architecture review or expand the trust boundary.
+10. A pass applies only to the stage authorized by the proposal.
 
 ## Review Focus
 

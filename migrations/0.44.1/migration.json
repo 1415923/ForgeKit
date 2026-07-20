@@ -1,0 +1,17 @@
+{
+  "id": "0.44.1-distribution-consistency-hotfix",
+  "title": "Distribution Consistency Hotfix",
+  "from": "0.44.0",
+  "to": "0.44.1",
+  "risk": "low",
+  "actions": [],
+  "manual_review": [
+    "This patch aligns ForgeKit distribution metadata and the shared plugin code-review Skill; it does not change generated project workflow semantics."
+  ],
+  "non_goals": [
+    "No project file replacement",
+    "No Skill architecture redesign",
+    "No workflow semantic change",
+    "No automatic Git operations"
+  ]
+}

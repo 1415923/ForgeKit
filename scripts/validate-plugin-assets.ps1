@@ -56,6 +56,80 @@ function Test-SkillAscii {
     }
 }
 
+function Test-VersionField {
+    param(
+        [string]$Label,
+        [string]$RelativePath,
+        [string]$Field,
+        [AllowNull()]
+        [object]$Actual
+    )
+    $actualText = if ($null -eq $Actual) { "<missing>" } else { [string]$Actual }
+    if ($actualText -ne $forgekitVersion) {
+        Add-Error "$Label mismatch at $($RelativePath) [$Field]: expected '$forgekitVersion' from VERSION, actual '$actualText'"
+    }
+}
+
+function Test-ReleaseVersionConsistency {
+    $codexManifestPath = Join-Path $repoRoot ".codex-plugin\plugin.json"
+    $claudeManifestPath = Join-Path $repoRoot ".claude-plugin\plugin.json"
+    $agentsMarketplacePath = Join-Path $repoRoot ".agents\plugins\marketplace.json"
+    $claudeMarketplacePath = Join-Path $repoRoot ".claude-plugin\marketplace.json"
+    $statePath = Join-Path $repoRoot "project-template\.forgekit\state.json"
+    $templateManifestPath = Join-Path $repoRoot "project-template\.forgekit\template-manifest.json"
+
+    $codexManifest = Get-Content -LiteralPath $codexManifestPath -Raw | ConvertFrom-Json
+    Test-VersionField "Codex plugin version" ".codex-plugin\plugin.json" "version" $codexManifest.version
+
+    $claudeManifest = Get-Content -LiteralPath $claudeManifestPath -Raw | ConvertFrom-Json
+    Test-VersionField "Claude plugin version" ".claude-plugin\plugin.json" "version" $claudeManifest.version
+
+    $agentsMarketplace = Get-Content -LiteralPath $agentsMarketplacePath -Raw | ConvertFrom-Json
+    $agentsPlugins = @($agentsMarketplace.plugins | Where-Object { $_.name -eq "forgekit" })
+    if ($agentsPlugins.Count -ne 1) {
+        Add-Error "Expected exactly one forgekit plugin at .agents\plugins\marketplace.json [plugins], actual count '$($agentsPlugins.Count)'"
+    } else {
+        Test-VersionField "Agents marketplace plugin version" ".agents\plugins\marketplace.json" "plugins[forgekit].version" $agentsPlugins[0].version
+    }
+
+    $claudeMarketplace = Get-Content -LiteralPath $claudeMarketplacePath -Raw | ConvertFrom-Json
+    Test-VersionField "Claude marketplace version" ".claude-plugin\marketplace.json" "version" $claudeMarketplace.version
+    $claudePlugins = @($claudeMarketplace.plugins | Where-Object { $_.name -eq "forgekit" })
+    if ($claudePlugins.Count -ne 1) {
+        Add-Error "Expected exactly one forgekit plugin at .claude-plugin\marketplace.json [plugins], actual count '$($claudePlugins.Count)'"
+    } else {
+        Test-VersionField "Claude marketplace plugin version" ".claude-plugin\marketplace.json" "plugins[forgekit].version" $claudePlugins[0].version
+    }
+
+    $state = Get-Content -LiteralPath $statePath -Raw | ConvertFrom-Json
+    Test-VersionField "Template state ForgeKit version" "project-template\.forgekit\state.json" "forgekit_version" $state.forgekit_version
+
+    $templateManifest = Get-Content -LiteralPath $templateManifestPath -Raw | ConvertFrom-Json
+    Test-VersionField "Template manifest version" "project-template\.forgekit\template-manifest.json" "template_version" $templateManifest.template_version
+}
+
+function Test-SharedSkillDistribution {
+    $sharedPairs = @(
+        @{
+            Expected = "project-template\.agents\skills\code-review\SKILL.md"
+            Actual = "skills\code-review\SKILL.md"
+        }
+    )
+
+    foreach ($pair in $sharedPairs) {
+        $expectedPath = Join-Path $repoRoot $pair.Expected
+        $actualPath = Join-Path $repoRoot $pair.Actual
+        if (-not (Test-Path -LiteralPath $expectedPath) -or -not (Test-Path -LiteralPath $actualPath)) {
+            continue
+        }
+        $expectedHash = (Get-FileHash -LiteralPath $expectedPath -Algorithm SHA256).Hash.ToLowerInvariant()
+        $actualHash = (Get-FileHash -LiteralPath $actualPath -Algorithm SHA256).Hash.ToLowerInvariant()
+        if ($expectedHash -ne $actualHash) {
+            Add-Error "Shared skill drift: '$($pair.Actual)' must match '$($pair.Expected)'; expected SHA256 '$expectedHash', actual SHA256 '$actualHash'"
+        }
+    }
+}
+
 function Test-PluginManifest {
     $codexManifestPath = Join-Path $repoRoot ".codex-plugin\plugin.json"
     $claudeManifestPath = Join-Path $repoRoot ".claude-plugin\plugin.json"
@@ -64,9 +138,6 @@ function Test-PluginManifest {
     if ($codexManifest.name -ne "forgekit") {
         Add-Error "Unexpected Codex plugin name: $($codexManifest.name)"
     }
-    if ($codexManifest.version -ne $forgekitVersion) {
-        Add-Error "Codex plugin version ($($codexManifest.version)) does not match VERSION ($forgekitVersion)"
-    }
     if ($codexManifest.skills -ne "./skills/") {
         Add-Error "Codex plugin skills must point to ./skills/"
     }
@@ -74,9 +145,6 @@ function Test-PluginManifest {
     $claudeManifest = Get-Content -LiteralPath $claudeManifestPath -Raw | ConvertFrom-Json
     if ($claudeManifest.name -ne "forgekit") {
         Add-Error "Unexpected Claude plugin name: $($claudeManifest.name)"
-    }
-    if ($claudeManifest.version -ne $forgekitVersion) {
-        Add-Error "Claude plugin version ($($claudeManifest.version)) does not match VERSION ($forgekitVersion)"
     }
     $claudeSkills = @($claudeManifest.skills)
     if ($claudeSkills.Count -ne 1 -or $claudeSkills[0] -ne "./skills/") {
@@ -111,6 +179,7 @@ Test-RequiredPath "project-template\scripts\detect-local-toolchain.ps1"
 Test-RequiredPath "project-template\scripts\run-harness-check.ps1"
 Test-RequiredPath "scripts\init-project-template.ps1"
 Test-RequiredPath "scripts\init-project-template.sh"
+Test-RequiredPath "scripts\test-release-consistency.ps1"
 
 Test-RequiredPattern "README.md" "可选原生 agent 配置" "Current native adapter entry"
 Test-RequiredPattern "scripts\init-project-template.ps1" "CLAUDE.md" "Unified initializer Claude guidance"
@@ -122,6 +191,8 @@ Test-ForbiddenPath "plugins\forgekit-codex-workflow"
 Test-ForbiddenPath "plugins\forgekit-claude-workflow"
 
 Test-PluginManifest
+Test-ReleaseVersionConsistency
+Test-SharedSkillDistribution
 Test-SkillAscii
 
 if ($errors.Count -gt 0) {
