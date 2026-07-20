@@ -9,7 +9,15 @@ import json
 import re
 import shutil
 import sys
+import uuid
 from pathlib import Path
+
+from upgrade_review_packets import (
+    ensure_portable_path,
+    normalize_managed_path,
+    prepare_packet,
+    validate_complete_packet,
+)
 
 
 MIN_SUPPORTED_VERSION = (0, 36, 0)
@@ -211,6 +219,7 @@ def pending_migrations(current, migrations):
         if item["_to_version"] <= cursor:
             continue
         if migration_matches(item, cursor):
+            item["_source_version"] = version_text(cursor)
             pending.append(item)
             cursor = item["_to_version"]
     return pending, cursor
@@ -260,7 +269,7 @@ def action_status(project_root, migration, action, state):
         return "review-needed", "target exists with different content; preserve and skip"
     if action_type == "replace_file_if_baseline_matches":
         source = migration_source(migration, action)
-        baseline = migration_source(migration, {"source": action["baseline"]})
+        baseline = migration_source_optional(migration, action["baseline"])
         target = safe_target(project_root, action["target"])
         if not target.exists():
             return "safe", "file will be installed"
@@ -268,6 +277,8 @@ def action_status(project_root, migration, action, state):
             return "review-needed", "target exists and is not a file; preserve and skip"
         if sha256(target) == sha256(source):
             return "already-present", "same content; no write needed"
+        if baseline is None:
+            return "review-needed", "unknown baseline; preserve and skip"
         if sha256(target) == sha256(baseline):
             return "safe", "target matches the known previous-version baseline and will be replaced"
         return "review-needed", "checksum does not match the known baseline; preserve and skip"
@@ -370,6 +381,15 @@ def migration_source(migration, action):
     return source
 
 
+def migration_source_optional(migration, relative):
+    source = (migration["_path"].parent / relative).resolve()
+    try:
+        source.relative_to(migration["_path"].parent.resolve())
+    except ValueError:
+        fail(f"Migration source escapes package: {relative}")
+    return source if source.is_file() else None
+
+
 def utc_now():
     return dt.datetime.now(dt.timezone.utc).replace(microsecond=0).isoformat().replace("+00:00", "Z")
 
@@ -421,13 +441,16 @@ def review_item(project_root, migration, action, reason, lang="en-US"):
     if action.get("type") in {"copy_file_if_missing", "replace_file_if_baseline_matches"}:
         source = migration_source(migration, action)
     if action.get("type") == "replace_file_if_baseline_matches":
-        baseline = migration_source(migration, {"source": action["baseline"]})
+        baseline = migration_source_optional(migration, action["baseline"])
     target = safe_target(project_root, action["target"])
     item = {
         "action_id": action_id(action),
         "target_path": action["target"],
         "source_migration": migration["id"],
         "migration_to": migration["to"],
+        "source_version": migration.get("_source_version"),
+        "target_version": migration["to"],
+        "classification": "unknown-baseline" if baseline is None else "custom",
         "reason": reason_text(lang, reason),
         "raw_reason": reason,
         "expected_baseline_checksum": checksum_or_none(baseline) if baseline else None,
@@ -470,22 +493,28 @@ def copy_previous_review_exports(report, item):
     previous = {entry.get("key"): entry for entry in report.get("items", [])}.get(item["key"])
     if not previous:
         return
-    for key in ("export_path", "exported_files"):
+    for key in (
+        "export_path",
+        "exported_files",
+        "packet_id",
+        "packet_artifacts",
+        "rollback_checksum",
+        "local_existed",
+        "resolution_status",
+        "user_action",
+    ):
         if key in previous:
             item[key] = previous[key]
 
 
-def write_review_reports(project_root, target_version, items):
-    reports_dir = (project_root / REVIEW_REPORT_JSON).parent
-    reports_dir.mkdir(parents=True, exist_ok=True)
+def _report_payloads(target_version, items):
     data = {
-        "schema_version": 1,
+        "schema_version": 2,
         "generated_at": utc_now(),
-        "project_root": str(project_root),
         "target_version": target_version,
         "items": items,
     }
-    (project_root / REVIEW_REPORT_JSON).write_text(json.dumps(data, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+    json_bytes = (json.dumps(data, ensure_ascii=False, indent=2) + "\n").encode("utf-8")
     lines = [
         "# Upgrade Review Needed",
         "",
@@ -502,24 +531,110 @@ def write_review_reports(project_root, target_version, items):
             f"- Status: {item['status']}",
             f"- Action: {item['action_id']}",
             f"- Source migration: {item['source_migration']}",
+            f"- Classification: {item.get('classification', 'custom')}",
+            f"- Source version: {item.get('source_version') or 'unknown'}",
+            f"- Target version: {item.get('target_version') or target_version}",
             f"- Reason: {item['reason']}",
             f"- Expected baseline checksum: {item.get('expected_baseline_checksum') or 'n/a'}",
             f"- Actual checksum: {item.get('actual_checksum') or 'n/a'}",
             f"- Incoming template checksum: {item.get('incoming_template_checksum') or 'n/a'}",
+            f"- Rollback checksum: {item.get('rollback_checksum') or 'n/a'}",
+            f"- Packet: {item.get('export_path') or 'n/a'}",
             f"- Impact: {item['impact']}",
             f"- Recommended action: {item['recommended_action']}",
             "",
         ])
-    (project_root / REVIEW_REPORT_MD).write_text("\n".join(lines).rstrip() + "\n", encoding="utf-8")
+    return json_bytes, ("\n".join(lines).rstrip() + "\n").encode("utf-8")
 
 
-def merge_review_items(project_root, target_version, updates):
+def _validate_report_packets(project_root, items):
+    packet_root = project_root / REVIEW_EXPORT_ROOT
+    for item in items:
+        packet_name = item.get("packet_id")
+        if not packet_name:
+            continue
+        packet = validate_complete_packet(packet_root / packet_name)
+        expected = {
+            "packet_id": item.get("packet_id"),
+            "managed_path": normalize_managed_path(item.get("target_path")),
+            "target_version": item.get("target_version"),
+            "source_version": item.get("source_version"),
+            "existed_before_upgrade": item.get("local_existed"),
+            "rollback_sha256": item.get("rollback_checksum"),
+            "classification": item.get("classification"),
+            "incoming_sha256": item.get("incoming_template_checksum"),
+            "artifacts": item.get("packet_artifacts"),
+        }
+        actual = {
+            "packet_id": packet.get("packet_id"),
+            "managed_path": packet.get("managed_path"),
+            "target_version": packet.get("target_version"),
+            "source_version": packet.get("source_version"),
+            "existed_before_upgrade": packet.get("existed_before_upgrade"),
+            "rollback_sha256": packet.get("rollback_sha256"),
+            "classification": packet.get("classification"),
+            "incoming_sha256": packet.get("incoming_sha256"),
+            "artifacts": packet.get("artifacts"),
+        }
+        if actual != expected:
+            raise ValueError(f"packet identity conflict while writing summary: {packet_name}")
+        if item.get("export_path") != f"review-needed/{packet_name}":
+            raise ValueError(f"packet artifact path conflict while writing summary: {packet_name}")
+
+
+def write_review_reports(project_root, target_version, items, fault_injector=None):
+    _validate_report_packets(project_root, items)
+    reports_dir = (project_root / REVIEW_REPORT_JSON).parent
+    reports_dir.mkdir(parents=True, exist_ok=True)
+    json_path = project_root / REVIEW_REPORT_JSON
+    md_path = project_root / REVIEW_REPORT_MD
+    original = {path: path.read_bytes() if path.is_file() else None for path in (json_path, md_path)}
+    nonce = uuid.uuid4().hex
+    json_tmp = reports_dir / f".tmp-upgrade-review-{nonce}.json"
+    md_tmp = reports_dir / f".tmp-upgrade-review-{nonce}.md"
+    fault = fault_injector or (lambda _stage: None)
+    json_bytes, md_bytes = _report_payloads(target_version, items)
+    try:
+        json_tmp.write_bytes(json_bytes)
+        md_tmp.write_bytes(md_bytes)
+        if json_tmp.read_bytes() != json_bytes or md_tmp.read_bytes() != md_bytes:
+            raise OSError("summary staging verification failed")
+        json_tmp.replace(json_path)
+        fault("after_json_publish")
+        md_tmp.replace(md_path)
+        fault("after_markdown_publish")
+        if json_path.read_bytes() != json_bytes or md_path.read_bytes() != md_bytes:
+            raise OSError("published summary verification failed")
+        published = json.loads(json_path.read_text(encoding="utf-8"))
+        if published.get("target_version") != target_version or published.get("items") != items:
+            raise ValueError("published JSON summary identity mismatch")
+        _validate_report_packets(project_root, published["items"])
+    except Exception:
+        for path, content in original.items():
+            if content is None:
+                path.unlink(missing_ok=True)
+            else:
+                restore = reports_dir / f".tmp-restore-{nonce}-{path.name}"
+                restore.write_bytes(content)
+                restore.replace(path)
+        raise
+    finally:
+        json_tmp.unlink(missing_ok=True)
+        md_tmp.unlink(missing_ok=True)
+
+
+def merge_review_items(project_root, target_version, updates, fault_injector=None):
     report = load_review_report(project_root)
     merged = {entry.get("key"): entry for entry in report.get("items", []) if entry.get("key")}
     for item in updates:
+        packet_name = item.get("packet_id")
+        if packet_name:
+            for key, existing in list(merged.items()):
+                if existing.get("packet_id") == packet_name:
+                    del merged[key]
         merged[item["key"]] = item
     items = sorted(merged.values(), key=lambda entry: (entry.get("source_migration", ""), entry.get("action_id", ""), entry.get("target_path", "")))
-    write_review_reports(project_root, target_version, items)
+    write_review_reports(project_root, target_version, items, fault_injector=fault_injector)
 
 
 def safe_review_dir_name(migration_id, item_action_id, used_names=None):
@@ -579,33 +694,110 @@ def manual_merge_readme(item, export_dir, lang):
     return "\n".join(lines)
 
 
-def export_manual_merge(project_root, migration, action, item, lang, used_names=None):
+def attach_packet(item, packet):
+    item["packet_id"] = packet["packet_id"]
+    item["classification"] = packet["classification"]
+    item["source_version"] = packet["source_version"]
+    item["target_version"] = packet["target_version"]
+    item["rollback_checksum"] = packet["rollback_sha256"]
+    item["local_existed"] = packet["local_existed"]
+    item["resolution_status"] = packet["resolution_status"]
+    item["user_action"] = packet["user_action"]
+    item["packet_artifacts"] = packet["artifacts"]
+    item["export_path"] = f"review-needed/{packet['packet_id']}"
+    item["exported_files"] = packet["artifacts"]
+
+
+def capture_origin_snapshots(project_root, migrations, source_version):
+    snapshots = {}
+    for migration in migrations:
+        for action in migration["actions"]:
+            if action.get("type") not in {"copy_file_if_missing", "replace_file_if_baseline_matches"}:
+                continue
+            managed_path = normalize_managed_path(action["target"])
+            ensure_portable_path(project_root, managed_path)
+            if managed_path in snapshots:
+                continue
+            target = safe_target(project_root, managed_path)
+            if target.is_file():
+                original = target.read_bytes()
+                snapshots[managed_path] = {
+                    "managed_path": managed_path,
+                    "source_version": source_version,
+                    "existed_before_upgrade": True,
+                    "original_bytes": original,
+                    "original_sha256": hashlib.sha256(original).hexdigest(),
+                }
+            elif target.exists():
+                snapshots[managed_path] = {
+                    "managed_path": managed_path,
+                    "source_version": source_version,
+                    "existed_before_upgrade": True,
+                    "original_bytes": None,
+                    "original_sha256": None,
+                    "unsupported_original_type": True,
+                }
+            else:
+                snapshots[managed_path] = {
+                    "managed_path": managed_path,
+                    "source_version": source_version,
+                    "existed_before_upgrade": False,
+                    "original_bytes": None,
+                    "original_sha256": None,
+                }
+    return snapshots
+
+
+def export_manual_merge(
+    project_root,
+    migration,
+    action,
+    item,
+    lang,
+    used_names=None,
+    *,
+    target_version=None,
+    classification=None,
+    resolution_status="manual_merge_pending",
+    user_action="merge local and incoming, then rerun the unified upgrade entry",
+    origin_snapshots=None,
+    packet_fault_injector=None,
+    summary_fault_injector=None,
+):
     if action.get("type") not in {"copy_file_if_missing", "replace_file_if_baseline_matches"}:
         fail(f"Cannot export manual merge files for action without a source file: {action_id(action)}")
-    target = safe_target(project_root, action["target"])
+    managed_path = normalize_managed_path(action["target"])
+    target = safe_target(project_root, managed_path)
     source = migration_source(migration, action)
-    if not target.is_file():
-        fail(f"Cannot export manual merge files because target is not a file: {action['target']}")
-    directory_name = safe_review_dir_name(migration["id"], item["action_id"], used_names)
-    export_dir = project_root / REVIEW_EXPORT_ROOT / directory_name
-    export_dir.mkdir(parents=True, exist_ok=True)
-    filename = Path(action["target"]).name
-    local_path = export_dir / f"{filename}.local"
-    incoming_path = export_dir / f"{filename}.incoming"
-    diff_path = export_dir / f"{filename}.diff"
-    readme_path = export_dir / "README.md"
-    shutil.copyfile(target, local_path)
-    shutil.copyfile(source, incoming_path)
-    diff_path.write_text(diff_text(local_path, incoming_path, action["target"]), encoding="utf-8")
-    item["export_path"] = (REVIEW_EXPORT_ROOT / directory_name).as_posix()
-    item["exported_files"] = {
-        "local": local_path.name,
-        "incoming": incoming_path.name,
-        "diff": diff_path.name,
-        "readme": readme_path.name,
-    }
-    readme_path.write_text(manual_merge_readme(item, export_dir, lang), encoding="utf-8")
-    return (REVIEW_EXPORT_ROOT / directory_name).as_posix()
+    local_bytes = target.read_bytes() if target.is_file() else None
+    origin = origin_snapshots.get(managed_path) if origin_snapshots is not None else None
+    source_version = origin["source_version"] if origin is not None else migration.get("_source_version")
+
+    def publish_summary(packet):
+        attach_packet(item, packet)
+        merge_review_items(
+            project_root,
+            target_version or migration["to"],
+            [item],
+            fault_injector=summary_fault_injector,
+        )
+
+    packet = prepare_packet(
+        project_root,
+        target_version=target_version or migration["to"],
+        managed_path=managed_path,
+        source_version=source_version,
+        classification=classification or item.get("classification", "custom"),
+        baseline_sha256=item.get("expected_baseline_checksum"),
+        local_bytes=local_bytes,
+        incoming_bytes=source.read_bytes(),
+        resolution_status=resolution_status,
+        user_action=user_action,
+        origin_snapshot=origin,
+        on_publish=publish_summary,
+        fault_injector=packet_fault_injector,
+    )
+    return item["export_path"]
 
 
 def collect_review_needed(project_root, migrations, state, lang):
@@ -659,7 +851,8 @@ def collect_review_needed(project_root, migrations, state, lang):
                 item = review_item(project_root, migration, action, reason, lang)
             elif action_type == "replace_file_if_baseline_matches":
                 source_checksum = sha256(migration_source(migration, action))
-                baseline_checksum = sha256(migration_source(migration, {"source": action["baseline"]}))
+                baseline_path = migration_source_optional(migration, action["baseline"])
+                baseline_checksum = sha256(baseline_path) if baseline_path else None
                 key, entry = virtual_entry(action["target"])
                 if not entry["exists"]:
                     entry.update({"exists": True, "file": True, "checksum": source_checksum, "migration_owned": True})
@@ -668,11 +861,16 @@ def collect_review_needed(project_root, migrations, state, lang):
                     item = review_item(project_root, migration, action, "target exists and is not a file; preserve and skip", lang)
                 elif entry["checksum"] == source_checksum:
                     continue
-                elif entry["checksum"] == baseline_checksum or entry["migration_owned"]:
+                elif baseline_checksum is not None and (entry["checksum"] == baseline_checksum or entry["migration_owned"]):
                     entry.update({"exists": True, "file": True, "checksum": source_checksum, "migration_owned": True})
                     continue
                 else:
-                    item = review_item(project_root, migration, action, "checksum does not match the known baseline; preserve and skip", lang)
+                    reason = (
+                        "unknown baseline; preserve and skip"
+                        if baseline_checksum is None
+                        else "checksum does not match the known baseline; preserve and skip"
+                    )
+                    item = review_item(project_root, migration, action, reason, lang)
             elif action_type == "set_state_feature":
                 continue
             else:
@@ -740,7 +938,7 @@ def print_noninteractive_policy_help(project_root, lang):
     print(f'python {script_text} apply --repo-root "{project_root}" --safe --review-needed-policy replace-template')
 
 
-def resolve_review_needed(project_root, pending, decisions, target_version, policy, lang):
+def resolve_review_needed(project_root, pending, decisions, target_version, policy, lang, origin_snapshots=None):
     if not pending:
         return decisions, []
     if policy == "keep-local":
@@ -762,15 +960,36 @@ def resolve_review_needed(project_root, pending, decisions, target_version, poli
             item["status"] = "resolved_manual_merge" if decision == "manual-merge" else "resolved_replace_template"
             item["resolved_at"] = now
             if decision == "manual-merge":
-                export_manual_merge(project_root, migration, action, item, lang, used_names)
+                export_manual_merge(
+                    project_root,
+                    migration,
+                    action,
+                    item,
+                    lang,
+                    used_names,
+                    target_version=target_version,
+                    resolution_status="manual_merge_pending",
+                    origin_snapshots=origin_snapshots,
+                )
+            else:
+                export_manual_merge(
+                    project_root,
+                    migration,
+                    action,
+                    item,
+                    lang,
+                    used_names,
+                    target_version=target_version,
+                    resolution_status="replace_template_authorized",
+                    user_action="restore rollback bytes from this packet if replacement must be reverted",
+                    origin_snapshots=origin_snapshots,
+                )
             decisions[item["key"]] = decision
             for key in item.get("related_keys", []):
                 decisions[key] = decision
             resolved.append(item)
-        merge_review_items(project_root, target_version, resolved)
         return decisions, resolved
     if not sys.stdin.isatty():
-        merge_review_items(project_root, target_version, items)
         print_noninteractive_policy_help(project_root, lang)
         raise SystemExit(2)
     now = utc_now()
@@ -795,12 +1014,34 @@ def resolve_review_needed(project_root, pending, decisions, target_version, poli
                 item["status"] = "resolved_replace_template" if decision == "replace-template" else "resolved_manual_merge"
                 item["resolved_at"] = now
                 if decision == "manual-merge":
-                    export_manual_merge(project_root, migration, action, item, lang, used_names)
+                    export_manual_merge(
+                        project_root,
+                        migration,
+                        action,
+                        item,
+                        lang,
+                        used_names,
+                        target_version=target_version,
+                        resolution_status="manual_merge_pending",
+                        origin_snapshots=origin_snapshots,
+                    )
+                else:
+                    export_manual_merge(
+                        project_root,
+                        migration,
+                        action,
+                        item,
+                        lang,
+                        used_names,
+                        target_version=target_version,
+                        resolution_status="replace_template_authorized",
+                        user_action="restore rollback bytes from this packet if replacement must be reverted",
+                        origin_snapshots=origin_snapshots,
+                    )
                 decisions[item["key"]] = decision
                 for key in item.get("related_keys", []):
                     decisions[key] = decision
                 resolved.append(item)
-                merge_review_items(project_root, target_version, [item])
                 break
             print(msg(lang, "choice_invalid"))
     return decisions, resolved
@@ -815,7 +1056,31 @@ def replace_with_template(project_root, migration, action):
     shutil.copyfile(source, target)
 
 
-def apply_action(project_root, migration, action, state, review_decisions):
+def prepare_safe_write_packet(project_root, migration, action, target_version, classification, origin_snapshots):
+    reason = "safe stock replacement" if classification == "stock" else "migration will create a missing managed file"
+    item = review_item(project_root, migration, action, reason)
+    item["status"] = "auto_update_audit"
+    item["classification"] = classification
+    export_manual_merge(
+        project_root,
+        migration,
+        action,
+        item,
+        "en-US",
+        target_version=target_version,
+        classification=classification,
+        resolution_status="rollback_ready",
+        user_action=(
+            "restore original bytes from this packet"
+            if classification == "stock"
+            else "delete the upgrade-created managed file"
+        ),
+        origin_snapshots=origin_snapshots,
+    )
+    return item
+
+
+def apply_action(project_root, migration, action, state, review_decisions, target_version, origin_snapshots):
     action_type = action.get("type")
     if action.get("safety") != "safe":
         return "manual"
@@ -826,6 +1091,8 @@ def apply_action(project_root, migration, action, state, review_decisions):
         if decision == "manual-merge":
             return "resolved-manual-merge"
         if decision in {"replace-template", "auto-replace-template"}:
+            if decision == "auto-replace-template":
+                prepare_safe_write_packet(project_root, migration, action, target_version, "stock", origin_snapshots)
             replace_with_template(project_root, migration, action)
             if decision == "auto-replace-template":
                 return "applied"
@@ -845,20 +1112,24 @@ def apply_action(project_root, migration, action, state, review_decisions):
             if target.is_file() and sha256(target) == sha256(source):
                 return "already-present"
             return "skipped-existing-review-needed"
+        prepare_safe_write_packet(project_root, migration, action, target_version, "missing", origin_snapshots)
         target.parent.mkdir(parents=True, exist_ok=True)
         shutil.copyfile(source, target)
         return "applied"
     if action_type == "replace_file_if_baseline_matches":
         source = migration_source(migration, action)
-        baseline = migration_source(migration, {"source": action["baseline"]})
+        baseline = migration_source_optional(migration, action["baseline"])
         target = safe_target(project_root, action["target"])
         if target.exists():
             if not target.is_file():
                 return "skipped-existing-review-needed"
             if sha256(target) == sha256(source):
                 return "already-present"
-            if sha256(target) != sha256(baseline):
+            if baseline is None or sha256(target) != sha256(baseline):
                 return "skipped-existing-review-needed"
+            prepare_safe_write_packet(project_root, migration, action, target_version, "stock", origin_snapshots)
+        else:
+            prepare_safe_write_packet(project_root, migration, action, target_version, "missing", origin_snapshots)
         target.parent.mkdir(parents=True, exist_ok=True)
         shutil.copyfile(source, target)
         return "applied"
@@ -872,6 +1143,9 @@ def preflight_action(project_root, migration, action):
     if action.get("safety") != "safe":
         fail(f"Migration {migration['id']} contains a non-safe action: {action.get('id', action.get('type'))}")
     action_type = action.get("type")
+    if "target" in action:
+        managed_path = normalize_managed_path(action["target"])
+        ensure_portable_path(project_root, managed_path)
     if action_type == "ensure_directory":
         safe_target(project_root, action["target"])
         return
@@ -881,7 +1155,7 @@ def preflight_action(project_root, migration, action):
         return
     if action_type == "replace_file_if_baseline_matches":
         migration_source(migration, action)
-        migration_source(migration, {"source": action["baseline"]})
+        migration_source_optional(migration, action["baseline"])
         safe_target(project_root, action["target"])
         return
     if action_type == "set_state_feature":
@@ -910,9 +1184,11 @@ def command_apply(project_root, migration_root, safe, review_needed_policy, lang
     if not pending:
         print(msg(lang, "no_migration"))
         return
+    start = state["forgekit_version"]
     for migration in pending:
         for action in migration["actions"]:
             preflight_action(project_root, migration, action)
+    origin_snapshots = capture_origin_snapshots(project_root, pending, start)
     review_pending, review_decisions, review_items = collect_review_needed(project_root, pending, state, lang)
     if review_pending:
         review_decisions, resolved_items = resolve_review_needed(
@@ -922,15 +1198,23 @@ def command_apply(project_root, migration_root, safe, review_needed_policy, lang
             version_text(target),
             review_needed_policy,
             lang,
+            origin_snapshots,
         )
     elif review_items:
         merge_review_items(project_root, version_text(target), review_items)
     applied_ids = []
     unresolved_review_needed = []
-    start = state["forgekit_version"]
     for migration in pending:
         for action in migration["actions"]:
-            result = apply_action(project_root, migration, action, state, review_decisions)
+            result = apply_action(
+                project_root,
+                migration,
+                action,
+                state,
+                review_decisions,
+                version_text(target),
+                origin_snapshots,
+            )
             print(f"[{result}] {action_id(action)}")
             if result == "skipped-existing-review-needed":
                 unresolved_review_needed.append(action)

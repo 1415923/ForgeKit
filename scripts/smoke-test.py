@@ -62,9 +62,12 @@ REQUIRED_REPO_PATHS = [
     "project-template/.forgekit/projects/_template/source-links.md",
     "project-template/migrations/0.36.0/migration.json",
     "project-template/scripts/forgekit-upgrade.py",
+    "project-template/scripts/upgrade_review_packets.py",
     "migrations/0.36.0/migration.json",
     "scripts/forgekit-upgrade.py",
+    "scripts/upgrade_review_packets.py",
     "project-template/governance/ai-engineering-loop.md",
+    "project-template/governance/agent-entry-contract.md",
     "project-template/changes/README.md",
     "project-template/changes/_template/proposal.md",
     "project-template/changes/_template/design.md",
@@ -149,6 +152,12 @@ REQUIRED_REPO_PATHS = [
     "scripts/forgekit-project.ps1",
     "scripts/forgekit-project.sh",
     "scripts/test-release-consistency.ps1",
+    "config/skill-projections.json",
+    "scripts/sync-skill-projections.py",
+    "scripts/validate-rule-ownership.py",
+    "scripts/test-skill-behavior.py",
+    "scripts/skill_behavior_adapters/codex.py",
+    "scripts/skill_behavior_adapters/claude.py",
     ".codex-plugin/plugin.json",
     ".claude-plugin/plugin.json",
 ]
@@ -218,6 +227,7 @@ REQUIRED_GENERATED_PATHS = [
     "migrations/0.43.0/migration.json",
     "migrations/0.44.1/migration.json",
     "governance/ai-engineering-loop.md",
+    "governance/agent-entry-contract.md",
     ".forgekit/changes/README.md",
     ".forgekit/changes/_template/proposal.md",
     ".forgekit/changes/_template/design.md",
@@ -237,6 +247,7 @@ REQUIRED_GENERATED_PATHS = [
     "scripts/check-workspace-integrity.py",
     "scripts/bootstrap-project-capsule.py",
     "scripts/forgekit-upgrade.py",
+    "scripts/upgrade_review_packets.py",
     "migrations/0.36.0/migration.json",
     "scripts/archive-changes.py",
 ]
@@ -1756,15 +1767,6 @@ def assert_release_distribution_consistency(repo):
     if mismatches:
         fail("Release version metadata mismatch:\n" + "\n".join(mismatches))
 
-    root_skill = repo / "skills/code-review/SKILL.md"
-    template_skill = repo / "project-template/.agents/skills/code-review/SKILL.md"
-    if root_skill.read_bytes() != template_skill.read_bytes():
-        fail(
-            "Shared skill drift: skills/code-review/SKILL.md must match "
-            "project-template/.agents/skills/code-review/SKILL.md; "
-            f"expected SHA256 {sha256_file(template_skill)}, actual SHA256 {sha256_file(root_skill)}"
-        )
-
     root_migration = repo / "migrations/0.44.1/migration.json"
     template_migration = repo / "project-template/migrations/0.44.1/migration.json"
     if root_migration.read_bytes() != template_migration.read_bytes():
@@ -1772,6 +1774,15 @@ def assert_release_distribution_consistency(repo):
     migration = json.loads(root_migration.read_text(encoding="utf-8"))
     if migration.get("from") != "0.44.0" or migration.get("to") != expected or migration.get("actions") != []:
         fail(f"v0.44.1 migration must be an action-free 0.44.0 -> {expected} patch")
+
+    root_helper = repo / "scripts/upgrade_review_packets.py"
+    template_helper = repo / "project-template/scripts/upgrade_review_packets.py"
+    if root_helper.read_bytes() != template_helper.read_bytes():
+        fail(
+            "Shared upgrade packet helper drift: "
+            f"scripts/upgrade_review_packets.py SHA-256={sha256_file(root_helper)}; "
+            f"project-template/scripts/upgrade_review_packets.py SHA-256={sha256_file(template_helper)}"
+        )
 
 
 def assert_manifest_lock(target):
@@ -1988,14 +1999,14 @@ def assert_versioned_migration_upgrade(repo, target, temp_parent):
         fail("v0.41.1 review report missing update-workspace-integrity-checker item")
     if checker_item["status"] != "resolved_manual_merge":
         fail("v0.41.1 manual-merge must record resolved_manual_merge")
-    export_dir = modified_target / checker_item["export_path"]
+    reports_root = modified_target / ".forgekit/reports"
     exported = checker_item["exported_files"]
-    if (export_dir / exported["local"]).read_bytes() != modified_before:
+    if (reports_root / exported["local"]).read_bytes() != modified_before:
         fail("manual-merge .local must match the original target file")
-    if not (export_dir / exported["incoming"]).is_file() or not (export_dir / exported["diff"]).read_text(encoding="utf-8"):
+    if not (reports_root / exported["incoming"]).is_file() or not (reports_root / exported["diff"]).read_text(encoding="utf-8"):
         fail("manual-merge must export incoming and diff files")
-    if "Please read the .local, .incoming, and .diff files" not in (export_dir / "README.md").read_text(encoding="utf-8"):
-        fail("manual-merge README must include the AI-assisted merge prompt")
+    if not (reports_root / exported["packet"]).is_file() or not (reports_root / exported["rollback"]).is_file():
+        fail("manual-merge packet must include packet metadata and in-packet rollback bytes")
 
     capsule_migration = temp_parent / "v0420-capsule-bootstrap-migration"
     shutil.copytree(target, capsule_migration)
@@ -2261,7 +2272,7 @@ def assert_0440_review_convergence_migration(repo, current_target, temp_parent):
         fail("0.44.0 single-command flow modified business files or a real change artifact")
     single_report = json.loads((single / ".forgekit/reports/upgrade-review-needed.json").read_text(encoding="utf-8"))
     single_exports = [item.get("export_path") for item in single_report.get("items", []) if item.get("status") == "resolved_manual_merge"]
-    if not single_exports or not all((single / path).is_dir() for path in single_exports):
+    if not single_exports or not all((single / ".forgekit/reports" / path).is_dir() for path in single_exports):
         fail("0.44.0 single-command manual-merge did not export incoming/diff evidence")
 
     if os.name != "nt":
@@ -2316,7 +2327,7 @@ def assert_0440_review_convergence_migration(repo, current_target, temp_parent):
             fail("0.44.0 interactive upgrade modified business files or a real change artifact")
         interactive_report = json.loads((interactive / ".forgekit/reports/upgrade-review-needed.json").read_text(encoding="utf-8"))
         interactive_exports = [item.get("export_path") for item in interactive_report.get("items", []) if item.get("status") == "resolved_manual_merge"]
-        if not interactive_exports or not all((interactive / path).is_dir() for path in interactive_exports):
+        if not interactive_exports or not all((interactive / ".forgekit/reports" / path).is_dir() for path in interactive_exports):
             fail("0.44.0 interactive manual-merge did not export incoming/diff evidence")
 
 
@@ -2582,7 +2593,10 @@ def assert_unified_project_entry(repo, current_target, temp_parent):
     early_legacy = temp_parent / "unified-early-legacy"
     (early_legacy / "governance").mkdir(parents=True)
     (early_legacy / ".codex").mkdir()
-    early_result = run([sys.executable, str(script), "--target", str(early_legacy)], cwd=repo)
+    early_result = run(
+        [sys.executable, str(script), "--target", str(early_legacy), "--lang", "en-US"],
+        cwd=repo,
+    )
     if "Detected action: legacy-adoption" not in early_result.stdout:
         fail("unified entry must recognize pre-boundary ForgeKit markers as legacy adoption")
     if (early_legacy / ".forgekit/state.json").exists():
@@ -2590,7 +2604,11 @@ def assert_unified_project_entry(repo, current_target, temp_parent):
 
     future = temp_parent / "unified-future"
     write_state(future, "0.45.0")
-    future_result = run([sys.executable, str(script), "--target", str(future)], cwd=repo, check=False)
+    future_result = run(
+        [sys.executable, str(script), "--target", str(future), "--lang", "en-US"],
+        cwd=repo,
+        check=False,
+    )
     if future_result.returncode == 0 or "Detected action: stop-toolkit-too-old" not in (future_result.stdout + future_result.stderr):
         fail("unified entry must stop when the project version is newer than ForgeKitRoot")
 
@@ -3601,6 +3619,9 @@ def main():
         "project-template/.codex/agents/worktree-runner.md",
     ])
     run([sys.executable, str(repo / "scripts" / "update-template-manifest.py"), "--check"], cwd=repo)
+    run([sys.executable, str(repo / "scripts" / "sync-skill-projections.py"), "check", "--repo-root", str(repo)], cwd=repo)
+    run([sys.executable, str(repo / "scripts" / "validate-rule-ownership.py"), "--repo-root", str(repo)], cwd=repo)
+    run([sys.executable, str(repo / "scripts" / "test-skill-behavior.py"), "validate", "--repo-root", str(repo)], cwd=repo)
     assert_skill_frontmatter(repo / "skills")
     assert_skill_frontmatter(repo / "project-template" / ".agents" / "skills")
 

@@ -18,6 +18,15 @@ ForgeKit does not replace the framework, CI, issue tracker, or architecture proc
 | medium | Multi-file change, small feature, template/script change, user-visible flow, documentation structure change | Create `.forgekit/changes/<id>/proposal.md`, `tasks.md`, `verification.md`, and `review.md`; confirm the plan before implementation. |
 | high | Architecture change, migration, security/permission change, cross-platform script, public template contract, deployment or compatibility risk | Create `proposal.md`, `design.md`, `tasks.md`, `verification.md`, `review.md`, and `ship.md`; confirm the design before implementation. `retro.md` is recommended after completion. |
 
+风险按客观影响判断，不按文件数或模块数计分。每次用一段简短说明覆盖：不可逆性、公共合同、持久数据或迁移、身份权限与秘密、外部动作、跨仓库协调、回滚难度、部署影响、验证能力以及事实不确定性。
+
+- 本地、可逆、无公共合同或持久状态影响且可完整验证的机械变更可为低风险，即使涉及多个文件。
+- 单文件权限策略、schema migration、公共 API、模板升级或发布规则至少为中风险。
+- 生产数据、身份与密钥、不可回滚发布、破坏性外部动作或当前无法可靠验证的关键结论属于高风险。
+- 用户授权只解决“是否允许执行”，不会降低数据、权限、兼容、部署或回滚的客观风险。
+
+maker-checker、独立 code review 和 change artifact 由中高风险或明确 gate 触发；低风险改动不因代码或文件数量自动升级。推荐使用：`Risk: <level> — <主要影响>; rollback <难度>; verification <能力或缺口>.`
+
 ## Change Metadata
 
 Each `.forgekit/changes/<id>/proposal.md` should start with ASCII metadata:

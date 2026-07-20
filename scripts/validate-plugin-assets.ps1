@@ -109,24 +109,17 @@ function Test-ReleaseVersionConsistency {
 }
 
 function Test-SharedSkillDistribution {
-    $sharedPairs = @(
-        @{
-            Expected = "project-template\.agents\skills\code-review\SKILL.md"
-            Actual = "skills\code-review\SKILL.md"
-        }
-    )
-
-    foreach ($pair in $sharedPairs) {
-        $expectedPath = Join-Path $repoRoot $pair.Expected
-        $actualPath = Join-Path $repoRoot $pair.Actual
-        if (-not (Test-Path -LiteralPath $expectedPath) -or -not (Test-Path -LiteralPath $actualPath)) {
-            continue
-        }
-        $expectedHash = (Get-FileHash -LiteralPath $expectedPath -Algorithm SHA256).Hash.ToLowerInvariant()
-        $actualHash = (Get-FileHash -LiteralPath $actualPath -Algorithm SHA256).Hash.ToLowerInvariant()
-        if ($expectedHash -ne $actualHash) {
-            Add-Error "Shared skill drift: '$($pair.Actual)' must match '$($pair.Expected)'; expected SHA256 '$expectedHash', actual SHA256 '$actualHash'"
-        }
+    $checker = Join-Path $repoRoot "scripts\sync-skill-projections.py"
+    $previousErrorPreference = $ErrorActionPreference
+    try {
+        $ErrorActionPreference = "Continue"
+        $output = & python $checker check --repo-root $repoRoot 2>&1
+        $projectionExitCode = $LASTEXITCODE
+    } finally {
+        $ErrorActionPreference = $previousErrorPreference
+    }
+    if ($projectionExitCode -ne 0) {
+        Add-Error "Skill projection check failed: $($output -join [Environment]::NewLine)"
     }
 }
 
@@ -162,15 +155,8 @@ Test-RequiredPath ".codex-plugin\plugin.json"
 Test-RequiredPath ".claude-plugin\plugin.json"
 Test-RequiredPath ".agents\plugins\marketplace.json"
 Test-RequiredPath ".claude-plugin\marketplace.json"
-Test-RequiredPath "skills\project-init\SKILL.md"
-Test-RequiredPath "skills\project-bootstrap-fill\SKILL.md"
-Test-RequiredPath "skills\project-suitability\SKILL.md"
-Test-RequiredPath "skills\document-backfill\SKILL.md"
-Test-RequiredPath "skills\handover-review\SKILL.md"
-Test-RequiredPath "skills\large-change-planning\SKILL.md"
-Test-RequiredPath "skills\code-review\SKILL.md"
-Test-RequiredPath "skills\release-check\SKILL.md"
-Test-RequiredPath "skills\security-review\SKILL.md"
+Test-RequiredPath "config\skill-projections.json"
+Test-RequiredPath "scripts\sync-skill-projections.py"
 Test-RequiredPath "project-template\AGENTS.md"
 Test-RequiredPath "project-template\CLAUDE.md"
 Test-RequiredPath "project-template\.claude\skills\forgekit-project-workflow\SKILL.md"

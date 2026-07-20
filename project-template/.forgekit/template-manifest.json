@@ -361,7 +361,15 @@
       "role": "governance",
       "update_policy": "replace",
       "render_mode": "copy",
-      "checksum": "sha256:5ee07a66317258372310650da563b522f184ac2fbf3e8d82f8cc955f388df370"
+      "checksum": "sha256:83319368356f46d2809cc44640e2e55a8c84c770ec5961185527fe09af69161e"
+    },
+    {
+      "source_path": "governance/agent-entry-contract.md",
+      "target_path": "governance/agent-entry-contract.md",
+      "role": "governance",
+      "update_policy": "replace",
+      "render_mode": "copy",
+      "checksum": "sha256:279388b1707debbc6ad6145d6000bcfe2264958e1ecec2202e53fa81e86aaa46"
     },
     {
       "source_path": "governance/agent-harness.md",
@@ -433,7 +441,15 @@
       "role": "script",
       "update_policy": "replace",
       "render_mode": "copy",
-      "checksum": "sha256:cee019bc135c1baa84cd48631a7e54a00bcf7daf946c4ca034e66ebc7efbc1e8"
+      "checksum": "sha256:83680d38552809ff664a2a20de67a3d7a2c29abfef8150b2288daac305e5ad9a"
+    },
+    {
+      "source_path": "scripts/upgrade_review_packets.py",
+      "target_path": "scripts/upgrade_review_packets.py",
+      "role": "script",
+      "update_policy": "replace",
+      "render_mode": "copy",
+      "checksum": "sha256:8668d30fc59ec882d594dc087422e197decb2d4a18041cac4066d93bc9a8f016"
     },
     {
       "source_path": "migrations/0.36.0/migration.json",

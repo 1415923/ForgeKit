@@ -1,10 +1,11 @@
 # v0.45.0 验证与验收设计
 
-DesignStatus: design-revised-awaiting-blocker-recheck
+DesignStatus: design-approved-for-stage-a
+ImplementationStatus: stage-a-implemented-awaiting-independent-check
 
 ## 1. 状态说明
 
-本文件冻结未来 v0.45.0 实施的验收合同，并记录本轮设计工件自身的只读检查。未来行为测试当前均为 `NEEDS_TEST`，不得解释为已经通过。
+本文件冻结 v0.45.0 的验收合同，并记录阶段 A maker 的确定性实施证据。真实 Codex/Claude 行为合同仍为 `NEEDS_TEST`，不得把基础设施通过解释为 A01-A22 全部通过。
 
 本验收合同应用已经冻结的 DECISION-01、DECISION-02 和 DECISION-03：不把三项决定重新列为选择题，也不以测试结果反向授权阶段 A。
 
@@ -150,9 +151,29 @@ v0.45.0 发布前必须分别取得一个当前稳定 Codex 和一个当前稳�
 | 受保护产品路径与 HEAD 的差异检查 | PASS；唯一 tracked diff 仍为原有 `usage.html` 删除，未出现阶段 A runner/config/tests 或其他实现文件 |
 | `git status --short --untracked-files=all` | PASS；仅原有 `D usage.html` 和六份 v0.45.0 设计工件 |
 
-## 9. 未验证项
+## 9. 阶段 A maker 确定性验证记录
 
-- `NEEDS_TEST`: A01-A22 的未来行为合同尚未实施；阶段 A 仅建立 runner/adapter 骨架和最小安全 fixture。
+| Command / check | Result |
+| --- | --- |
+| `python -B scripts/sync-skill-projections.py check` | PASS；九个 Skill、18 个受管文件逐字节一致，输出双方路径和 SHA-256 |
+| `python -B scripts/validate-rule-ownership.py` | PASS；41 个 rule ID 完整唯一，owner 为单一具体文件，七条共享规则 application-site 分离正确 |
+| `python -B scripts/test-skill-behavior.py validate` 与 `list` | PASS；3 个阶段 A 最小 case，冻结字段、授权值和安全路径合法 |
+| `python -B scripts/test-skill-behavior.py dry-run --temp-root D:\tmp` | PASS；3 个隔离 fixture 均清理，未调用真实模型，run record 如实为 `GRADER_UNCERTAIN` |
+| `python -B -m unittest discover -s tests -p "test_*.py"` | PASS；27/27，含投影和 behavior fixture 的真实 Windows junction/reparse 拒绝、真实仓库内 temp-root 拒绝、正常/异常清理、secret redaction、四类升级 fixture |
+| `powershell -ExecutionPolicy Bypass -File .\scripts\validate-plugin-assets.ps1` | PASS |
+| `powershell -ExecutionPolicy Bypass -File .\scripts\validate-template.ps1` | PASS |
+| `powershell -ExecutionPolicy Bypass -File .\scripts\test-release-consistency.ps1` | PASS；九个 Skill 的 `SKILL.md` 与 `agents/openai.yaml` 共 18 个 mutation 均按预期失败，并在 `finally` 中逐字节恢复；恢复后 baseline PASS |
+| `python scripts/update-template-manifest.py refresh --repo-root . --check` | PASS；新增 template 文件和变更文件 checksum 与 manifest 一致 |
+| `python -B scripts/smoke-test.py --repo-root <isolated-copy>` | PASS；工作树复制到 `D:\tmp`，仅在副本物化 tracked `usage.html`，结束后清理；真实工作树中的删除状态未改变 |
+| Codex/Claude adapter 只读 availability/version probe | PASS；Codex `codex-cli 0.144.6`、Claude Code `2.1.210` 可用；未执行真实 prompt/模型行为 |
+| `git diff --check` | PASS |
+
+自动 blocker 的阶段 A 范围仅为 schema、fixture、adapter 接口、隔离保护、runner 单元测试、投影、所有权和 upgrade fixture。当前 maker 结果需要独立 checker 复核。
+
+## 10. 未验证项
+
+- `NEEDS_TEST`: A01-A03、A08-A16、A19-A22 的真实模型行为；阶段 A 仅建立 runner/adapter 骨架和最小安全 fixture。
+- `NEEDS_TEST`: A17 prompts 兼容与阶段 E 的 plugin/local Skill 职责拆分；均不属于阶段 A。
 - `NEEDS_TEST`: 真实 Codex/Claude 客户端同名 Skill 和 implicit policy。
 - `NEEDS_TEST`: Skill 未触发时入口安全、Codex selector 与显式/隐式路由优先级、Claude metadata 和 implicit policy。
 - `NEEDS_TEST`: plugin/local 同名重复的真实用户影响，以及阶段 E 入口型/操作型职责拆分效果。
@@ -161,3 +182,80 @@ v0.45.0 发布前必须分别取得一个当前稳定 Codex 和一个当前稳�
 - `NEEDS_TEST`: migration 对各版本本地定制的 manual-merge 质量。
 
 `project-bootstrap-fill`、`project-suitability` 和 first-principles 的完整 input/output/not-trigger 合同是阶段 C/D 前置事项，不是阶段 A 的前置 blocker。
+
+## 11. Stage A Independent Review finding 修复验证
+
+### 11.1 2 BLOCKER / 10 MAJOR
+
+| Finding | 修复与证据 | 结果 |
+| --- | --- | --- |
+| B-01 | 单命令 apply 在任何 managed file 写入前捕获按 POSIX managed path 索引的 origin snapshot；真实 A→B→C 双 migration 保持 rollback=A、SHA-256=A，重试不变，rollback 恢复 A | PASS |
+| B-02 | runner 使用临时 HOME/USERPROFILE/XDG/CODEX_HOME/CLAUDE_CONFIG_DIR 和最小环境；fake executable 证明 cwd/prompt/配置隔离/无 shell；真实客户端不能证明 fixture-only 读取和网络禁用时返回 `ENVIRONMENT_UNAVAILABLE` | PASS |
+| M-01 | 18 个目标在首次复制前完成 source、root、全部父组件和最终 target 类型/reparse 预检；后续目标父文件冲突时所有 target bytes 不变 | PASS |
+| M-02 | packet 在 `review-needed/` sibling staging 完整构建并校验后交换；旧 packet 可恢复；summary 仅在固定 packet 发布后更新；七个 packet 故障点及 summary 故障均保持旧状态 | PASS |
+| M-03 | semver target version 与 Windows 设备名/尾随点空格/控制字符/驱动器 UNC 规则统一拒绝；正常 Unicode 保持大小写和 UTF-8 POSIX 哈希身份，NFC 冲突写前失败 | PASS |
+| M-04 | 根/template `upgrade_review_packets.py` 精确 bytes 门禁接入 template validator、release mutation 和 smoke，错误含双方路径/checksum | PASS |
+| M-05 | tree oracle 记录 file/directory/empty directory/special/reparse，检测增删、类型互换和重命名；finally 后验证 fixture root 不存在，清理失败强制非 PASS | PASS |
+| M-06 | command/environment/prompt/stdout/stderr/tool trace/diagnostics 使用公共脱敏；覆盖等号/空格参数、Bearer、认证字段和 HOME/fixture 外路径 | PASS |
+| M-07 | 默认 `run` 仅 PASS=0；其余六类使用稳定非零退出码 20-25；CLI 级七分类测试通过 | PASS |
+| M-08 | adapter 结果包含 model/tool_trace/skill_source/capabilities/evidence_unavailable_reason；只解析结构化事件，缺路由来源证据为 `GRADER_UNCERTAIN` | PASS |
+| M-09 | 删除 `EXPECTED_SKILLS`；sync 只消费 manifest；ownership validator 从 41 条矩阵的 ROUTE owner 派生九项并交叉验证 | PASS |
+| M-10 | projection、upgrade、behavior、adapter、helper 漂移与失败顺序测试补齐；全量 42 项通过 | PASS |
+
+### 11.2 实际命令与结果
+
+| Command / check | Result |
+| --- | --- |
+| `python -B scripts/sync-skill-projections.py check` | PASS；9 Skill / 18 文件逐字节一致 |
+| `python -B scripts/validate-rule-ownership.py` | PASS；41 个唯一 rule ID 与单 owner/application-site 合同成立 |
+| `python -B scripts/test-skill-behavior.py validate` | PASS；3 cases |
+| `python -B scripts/test-skill-behavior.py list` | PASS；3 cases |
+| `python -B scripts/test-skill-behavior.py dry-run --temp-root D:\\tmp` | PASS；3 个隔离 fixture，未调用客户端，清理成功 |
+| `python -B -m unittest tests.test_upgrade_review_packets -v` | PASS；10/10 |
+| `python -B -m unittest tests.test_skill_behavior_runner tests.test_skill_behavior_adapters -v` | PASS；18/18 |
+| `python -B -m unittest discover -s tests -p "test_*.py"` | PASS；42/42 |
+| `powershell -NoProfile -ExecutionPolicy Bypass -File .\\scripts\\validate-plugin-assets.ps1` | PASS |
+| `powershell -NoProfile -ExecutionPolicy Bypass -File .\\scripts\\validate-template.ps1` | PASS |
+| `python -B .\\scripts\\update-template-manifest.py --check` | PASS |
+| `powershell -NoProfile -ExecutionPolicy Bypass -File .\\scripts\\test-release-consistency.ps1` | PASS；18 个投影 mutation 与 helper drift mutation 均失败后精确恢复 |
+| 隔离副本 `python -B scripts/smoke-test.py --repo-root <isolated-copy>` | PASS；含 tracked/untracked 修复；只在副本补入 tracked `usage.html`；副本清理，真实删除状态不变 |
+| Codex/Claude version/help probe | Codex 0.144.6、Claude Code 2.1.210 可检测；两者 isolation `ready=false`，未执行 prompt |
+
+### 11.3 保留 NOTE 与未执行项
+
+- NOTE：projection 已消除所有可预检冲突导致的部分更新，并使用同目录临时文件替换；极端不可预见 I/O/进程终止下的完整事务恢复仍不在本轮合同内。
+- NOTE：本地 reparse 检查仍有合理 TOCTOU 残余，本轮不扩大修复。
+- NOTE：upgrade review JSON schema 2 的外部兼容说明是最终 release 前事项；当前没有发现仓库内消费者回归，但不标记为完成。
+- `NEEDS_TEST`：真实 Codex/Claude prompt、路由和 Skill 来源行为仍未执行。当前客户端无法证明 fixture-only 读取边界和网络/外部动作禁用；adapter 按 B-02 失败关闭。
+- 最终状态保持 `stage-a-implemented-awaiting-independent-check`，等待原 checker blocker/major recheck。
+
+## 12. Findings recheck 最后定向修复验证
+
+### 12.1 M-02 事务提交点
+
+提交前包括 staging packet、artifact checksum、canonical 交换、两份 summary 发布和 packet/summary 交叉验证。交叉验证比较 packet ID、managed path、source/target version、classification、incoming/rollback checksum、artifact 路径和 JSON item；Markdown/JSON 发布后逐字节读回验证。同一 packet ID 的新 summary item 会替换旧 item，避免多 migration 旧索引引用新 canonical packet。
+
+只有生产 callback 完成上述发布和交叉验证后才到达提交点。提交前任何异常仍恢复旧 canonical packet 和两份旧 summary，并清理 staging。提交后 `.old-*` 删除失败只产生 `packet committed; cleanup pending` warning：新 canonical packet 和两份新 summary 不回滚，旧目录只保留为非 canonical `.old-*`。canonical 枚举只接受名称精确匹配且 `publication_status=complete`、artifact checksum 有效的固定 packet 目录，忽略 `.tmp-*`、`.old-*` 和不完整目录；后续同 packet 重试会在身份验证后安全尝试清理未被 summary 引用的 stale old。
+
+### 12.2 M-06 最终递归脱敏边界
+
+`sanitize_record` 对最终 record 的 dict/list/tuple/字符串组合递归处理。字典键先做 camelCase 拆分、非字母数字归一为 `_`、转大写，再按精确敏感名或以完整敏感名为后缀的供应商前缀匹配；命中键的值无论是字符串、数字、列表或嵌套对象均整体替换为 `<REDACTED>`。command 数组、认证文本和 HOME/USERPROFILE/受保护路径继续统一脱敏。
+
+evidence 写入和 stdout 输出都只调用 `serialize_sanitized`；序列化前再次对整个对象执行 `sanitize_record`。序列化异常只报告异常类型，不输出原始对象 repr。测试扫描最终 JSON 和实际 evidence 文件，覆盖 `adapter_diagnostics.environment.OPENAI_API_KEY`、三层嵌套 dict/list、list 内 dict、tuple、tool trace environment、`--token value`、Bearer、API key、grader password、exception diagnostics、HOME 以及敏感键值为嵌套对象。
+
+### 12.3 实际结果
+
+| Command / check | Result |
+| --- | --- |
+| M-02/M-06 五个定向测试 | PASS；5/5 |
+| `python -B -m unittest tests.test_upgrade_review_packets -v` | PASS；11/11 |
+| `python -B -m unittest tests.test_skill_behavior_runner tests.test_skill_behavior_adapters -v` | PASS；19/19 |
+| `python -B -m unittest discover -s tests -p "test_*.py"` | PASS；44/44 |
+| projection、ownership、behavior validate/list/dry-run | PASS；dry-run 未调用客户端 |
+| plugin、template、template-manifest、release consistency | PASS；所有 mutation 恢复 |
+| 隔离完整副本 smoke | PASS；包含 tracked/untracked 当前文件，只在副本物化 `usage.html`，副本在 finally 清理 |
+| `git diff --check` | PASS |
+
+checker 报告的主机 TEMP 中 3 个由无效沙箱测试进程持续重建的 fixture 继续作为外部环境噪声记录。本轮未终止未知主机进程、未删除仍被外部进程使用的目录，也不声称全主机 TEMP 清洁；仅验证本轮自己的定向测试、dry-run 和 smoke 临时目录均已清理。
+
+真实 Codex/Claude prompt 和完整行为矩阵仍未执行。状态保持 `stage-a-implemented-awaiting-independent-check`，等待 checker 仅复核 M-02、M-06、M-10。

@@ -1,0 +1,1 @@
+This fixture contains a typoo for bounded-write tests.

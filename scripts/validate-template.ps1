@@ -85,6 +85,33 @@ function Test-SkillFrontmatter {
     }
 }
 
+function Test-StageADeterministicContracts {
+    $checks = @(
+        @("Skill projection", @((Join-Path $repoRoot "scripts\sync-skill-projections.py"), "check", "--repo-root", $repoRoot)),
+        @("Rule ownership", @((Join-Path $repoRoot "scripts\validate-rule-ownership.py"), "--repo-root", $repoRoot)),
+        @("Skill behavior cases", @((Join-Path $repoRoot "scripts\test-skill-behavior.py"), "validate", "--repo-root", $repoRoot))
+    )
+    foreach ($check in $checks) {
+        $label = $check[0]
+        $arguments = $check[1]
+        $output = & python @arguments 2>&1
+        if ($LASTEXITCODE -ne 0) {
+            Add-Error "$label check failed: $($output -join [Environment]::NewLine)"
+        }
+    }
+    $previousErrorPreference = $ErrorActionPreference
+    try {
+        $ErrorActionPreference = "Continue"
+        $unitOutput = & python -B -m unittest discover -s (Join-Path $repoRoot "tests") -p "test_*.py" 2>&1
+        $unitExitCode = $LASTEXITCODE
+    } finally {
+        $ErrorActionPreference = $previousErrorPreference
+    }
+    if ($unitExitCode -ne 0) {
+        Add-Error "Stage A deterministic unit tests failed: $($unitOutput -join [Environment]::NewLine)"
+    }
+}
+
 function Test-GovernanceFiles {
     $required = @(
         "project-template\governance\sdlc.md",
@@ -108,6 +135,7 @@ function Test-GovernanceFiles {
         "project-template\governance\team-agent-rollout.md",
         "project-template\governance\agent-suitability.md",
         "project-template\governance\ai-engineering-loop.md"
+        "project-template\governance\agent-entry-contract.md"
     )
     foreach ($item in $required) {
         Test-RequiredPath $item
@@ -1122,6 +1150,15 @@ function Test-HarnessEntryConsistency {
     if ($rootUpgrade -ne $templateUpgrade) {
         Add-Error "Root and project-template forgekit-upgrade.py must stay identical"
     }
+    $rootPacketHelperPath = Join-Path $repoRoot "scripts\upgrade_review_packets.py"
+    $templatePacketHelperPath = Join-Path $repoRoot "project-template\scripts\upgrade_review_packets.py"
+    if ((Test-Path -LiteralPath $rootPacketHelperPath -PathType Leaf) -and (Test-Path -LiteralPath $templatePacketHelperPath -PathType Leaf)) {
+        $rootPacketHash = (Get-FileHash -LiteralPath $rootPacketHelperPath -Algorithm SHA256).Hash.ToLowerInvariant()
+        $templatePacketHash = (Get-FileHash -LiteralPath $templatePacketHelperPath -Algorithm SHA256).Hash.ToLowerInvariant()
+        if ($rootPacketHash -ne $templatePacketHash) {
+            Add-Error "Shared upgrade packet helper drift: scripts/upgrade_review_packets.py SHA-256=$rootPacketHash; project-template/scripts/upgrade_review_packets.py SHA-256=$templatePacketHash"
+        }
+    }
 }
 
 function Test-PluginDistribution {
@@ -1565,15 +1602,6 @@ Test-RequiredPattern "project-template\.codex\rules.md" "Simplicity First" "AI c
 Test-RequiredPattern "project-template\.codex\rules.md" "Surgical Changes" "AI coding rule: surgical changes"
 Test-RequiredPattern "project-template\.codex\rules.md" "Goal-Driven Execution" "AI coding rule: goal-driven execution"
 Test-RequiredPath "project-template\.claude\skills\forgekit-project-workflow\SKILL.md"
-    Test-RequiredPath "project-template\.agents\skills\project-init\SKILL.md"
-    Test-RequiredPath "project-template\.agents\skills\project-bootstrap-fill\SKILL.md"
-    Test-RequiredPath "project-template\.agents\skills\project-suitability\SKILL.md"
-    Test-RequiredPath "project-template\.agents\skills\document-backfill\SKILL.md"
-    Test-RequiredPath "project-template\.agents\skills\handover-review\SKILL.md"
-Test-RequiredPath "project-template\.agents\skills\large-change-planning\SKILL.md"
-Test-RequiredPath "project-template\.agents\skills\code-review\SKILL.md"
-Test-RequiredPath "project-template\.agents\skills\release-check\SKILL.md"
-Test-RequiredPath "project-template\.agents\skills\security-review\SKILL.md"
 Test-RequiredPath "project-template\governance\project-bootstrap-fill.md"
 
 $rootArchiveScript = Join-Path $repoRoot "scripts\archive-changes.py"
@@ -1609,6 +1637,7 @@ Test-PluginDistribution
 Test-ClaudePluginDistribution
 Test-SkillAscii
 Test-SkillFrontmatter
+Test-StageADeterministicContracts
 Test-StaleText
 Test-NoForgeKitHistoryInTemplate
 
