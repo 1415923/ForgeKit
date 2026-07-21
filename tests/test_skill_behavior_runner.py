@@ -32,6 +32,7 @@ class FakeAdapter:
         self.result = result
         self.observed_workspace = None
         self.observed_context = None
+        self.observed_prompt = None
 
     def probe(self):
         return {"available": self.available, "reason": "not installed", "executable": "fake", "version": "1"}
@@ -39,6 +40,7 @@ class FakeAdapter:
     def invoke(self, workspace, prompt, invocation_mode, context):
         self.observed_workspace = workspace.resolve()
         self.observed_context = context
+        self.observed_prompt = prompt
         if self.error:
             raise RuntimeError(self.error)
         if self.write_path:
@@ -75,7 +77,7 @@ class FakeAdapter:
 class SkillBehaviorRunnerTests(unittest.TestCase):
     def setUp(self):
         self.cases = behavior.load_cases(REPO, "tests/skill-behavior/cases.json")
-        self.temp = tempfile.TemporaryDirectory(prefix="forgekit-behavior-tests-")
+        self.temp = tempfile.TemporaryDirectory(prefix="forgekit-behavior-tests-", dir=Path("D:/tmp"))
         self.temp_root = Path(self.temp.name)
 
     def tearDown(self):
@@ -87,14 +89,28 @@ class SkillBehaviorRunnerTests(unittest.TestCase):
     def run_case(self, case, adapter):
         return behavior.execute_case(REPO, case, adapter_module=adapter, temp_parent=self.temp_root)
 
+    def load_mutated_case(self, case, name="mutated"):
+        root = self.temp_root / name
+        shutil.copytree(REPO / "tests/skill-behavior/fixtures/minimal-project", root / "fixture")
+        shutil.copytree(REPO / "config", root / "config")
+        shutil.copytree(REPO / "skills", root / "skills")
+        case = json.loads(json.dumps(case))
+        case["fixture"] = "fixture"
+        (root / "cases.json").write_text(
+            json.dumps({"schema_version": 1, "cases": [case]}), encoding="utf-8"
+        )
+        return behavior.load_cases(root, "cases.json")
+
     def test_real_manifest_schema(self):
-        self.assertEqual(3, len(self.cases))
+        self.assertEqual(13, len(self.cases))
 
     def test_duplicate_id_invalid_authorization_and_path_fail(self):
         manifest = json.loads((REPO / "tests/skill-behavior/cases.json").read_text(encoding="utf-8"))
         manifest_root = self.temp_root / "manifest-root"
         fixture = manifest_root / "fixture"
         shutil.copytree(REPO / "tests/skill-behavior/fixtures/minimal-project", fixture)
+        shutil.copytree(REPO / "config", manifest_root / "config")
+        shutil.copytree(REPO / "skills", manifest_root / "skills")
         for case in manifest["cases"]:
             case["fixture"] = "fixture"
         mutations = []
@@ -125,6 +141,8 @@ class SkillBehaviorRunnerTests(unittest.TestCase):
         manifest_root = self.temp_root / "reparse-root"
         fixture = manifest_root / "fixture"
         fixture.mkdir(parents=True)
+        shutil.copytree(REPO / "config", manifest_root / "config")
+        shutil.copytree(REPO / "skills", manifest_root / "skills")
         outside = self.temp_root / "outside"
         outside.mkdir()
         link = fixture / "linked"
@@ -163,7 +181,8 @@ class SkillBehaviorRunnerTests(unittest.TestCase):
         self.assertIn("empty-added", empty["changed_paths"])
 
         def delete_directory(workspace):
-            (workspace / "src/note.txt").unlink()
+            for child in (workspace / "src").iterdir():
+                child.unlink()
             (workspace / "src").rmdir()
 
         deleted = self.run_case(case, FakeAdapter(action=delete_directory))
@@ -345,6 +364,138 @@ class SkillBehaviorRunnerTests(unittest.TestCase):
         )
         self.assertEqual("GRADER_UNCERTAIN", record["failure_class"])
         self.assertEqual([], list(self.temp_root.iterdir()))
+
+    def test_stage_c_fixture_materializes_authoritative_skill_packages(self):
+        case = self.case("stage-c-bootstrap-placeholder")
+        captured = {}
+
+        def inspect_materialized(workspace):
+            for relative in ("SKILL.md", "agents/openai.yaml"):
+                target = workspace / ".agents/skills/project-bootstrap-fill" / relative
+                source = REPO / "skills/project-bootstrap-fill" / relative
+                captured[relative] = target.read_bytes()
+                self.assertEqual(source.read_bytes(), captured[relative])
+
+        adapter = FakeAdapter(action=inspect_materialized)
+        record = self.run_case(case, adapter)
+        self.assertEqual({"SKILL.md", "agents/openai.yaml"}, set(captured))
+        self.assertTrue(record["client_skill_capability"])
+        self.assertEqual(".agents/skills", record["materialization"]["location"])
+        self.assertEqual("skills/project-bootstrap-fill/SKILL.md", record["expected_skill_source"])
+        self.assertEqual([], list(self.temp_root.iterdir()))
+
+    def test_explicit_and_implicit_prompts_render_real_invocation_syntax(self):
+        explicit_adapter = FakeAdapter()
+        explicit = self.run_case(self.case("stage-c-bootstrap-placeholder"), explicit_adapter)
+        self.assertTrue(explicit_adapter.observed_context)
+        self.assertEqual("project-bootstrap-fill", explicit["explicit_skill_id"])
+        self.assertTrue(explicit["rendered_prompt"].startswith("$project-bootstrap-fill\n\n"))
+        self.assertEqual(1, explicit["invocation_marker_count"])
+        self.assertTrue(explicit["invocation_inserted"])
+        self.assertEqual(explicit["rendered_prompt"], explicit_adapter.observed_prompt)
+
+        implicit_adapter = FakeAdapter()
+        implicit = self.run_case(self.case("stage-c-handover-read-only"), implicit_adapter)
+        self.assertIsNone(implicit["explicit_skill_id"])
+        self.assertNotIn("$handover-review", implicit["rendered_prompt"])
+        self.assertEqual(implicit["original_prompt"], implicit["rendered_prompt"])
+        self.assertEqual(0, implicit["invocation_marker_count"])
+        self.assertFalse(implicit["invocation_inserted"])
+
+    def test_bounded_write_and_read_only_cases_require_write_evidence(self):
+        bounded = self.case("stage-a-bounded-local-write")
+        bounded["evidence_requirements"]["write_behavior"] = False
+        with self.assertRaisesRegex(behavior.BehaviorError, "bounded local write requires write behavior evidence"):
+            self.load_mutated_case(bounded, "bounded-no-evidence")
+
+        bounded = self.case("stage-a-bounded-local-write")
+        bounded["allowed_write_paths"] = []
+        with self.assertRaisesRegex(behavior.BehaviorError, "non-empty allowed_write_paths"):
+            self.load_mutated_case(bounded, "bounded-no-path")
+
+        read_only = self.case("stage-c-handover-read-only")
+        read_only["evidence_requirements"]["write_behavior"] = False
+        with self.assertRaisesRegex(behavior.BehaviorError, "read_only requires write behavior evidence"):
+            self.load_mutated_case(read_only, "readonly-no-oracle")
+
+    def test_explicit_prompt_rendering_is_idempotent_and_rejects_bad_markers(self):
+        case = self.case("stage-c-bootstrap-placeholder")
+        case["prompt"] = "$project-bootstrap-fill\n\n" + case["prompt"]
+        loaded = self.load_mutated_case(case, "existing-marker")[0]
+        rendered, skill, count, inserted = behavior.render_prompt(loaded)
+        self.assertEqual(case["prompt"], rendered)
+        self.assertEqual("project-bootstrap-fill", skill)
+        self.assertEqual(1, count)
+        self.assertFalse(inserted)
+
+        duplicate = self.case("stage-c-bootstrap-placeholder")
+        duplicate["prompt"] = "$project-bootstrap-fill\n$project-bootstrap-fill\n\n" + duplicate["prompt"]
+        with self.assertRaisesRegex(behavior.BehaviorError, "duplicate formal invocation"):
+            self.load_mutated_case(duplicate, "duplicate-marker")
+
+        wrong = self.case("stage-c-bootstrap-placeholder")
+        wrong["prompt"] = "$document-backfill\n\n" + wrong["prompt"]
+        with self.assertRaisesRegex(behavior.BehaviorError, "wrong Skill marker"):
+            self.load_mutated_case(wrong, "wrong-marker")
+
+        inline = self.case("stage-c-bootstrap-placeholder")
+        inline["prompt"] = "Use $project-bootstrap-fill as an example.\n" + inline["prompt"]
+        loaded = self.load_mutated_case(inline, "inline-marker")[0]
+        rendered, _, count, inserted = behavior.render_prompt(loaded)
+        self.assertTrue(rendered.startswith("$project-bootstrap-fill\n\n"))
+        self.assertEqual(1, count)
+        self.assertTrue(inserted)
+
+        implicit = self.case("stage-c-handover-read-only")
+        rendered, skill, count, inserted = behavior.render_prompt(implicit)
+        self.assertNotIn("$handover-review", rendered)
+        self.assertIsNone(skill)
+        self.assertEqual(0, count)
+        self.assertFalse(inserted)
+
+    def test_case_evidence_requirements_and_dry_run_plan_are_explicit(self):
+        for case in self.cases:
+            self.assertEqual(behavior.EVIDENCE_REQUIREMENT_KEYS, set(case["evidence_requirements"]))
+            self.assertTrue(any(case["evidence_requirements"].values()))
+        record = behavior.execute_case(
+            REPO, self.case("stage-c-document-backfill-fact"), dry_run=True,
+            temp_parent=self.temp_root,
+        )
+        self.assertEqual("not-obtained", record["evidence_status"]["routing"])
+        self.assertEqual("not-obtained", record["evidence_status"]["skill_source"])
+        self.assertEqual("not-run", record["grader"]["result"])
+        paths = {
+            item["source_path"]
+            for skill in record["materialization"]["skills"] for item in skill["files"]
+        }
+        self.assertIn("skills/document-backfill/SKILL.md", paths)
+
+    def test_missing_or_invalid_evidence_and_implicit_explicit_only_positive_fail(self):
+        manifest_root = self.temp_root / "evidence-schema"
+        shutil.copytree(REPO / "tests/skill-behavior/fixtures/minimal-project", manifest_root / "fixture")
+        shutil.copytree(REPO / "config", manifest_root / "config")
+        shutil.copytree(REPO / "skills", manifest_root / "skills")
+        manifest = json.loads((REPO / "tests/skill-behavior/cases.json").read_text(encoding="utf-8"))
+        manifest["cases"] = [manifest["cases"][4]]
+        manifest["cases"][0]["fixture"] = "fixture"
+
+        missing = json.loads(json.dumps(manifest))
+        del missing["cases"][0]["evidence_requirements"]
+        (manifest_root / "missing.json").write_text(json.dumps(missing), encoding="utf-8")
+        with self.assertRaises(behavior.BehaviorError):
+            behavior.load_cases(manifest_root, "missing.json")
+
+        wrong_type = json.loads(json.dumps(manifest))
+        wrong_type["cases"][0]["evidence_requirements"]["routing"] = "true"
+        (manifest_root / "wrong-type.json").write_text(json.dumps(wrong_type), encoding="utf-8")
+        with self.assertRaises(behavior.BehaviorError):
+            behavior.load_cases(manifest_root, "wrong-type.json")
+
+        implicit = json.loads(json.dumps(manifest))
+        implicit["cases"][0]["invocation_mode"] = "implicit"
+        (manifest_root / "implicit.json").write_text(json.dumps(implicit), encoding="utf-8")
+        with self.assertRaisesRegex(behavior.BehaviorError, "explicit-only"):
+            behavior.load_cases(manifest_root, "implicit.json")
 
     def test_adapter_modules_expose_only_runner_interface(self):
         for client in ("codex", "claude"):

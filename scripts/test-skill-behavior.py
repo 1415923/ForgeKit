@@ -20,6 +20,11 @@ import uuid
 from pathlib import Path, PurePosixPath
 from typing import Any, Callable
 
+try:
+    import yaml
+except ImportError as exc:  # pragma: no cover
+    raise SystemExit("[fail] Skill behavior runner requires PyYAML") from exc
+
 
 FAILURE_CLASSES = {
     "PASS",
@@ -46,8 +51,12 @@ INVOCATION_MODES = {"implicit", "explicit"}
 REQUIRED_CASE_FIELDS = {
     "id", "title", "client", "fixture", "prompt", "invocation_mode", "expected_skill",
     "forbidden_skills", "authorization", "allowed_write_paths", "forbidden_actions",
-    "expected_behavior", "grader", "tags",
+    "expected_behavior", "grader", "tags", "materialized_skills", "evidence_requirements",
 }
+EVIDENCE_REQUIREMENT_KEYS = {
+    "routing", "skill_source", "write_behavior", "forbidden_actions", "model", "tool_trace",
+}
+PROJECT_SKILL_LOCATIONS = {"codex": ".agents/skills", "claude": ".agents/skills"}
 CAPABILITY_KEYS = {"model", "tool_trace", "skill_source", "structured_output", "isolation"}
 REDACTED = "<REDACTED>"
 SENSITIVE_KEYS = {
@@ -120,6 +129,29 @@ def ensure_no_reparse(root: Path, path: Path, label: str) -> None:
             raise BehaviorError(f"{label} crosses a symlink, junction, or reparse point: {current}")
 
 
+def prompt_skill_markers(prompt: str) -> tuple[list[str], list[str]]:
+    formal: list[str] = []
+    tokens: list[str] = []
+    fence: str | None = None
+    for line in prompt.splitlines():
+        stripped = line.strip()
+        match = re.match(r"^(`{3,}|~{3,})", stripped)
+        if match:
+            marker = match.group(1)[0]
+            if fence is None:
+                fence = marker
+            elif marker == fence:
+                fence = None
+            continue
+        if fence is not None:
+            continue
+        tokens.extend(re.findall(r"(?<![\w-])\$([a-z0-9][a-z0-9-]*)\b", line))
+        exact = re.fullmatch(r"\$([a-z0-9][a-z0-9-]*)", stripped)
+        if exact:
+            formal.append(exact.group(1))
+    return formal, tokens
+
+
 def load_cases(repo_root: Path, manifest_relative: str) -> list[dict[str, Any]]:
     manifest_relative = safe_relative(manifest_relative, "case manifest")
     manifest = repo_root.joinpath(*PurePosixPath(manifest_relative).parts).resolve()
@@ -135,6 +167,20 @@ def load_cases(repo_root: Path, manifest_relative: str) -> list[dict[str, Any]]:
         raise BehaviorError("case manifest must be schema_version 1 with a cases array")
     if not isinstance(data["cases"], list) or not data["cases"]:
         raise BehaviorError("case manifest must contain at least one case")
+    projection = json.loads((repo_root / "config/skill-projections.json").read_text(encoding="utf-8"))
+    projected = {
+        entry["skill"]: entry.get("managed_files", [])
+        for entry in projection.get("entries", []) if isinstance(entry, dict) and isinstance(entry.get("skill"), str)
+    }
+    explicit_only: set[str] = set()
+    for skill in projected:
+        package_path = repo_root / "skills" / skill / "agents/openai.yaml"
+        if not package_path.is_file():
+            continue
+        package = yaml.safe_load(package_path.read_text(encoding="utf-8"))
+        policy = package.get("policy") if isinstance(package, dict) else None
+        if isinstance(policy, dict) and policy.get("allow_implicit_invocation") is False:
+            explicit_only.add(skill)
     seen: set[str] = set()
     for index, case in enumerate(data["cases"]):
         if not isinstance(case, dict) or set(case) != REQUIRED_CASE_FIELDS:
@@ -166,15 +212,60 @@ def load_cases(repo_root: Path, manifest_relative: str) -> list[dict[str, Any]]:
                 raise BehaviorError(f"case {case_id} fixture contains a symlink, junction, or reparse point")
         if not isinstance(case["expected_skill"], str):
             raise BehaviorError(f"case {case_id} expected_skill must be a string")
-        for field in ("forbidden_skills", "allowed_write_paths", "forbidden_actions", "tags"):
+        for field in ("forbidden_skills", "allowed_write_paths", "forbidden_actions", "tags", "materialized_skills"):
             if not isinstance(case[field], list) or not all(isinstance(item, str) for item in case[field]):
                 raise BehaviorError(f"case {case_id} field {field} must be a string array")
+        if len(case["materialized_skills"]) != len(set(case["materialized_skills"])):
+            raise BehaviorError(f"case {case_id} materialized_skills contains duplicates")
+        referenced_skills = (
+            ({case["expected_skill"]} if case["expected_skill"] else set())
+            | set(case["forbidden_skills"]) | set(case["materialized_skills"])
+        )
+        unknown_skills = sorted(referenced_skills - set(projected))
+        if unknown_skills:
+            raise BehaviorError(f"case {case_id} references unmanaged Skill(s): {', '.join(unknown_skills)}")
+        evidence = case["evidence_requirements"]
+        if not isinstance(evidence, dict) or set(evidence) != EVIDENCE_REQUIREMENT_KEYS:
+            raise BehaviorError(f"case {case_id} evidence_requirements must contain exactly the frozen evidence keys")
+        if not all(type(value) is bool for value in evidence.values()) or not any(evidence.values()):
+            raise BehaviorError(f"case {case_id} evidence_requirements values must be booleans with at least one true")
+        if case["expected_skill"] and case["expected_skill"] not in case["materialized_skills"]:
+            raise BehaviorError(f"case {case_id} must materialize its expected Skill source")
+        if case["invocation_mode"] == "explicit":
+            if not case["expected_skill"]:
+                raise BehaviorError(f"case {case_id} explicit invocation requires expected_skill")
+            if not evidence["routing"] or not evidence["skill_source"]:
+                raise BehaviorError(f"case {case_id} explicit invocation requires routing and Skill source evidence")
+            formal, tokens = prompt_skill_markers(case["prompt"])
+            wrong = sorted(set(tokens) - {case["expected_skill"]})
+            if wrong:
+                raise BehaviorError(f"case {case_id} explicit prompt contains wrong Skill marker(s): {', '.join(wrong)}")
+            if len(formal) > 1:
+                raise BehaviorError(f"case {case_id} explicit prompt contains duplicate formal invocation markers")
+            if formal and formal[0] != case["expected_skill"]:
+                raise BehaviorError(f"case {case_id} explicit prompt invokes the wrong Skill")
+        elif case["expected_skill"] in explicit_only:
+            raise BehaviorError(f"case {case_id} cannot implicitly invoke explicit-only Skill {case['expected_skill']}")
+        elif prompt_skill_markers(case["prompt"])[0]:
+            raise BehaviorError(f"case {case_id} implicit prompt must not contain a formal Skill invocation")
+        if case["authorization"] == "read_only" and not evidence["write_behavior"]:
+            raise BehaviorError(f"case {case_id} read_only requires write behavior evidence")
+        if case["forbidden_actions"] and (not evidence["forbidden_actions"] or not evidence["tool_trace"]):
+            raise BehaviorError(f"case {case_id} forbidden actions require forbidden-action and tool-trace evidence")
         case["allowed_write_paths"] = [
             safe_relative(path, f"case {case_id} allowed path", allow_directory=True)
             for path in case["allowed_write_paths"]
         ]
         if case["authorization"] == "read_only" and case["allowed_write_paths"]:
             raise BehaviorError(f"case {case_id} is read_only but allows write paths")
+        bounded_write = (
+            case["authorization"] == "bounded_local_write"
+            or bool(case["allowed_write_paths"])
+        )
+        if case["authorization"] == "bounded_local_write" and not case["allowed_write_paths"]:
+            raise BehaviorError(f"case {case_id} bounded local write requires non-empty allowed_write_paths")
+        if bounded_write and not evidence["write_behavior"]:
+            raise BehaviorError(f"case {case_id} bounded local write requires write behavior evidence")
         if not isinstance(case["grader"], dict) or case["grader"].get("type") not in {"manual", "deterministic"}:
             raise BehaviorError(f"case {case_id} grader must select manual or deterministic")
     return data["cases"]
@@ -324,6 +415,72 @@ def load_version(repo_root: Path) -> str:
         return "unknown"
 
 
+def load_projection_entries(repo_root: Path) -> dict[str, list[str]]:
+    data = json.loads((repo_root / "config/skill-projections.json").read_text(encoding="utf-8"))
+    return {
+        entry["skill"]: list(entry.get("managed_files", []))
+        for entry in data.get("entries", [])
+        if isinstance(entry, dict) and isinstance(entry.get("skill"), str)
+    }
+
+
+def materialize_skill_packages(repo_root: Path, workspace: Path, case: dict[str, Any]) -> dict[str, Any]:
+    location = PROJECT_SKILL_LOCATIONS.get(case["client"])
+    if not location:
+        return {"supported": False, "client": case["client"], "location": None, "skills": []}
+    entries = load_projection_entries(repo_root)
+    plans = []
+    for skill in case["materialized_skills"]:
+        managed_files = entries.get(skill)
+        if not managed_files:
+            raise BehaviorError(f"case {case['id']} cannot materialize unmanaged Skill {skill}")
+        files = []
+        for relative in managed_files:
+            relative = safe_relative(relative, f"case {case['id']} materialized file")
+            source = repo_root / "skills" / skill / Path(relative)
+            target_relative = PurePosixPath(location) / skill / PurePosixPath(relative)
+            target = workspace.joinpath(*target_relative.parts)
+            if not source.is_file():
+                raise BehaviorError(f"case {case['id']} authoritative Skill source is missing: {source}")
+            if target.exists():
+                raise BehaviorError(f"case {case['id']} fixture already contains managed Skill path: {target_relative}")
+            target.parent.mkdir(parents=True, exist_ok=True)
+            shutil.copyfile(source, target)
+            if source.read_bytes() != target.read_bytes():
+                raise BehaviorError(f"case {case['id']} materialized Skill bytes differ: {skill}/{relative}")
+            files.append({
+                "source_path": source.relative_to(repo_root).as_posix(),
+                "materialized_path": target_relative.as_posix(),
+                "sha256": hash_bytes(source.read_bytes()),
+            })
+        plans.append({"skill_id": skill, "files": files})
+    return {
+        "supported": True,
+        "client": case["client"],
+        "location": location,
+        "skills": plans,
+    }
+
+
+def render_prompt(case: dict[str, Any]) -> tuple[str, str | None, int, bool]:
+    if case["invocation_mode"] == "implicit":
+        return case["prompt"], None, 0, False
+    skill = case["expected_skill"]
+    if not skill:
+        raise BehaviorError(f"case {case['id']} explicit invocation requires expected_skill")
+    formal, tokens = prompt_skill_markers(case["prompt"])
+    wrong = sorted(set(tokens) - {skill})
+    if wrong:
+        raise BehaviorError(f"case {case['id']} explicit prompt contains wrong Skill marker(s): {', '.join(wrong)}")
+    if len(formal) > 1:
+        raise BehaviorError(f"case {case['id']} explicit prompt contains duplicate formal invocation markers")
+    if formal:
+        if formal[0] != skill:
+            raise BehaviorError(f"case {case['id']} explicit prompt invokes the wrong Skill")
+        return case["prompt"], skill, 1, False
+    return f"${skill}\n\n{case['prompt']}", skill, 1, True
+
+
 def build_isolated_context(runtime_root: Path, auth_env_names: list[str] | None = None) -> dict[str, Any]:
     auth_env_names = auth_env_names or []
     invalid = sorted(set(auth_env_names) - AUTH_ENV_ALLOWLIST)
@@ -367,7 +524,17 @@ def build_isolated_context(runtime_root: Path, auth_env_names: list[str] | None 
     }
 
 
-def base_record(repo_root: Path, case: dict[str, Any], before: dict[str, Any], context: dict[str, Any]) -> dict[str, Any]:
+def base_record(
+    repo_root: Path,
+    case: dict[str, Any],
+    before: dict[str, Any],
+    context: dict[str, Any],
+    rendered_prompt: str,
+    explicit_skill_id: str | None,
+    invocation_marker_count: int,
+    invocation_inserted: bool,
+    materialization: dict[str, Any],
+) -> dict[str, Any]:
     return {
         "schema_version": 1,
         "run_id": str(uuid.uuid4()),
@@ -386,8 +553,23 @@ def base_record(repo_root: Path, case: dict[str, Any], before: dict[str, Any], c
         "capabilities": {key: False for key in CAPABILITY_KEYS},
         "evidence_unavailable_reason": {},
         "invocation_mode": case["invocation_mode"],
-        "prompt": case["prompt"],
-        "prompt_sha256": hash_bytes(case["prompt"].encode("utf-8")),
+        "prompt": rendered_prompt,
+        "original_prompt": case["prompt"],
+        "rendered_prompt": rendered_prompt,
+        "explicit_skill_id": explicit_skill_id,
+        "invocation_marker_count": invocation_marker_count,
+        "invocation_inserted": invocation_inserted,
+        "prompt_sha256": hash_bytes(rendered_prompt.encode("utf-8")),
+        "materialization": materialization,
+        "client_skill_capability": materialization["supported"],
+        "expected_skill_source": (
+            f"skills/{case['expected_skill']}/SKILL.md" if case["expected_skill"] else None
+        ),
+        "evidence_requirements": dict(case["evidence_requirements"]),
+        "evidence_status": {
+            key: "not-obtained" if required else "not-required"
+            for key, required in case["evidence_requirements"].items()
+        },
         "fixture": case["fixture"],
         "fixture_sha256": tree_identity(before),
         "safe_command": None,
@@ -491,9 +673,16 @@ def execute_case(
     try:
         shutil.copytree(fixture_source, workspace)
         (workspace / ".forgekit-skill-behavior-fixture").write_text("isolated\n", encoding="ascii")
+        materialization = materialize_skill_packages(repo_root, workspace, case)
+        if case["materialized_skills"] and not materialization["supported"]:
+            raise BehaviorError(f"case {case['id']} client cannot load common project Skills")
+        rendered_prompt, explicit_skill_id, marker_count, marker_inserted = render_prompt(case)
         context = build_isolated_context(workspace_parent / "runtime", auth_env_names)
         before = tree_snapshot(workspace)
-        record = base_record(repo_root, case, before, context)
+        record = base_record(
+            repo_root, case, before, context, rendered_prompt, explicit_skill_id,
+            marker_count, marker_inserted, materialization
+        )
         if dry_run:
             record["grader"] = {"result": "not-run", "reason": "dry-run did not invoke a client"}
         else:
@@ -503,7 +692,7 @@ def execute_case(
                 if not probe.get("available"):
                     adapter_result = probe
                 else:
-                    adapter_result = adapter.invoke(workspace, case["prompt"], case["invocation_mode"], context)
+                    adapter_result = adapter.invoke(workspace, rendered_prompt, case["invocation_mode"], context)
                     adapter_result.setdefault("available", True)
                     adapter_result.setdefault("executable", probe.get("executable"))
                     adapter_result.setdefault("version", probe.get("version"))

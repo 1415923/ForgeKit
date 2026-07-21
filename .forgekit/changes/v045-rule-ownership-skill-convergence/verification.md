@@ -1,11 +1,11 @@
 # v0.45.0 验证与验收设计
 
 DesignStatus: design-approved-for-stage-a
-ImplementationStatus: stage-b-implemented-awaiting-independent-check
+ImplementationStatus: stage-c-implemented-awaiting-independent-check
 
 ## 1. 状态说明
 
-本文件冻结 v0.45.0 的验收合同，并记录阶段 A 与阶段 B maker 的确定性实施证据。阶段 A 已通过独立 checker；阶段 B 正等待独立 checker。真实 Codex/Claude 行为合同仍为 `NEEDS_TEST`，不得把静态与基础设施通过解释为 A01-A22 全部通过。
+本文件冻结 v0.45.0 的验收合同，并记录阶段 A、阶段 B 与阶段 C maker 的确定性实施证据。阶段 A、阶段 B 已通过独立 checker；阶段 C 正等待独立 checker。真实 Codex/Claude 行为合同仍为 `NEEDS_TEST`，不得把静态、dry-run 与确定性门禁通过解释为 A01-A22 全部通过。
 
 本验收合同应用已经冻结的 DECISION-01、DECISION-02 和 DECISION-03：不把三项决定重新列为选择题，也不以测试结果反向授权阶段 A。
 
@@ -430,3 +430,254 @@ mutation 覆盖 AGENTS 必要 anchor 缺失、CLAUDE 必要 anchor 缺失、完�
 | `git diff --check` | PASS（最终工件写回后再次执行） |
 
 本轮未修改 release mutation 脚本：expected-pass guard 位于 `tests.test_agent_entries`，并由正式 `validate-template.ps1` 的 unittest gate 执行；它使用临时最小仓库运行真实 CLI，退出后自动清理。所有定向证据、focused/full-unit、gate、template 和 smoke 临时目录均已清理，没有工作树 packet、evidence、mutation 或缓存残留。当前状态仍为 `stage-b-implemented-awaiting-independent-check`，只等待原 checker 复核 Markdown 误报修复。
+
+## 17. Stage C maker 验证证据
+
+Stage C 只收敛 `project-init`、`project-bootstrap-fill`、`handover-review`、`document-backfill`、`large-change-planning`。根级 `skills/` 保持唯一共享语义源，template `.agents` 由既有 manifest/sync 投影；`.claude/skills/`、Stage D 四项 Skill、prompts、README、usage、VERSION 和发布元数据均未修改。
+
+### 17.1 静态合同与路由
+
+- `scripts/validate-stage-c-skills.py` 从 41-rule ownership matrix 中 `migration_action` 为阶段 C 的 ROUTE 行动态派生五项 Skill，不维护第二份五项清单，也不复制 Skill 全文或依赖行号/固定章节数。
+- validator 检查 owner、trigger、只读默认、局部授权不重复确认、外部动作保护、事实边界、固定数量/问题/八章节回流、handover 自动修复、backfill 推测、universal checker、project-init 吞既有项目、明显循环和 root/template 漂移。
+- 路由冻结为：新项目初始化→`project-init`；已初始化 placeholder→`project-bootstrap-fill`；接手审计→`handover-review`；实现事实回填→`document-backfill`；高影响分阶段规划→`large-change-planning`。没有全链串行执行或互相回路。
+
+### 17.2 定向测试、mutation 与行为 cases
+
+| Gate | Result |
+| --- | --- |
+| `python -B scripts/validate-stage-c-skills.py` | PASS；5 Skills 从 matrix 派生 |
+| `tests.test_stage_c_skills` | PASS；13/13 |
+| 必需 Stage C mutation | 9/9 mutation 的正式 validator exit 1；错误定位 Skill/rule；finally 恢复逐字节一致；恢复后 exit 0 |
+| 额外 mutation | missing owner/trigger、重复授权/外部保护、固定八章节、明显 route cycle 均失败关闭并恢复 |
+| behavior manifest | PASS；13 cases（Stage A 3 + Stage C 10） |
+| behavior dry-run | PASS；全部 `changed_paths=[]`、cleanup passed、`GRADER_UNCERTAIN/not-run` |
+| 真实 Codex/Claude | 未运行 prompt；继续 `NEEDS_TEST`，不作为 maker 失败，也未据单次模型结果改 Skill |
+
+### 17.3 Development migration 与回归
+
+按 `tasks.md` 阶段 C 修改范围中的 migration 要求，扩展既有且唯一的 `stage-b-migration-draft/0.45.0`：AGENTS/CLAUDE baseline 继续锚定 Stage A commit，五项 Skill baseline 锚定 Stage B commit `d02b496971db3773ac0c1435a423198189d6d8d8`，incoming 与当前 template projection 逐字节一致。stock 自动更新；custom/unknown 保留；missing 安装但不伪造 origin；rollback 保持升级起点；production discovery 仍只见 0.44.1。没有创建正式 `migrations/0.45.0` 或第二个 draft 系统。
+
+| Command / gate | Result |
+| --- | --- |
+| projection / ownership / Stage A-B entry gates | PASS；18 managed files、41 rules、Stage B entry/migration 回归通过 |
+| migration identity/behavior tests | PASS；`tests.test_stage_b_entry_migration` 21/21 |
+| full unittest | PASS；136/136 |
+| plugin / template / manifest | PASS |
+| release consistency | PASS；既有入口/migration mutation 与 18 个 managed projection mutation 均失败并逐字节恢复 |
+| 短路径完整 smoke | PASS；含 `.git`、全部 tracked 和全部 Stage C untracked 文件；首次 clone checkout 的 CRLF 转换在 Git baseline gate 失败关闭，改为从源工作树逐字节 overlay 后通过；两个隔离目录均删除 |
+| `git diff --check` | PASS |
+
+当前 maker 状态为 `stage-c-implemented-awaiting-independent-check`。A12-A16 留 Stage D；A17/A21 与正式 migration/发布写回留 Stage E；A18 只作为最终 release gate；A22 仍需真实客户端证据。
+
+## 18. Stage C independent-review 七项 MAJOR 修复验证
+
+### 18.1 Package、manifest 与 migration
+
+- C-M01：官方当前 Skill package schema 将 `allow_implicit_invocation` 放在顶层 `policy` 下；仓库 package 解析和 mutation 同步验证该字段必须为 boolean。bootstrap/backfill 的错误 SKILL frontmatter metadata 已移除，根级 `agents/openai.yaml` 设置 `policy.allow_implicit_invocation: false`；project-init/bootstrap/backfill 的 default prompt 已与已通过正文收敛，handover/large-change 审计无冲突而未制造 diff。
+- C-M02：manifest generator 的根因是只刷新已列 entry 的 checksum，不发现漏项。template manifest 现恰好包含五份 Stage C `SKILL.md`、三份实际变化的 `agents/openai.yaml` 和 generated-project `.gitattributes`；Stage C validator 增加 completeness、唯一性和 checksum gate，删除、错误 checksum、duplicate mutation 均失败。
+- development migration 仍是唯一 change-local draft。五份 SKILL 和三份 YAML baseline 均锚定 Stage B commit `d02b496971db3773ac0c1435a423198189d6d8d8`，incoming 与当前 template projection 逐字节一致；stock/custom/unknown/missing/rollback 与 production discovery 门禁通过。未创建正式 `migrations/0.45.0`。
+
+### 18.2 Markdown 语义层与双源集合
+
+- C-M03/C-M04：Stage C validator 复用 Stage B 已验证的 frontmatter/fence/heading/inline-code/link/path/navigation 分层，只在提取后的普通 policy prose 上运行 required/contradiction detector。已有项目重新初始化与 mandatory five-Skill pipeline 使用 subject/action/universal/sequential/negation 数据组，而不是硬编码完整 checker 句子。
+- 三个 reinitialize 反例和三个 mandatory-pipeline 反例均非零；`must not`/`do not` 安全否定通过。fenced/heading required marker 不能伪造合同；fenced/heading legacy、inline path 不误报；普通 prose、list、table、Markdown link 后真实反例继续失败。
+- C-M05：Source A 从 `tasks.md` 的 SC-01..SC-05 owner path 解析，Source B 从 41-rule matrix 的 Stage C ROUTE normative owner 解析。两边必须各为五个不同 Skill、集合完全相等、均存在于 projection manifest，且不得与 Stage D owner 交集。matrix/tasks 缩为四项、两边各五但不同、Stage D owner、duplicate mutation 均失败；没有第二份五项名称清单。
+
+### 18.3 Behavior source、explicit invocation 与 evidence
+
+- C-M06：case 的 `materialized_skills` 从根级 `skills/<id>/` 在 runtime temp fixture 中复制 manifest 管理的 `SKILL.md` 与 `agents/openai.yaml` 到 client 支持的 `.agents/skills/<id>/`；source/target bytes 与 SHA-256 记录在 dry-run，finally 清理，不提交第四份正文。
+- explicit case 的 adapter prompt 为 `$skill-id` 加原始 prompt；implicit case 不注入 `$skill-id`。explicit-only Skill 的 implicit positive case在 schema 阶段拒绝。
+- 13 个 case 均声明 routing、Skill source、write behavior、forbidden action、model 和 tool trace 的 boolean evidence requirement。dry-run 将必需但未取得的证据标为 `not-obtained`，结果保持 `GRADER_UNCERTAIN/not-run`；未执行真实 Codex/Claude prompt。
+
+### 18.4 LF checkout 与当前确定性结果
+
+- C-M07：根 `.gitattributes` 对 `.gitattributes` 自身、`*.md`、`*.json`、`*.yaml`、`*.yml` 固定 `text eol=lf`；模板 `.gitattributes` 使用相同 generated-project byte-sensitive text 合同并进入 manifest。Python/PowerShell 的既有 checkout 规则未扩大。
+- `test-fresh-clone-crlf.py` 从当前 tracked/untracked Stage C 文件构造本地临时 commit，明确排除用户 `usage.html` 删除，再使用 `--no-local` 创建 autocrlf=false/true clone；clone 后不复制或覆盖 tracked 文件。runner 为嵌套 migration/unit/smoke 设置同一短路径 TEMP/TMP，避免 Windows 长路径把 checkout 合同测试误变为 `WinError 206`。
+- 最终 `--full --mutation-check` 临时 commit 为 `194abdf712206b21c980d0c3e501b72f0967472a`。Stage C snapshot（含 `.git`，只在隔离副本物化 HEAD `usage.html`）、autocrlf=false fresh clone、autocrlf=true fresh clone 三路 smoke 均 PASS；两种 fresh clone 的 Stage C、migration、projection、template、完整 smoke 均 PASS，且 clone 后无 byte overlay。
+- 两种 clone 的代表性 Git blob/working-tree SHA-256 完全相等：`.gitattributes` `68e9a1aa.../68e9a1aa...`、project-init SKILL `15591041.../15591041...`、project-init YAML `dace0e47.../dace0e47...`、template manifest `0daefde6.../0daefde6...`、migration descriptor `cf6ea9f2.../cf6ea9f2...`；`git check-attr` 均为 `text: set`, `eol: lf`。删除 Markdown LF rule 后，autocrlf=true clone 的正式 validator exit 1，project-init blob `15591041...` 与 working-tree `24ea0791...` 不同。
+- 定向结果：Stage C 16/16、behavior runner 19/19、behavior adapters 4/4、fresh-clone 3/3、migration 21/21；完整 unittest 146/146。所有 mutation 位于临时副本或由 finally 逐字节恢复。
+- 正式 release consistency PASS：既有入口、migration、projection mutation 均非零并逐字节恢复，随后快速 LF/CRLF fresh-clone gate PASS。plugin/template/manifest、Stage A/B 回归和 `git diff --check` 均 PASS。
+
+当前状态继续为 `stage-c-implemented-awaiting-independent-check`。七项均为 maker `Fixed / self-verified`，必须等待原 checker recheck；不得写成 Stage C approved 或进入 Stage D/E。
+
+## 19. Stage C recheck 剩余五项修复验证
+
+### 19.1 Package、manifest 与语义
+
+- 五个 default prompt 的首个非空逻辑行分别是唯一正确的 $skill-id。package validator 对缺失、重复、错误/其他 Stage C Skill、fenced/inline-only marker 失败关闭；没有修改公开 ID、name 或 display name。
+- fixed-quantity detector 同时作用于 SKILL policy prose 和 YAML default prompt。任意数字/数字词加 files/modules/lines/components 与 threshold/required/use-when/treat-as-large 强制语义均失败；明确安全否定和 deterministic low-risk 示例通过。
+- manifest generator 从 projection config 生成完整 18-file target 集合并以 raw bytes 计算 SHA-256。manifest 为 18/18，Stage C package 为 10/10；missing unchanged YAML、非 Stage C projection target、duplicate、wrong checksum 和 config 新 target 未同步均失败。
+- reinitialize family 覆盖 existing/already/previously initialized project/repository/workspace 与 repeat/rerun/restart/go-through/from-scratch；pipeline family 覆盖 all/every/complete-five、required/must/always、sequence/order/one-by-one、task/request/project scope。checker 四个漏检句和两个额外变体均由真实 CLI exit 1 拒绝并回显 Skill/category/matched text。安全否定通过；C-M04/C-M05 回归通过。
+
+### 19.2 Behavior、migration 与 raw-byte/LF
+
+- bounded-write case 必须 write_behavior=true 且 allowed paths 非空；read-only handover 仍要求 write oracle。关闭 evidence、删除 allowlist、错误类型均在 schema validate 阶段失败并定位 case ID。
+- explicit renderer 只认可 fence 外独立逻辑行的精确 $skill-id。无 marker 插入一次；已有一次保持原 prompt并记录 invocation_inserted=false；重复/错误 marker 失败；inline 示例不替代正式调用；implicit 不注入。dry-run 记录 original/rendered prompt、explicit ID、marker count、inserted、materialized source 与尚未取得的 evidence，结果继续为 GRADER_UNCERTAIN/not-run。
+- development migration target 为五份 SKILL + 五份 YAML；新增 handover/large-change YAML baseline/incoming，刷新其余三份 YAML incoming/checksum。baseline 仍锚定 d02b496971db3773ac0c1435a423198189d6d8d8，incoming 逐字节等于 template，stock/custom/unknown/missing/rollback 保持通过。
+- sync、manifest、Stage C、migration 与 smoke checksum helper 均以原始 bytes 计算/比较；语义 decode 与 byte gate 分离。LF gate 覆盖 18 个 projection source/target、完整 template manifest source、manifest、两份 .gitattributes、migration descriptor 与 baseline/incoming。
+
+### 19.3 测试、mutation 与 checkout 证据
+
+| Gate | Result |
+| --- | --- |
+| Stage C/package/manifest/semantic | PASS；25/25 |
+| behavior runner | PASS；21/21 |
+| projection | PASS；11/11 |
+| migration | PASS；23/23 |
+| fresh-clone unit | PASS；3/3 |
+| 上述定向合计 | PASS；83/83 |
+| 全量 unittest | PASS；160/160 |
+| Stage C / projection / ownership / entry / migration | PASS |
+| behavior validate/list/dry-run | PASS；13 cases；未启动真实客户端 |
+| plugin / template / manifest / release consistency | PASS |
+| scoped snapshot / autocrlf=false / autocrlf=true full smoke | PASS / PASS / PASS |
+
+root 单侧 CRLF、root/template 双侧、双侧加 manifest checksum、YAML 双侧、migration incoming 加 descriptor checksum 均由正式 raw/LF gate 非零拒绝；隔离副本销毁或 finally 逐字节恢复。删除 Markdown LF rule 后 autocrlf=true clone 的 validator exit 1，project-init blob SHA-256 为 155910413dcdd658ac19b5f586a668db27147aaa960200666b03cd34047c02ce，working-tree SHA-256 为 24ea0791c4ff5a0de8e03b50dc9598576d5b1c4e4cc1f1b87ba6292723be7929。
+
+最终 full gate 临时 commit 为 477e041183602ca9cc1ddc006404ca98084a7441。autocrlf=false/true 中受审路径均满足 blob bytes = working-tree bytes，且 git attributes 为 text set/eol lf。代表性相等 SHA-256：根 .gitattributes a11de07a...、project-init SKILL 15591041...、project-init YAML 512070ce...、template manifest 0e386223...、migration descriptor afa2c5a1...。
+
+当前仍为 maker Fixed / self-verified / awaiting original checker recheck；真实 Codex/Claude prompt 未执行。状态保持 stage-c-implemented-awaiting-independent-check。
+
+## 20. Stage C 最后两个 OPEN finding 验证
+
+### 20.1 数据驱动语义要素
+
+- C-M01 不维护 forbidden-sentence 列表。detector 要求同一 policy segment 同时出现 quantity、workload unit、mandatory trigger 与 risk/process target；prompt 与 SKILL policy prose 使用同一入口。`42-directory`、`more than 11 folders`、`changing three services`、`28 packages`、`over 700 lines`、`affecting nine endpoints`、`dozens of classes` 均命中；`must not`、`does not`、example-only 与 may/can remain low risk 均通过。
+- C-M03A 以已有状态主体、初始化/setup/bootstrap 动作、再次/从头语义与 modal/命令式组合判定，支持主体前置、动作前置、条件前置与被动式。C-M03B 以全量 Skill 集合、普遍任务范围、mandatory 与 sequence/workflow 组合判定，并覆盖 no Skill may be skipped 的等价全量流水。
+- C-M04 的 Markdown policy-prose extractor 与 negation 分层未修改；fence、heading、navigation、inline path 和 safe negation 回归通过。C-M05 双源五项集合实现未修改。
+
+### 20.2 checker 六句正式 CLI
+
+| Sentence | Exit | Category |
+| --- | --- | --- |
+| `A 42-directory change requires independent planning.` | 1 | `large-change-planning [package-prompt/fixed-quantity-risk-threshold]`，含 quantity/unit/trigger/target |
+| `An initialized project is required to go through project setup again before review.` | 1 | `project-init [existing-project-reinitialize]` |
+| `Before review, reinitialize every previously initialized repository.` | 1 | `project-init [existing-project-reinitialize]` |
+| `All Stage C Skills form a mandatory one-by-one workflow for each project.` | 1 | `project-init [mandatory-five-skill-pipeline]` |
+| `For every project request, all five Skills have to be processed sequentially as one required workflow.` | 1 | `project-init [mandatory-five-skill-pipeline]` |
+| `Always take each task through every Stage C Skill in a fixed order.` | 1 | `project-init [mandatory-five-skill-pipeline]` |
+
+每项 mutation 同时保留全部正向 marker，输出包含完整 matched prose；隔离副本销毁或逐字节恢复。
+
+### 20.3 回归与正式门禁
+
+| Gate | Result |
+| --- | --- |
+| `python -B scripts/validate-stage-c-skills.py` | PASS；tasks/matrix 五项锁定 |
+| `python -B -m unittest tests.test_stage_c_skills` | PASS；28/28 |
+| 六句 formal CLI 定向 | PASS；6/6 均验证 validator exit 1 |
+| `python -B -m unittest discover -s tests -p "test_*.py"` | PASS；163/163 |
+| projection / manifest 18/18 / ownership / entry / migration | PASS |
+| behavior validate / dry-run | PASS；13 cases；真实模型仍 `GRADER_UNCERTAIN/not-run` |
+| fresh clone LF/CRLF | PASS；临时提交 `a4debe204d2ade609a83950fb49bb2bd987b722d`，clone 后无 byte overlay |
+| template validator | PASS |
+| release consistency | PASS；directory/setup-again/one-by-one mutation 均失败关闭并逐字节恢复 |
+| `git diff --check` | PASS |
+
+C-M02 manifest、C-M06 behavior evidence/renderer 与 C-M07 raw-byte/LF/fresh-clone 只复跑既有门禁，未修改实现。当前状态继续为 `stage-c-implemented-awaiting-independent-check`。
+
+## 21. Stage C 最后一个 OPEN finding（C-M03）验证
+
+### 21.1 句级 feature 不变量
+
+- Reinitialize：对 Markdown policy-prose 提取后的每个句子独立计算 existing/initialized subject、initialization/setup/bootstrap action、again/once-more/anew/from-scratch/repeat/rerun/restart/reinitialize、modal/command feature。只有 A+B+C+D 同句成立且动作未被局部否定、没有替代路由时，才返回 `existing-project-reinitialize`。
+- Mandatory full-Skill execution：独立计算 full Skill set、universal task scope、mandatory、sequence/chain 和 non-skippable。`S+U+M` 已足够失败；`S+U+Q` 与 `non-skippable+U` 也是独立失败分支。
+- C-M04 的 Markdown/fence/heading/navigation 提取 helper 未修改。安全上下文覆盖 `without repeating/rerunning/reinitializing`、must/do/should not、never、not required、handover-review instead of、alternatives、not every、no fixed order、need not 与 only matching Skill。
+
+### 21.2 checker 九个问题的正式 CLI
+
+| Prose | Expected / actual exit | Category / features |
+| --- | --- | --- |
+| `Run the bootstrap process once more for repositories that are already initialized.` | 1 / 1 | `existing-project-reinitialize`; `existing_subject,init_action,repeat_action,positive_requirement` |
+| `For each project that has already been initialized, run project setup again.` | 1 / 1 | `existing-project-reinitialize`; `existing_subject,init_action,repeat_action,positive_requirement` |
+| `Existing repositories may continue to handover-review without repeating setup.` | 0 / 0 | no finding；局部否定与替代路由生效 |
+| `Every request must complete each Stage C Skill before finishing.` | 1 / 1 | `mandatory-five-skill-pipeline`; `full_skill_set,universal_scope,mandatory,sequence` |
+| `The complete Stage C Skill set is a required chain for any change.` | 1 / 1 | `mandatory-five-skill-pipeline`; `full_skill_set,universal_scope,mandatory,sequence` |
+| `Every Stage C Skill is compulsory for every project request.` | 1 / 1 | `mandatory-five-skill-pipeline`; `full_skill_set,universal_scope,mandatory` |
+| `Each of the five Skills is mandatory for every task.` | 1 / 1 | `mandatory-five-skill-pipeline`; `full_skill_set,universal_scope,mandatory` |
+| `The complete set of five forms a prerequisite chain for each change.` | 1 / 1 | `mandatory-five-skill-pipeline`; `full_skill_set,universal_scope,mandatory,sequence` |
+| `All five Skills are required one at a time for any project request.` | 1 / 1 | `mandatory-five-skill-pipeline`; `full_skill_set,universal_scope,mandatory,sequence` |
+
+每项在隔离 package 副本保留正向合同 marker 后调用真实 `validate-stage-c-skills.py` CLI；输出断言 Skill、category、matched prose 和 feature 集合，副本销毁或原始 bytes 恢复。
+
+### 21.3 回归和 mutation
+
+| Gate | Result |
+| --- | --- |
+| Stage C validator | PASS；tasks/matrix 五项锁定 |
+| `tests.test_stage_c_skills` | PASS；28/28；含 C-M01 directory threshold 最小回归 |
+| full unittest | PASS；163/163 |
+| projection / manifest / ownership / entry / migration | PASS；18/18 manifest 保持完整 |
+| behavior validate / dry-run | PASS；13 cases；未启动真实模型 |
+| template validation | PASS |
+| fresh-clone LF/CRLF | PASS；临时提交 `48649a7af23670db8a697f21692b04577e5bbd11`；无 post-clone overlay |
+| release consistency | PASS；setup-again、action-first bootstrap-once-more、one-by-one、full-set mandatory without sequence 均失败关闭并逐字节恢复；C-M01 directory mutation 继续失败关闭 |
+| `git diff --check` | PASS |
+
+C-M01/C-M02/C-M04/C-M05/C-M06/C-M07 保持 CLOSED。当前状态仍为 `stage-c-implemented-awaiting-independent-check`，只等待原 checker 复核 C-M03。
+
+## 22. Stage C C-M03A 命令式初始化动作验证
+
+### 22.1 词法与命令式合同
+
+- Bootstrap verb family 覆盖 `bootstrap/bootstraps/bootstrapped/bootstrapping`；token 边界排除 `bootstrappable`、`bootstrapper` 和标识符后缀。
+- Setup noun 与 `set up/sets up/setting up`、`set the project/repository/workspace up`、`set it up` 分离处理。只有 feature 分析副本规范化相邻短语，matched prose 保持原始句子。
+- imperative detector 只接受句首初始化命令或 `Before review/audit/handover/continuing`、`For each/every/any ...` 前置状语后的命令；`Do not`、`Never`、`Without`、`Instead of` 不形成正向命令。
+- C-M03A 判定仍为 A+B+C+D 且非 `negated_init/alternative_route`；C-M03B、Markdown extractor 和其余 finding 实现未修改。
+
+### 22.2 两个 checker 漏检
+
+| Prose | Expected / actual exit | Category / features |
+| --- | --- | --- |
+| `Bootstrap an already initialized repository again.` | 1 / 1 | `existing-project-reinitialize`; `existing_subject,init_action,repeat_action,positive_requirement` |
+| `Set up each existing workspace from scratch.` | 1 / 1 | `existing-project-reinitialize`; `existing_subject,init_action,repeat_action,positive_requirement` |
+
+补充正向表达覆盖 bootstrap once more、split-particle `set ... up again`、前置状语、`set it up from scratch` 和 required gerund；否定、without bootstrapping、handover alternative、说明/示例、bootstrap 名词、setup-like token、inline/fenced set-up 全部通过。
+
+### 22.3 门禁结果
+
+| Gate | Result |
+| --- | --- |
+| Stage C validator / directed module | PASS；28/28 |
+| full unittest | PASS；163/163 |
+| projection / manifest / ownership / entry / migration | PASS；manifest 18/18 |
+| behavior validate / dry-run | PASS；13 cases；真实模型未运行 |
+| template validation | PASS |
+| autocrlf=false/true fresh clone | PASS；临时提交 `eb113b48427a593385b59aa6655d9dfc41b95956`；无 post-clone overlay |
+| release consistency | PASS；bootstrap-again 与 phrasal-set-up mutation 均按 category/prose/features 失败并逐字节恢复；既有 C-M01/C-M03B mutation 保持通过 |
+| `git diff --check` | PASS |
+
+当前仍是 maker self-verified；状态保持 `stage-c-implemented-awaiting-independent-check`，只等待原 checker 复核两个命令式表达及安全回归。
+
+## 23. Stage C C-M03A init-action 正负对称验证
+
+### 23.1 单一 matcher 与局部否定
+
+- `INIT_ACTION_SPECS` 是 initialize/reinitialize/bootstrap/setup/set-up/repeat-init 的唯一词法源；`InitActionMatch` 保存 `start/end/family/text`，原句不被改写。
+- `directive_init_action_matches` 排除 existing/initialized subject span 内的描述性 action；`init_action` 与 imperative detector直接使用剩余 match。
+- `init_action_is_negated` 针对每个相同 match 检查局部 before/after scope：modal+not/never、cannot、do/does not、without、instead of、copula not，以及 action 后 `is not required`/`should never be used`。`init_actions_are_negated` 只有在全部 directive action 均被局部否定时才抑制 finding。
+- 原 `NEGATED_INIT_PATTERNS` 已删除，没有第二份 bootstrap/setup/initialize 词形表；C-M03A 布尔合同、C-M03B 和 Markdown helper 未修改。
+
+### 23.2 正式 CLI 与对称表
+
+| Prose | Expected / actual | Result |
+| --- | --- | --- |
+| `An already initialized project must not be bootstrapped again.` | 0 / 0 | no finding；`bootstrapped` match 被 modal+not passive scope 否定 |
+| `An already initialized project must be bootstrapped again.` | 1 / 1 | `project-init [existing-project-reinitialize]`；matched prose 与四项 feature 完整 |
+
+正式 CLI 另验证 should-not/cannot passive bootstrap、without bootstrapping、must-not set-up 和 gerund `is not required` 均 exit 0。表驱动正负对称覆盖 bootstrap、bootstrapped、bootstrapping、set up、set object up、initialized、reinitialize 七组；每组正向命中相同 family 且失败，负向同 family match 被局部否定且通过。
+
+### 23.3 门禁
+
+| Gate | Result |
+| --- | --- |
+| Stage C validator / directed module | PASS；29/29 |
+| full unittest | PASS；164/164 |
+| projection / manifest / ownership / entry / migration | PASS；manifest 18/18 |
+| behavior validate / dry-run | PASS；13 cases；真实模型未运行 |
+| template validation | PASS |
+| autocrlf=false/true fresh clone | PASS；临时提交 `fb9538cca22cb7a9cdb1d1eb55499ab7167658d7`；无 post-clone overlay |
+| release consistency | PASS；negated bootstrapped expected-pass guard exit 0，对应 positive guard exit 1；root/template/manifest 逐字节恢复，既有 C-M01/C-M03B mutation 保持通过 |
+| `git diff --check` | PASS |
+
+当前仍是 maker self-verified；状态保持 `stage-c-implemented-awaiting-independent-check`，等待原 checker 只复核正负词形对称性。

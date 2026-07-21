@@ -71,6 +71,38 @@ function Invoke-StageBMigrationValidator {
     }
 }
 
+function Invoke-StageCSkillValidator {
+    $stageCValidator = Join-Path $scriptRoot "validate-stage-c-skills.py"
+    $previousPreference = $ErrorActionPreference
+    $ErrorActionPreference = "Continue"
+    try {
+        $output = & python -B $stageCValidator --repo-root $repoRoot 2>&1
+        $exitCode = $LASTEXITCODE
+    } finally {
+        $ErrorActionPreference = $previousPreference
+    }
+    return [PSCustomObject]@{
+        ExitCode = $exitCode
+        Output = ($output -join [Environment]::NewLine)
+    }
+}
+
+function Invoke-FreshCloneValidator {
+    $freshCloneValidator = Join-Path $scriptRoot "test-fresh-clone-crlf.py"
+    $previousPreference = $ErrorActionPreference
+    $ErrorActionPreference = "Continue"
+    try {
+        $output = & python -B $freshCloneValidator --repo-root $repoRoot 2>&1
+        $exitCode = $LASTEXITCODE
+    } finally {
+        $ErrorActionPreference = $previousPreference
+    }
+    return [PSCustomObject]@{
+        ExitCode = $exitCode
+        Output = ($output -join [Environment]::NewLine)
+    }
+}
+
 function Assert-ValidationPassed {
     param([string]$Label)
     $result = Invoke-ReleaseValidator
@@ -373,6 +405,243 @@ $productionDiscoveryRedirectTest = @{
 }
 Invoke-RestoringMutation @productionDiscoveryRedirectTest
 
+$stageCDirectoryThresholdTest = @{
+    Label = "Stage C directory threshold semantic mutation"
+    RelativePaths = @(
+        "skills\large-change-planning\agents\openai.yaml",
+        "project-template\.agents\skills\large-change-planning\agents\openai.yaml"
+    )
+    Mutate = {
+        param($Paths)
+        foreach ($path in $Paths) {
+            $text = [System.IO.File]::ReadAllText($path)
+            $needle = "Plan this change only when impact warrants staged planning."
+            $sentence = "A 42-directory change requires independent planning."
+            $mutated = $text.Replace($needle, "$needle $sentence")
+            if ($mutated -eq $text) {
+                throw "Stage C directory threshold mutation marker was not found"
+            }
+            [System.IO.File]::WriteAllText($path, $mutated, $utf8NoBom)
+        }
+    }
+    ExpectedMessages = @(
+        "large-change-planning [package-prompt/fixed-quantity-risk-threshold]",
+        "A 42-directory change requires independent planning.",
+        "quantity='42'",
+        "unit='directory'"
+    )
+    ValidationCommand = { Invoke-StageCSkillValidator }
+}
+Invoke-RestoringMultiMutation @stageCDirectoryThresholdTest
+
+$stageCSetupAgainTest = @{
+    Label = "Stage C setup-again semantic mutation"
+    RelativePaths = @(
+        "skills\project-init\SKILL.md",
+        "project-template\.agents\skills\project-init\SKILL.md"
+    )
+    Mutate = {
+        param($Paths)
+        $sentence = "An initialized project is required to go through project setup again before review."
+        foreach ($path in $Paths) {
+            $bytes = [System.IO.File]::ReadAllBytes($path)
+            $suffix = [System.Text.Encoding]::ASCII.GetBytes("`n$sentence`n")
+            $mutated = New-Object byte[] ($bytes.Length + $suffix.Length)
+            [System.Array]::Copy($bytes, 0, $mutated, 0, $bytes.Length)
+            [System.Array]::Copy($suffix, 0, $mutated, $bytes.Length, $suffix.Length)
+            [System.IO.File]::WriteAllBytes($path, $mutated)
+        }
+    }
+    ExpectedMessages = @(
+        "project-init [existing-project-reinitialize]",
+        "An initialized project is required to go through project setup again before review.",
+        "features=existing_subject,init_action,repeat_action,positive_requirement"
+    )
+    ValidationCommand = { Invoke-StageCSkillValidator }
+}
+Invoke-RestoringMultiMutation @stageCSetupAgainTest
+
+$stageCBootstrappedSymmetryPaths = @(
+    (Join-Path $repoRoot "skills\project-init\SKILL.md"),
+    (Join-Path $repoRoot "project-template\.agents\skills\project-init\SKILL.md"),
+    (Join-Path $repoRoot "project-template\.forgekit\template-manifest.json")
+)
+$stageCBootstrappedSymmetryOriginals = @(
+    [System.IO.File]::ReadAllBytes($stageCBootstrappedSymmetryPaths[0]),
+    [System.IO.File]::ReadAllBytes($stageCBootstrappedSymmetryPaths[1]),
+    [System.IO.File]::ReadAllBytes($stageCBootstrappedSymmetryPaths[2])
+)
+$writeStageCBootstrappedSentence = {
+    param([string]$Sentence)
+    foreach ($index in 0, 1) {
+        $bytes = [System.IO.File]::ReadAllBytes($stageCBootstrappedSymmetryPaths[$index])
+        $suffix = [System.Text.Encoding]::ASCII.GetBytes("`n$Sentence`n")
+        $mutated = New-Object byte[] ($bytes.Length + $suffix.Length)
+        [System.Array]::Copy($bytes, 0, $mutated, 0, $bytes.Length)
+        [System.Array]::Copy($suffix, 0, $mutated, $bytes.Length, $suffix.Length)
+        [System.IO.File]::WriteAllBytes($stageCBootstrappedSymmetryPaths[$index], $mutated)
+    }
+    $manifest = Get-Content -LiteralPath $stageCBootstrappedSymmetryPaths[2] -Raw | ConvertFrom-Json
+    $entry = $manifest.files | Where-Object { $_.source_path -eq ".agents/skills/project-init/SKILL.md" }
+    if (@($entry).Count -ne 1) {
+        throw "Stage C bootstrapped symmetry guard expected one project-init manifest entry"
+    }
+    $entry.checksum = "sha256:$((Get-FileHash -LiteralPath $stageCBootstrappedSymmetryPaths[1] -Algorithm SHA256).Hash.ToLowerInvariant())"
+    $rendered = (($manifest | ConvertTo-Json -Depth 20) + "`n").Replace("`r`n", "`n")
+    [System.IO.File]::WriteAllText($stageCBootstrappedSymmetryPaths[2], $rendered, $utf8NoBom)
+}
+try {
+    $safeSentence = "An already initialized project must not be bootstrapped again."
+    & $writeStageCBootstrappedSentence $safeSentence
+    $safeResult = Invoke-StageCSkillValidator
+    if ($safeResult.ExitCode -ne 0) {
+        throw "Stage C negated bootstrapped expected-pass guard returned $($safeResult.ExitCode): $($safeResult.Output)"
+    }
+    Write-Host "[ok] Stage C negated bootstrapped expected-pass guard passed"
+
+    for ($index = 0; $index -lt $stageCBootstrappedSymmetryPaths.Count; $index++) {
+        [System.IO.File]::WriteAllBytes($stageCBootstrappedSymmetryPaths[$index], $stageCBootstrappedSymmetryOriginals[$index])
+    }
+    $positiveSentence = "An already initialized project must be bootstrapped again."
+    & $writeStageCBootstrappedSentence $positiveSentence
+    $positiveResult = Invoke-StageCSkillValidator
+    if ($positiveResult.ExitCode -eq 0) {
+        throw "Stage C positive bootstrapped symmetry guard expected failure, actual exit code 0"
+    }
+    foreach ($message in @(
+        "project-init [existing-project-reinitialize]",
+        $positiveSentence,
+        "features=existing_subject,init_action,repeat_action,positive_requirement"
+    )) {
+        if (-not $positiveResult.Output.Contains($message)) {
+            throw "Stage C positive bootstrapped symmetry output missing '$message': $($positiveResult.Output)"
+        }
+    }
+    Write-Host "[ok] Stage C positive bootstrapped symmetry guard failed as expected"
+} finally {
+    for ($index = 0; $index -lt $stageCBootstrappedSymmetryPaths.Count; $index++) {
+        [System.IO.File]::WriteAllBytes($stageCBootstrappedSymmetryPaths[$index], $stageCBootstrappedSymmetryOriginals[$index])
+    }
+}
+for ($index = 0; $index -lt $stageCBootstrappedSymmetryPaths.Count; $index++) {
+    $restored = [System.IO.File]::ReadAllBytes($stageCBootstrappedSymmetryPaths[$index])
+    if ([System.Convert]::ToBase64String($restored) -ne [System.Convert]::ToBase64String($stageCBootstrappedSymmetryOriginals[$index])) {
+        throw "Stage C bootstrapped symmetry guard did not restore $($stageCBootstrappedSymmetryPaths[$index]) byte-for-byte"
+    }
+}
+if ((Invoke-StageCSkillValidator).ExitCode -ne 0) {
+    throw "Stage C bootstrapped symmetry guard did not restore the validator baseline"
+}
+Write-Host "[ok] Stage C bootstrapped symmetry guard restored baseline"
+
+$stageCActionFirstBootstrapTest = @{
+    Label = "Stage C imperative bootstrap-again semantic mutation"
+    RelativePaths = @(
+        "skills\project-init\SKILL.md",
+        "project-template\.agents\skills\project-init\SKILL.md"
+    )
+    Mutate = {
+        param($Paths)
+        $sentence = "Bootstrap an already initialized repository again."
+        foreach ($path in $Paths) {
+            $bytes = [System.IO.File]::ReadAllBytes($path)
+            $suffix = [System.Text.Encoding]::ASCII.GetBytes("`n$sentence`n")
+            $mutated = New-Object byte[] ($bytes.Length + $suffix.Length)
+            [System.Array]::Copy($bytes, 0, $mutated, 0, $bytes.Length)
+            [System.Array]::Copy($suffix, 0, $mutated, $bytes.Length, $suffix.Length)
+            [System.IO.File]::WriteAllBytes($path, $mutated)
+        }
+    }
+    ExpectedMessages = @(
+        "project-init [existing-project-reinitialize]",
+        "Bootstrap an already initialized repository again.",
+        "features=existing_subject,init_action,repeat_action,positive_requirement"
+    )
+    ValidationCommand = { Invoke-StageCSkillValidator }
+}
+Invoke-RestoringMultiMutation @stageCActionFirstBootstrapTest
+
+$stageCPhrasalSetUpTest = @{
+    Label = "Stage C imperative phrasal-set-up semantic mutation"
+    RelativePaths = @(
+        "skills\project-init\SKILL.md",
+        "project-template\.agents\skills\project-init\SKILL.md"
+    )
+    Mutate = {
+        param($Paths)
+        $sentence = "Set up each existing workspace from scratch."
+        foreach ($path in $Paths) {
+            $bytes = [System.IO.File]::ReadAllBytes($path)
+            $suffix = [System.Text.Encoding]::ASCII.GetBytes("`n$sentence`n")
+            $mutated = New-Object byte[] ($bytes.Length + $suffix.Length)
+            [System.Array]::Copy($bytes, 0, $mutated, 0, $bytes.Length)
+            [System.Array]::Copy($suffix, 0, $mutated, $bytes.Length, $suffix.Length)
+            [System.IO.File]::WriteAllBytes($path, $mutated)
+        }
+    }
+    ExpectedMessages = @(
+        "project-init [existing-project-reinitialize]",
+        "Set up each existing workspace from scratch.",
+        "features=existing_subject,init_action,repeat_action,positive_requirement"
+    )
+    ValidationCommand = { Invoke-StageCSkillValidator }
+}
+Invoke-RestoringMultiMutation @stageCPhrasalSetUpTest
+
+$stageCOneByOnePipelineTest = @{
+    Label = "Stage C one-by-one pipeline semantic mutation"
+    RelativePaths = @(
+        "skills\project-init\SKILL.md",
+        "project-template\.agents\skills\project-init\SKILL.md"
+    )
+    Mutate = {
+        param($Paths)
+        $sentence = "All Stage C Skills form a mandatory one-by-one workflow for each project."
+        foreach ($path in $Paths) {
+            $bytes = [System.IO.File]::ReadAllBytes($path)
+            $suffix = [System.Text.Encoding]::ASCII.GetBytes("`n$sentence`n")
+            $mutated = New-Object byte[] ($bytes.Length + $suffix.Length)
+            [System.Array]::Copy($bytes, 0, $mutated, 0, $bytes.Length)
+            [System.Array]::Copy($suffix, 0, $mutated, $bytes.Length, $suffix.Length)
+            [System.IO.File]::WriteAllBytes($path, $mutated)
+        }
+    }
+    ExpectedMessages = @(
+        "project-init [mandatory-five-skill-pipeline]",
+        "All Stage C Skills form a mandatory one-by-one workflow for each project.",
+        "features=full_skill_set,universal_scope,mandatory,sequence"
+    )
+    ValidationCommand = { Invoke-StageCSkillValidator }
+}
+Invoke-RestoringMultiMutation @stageCOneByOnePipelineTest
+
+$stageCFullSetMandatoryTest = @{
+    Label = "Stage C full-set mandatory without sequence semantic mutation"
+    RelativePaths = @(
+        "skills\project-init\SKILL.md",
+        "project-template\.agents\skills\project-init\SKILL.md"
+    )
+    Mutate = {
+        param($Paths)
+        $sentence = "Every Stage C Skill is compulsory for every project request."
+        foreach ($path in $Paths) {
+            $bytes = [System.IO.File]::ReadAllBytes($path)
+            $suffix = [System.Text.Encoding]::ASCII.GetBytes("`n$sentence`n")
+            $mutated = New-Object byte[] ($bytes.Length + $suffix.Length)
+            [System.Array]::Copy($bytes, 0, $mutated, 0, $bytes.Length)
+            [System.Array]::Copy($suffix, 0, $mutated, $bytes.Length, $suffix.Length)
+            [System.IO.File]::WriteAllBytes($path, $mutated)
+        }
+    }
+    ExpectedMessages = @(
+        "project-init [mandatory-five-skill-pipeline]",
+        "Every Stage C Skill is compulsory for every project request.",
+        "features=full_skill_set,universal_scope,mandatory"
+    )
+    ValidationCommand = { Invoke-StageCSkillValidator }
+}
+Invoke-RestoringMultiMutation @stageCFullSetMandatoryTest
+
 foreach ($entry in $projectionManifest.entries) {
     foreach ($managedFile in $entry.managed_files) {
         $sourceRelative = "$($projectionManifest.source_root)/$($entry.skill)/$managedFile"
@@ -401,4 +670,9 @@ if ($helperBaseline.ExitCode -ne 0) {
     throw "post-mutation helper baseline expected validation success: $($helperBaseline.Output)"
 }
 Write-Host "[ok] shared helper post-mutation restored baseline"
+$freshCloneBaseline = Invoke-FreshCloneValidator
+if ($freshCloneBaseline.ExitCode -ne 0) {
+    throw "fresh-clone LF/CRLF gate expected validation success: $($freshCloneBaseline.Output)"
+}
+Write-Host "[ok] fresh-clone LF/CRLF checkout baseline"
 Write-Host "[ok] Release consistency mutation tests passed"

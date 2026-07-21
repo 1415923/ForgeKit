@@ -10,6 +10,7 @@ from pathlib import Path
 
 
 APPROVED_STAGE_A_COMMIT = "506cecf8d377a17a2616bf3b9eeea483ee4039a4"
+APPROVED_STAGE_B_COMMIT = "d02b496971db3773ac0c1435a423198189d6d8d8"
 DRAFT_RELATIVE = Path(
     ".forgekit/changes/v045-rule-ownership-skill-convergence/"
     "stage-b-migration-draft/0.45.0"
@@ -42,19 +43,44 @@ def make_temp_root(prefix, repo_root, temp_parent=None):
     raise RuntimeError(f"cannot allocate isolated Stage B validator directory under {parent}")
 
 
-def git_blob(repo_root, relative):
+def git_blob_at(repo_root, commit, relative):
     command = [
         "git",
         "-C",
         str(repo_root),
         "show",
-        f"{APPROVED_STAGE_A_COMMIT}:{relative.as_posix()}",
+        f"{commit}:{relative.as_posix()}",
     ]
     result = subprocess.run(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE, check=False, timeout=30)
     if result.returncode != 0:
         message = result.stderr.decode("utf-8", errors="replace").strip()
         raise RuntimeError(f"git show failed for {relative}: {message}")
     return result.stdout
+
+
+def git_blob(repo_root, relative):
+    return git_blob_at(repo_root, APPROVED_STAGE_A_COMMIT, relative)
+
+
+def stage_c_skill_targets(repo_root):
+    import importlib.util
+
+    path = Path(repo_root) / "scripts/validate-stage-c-skills.py"
+    spec = importlib.util.spec_from_file_location("stage_b_stage_c_contract", path)
+    if spec is None or spec.loader is None:
+        raise RuntimeError(f"cannot load Stage C validator: {path}")
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    targets = []
+    for row in module.stage_c_rows(Path(repo_root)):
+        prefix = f".agents/skills/{row['skill']}"
+        targets.append(f"{prefix}/SKILL.md")
+        targets.append(f"{prefix}/agents/openai.yaml")
+    return tuple(targets)
+
+
+def managed_targets(repo_root):
+    return ENTRY_NAMES + stage_c_skill_targets(repo_root)
 
 
 def validate_draft(repo_root, package_root=None):
@@ -64,6 +90,8 @@ def validate_draft(repo_root, package_root=None):
     descriptor_path = package / "migration.json"
     if not descriptor_path.is_file():
         return [f"missing Stage B migration draft: {descriptor_path}"]
+    if b"\r" in descriptor_path.read_bytes():
+        errors.append("migration.json violates the LF checkout contract")
     try:
         descriptor = json.loads(descriptor_path.read_text(encoding="utf-8"))
     except Exception as exc:
@@ -86,12 +114,13 @@ def validate_draft(repo_root, package_root=None):
         )
 
     actions = descriptor.get("actions")
-    if not isinstance(actions, list) or len(actions) != 2:
-        errors.append("Stage B migration draft must contain exactly two entry actions")
+    expected_targets = managed_targets(repo_root)
+    if not isinstance(actions, list) or len(actions) != len(expected_targets):
+        errors.append(f"Stage B/C migration draft must contain exactly {len(expected_targets)} managed actions")
         return errors
     by_target = {action.get("target"): action for action in actions if isinstance(action, dict)}
-    if set(by_target) != set(ENTRY_NAMES):
-        errors.append("Stage B migration draft targets must be AGENTS.md and CLAUDE.md")
+    if set(by_target) != set(expected_targets):
+        errors.append("Stage B/C migration draft targets must equal the entries plus dual-source-derived Stage C package files")
         return errors
 
     for target, action in by_target.items():
@@ -108,19 +137,24 @@ def validate_draft(repo_root, package_root=None):
         if not source.is_file() or not baseline.is_file():
             errors.append(f"{target}: source or baseline fixture is missing")
             continue
+        baseline_commit = APPROVED_STAGE_A_COMMIT if target in ENTRY_NAMES else APPROVED_STAGE_B_COMMIT
+        if target not in ENTRY_NAMES and action.get("baseline_commit") != baseline_commit:
+            errors.append(f"{target}: baseline_commit must equal approved Stage B commit {baseline_commit}")
         try:
-            git_bytes = git_blob(repo_root, Path("project-template") / target)
+            git_bytes = git_blob_at(repo_root, baseline_commit, Path("project-template") / target)
         except RuntimeError as exc:
             errors.append(str(exc))
             continue
         baseline_bytes = baseline.read_bytes()
+        if b"\r" in baseline_bytes:
+            errors.append(f"{target}: baseline fixture violates the LF checkout contract")
         descriptor_baseline = action.get("baseline_sha256")
         git_sha = sha256_bytes(git_bytes)
         draft_sha = sha256_bytes(baseline_bytes)
         if baseline_bytes != git_bytes or descriptor_baseline != git_sha:
             errors.append(
                 f"{target}: approved baseline mismatch; managed path={target}; "
-                f"approved source commit={APPROVED_STAGE_A_COMMIT}; expected Git SHA-256={git_sha}; "
+                f"approved source commit={baseline_commit}; expected Git SHA-256={git_sha}; "
                 f"draft baseline SHA-256={draft_sha}; descriptor SHA-256={descriptor_baseline}"
             )
 
@@ -128,6 +162,8 @@ def validate_draft(repo_root, package_root=None):
             errors.append(f"{target}: current project-template entry is missing")
             continue
         incoming_bytes = source.read_bytes()
+        if b"\r" in incoming_bytes:
+            errors.append(f"{target}: incoming fixture violates the LF checkout contract")
         template_bytes = template_entry.read_bytes()
         descriptor_incoming = action.get("incoming_sha256")
         template_sha = sha256_bytes(template_bytes)
@@ -254,11 +290,13 @@ def create_scenario(temp_root, name, package_root, entries, remove_baseline=None
     state_before = write_state(project)
     for target, content in entries.items():
         if content is not None:
-            (project / target).write_bytes(content)
+            path = project / target
+            path.parent.mkdir(parents=True, exist_ok=True)
+            path.write_bytes(content)
     return project, migrations, package, state_before, file_snapshot(project)
 
 
-def read_behavior_evidence(project, result, before_entries, state_before, before_snapshot):
+def read_behavior_evidence(project, result, before_entries, state_before, before_snapshot, targets):
     report_path = project / REPORT_JSON
     report_text = report_path.read_text(encoding="utf-8")
     report = json.loads(report_text)
@@ -279,7 +317,7 @@ def read_behavior_evidence(project, result, before_entries, state_before, before
         "before_entries": before_entries,
         "after_entries": {
             target: (project / target).read_bytes() if (project / target).is_file() else None
-            for target in ENTRY_NAMES
+            for target in targets
         },
         "state_before": state_before,
         "state_after": (project / ".forgekit/state.json").read_bytes(),
@@ -292,14 +330,14 @@ def read_behavior_evidence(project, result, before_entries, state_before, before
     }
 
 
-def validate_scenario(name, evidence, incoming, expected_classifications):
+def validate_scenario(name, evidence, incoming, expected_classifications, targets):
     errors = []
     if evidence["returncode"] != 0:
         return [f"{name}: upgrader returned {evidence['returncode']}: {evidence['stdout']}{evidence['stderr']}"]
     items = evidence["report"].get("items", [])
     by_target = {item.get("target_path"): item for item in items}
-    if set(by_target) != set(ENTRY_NAMES):
-        errors.append(f"{name}: report targets differ from AGENTS.md/CLAUDE.md")
+    if set(by_target) != set(targets):
+        errors.append(f"{name}: report targets differ from the managed Stage B/C target set")
         return errors
     for target, expected_classification in expected_classifications.items():
         item = by_target[target]
@@ -372,6 +410,7 @@ def rollback_from_packets(project, evidence):
         packet = packet_record["metadata"]
         path = project / target
         if packet["rollback_action"] == "restore_original_bytes":
+            path.parent.mkdir(parents=True, exist_ok=True)
             path.write_bytes(packet_record["artifacts"]["rollback"])
         elif packet["rollback_action"] == "delete_upgrade_created_file":
             if path.exists():
@@ -462,19 +501,30 @@ def validate_migration_behavior(repo_root, package_root=None, temp_parent=None):
     temp_root = make_temp_root(".fb45m-", repo_root, temp_parent)
     evidence["temp_root"] = str(temp_root)
     try:
-        baseline = {name: (package_root / "baseline" / name).read_bytes() for name in ENTRY_NAMES}
-        incoming = {name: (package_root / "files" / name).read_bytes() for name in ENTRY_NAMES}
+        targets = managed_targets(repo_root)
+        baseline = {name: (package_root / "baseline" / name).read_bytes() for name in targets}
+        incoming = {name: (package_root / "files" / name).read_bytes() for name in targets}
+        # Keep the long-standing entry unknown-baseline scenario stable while
+        # the stock/custom/missing/mixed scenarios exercise every Stage C Skill.
+        unknown_target = "CLAUDE.md"
+        mixed_entries = {
+            target: baseline[target] if index % 2 == 0 else f"mixed custom {index}\r\n".encode("ascii")
+            for index, target in enumerate(targets)
+        }
+        mixed_expected = {
+            target: "stock" if index % 2 == 0 else "custom"
+            for index, target in enumerate(targets)
+        }
         scenarios = {
-            "stock": ({name: baseline[name] for name in ENTRY_NAMES}, None,
-                      {name: "stock" for name in ENTRY_NAMES}),
-            "custom": ({"AGENTS.md": b"custom agents\r\n", "CLAUDE.md": b"custom claude\n"}, None,
-                       {name: "custom" for name in ENTRY_NAMES}),
-            "unknown": ({"AGENTS.md": baseline["AGENTS.md"], "CLAUDE.md": b"unknown claude\n"},
-                        "CLAUDE.md", {"AGENTS.md": "stock", "CLAUDE.md": "unknown-baseline"}),
-            "missing": ({name: None for name in ENTRY_NAMES}, None,
-                        {name: "missing" for name in ENTRY_NAMES}),
-            "mixed": ({"AGENTS.md": baseline["AGENTS.md"], "CLAUDE.md": b"mixed custom claude\r\n"}, None,
-                      {"AGENTS.md": "stock", "CLAUDE.md": "custom"}),
+            "stock": ({name: baseline[name] for name in targets}, None,
+                      {name: "stock" for name in targets}),
+            "custom": ({name: f"custom {index}\r\n".encode("ascii") for index, name in enumerate(targets)}, None,
+                       {name: "custom" for name in targets}),
+            "unknown": ({name: baseline[name] if name != unknown_target else b"unknown skill\n" for name in targets},
+                        unknown_target, {name: "stock" if name != unknown_target else "unknown-baseline" for name in targets}),
+            "missing": ({name: None for name in targets}, None,
+                        {name: "missing" for name in targets}),
+            "mixed": (mixed_entries, None, mixed_expected),
         }
         for name, (entries, removed_baseline, expected) in scenarios.items():
             project, migrations, _package, state_before, before = create_scenario(
@@ -489,9 +539,9 @@ def validate_migration_behavior(repo_root, package_root=None, temp_parent=None):
             if result.returncode != 0 or not (project / REPORT_JSON).is_file():
                 errors.append(f"{name}: upgrader/report failure: {result.stdout}{result.stderr}")
                 continue
-            evidence_item = read_behavior_evidence(project, result, entries, state_before, before)
+            evidence_item = read_behavior_evidence(project, result, entries, state_before, before, targets)
             evidence["scenarios"][name] = evidence_item
-            errors.extend(validate_scenario(name, evidence_item, incoming, expected))
+            errors.extend(validate_scenario(name, evidence_item, incoming, expected, targets))
             if name == "stock" and evidence_item["state"].get("last_upgrade", {}).get("review_needed_actions"):
                 errors.append("stock: unresolved REVIEW-NEEDED actions were produced")
             if name in {"missing", "mixed"}:

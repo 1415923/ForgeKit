@@ -1,4 +1,4 @@
 interface:
   display_name: "Handover Review"
   short_description: "Audit and stabilize inherited projects"
-  default_prompt: "Audit this inherited project, identify compatibility boundaries and defects, and propose a safe repair plan before new development."
+  default_prompt: "$handover-review\n\nAudit this inherited project read-only, distinguish confirmed, unknown, conflicting, and risky evidence, and identify whether work can safely continue without modifying implementation."

@@ -476,12 +476,76 @@
       "checksum": "sha256:1c8d47434f48f35977abfeaf556ccf59a02bb767da7aec449c7670670f2427e9"
     },
     {
+      "source_path": ".gitattributes",
+      "target_path": ".gitattributes",
+      "role": "metadata",
+      "update_policy": "replace",
+      "render_mode": "copy",
+      "checksum": "sha256:96420a25f329f6b7e98bc21e68a37153c186b31f4ab78db363bb877d48aca5cb"
+    },
+    {
       "source_path": ".agents/skills/project-init/SKILL.md",
       "target_path": ".agents/skills/project-init/SKILL.md",
       "role": "skill",
       "update_policy": "replace",
       "render_mode": "copy",
-      "checksum": "sha256:55ac034b590cb689404a76b5169ca33e88b52a12a57e78e22429998518774f0a"
+      "checksum": "sha256:155910413dcdd658ac19b5f586a668db27147aaa960200666b03cd34047c02ce"
+    },
+    {
+      "source_path": ".agents/skills/project-init/agents/openai.yaml",
+      "target_path": ".agents/skills/project-init/agents/openai.yaml",
+      "role": "skill",
+      "update_policy": "replace",
+      "render_mode": "copy",
+      "checksum": "sha256:512070ce3d8a3cfe14c1819fc9733a3c013387d6aca213c5abb884a43ff49908"
+    },
+    {
+      "source_path": ".agents/skills/project-bootstrap-fill/SKILL.md",
+      "target_path": ".agents/skills/project-bootstrap-fill/SKILL.md",
+      "role": "skill",
+      "update_policy": "replace",
+      "render_mode": "copy",
+      "checksum": "sha256:e4b5539098605371ab09791276fdd6f62eb6e06596b9362a2207290b1a3182e3"
+    },
+    {
+      "source_path": ".agents/skills/project-bootstrap-fill/agents/openai.yaml",
+      "target_path": ".agents/skills/project-bootstrap-fill/agents/openai.yaml",
+      "role": "skill",
+      "update_policy": "replace",
+      "render_mode": "copy",
+      "checksum": "sha256:926c68e2ecaa909a89a86e9a8f8e7e6f6cc8b47c48b320596b9c1f7e5e146a31"
+    },
+    {
+      "source_path": ".agents/skills/handover-review/SKILL.md",
+      "target_path": ".agents/skills/handover-review/SKILL.md",
+      "role": "skill",
+      "update_policy": "replace",
+      "render_mode": "copy",
+      "checksum": "sha256:9e1c6e60594f187aa07dcf955687ec37f4fa45e9dd329b22b171e224b5517aea"
+    },
+    {
+      "source_path": ".agents/skills/document-backfill/SKILL.md",
+      "target_path": ".agents/skills/document-backfill/SKILL.md",
+      "role": "skill",
+      "update_policy": "replace",
+      "render_mode": "copy",
+      "checksum": "sha256:58370bbc08935bc762452785af0802bb99239eb9a9f2f755e17397bd3aca808c"
+    },
+    {
+      "source_path": ".agents/skills/document-backfill/agents/openai.yaml",
+      "target_path": ".agents/skills/document-backfill/agents/openai.yaml",
+      "role": "skill",
+      "update_policy": "replace",
+      "render_mode": "copy",
+      "checksum": "sha256:758b56732133d99139d7584863f47739ff6591978e82ad1cd30f962ce8e615b5"
+    },
+    {
+      "source_path": ".agents/skills/large-change-planning/SKILL.md",
+      "target_path": ".agents/skills/large-change-planning/SKILL.md",
+      "role": "skill",
+      "update_policy": "replace",
+      "render_mode": "copy",
+      "checksum": "sha256:919decb16d3d8033ce79592a4d42744005935aaad479bcf8844a3955f892b9e1"
     },
     {
       "source_path": ".agents/skills/release-check/SKILL.md",
@@ -490,6 +554,78 @@
       "update_policy": "replace",
       "render_mode": "copy",
       "checksum": "sha256:95cbe56b82efd53873534932eae39e48e755327cc0994ee3c8da5e7a6e66740d"
+    },
+    {
+      "source_path": ".agents/skills/handover-review/agents/openai.yaml",
+      "target_path": ".agents/skills/handover-review/agents/openai.yaml",
+      "role": "skill",
+      "update_policy": "replace",
+      "render_mode": "copy",
+      "checksum": "sha256:48706a4d5e2c1a75bf89a051ecafea2d6d8f9255341f305723a01b55c101ccc6"
+    },
+    {
+      "source_path": ".agents/skills/large-change-planning/agents/openai.yaml",
+      "target_path": ".agents/skills/large-change-planning/agents/openai.yaml",
+      "role": "skill",
+      "update_policy": "replace",
+      "render_mode": "copy",
+      "checksum": "sha256:254105e4d944146100595d76d32ee59587006baf8f028389d905d282e3680aa8"
+    },
+    {
+      "source_path": ".agents/skills/release-check/agents/openai.yaml",
+      "target_path": ".agents/skills/release-check/agents/openai.yaml",
+      "role": "skill",
+      "update_policy": "replace",
+      "render_mode": "copy",
+      "checksum": "sha256:3c092e9667b4596e5b1574363a2b53879f55c9f623e26642ac77057ff5b3f664"
+    },
+    {
+      "source_path": ".agents/skills/code-review/SKILL.md",
+      "target_path": ".agents/skills/code-review/SKILL.md",
+      "role": "skill",
+      "update_policy": "replace",
+      "render_mode": "copy",
+      "checksum": "sha256:b498ab405e5d882f7e49ccbd5da7eec793e541101a512b4d727eca5948bf46f1"
+    },
+    {
+      "source_path": ".agents/skills/code-review/agents/openai.yaml",
+      "target_path": ".agents/skills/code-review/agents/openai.yaml",
+      "role": "skill",
+      "update_policy": "replace",
+      "render_mode": "copy",
+      "checksum": "sha256:87b878a47fa122da0b571bb8b5a4d51533fc14f1eb5fbdbac36c628c823d9558"
+    },
+    {
+      "source_path": ".agents/skills/project-suitability/SKILL.md",
+      "target_path": ".agents/skills/project-suitability/SKILL.md",
+      "role": "skill",
+      "update_policy": "replace",
+      "render_mode": "copy",
+      "checksum": "sha256:662abebca818a5b2e36c169b4921f7fa4c74008f2e298db6bae58453df8be19d"
+    },
+    {
+      "source_path": ".agents/skills/project-suitability/agents/openai.yaml",
+      "target_path": ".agents/skills/project-suitability/agents/openai.yaml",
+      "role": "skill",
+      "update_policy": "replace",
+      "render_mode": "copy",
+      "checksum": "sha256:2d27b13327f9d67631358e7f1df4241d3a3d509da83999da678660aefe000096"
+    },
+    {
+      "source_path": ".agents/skills/security-review/SKILL.md",
+      "target_path": ".agents/skills/security-review/SKILL.md",
+      "role": "skill",
+      "update_policy": "replace",
+      "render_mode": "copy",
+      "checksum": "sha256:812c3500b5151b70df2da83e83beca7393b4dc984ce13fa6e9458da367c65fb8"
+    },
+    {
+      "source_path": ".agents/skills/security-review/agents/openai.yaml",
+      "target_path": ".agents/skills/security-review/agents/openai.yaml",
+      "role": "skill",
+      "update_policy": "replace",
+      "render_mode": "copy",
+      "checksum": "sha256:fe4d5a9ddc3c47461720509fa2c04b5ecf2e864fa8fb9268bfa55a544de4cc82"
     },
     {
       "source_path": ".claude/agents/forgekit-code-reviewer.md",

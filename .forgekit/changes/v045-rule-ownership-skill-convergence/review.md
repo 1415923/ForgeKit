@@ -940,3 +940,754 @@ None.
 M-B1 is CLOSED and M-B2 remains CLOSED. Stage B passes with notes. Status is `stage-b-approved-for-stage-c`; Stage C is authorized, but this checker did not enter or implement Stage C.
 
 `VERSION` remains `0.44.1`. No real model prompt was executed; no formal v0.45.0 release migration was created or updated; v0.45.0 is not release-ready. This checker did not commit, push, tag, or release.
+
+## Stage C Independent Review
+
+ReviewedOn: 2026-07-21
+ReviewType: independent
+ReviewerAgent: Codex independent checker (`/root`)
+StageACommit: `506cecf8d377a17a2616bf3b9eeea483ee4039a4`
+StageBCommit: `d02b496971db3773ac0c1435a423198189d6d8d8`
+ReviewDecision: FAIL
+ArtifactStatus: stage-c-implemented-awaiting-independent-check
+StageCApproved: no
+StageDAuthorized: no
+Findings: 0 BLOCKER, 7 MAJOR, 3 NOTE
+
+### Baseline, scope, and Stage-C mapping
+
+- Branch is `main`; HEAD is the approved Stage B commit `d02b496`; `VERSION` remains `0.44.1`.
+- The initial worktree contained only the user's pre-existing deleted `usage.html`. This checker did not restore, modify, stage, or include that file in the real worktree.
+- Read all six change artifacts, DECISION-01/02/03, all 41 ownership rows, A01-A22, the Stage-C task--acceptance mapping, every Stage A/B independent review and findings recheck, the Stage C maker writeback, both required governance files, every tracked diff, every untracked file, all five current/Stage-B Skill bodies, frontmatter, and `agents/openai.yaml` files.
+- No change was found in `code-review`, `security-review`, `release-check`, `project-suitability`, `.claude/skills/`, root/template AGENTS or CLAUDE, prompts, user-facing README/usage, formal migrations, VERSION, plugin manifests, or marketplace metadata. Stage D/E was not implemented.
+
+| Stage-C task | Actual change group | Necessity | User runtime | Stage boundary |
+| --- | --- | --- | --- | --- |
+| SC-01 | root/template `project-init/SKILL.md`; template checksum | Required Skill convergence | Yes: plugin and generated-project workflow | Within C |
+| SC-02 | root/template `project-bootstrap-fill/SKILL.md`; draft baseline/incoming | Required Skill convergence and development upgrade fixture | Yes for Skill body; draft is development-only | Within C, but metadata defect remains |
+| SC-03 | root/template `handover-review/SKILL.md`; draft baseline/incoming | Required read-only audit convergence | Yes for Skill body | Within C |
+| SC-04 | root/template `document-backfill/SKILL.md`; draft baseline/incoming; factual fixture files | Required fact-backfill convergence and behavior fixture | Yes for Skill body; fixture is test-only | Within C, but default prompt defect remains |
+| SC-05 | root/template `large-change-planning/SKILL.md`; draft baseline/incoming | Required impact-risk convergence | Yes for Skill body | Within C |
+| SC-06 | single change-local migration README/descriptor, ten Skill baseline/incoming files, Stage-B migration validator/test extension | Required development migration safety | No production discovery/runtime migration | Within C |
+| SC-07 | Stage-C validator/test, 13-case manifest, fixture additions, behavior runner assertion, plugin/template/smoke gates | Required deterministic gate and dry-run preparation | Test/release tooling only | Within C, but validator and case defects remain |
+| SC-07 writeback | `tasks.md`, `verification.md`, `ship.md` | Required maker evidence and handoff | No | Honest Stage-C boundary |
+
+No temp, packet, report, evidence, mutation, cache, `.pyc`, `.tmp-*`, or `.old-*` file was present in the real worktree before checker writeback.
+
+### Skill size and body conclusions
+
+Independent byte counts use `git show d02b496:skills/<skill>/SKILL.md` versus current working-tree bytes.
+
+| Skill | Stage B lines / bytes | Stage C lines / bytes | Body conclusion | Package conclusion |
+| --- | ---: | ---: | --- | --- |
+| `project-init` | 162 / 13,264 | 41 / 3,686 | PASS: new/uninitialized-only, minimal questions/writeback, unknown markers, bounded local authorization, external escalation, no business implementation | FAIL: stale machine-facing default prompt still asks for questionnaire/selected stack templates |
+| `project-bootstrap-fill` | 71 / 3,069 | 36 / 3,177 | PASS: initialized placeholder-only, preserve customization, no guessing/conflict overwrite, no fill-all requirement | FAIL: explicit-only policy is placed on an unsupported surface and therefore ineffective |
+| `handover-review` | 94 / 5,600 | 45 / 3,646 | PASS: read-only default, correct evidence order, owner-only optional writeback, no automatic repair | PASS WITH NOTE: default prompt still emphasizes defects/repair planning but does not itself authorize writes |
+| `document-backfill` | 85 / 4,350 | 41 / 3,549 | PASS: implemented facts only, owner-based recoverable batches, no speculation/future completion | FAIL: explicit-only policy is ineffective and `agents/openai.yaml` still mandates one source document at a time |
+| `large-change-planning` | 74 / 3,343 | 52 / 4,090 | PASS: impact-driven trigger, light branch, staged authorization, acceptance/rollback/checker conditions, no implementation | PASS WITH NOTE: default prompt still uses broad-implementation language rather than the new impact framing |
+
+The body rewrite genuinely removes the old full questionnaire, forced document suite, automatic P0/P1 repair, one-document batching, fixed file/module threshold, mandatory double-plan source, and universal checker behavior. It is not a line-count-only rewrite and does not simply copy the long entry contract. Common body contracts for read-only review/planning, bounded local authorization, external/irreversible protection, confirmed-fact owner writeback, preservation of customization, and no automatic cross-Skill execution are materially present.
+
+### Impact risk and routing matrix
+
+Impact-based risk is correctly implemented in the current `large-change-planning` body: trust boundary, public contract, persistent migration, auth/permission, irreversible actions, rollback cost, external coordination, verification capability, and evidence uncertainty control routing. A one-file permission/migration change can be high impact; a deterministic multi-file projection can be low impact. No current Stage-C Skill body contains the old `5 files / 2 modules`, line-count, score, question-count, section-count, or batch-count gate.
+
+| Scenario | Expected route | Must not route | Current body clarity |
+| --- | --- | --- | --- |
+| New/uninitialized project | `project-init` | bootstrap/handover/backfill/large-plan chain | Clear |
+| Initialized project with confirmed placeholder gaps | `project-bootstrap-fill` | re-run init/full rewrite | Clear in body; implicit policy ineffective |
+| Existing-project takeover/current-state audit | `handover-review` | init/automatic implementation | Clear |
+| Existing implementation with stale fact document | `document-backfill` | future design/init/governance suite | Clear in body; default prompt conflicts on batching |
+| High-impact or genuinely staged change | `large-change-planning` | count-based escalation | Clear |
+| Ordinary bounded small fix | direct implementation | all five heavy workflows | Clear in current body/entry |
+| Suitability assessment | `project-suitability` | `project-init` | Clear through Stage-B entry and init exclusion |
+| Code review | Stage-D-owned `code-review` | handover/implementation | Clear; Stage D not implemented, correctly non-blocking here |
+| Release review | Stage-D-owned `release-check` | bootstrap/handover | Clear; Stage D not implemented, correctly non-blocking here |
+
+The actual five bodies have no current route cycle and do not require sequential invocation. The deterministic validator does not reliably preserve that state, as recorded below.
+
+### Frontmatter, metadata, and machine-facing Skill configuration
+
+All five frontmatter blocks are syntactically parseable YAML, public `name` and display names are unchanged, and root/template `SKILL.md` plus `agents/openai.yaml` projections are byte-identical. `.claude/skills/` is untouched.
+
+MAJOR M-C1: the explicit-only policy is implemented on the wrong schema surface. Current Codex `0.144.6` toolchain guidance and its plugin validator define `policy.allow_implicit_invocation` under `agents/openai.yaml`, with default `true`. Stage C instead adds `metadata.allow_implicit_invocation: false` inside `SKILL.md`; both relevant `agents/openai.yaml` files remain byte-identical to Stage B and contain no `policy`. The Stage-C parser flattens nested frontmatter lines and therefore reports the misplaced field as valid. Moving the same key to an arbitrary `unsupported_policy_bucket` still returned exit 0. `project-bootstrap-fill` and `document-backfill` consequently remain implicitly eligible in the actual product policy.
+
+The unchanged `agents/openai.yaml` prompts also remain an active competing instruction surface: `document-backfill` says `one source document at a time`, directly restoring a fixed batch; `project-init` says to use its questionnaire and selected stack templates; bootstrap still says to create first-version Codex docs; other prompts retain old broad/repair framing. A synchronized mutation changing backfill to another fixed batch was invisible to the Stage-C validator. This is part of M-C1 because it prevents the five complete Skill packages, rather than only their Markdown bodies, from converging.
+
+### Projection and template manifest
+
+- `python -B scripts/sync-skill-projections.py check`: PASS; all 9 Skills / 18 declared files match byte-for-byte. For the five Stage-C `SKILL.md` files, SHA-256 values are `155910...c02ce`, `1403c7...4404`, `9e1c6e...7aea`, `961978...b31f`, and `919dec...b9e1` respectively.
+- Independent one-byte template projection drift: expected exit 1 / actual exit 1; restored byte-for-byte and baseline returned exit 0.
+- The sync manifest continues to own only explicitly declared `SKILL.md` and `agents/openai.yaml` files and does not touch `.claude` or Stage-D Skill bodies.
+
+MAJOR M-C2: `project-template/.forgekit/template-manifest.json` records only `project-init/SKILL.md` among the five changed Stage-C projections. Its updated checksum is correct, but bootstrap, handover, backfill, and large-change have no manifest entries/checksums. `update-template-manifest.py --check` validates only listed entries and therefore passes while four changed template Skills are absent. Root validators/tests and the change-local draft are correctly absent, and `template_version` remains `0.44.1`.
+
+### Stage-C validator quality and independent mutation
+
+The validator is compact and does not duplicate complete Skill bodies, but three design defects prevent it from serving as the claimed deterministic gate.
+
+MAJOR M-C3: explicit contradictory prose can retain all positive markers and pass. Required independent mutations produced:
+
+| Mutation | Expected | Actual | Skill / category | Restoration |
+| --- | ---: | ---: | --- | --- |
+| retain read-only marker, add automatic repair | 1 | 1 | handover / forbidden regression | exact, baseline 0 |
+| delete read-only default | 1 | 1 | handover / missing marker | exact, baseline 0 |
+| add `5 files / 2 modules` | 1 | 1 | large-change / fixed-count | exact, baseline 0 |
+| require checker for all code changes | 1 | 1 | large-change / universal-checker | exact, baseline 0 |
+| require exactly eight init questions | 1 | 1 | project-init / fixed-question | exact, baseline 0 |
+| state that existing projects are also reinitialized | 1 | 0 | project-init / trigger reversal missed | exact, baseline 0 |
+| overwrite existing bootstrap customization | 1 | 1 | bootstrap / overwrite | exact, baseline 0 |
+| infer and write when backfill evidence is insufficient | 1 | 1 | backfill / speculation | exact, baseline 0 |
+| delete key init cross-Skill route | 1 | 1 | project-init / missing route | exact, baseline 0 |
+| add init -> bootstrap -> init cycle | 1 | 1 | routing / obvious cycle | exact, baseline 0 |
+| root/template projection drift | 1 | 1 | projection | exact, baseline 0 |
+| move implicit key to an unsupported frontmatter bucket | 1 | 0 | bootstrap / wrong schema position missed | exact, baseline 0 |
+| require all five Stage-C Skills in order | 1 | 0 | routing / sequential workflow missed | exact, baseline 0 |
+| add fixed batch in `agents/openai.yaml` | 1 | 0 | backfill / unscanned active prompt | exact, baseline 0 |
+
+All mutations ran only in `D:\tmp` copies containing `.git`; none touched the real worktree.
+
+MAJOR M-C4: Stage B's Markdown/prose separation was not reused. The Stage-C validator scans raw Markdown for both required and forbidden regexes. A removed read-only policy followed by the same marker inside a fenced block returned exit 0. Conversely, a fenced legacy example, a heading, and the safe negation `Never use more than 5 files as a threshold` each returned exit 1. Inline code/link/path/navigation are subject to the same raw-text family. This creates both false-negative and false-positive systematic classes explicitly called out by the acceptance scope.
+
+MAJOR M-C5: five-Skill derivation can silently shrink. Changing only the `ROUTE-DOCUMENT-BACKFILL` matrix action wording from `阶段 C` to `Stage C` made the formal CLI report success for `4 Skills derived from the ownership matrix`. The exact-five assertion exists only in a unit test, not the validator; normal matrix wording/format evolution can therefore omit a Stage-C owner without a gate failure.
+
+### Behavior cases and fixture
+
+- Manifest validation/list/dry-run: PASS; 13 cases total (3 Stage A + 10 Stage C), all dry-run records remain honest `GRADER_UNCERTAIN/not-run`, `changed_paths=[]`, cleanup passed, and no client was launched.
+- Positive/negative intent coverage exists for all five Skills: new versus existing init, placeholder preservation, handover no-write, implemented fact versus future design, and one-file-high/many-file-low impact.
+- Read-only allowlists are empty; bounded writes name narrow targets; push/publish/release/deploy/delete are forbidden.
+
+MAJOR M-C6: the Stage-C cases are not yet executable routing cases. `stage-c-new-project` contains only README; `minimal-project` contains entry/governance evidence but no `.agents/skills`. The runner copies only the selected fixture, creates an isolated empty `CODEX_HOME`, and does not install/copy the ForgeKit plugin or authoritative Skills. Its `invocation_mode` is passed only as adapter context/diagnostics; explicit prompts do not invoke `$project-init`, `$project-bootstrap-fill`, or `$document-backfill`. The exact case schema also has no case-level evidence-requirement field. Thus the cases can dry-run but cannot later observe the declared Skill source/routing under the isolation contract without additional harness work. This finding is not based on the absence of a real model run.
+
+### Development migration, Git anchors, and behavior classification
+
+- Exactly one change-local draft exists. README accurately says Stage B entries plus Stage C Skills; production discovery sees only `0.44.1`; no root or template formal `migrations/0.45.0` exists.
+- Entry baseline remains anchored to Stage A. The five Skill baselines are byte-identical to Git objects at full Stage B SHA `d02b496971db3773ac0c1435a423198189d6d8d8`; incoming files are byte-identical to current template projections. The descriptor has exactly seven safe managed targets and no Stage-D Skill.
+- Independent synchronized baseline+checksum mutation: expected 1 / actual 1, rejected by Stage-B Git object SHA. Independent incoming+checksum mutation: expected 1 / actual 1, rejected by current projection SHA. Both restored exactly and the formal validator returned 0 afterward.
+- Independent real upgrader fixtures passed: all stock; one custom Skill; two custom Skills; Skill unknown-baseline; all missing; entry stock + Skill custom; mixed rollback; and same managed path over multiple migrations. Custom/unknown bytes were preserved, missing did not fabricate origin bytes, every tested rollback restored the upgrade start, and the same-path packet retained `stage-a-origin\r\n`.
+
+### CRLF and fresh-clone portability
+
+MAJOR M-C7: a reasonable Windows fresh clone fails the byte-exact gates.
+
+- Repository `.gitattributes` only contains `*.sh text eol=lf`; Markdown/JSON byte-sensitive migration and Skill files have no line-ending contract. The host's normal Git configuration is `core.autocrlf=true`.
+- LF clone (`git -c core.autocrlf=false clone --no-local`): Stage-B baseline AGENTS Git/working SHA-256 both `e3fb1941...5374`; Stage-C Skill/migration validators pass; full smoke passes.
+- CRLF clone (`git -c core.autocrlf=true clone --no-local`), with the current tracked diff applied and current untracked files copied: baseline AGENTS Git SHA-256 `e3fb1941...5374`, working SHA-256 `6756490d...feea`; current `project-init` working SHA-256 is `24ea0791...7929` instead of the LF incoming `15591041...c02ce`.
+- In that CRLF clone, Stage-C validator exits 1 because its raw-byte frontmatter regex requires LF; migration validator exits 1 for Stage-A entry baseline and Stage-C incoming byte mismatches; smoke exits 1 at the migration gate.
+- The migration validator reads approved baselines from Git objects but compares them to working-tree draft bytes; the upgrader consumes those working-tree package bytes. This is a real checkout/runtime portability defect, not merely an archive construction error. A source-worktree byte overlay passing only proves the maker workspace is self-consistent and masks the normal checkout failure.
+
+### Complete gates and smoke
+
+Authoritative gates ran in an LF, short-path, `.git`-preserving copy containing all Stage-C tracked/untracked bytes; only that disposable copy materialized HEAD `usage.html`.
+
+| Gate | Result |
+| --- | --- |
+| Stage-C Skill validator | PASS, 5 (subject to M-C3/M-C4/M-C5) |
+| projection / 41-rule ownership / Stage-B entry / Stage-B migration | PASS |
+| behavior validate / list / dry-run | PASS, 13; no client invocation |
+| unittest discovery | PASS, 136/136 |
+| plugin assets / template / template manifest | PASS |
+| release consistency mutations | PASS; all restored |
+| `git diff --check` | PASS under the source worktree's Git semantics |
+| current-worktree exact-copy smoke | PASS; `.git` present, Stage-C tracked/untracked present, copy-only `usage.html` materialization |
+| LF fresh-checkout semantic smoke | PASS |
+| CRLF fresh-checkout semantic smoke | FAIL as M-C7 |
+
+### BLOCKER
+
+None. The current Skill bodies do not automatically repair a read-only review, current migration behavior preserves custom/unknown content and rollback origin, production discovery does not expose the draft, and no Stage-D/Claude/external-release action was added.
+
+### MAJOR
+
+1. M-C1: explicit-only metadata is on the wrong product schema surface; machine-facing default prompts remain stale and reintroduce old behavior, including fixed backfill batching.
+2. M-C2: four of five changed template Skill projections are absent from `template-manifest.json`.
+3. M-C3: the validator misses existing-project reinitialization and mandatory five-Skill sequencing while markers remain.
+4. M-C4: raw Markdown scanning permits fenced-marker false negatives and causes fenced/heading/negation false positives.
+5. M-C5: matrix-derived Stage-C set can silently pass with four Skills after an ordinary action-wording change.
+6. M-C6: Stage-C behavior cases lack an available Skill source, operational explicit invocation, and case-level evidence requirement under the isolated runner.
+7. M-C7: normal `core.autocrlf=true` Windows checkout breaks Stage-C, migration, and smoke byte gates.
+
+### NOTE
+
+1. More complex natural language can still exceed a deliberately small deterministic contradiction gate after the concrete false-negative/Markdown defects are fixed.
+2. Real Codex/Claude prompts, selector/Skill-source observations, token/context benefit, and manual-merge usability remain `NEEDS_TEST`; their non-execution is not a failure reason here.
+3. Stage D review/security/release Skills and Stage E prompts, README/usage, formal migration, metadata, and release preparation remain intentionally incomplete and are not failure reasons.
+
+### Stage decision
+
+Stage C FAILS with 0 BLOCKER and 7 MAJOR. Status remains `stage-c-implemented-awaiting-independent-check`. Stage C is not approved and Stage D is not authorized.
+
+`VERSION` remains `0.44.1`. No real model prompt was executed. No formal v0.45.0 release migration was created. v0.45.0 is not release-ready. This checker did not implement a fix, enter Stage D/E, commit, push, tag, release, deploy, or modify the user's deleted `usage.html`.
+## Stage C Findings Recheck
+
+Date: 2026-07-21
+Checker: Codex，上一轮 Stage C Independent Review 的独立 checker
+Stage A commit: `506cecf8d377a17a2616bf3b9eeea483ee4039a4`
+Stage B commit: `d02b496971db3773ac0c1435a423198189d6d8d8`
+ArtifactStatus: `stage-c-implemented-awaiting-independent-check`
+
+### Recheck scope and decision
+
+本轮只定向复核 C-M01 至 C-M07；未重新打开上一轮已通过的五份 Skill 核心执行语义、handover 只读与证据优先级、document-backfill 事实批次、large-change 影响型风险、既有跨 Skill 路由、migration 基础分类/rollback 或 Stage A/B 已关闭事项。
+
+结论：`FAIL`。C-M04、C-M05 CLOSED；C-M01、C-M02、C-M03、C-M06、C-M07 OPEN。新增 0 BLOCKER；仍有 5 个 findings 对应 MAJOR。Stage C 未通过，不允许进入 Stage D。
+
+| Finding | 状态 | 定向结论 |
+| --- | --- | --- |
+| C-M01 package metadata/default prompt | OPEN | explicit-only schema 已放到受支持位置且为 boolean；实际 prompt 文案已去除旧流程，但 large-change prompt 的单一固定 `5 files` 门槛 mutation 仍以 0 退出，未满足“四类 prompt mutation 全部失败”。 |
+| C-M02 template manifest | OPEN | Stage C 十个 package 文件只列 8 个，缺 handover-review 与 large-change-planning 两份 unchanged `agents/openai.yaml`；删除 unchanged YAML entry 的要求在当前基线上已直接缺失而 validator 仍以 0 退出。 |
+| C-M03 reinitialize/pipeline contradiction | OPEN | 三条冻结反例能失败，但 checker 自构造的两条重初始化和两条 mandatory sequence 等价表达均以 0 退出。 |
+| C-M04 Markdown policy-prose | CLOSED | required marker 的 fence/heading 伪造失败；fenced/heading legacy 不误报；普通正文、list、table、link 后反例失败；navigation/path 与安全否定通过；复用 `validate-agent-entries.py` 的 policy-prose helper。 |
+| C-M05 dual-source five-Skill set | CLOSED | tasks SC-01..05 与 41-rule matrix 双源各锁定五项且集合相等；四项、集合不同、Stage D owner、duplicate、projection missing 均失败并显示实际集合。 |
+| C-M06 behavior runtime/evidence | OPEN | 当前 cases 可真实物化且 explicit prompt 正确，但 bounded-write case 可关闭 `write_behavior` 证据仍通过，且原 prompt 已含 `$skill-id` 时 runner 会重复注入。 |
+| C-M07 LF/CRLF fresh clone | OPEN | 合理的 LF/CRLF fresh clone 主路径和 generated-project checkout 均已修复，但 Stage C/manifest checksum 继续归一化换行；root/template 同步 CRLF mutation 可同时绕过 Stage C、projection、manifest 三个 gate。 |
+
+### C-M01: package schema, policy, prompts, projection, migration
+
+- 五份 `SKILL.md` frontmatter 均只保留 `name`/`description`，不再含 `metadata.allow_implicit_invocation`。
+- `project-bootstrap-fill` 与 `document-backfill` 的根级和 template `agents/openai.yaml` 均在顶层 `policy.allow_implicit_invocation` 设置 YAML boolean `false`。
+- 当前官方 Codex manual 明确将 invocation policy 放在 `agents/openai.yaml` 顶层 `policy`；本机官方 plugin validator 也解析该字段并要求 boolean。对整个仓库运行当前 `validate_plugin.py` 为 PASS。
+- 独立 schema mutation：policy 放回 SKILL frontmatter、删除 YAML policy、字符串 `"false"`、错误嵌套层均非零，诊断均包含 Skill、package policy/category。
+- 五个实际 default prompt 本身未恢复 questionnaire、selected-stack、固定批次、自动修复、所有修改 checker 或文件/模块双阈值；root/template package bytes 一致。
+- prompt mutation：project-init questionnaire、backfill one-source-at-a-time、handover automatic repair 均失败；`Any change touching 5 files requires this plan.` 加入 large-change package prompt 后 validator exit 0，故 finding 未关闭。
+- 当前安装的官方 `openai_yaml.md` authoring reference 还要求 `interface.default_prompt` 显式写 `$skill-name`；五个当前 prompt 均未使用 `$` 形式，项目 validator 与官方 plugin validator 均未把该 authoring requirement 作为 gate。该项不改变上述确定性 OPEN 判定。
+- `sync-skill-projections.py check` 对全部 18 个受管文件 PASS；五个 Stage C package 的根/template 两文件均逐字节一致。
+- 唯一 development draft 管理五份 Stage C `SKILL.md` 与三份 changed YAML。八项 baseline 均与 Stage B Git object blob 一致，incoming 均与当前 template bytes 一致，descriptor SHA 正确。
+- YAML baseline 与 checksum 同步篡改仍因 Stage B Git object anchor 失败；YAML incoming 与 checksum 同步篡改仍因 current template anchor 失败。
+- 独立 YAML 实跑：custom=`custom` 且不覆盖，unknown=`unknown-baseline` 且不覆盖，missing 安装 incoming；三者 rollback 均恢复完整升级起点。production discovery 未发现 draft；不存在正式 `migrations/0.45.0` 或 `project-template/migrations/0.45.0`。
+
+### C-M02: template manifest completeness
+
+- `template_version` 仍为 `0.44.1`；`.gitattributes` 唯一 entry 存在且当前 checksum 一致；Stage C root validator/tests 与 development draft 未列入 template manifest；未新增 Stage C `.claude` package。
+- 五份 Stage C `SKILL.md` 与三份 changed YAML 各恰好一个 entry，checksum 与当前 LF bytes 一致。
+- 明确缺失：`.agents/skills/handover-review/agents/openai.yaml`、`.agents/skills/large-change-planning/agents/openai.yaml`。因此 Stage C package 覆盖是 8/10，不是 10/10。
+- `validate_template_manifest()` 的 required YAML 条件仅为 SC-01 或 explicit-only，正好遗漏上述两项；实际 baseline validator PASS 证明 gate 不检查完整 package。
+- `config/skill-projections.json` 声明 18 个受管文件；template manifest 仅包含其中 9 个。即使不把 Stage D 的 manifest 完整性作为本轮判定依据，Stage C 明确要求的十项已经失败。
+- generated project 初始化会复制上述两份 YAML，但其 `.forgekit/template-lock.json` 不记录两项，确认缺项会影响后续管理身份，而不只是清单展示。
+- mutation：删除一份 Stage C SKILL、删除一份 changed YAML、修改 checksum、添加 duplicate 均失败；unchanged YAML 在 baseline 已缺失且 Stage C validator 仍通过。
+
+### C-M03/C-M04: validator semantics and Markdown structure
+
+- 冻结的三个 existing-project reinitialize 句式与三个 mandatory five-Skill pipeline 句式均命中正确 category；冻结安全否定均通过。
+- 自构造的以下清晰反向语义未命中，且在同步临时 manifest checksum 后 validator exit 0：
+  - `Existing projects must go through initialization from scratch before audit.`
+  - `For a project that is already initialized, repeat project initialization before handover.`
+  - `All five Stage C Skills are required as a sequential workflow for each request.`
+  - `Each project task goes through every one of the five Skills, one after another.`
+- large-change package prompt 的单一固定文件门槛也未命中。当前 detector 不是完整句硬编码，但 subject/action 词组仍窄于本轮要求。
+- Markdown 分层独立 mutation 全部符合预期：required contract 只在 fenced block 或 heading 时失败；fenced reinitialize 与 heading pipeline legacy 文本不误报；相同普通正文、list、table、Markdown link 后反例失败；inline code/path/URL/navigation 不误报；安全否定通过。
+- 因此 C-M03 OPEN，C-M04 CLOSED。
+
+### C-M05: dual-source set
+
+- Source A 从 tasks SC-01..SC-05 owner path 解析，恰好五个不同 Skill；Source B 从 41-rule matrix 的 Stage C ROUTE normative owner 解析，恰好五个不同 Skill；A=B。
+- 五项均在 projection config 中，owner 文件存在，无 Stage D overlap；实现只固定 cardinality 5 与 task ID，不硬编码五个 Skill 名称。
+- 独立 mutation 结果：matrix 精确缩为四项、tasks 缩为四项、两边各五但集合不同、两边替换成 Stage D owner、duplicate owner、projection config 删除一项全部非零。
+- 诊断分别显示 `found [...]`、`tasks-only`/`matrix-only`、Stage D owner 与 missing Skill，满足可定位性。C-M05 CLOSED。
+
+### C-M06: behavior materialization, explicit invocation, evidence
+
+- case manifest 为 13 项，其中 Stage C 10 项；覆盖 new init/existing negative、bootstrap placeholder/preserve custom、handover no-write、backfill fact/future-design negative、single-file high risk、many-file low risk 与 ordinary fix no-heavy-pipeline。
+- runner 从根权威 `skills/<id>/` 按 projection manifest 读取 `SKILL.md` 和 `agents/openai.yaml`，物化到 temp fixture `.agents/skills/<id>/`；source path、target path、SHA-256 和 materialized files 进入 record。
+- checker 实际保留 temp 到 cleanup callback，逐字节核对 bootstrap/backfill 两个 package 后删除；所有 bytes 与根权威一致，callback 后 parent 为空。
+- 当前 bootstrap/backfill rendered prompt 分别含一次 `$project-bootstrap-fill`、`$document-backfill`，原 prompt 保留；implicit handover prompt 不注入 `$`。explicit-only positive case 改为 implicit 时 validate exit 2。
+- 每个当前 case 有六键 boolean evidence contract；explicit、read-only、forbidden-action 规则的反向 mutation 均失败。dry-run 的 required evidence 为 `not-obtained`，非 required 为 `not-required`，结果保持 `GRADER_UNCERTAIN/not-run`，未伪造 PASS。
+- 未关闭路径一：bounded-write bootstrap case 将 `evidence_requirements.write_behavior` 改为 false 后 manifest 仍 exit 0，未强制 allowed-path/write oracle。
+- 未关闭路径二：如果 explicit case 原 prompt 已以 `$project-bootstrap-fill` 开头，`render_prompt()` 仍再次 prepend，最终出现两次 `$project-bootstrap-fill`。
+
+### C-M07: attributes, fresh clones, generated project
+
+- 根与 template `.gitattributes` 均含 `.gitattributes`、`*.md`、`*.json`、`*.yaml`、`*.yml` 的 `text eol=lf`；`git check-attr` 对代表 migration JSON、SKILL.md、package YAML 返回 `text: set`、`eol: lf`。未修改全局 Git config，未把文本标记为 binary。
+- fresh-clone runner 从当前 tracked/untracked Stage C 状态构造本地 identity 的临时 commit，排除用户 `usage.html` 删除；clone 前全部范围进入 Git object；clone 后无 tracked overlay，验证源不是源工作树。
+- `--full --mutation-check` 临时 commit：`8e8d43d5e2c5ec093bc208fa672a621b9861f81a`。snapshot smoke、`core.autocrlf=false` clone、`core.autocrlf=true` clone 三路均 PASS；两种 clone 的 Stage C、migration、projection、template、manifest-through-template 与完整 smoke 均 PASS。
+- 代表 SHA-256 在两种 clone 中均为 blob=working：`.gitattributes` `68e9a1aa...`、project-init SKILL `15591041...`、project-init YAML `dace0e47...`、template manifest `0daefde6...`、migration descriptor `cf6ea9f2...`。
+- 删除根 Markdown LF 规则后，Git 的 `core.autocrlf=true` checkout 实际产生 drift；validator exit 1，project-init blob `15591041...`、working `24ea0791...`。runner finally 清理 mutation repo。
+- generated project 临时 commit：`fb70fd7fc3842df327317c47652e2f8f4e0cec38`。autocrlf=true clone 中十个 Stage C package 文件均存在，代表 Git blob object=working object；generated harness、doc-sync、current-docs-integrity 均 PASS。
+- 但是 `canonical_checksum()` 与 `update-template-manifest.py` 都把 CRLF/CR 归一化为 LF。checker 在隔离 repo 同步把 root/template project-init SKILL 改成 CRLF（working SHA-256 `24ea0791...`）后，Stage C validator=0、projection check=0、manifest check=0。该 newline-insensitive 比较违反本轮明确验收；C-M07 仍 OPEN，尽管正常 fresh checkout 主路径已经修复。
+
+### Targeted tests, formal gates, and smoke
+
+| Gate | Actual result |
+| --- | --- |
+| `tests.test_stage_c_skills` | 16/16 PASS |
+| `tests.test_skill_behavior_runner` | 19/19 PASS |
+| `tests.test_skill_behavior_adapters` | 4/4 PASS |
+| `tests.test_fresh_clone_crlf` | 3/3 PASS |
+| `tests.test_stage_b_entry_migration` | 21/21 PASS |
+| full `unittest discover` | 146/146 PASS |
+| Stage C / projection / ownership / entries / migration validators | PASS |
+| behavior validate/list/dry-run | PASS；13 cases；全部 dry-run 为 `GRADER_UNCERTAIN/not-run` |
+| plugin assets / template / manifest / release consistency | PASS |
+| `git diff --check` | PASS；仅现有 Git newline conversion warnings |
+| current Stage C scoped snapshot smoke | PASS，含 `.git`，排除用户 `usage.html` 删除 |
+| `core.autocrlf=false` fresh clone full smoke | PASS |
+| `core.autocrlf=true` fresh clone full smoke | PASS |
+| generated-project autocrlf=true checkout gates | PASS |
+
+正式门禁全绿不能覆盖独立 mutation 已证实的语义/完整性缺口；本判定不以 maker 的 16/19/4/3/21/146 声称作为事实来源，上表均为 checker 本轮实跑数量。
+
+### BLOCKER
+
+None. explicit-only policy 已位于产品支持位置；development draft 未被 production discovery 发现；custom/unknown YAML 未覆盖；clone runner 未修改源工作树或在 clone 后 overlay；read-only cases 当前 allowlist 为空。
+
+### MAJOR
+
+1. C-M01 OPEN：large-change default prompt 的单一固定文件阈值可通过 validator；五个 default prompt 也未遵守当前官方 authoring reference 的 `$skill-name` 形式。
+2. C-M02 OPEN：Stage C template manifest 缺两份 unchanged package YAML，完整性 gate 只锁定 8/10；对应 generated template lock 也缺项。
+3. C-M03 OPEN：已有项目重复初始化与 mandatory five-Skill sequence 的四个清晰等价表达可通过 validator。
+4. C-M06 OPEN：bounded-write case-level allowed-path/write evidence 未被强制；已有 `$skill-id` 的 explicit prompt 会重复注入。
+5. C-M07 OPEN：正常 LF/CRLF clone 已通过，但 newline-normalizing checksum 仍允许 CRLF byte mutation 绕过三个正式 gate。
+
+### NOTE
+
+1. 更复杂自然语言仍可能超出有限静态 detector；本轮只把已复现的清晰反例列为 MAJOR。
+2. 真实 Codex/Claude 行为、selector、Skill source、token/context 效果与 manual merge 体验仍为 `NEEDS_TEST`；未执行真实模型 prompt 不构成本轮失败原因。
+3. C-M04/C-M05 已关闭；Stage D/E 未完成不构成本轮失败原因。
+
+### Stage decision
+
+Stage C findings recheck FAILS with 0 BLOCKER and 5 OPEN MAJOR findings. Status remains `stage-c-implemented-awaiting-independent-check`. Stage C is not approved and Stage D is not authorized.
+
+`VERSION` remains `0.44.1`. No real model prompt was executed. No formal v0.45.0 release migration was created. v0.45.0 is not release-ready. This checker did not implement fixes, enter Stage D/E, commit, push, tag, release, deploy, or modify/stage/restore the user's deleted `usage.html`.
+
+## Stage C Final Remaining Findings Recheck
+
+Date: 2026-07-21
+Checker: Codex，Stage C 最终剩余 findings 独立 checker
+Stage A commit: `506cecf8d377a17a2616bf3b9eeea483ee4039a4`
+Stage B / source HEAD: `d02b496971db3773ac0c1435a423198189d6d8d8`
+ArtifactStatus: `stage-c-implemented-awaiting-independent-check`
+
+### Scope and decision
+
+本轮只复核 C-M01、C-M02、C-M03、C-M06、C-M07，并对已关闭的 C-M04/C-M05 做最小回归；未重新打开五份 Skill 核心执行正文、handover 只读、large-change 影响型风险、既有路由、migration 已关闭分类/rollback 或 Stage A/B 已关闭事项。
+
+结论：`FAIL`。C-M02、C-M06、C-M07 CLOSED；C-M04、C-M05 保持 CLOSED；C-M01、C-M03 OPEN。新增 0 BLOCKER，仍有 2 个 MAJOR。Stage C 未通过，不允许进入 Stage D。
+
+| Finding | 状态 | 定向结论 |
+| --- | --- | --- |
+| C-M01 package default prompt / fixed quantity threshold | OPEN | 五个 prompt 的正式 `$skill-id`、explicit-only policy 和旧流程回归均已修复；但独立 `42-directory` 固定数量风险门槛仍可通过正式 CLI。 |
+| C-M02 full managed projection manifest | CLOSED | projection config 动态派生 9 Skills / 18 targets；manifest 18/18、Stage C package 10/10，generator 与删除/重复/checksum/新增 target mutation 均成立。 |
+| C-M03 equivalent reinitialize / mandatory pipeline | OPEN | 多数冻结反例已命中且安全否定通过，但一个用户指定 reinitialize 句、一个用户指定 one-by-one pipeline 句及 checker 变体仍可通过。 |
+| C-M04 Markdown policy-prose layering | CLOSED | fence/heading/navigation/inline/link/negation/list/table 最小回归继续通过。 |
+| C-M05 tasks/matrix dual source set | CLOSED | SC-01..SC-05 与 41-rule matrix 继续各派生五项且相等；任一来源缩为四项失败。 |
+| C-M06 behavior write evidence / explicit idempotence | CLOSED | bounded-write/read-only evidence mutation 均失败；bootstrap/backfill 的 absent/once/duplicate/inline renderer 路径符合冻结合同。 |
+| C-M07 raw bytes / LF / fresh checkout | CLOSED | raw hash、LF content gate、单/双侧 CRLF、同步 manifest、YAML、migration CRLF mutation 均成立；LF/CRLF fresh clone 与 generated project checkout 通过。 |
+
+### C-M01: package prompt and fixed quantity threshold
+
+- 五个根级与 template package 逐字节一致；public Skill ID、frontmatter `name`、`interface.display_name` 均相对 Stage B 未变。
+- 五个 `interface.default_prompt` 分别只含一个独立正式调用：`$project-init`、`$project-bootstrap-fill`、`$handover-review`、`$document-backfill`、`$large-change-planning`；不含其他 Stage C 主调用或串行 pipeline。
+- marker mutation：删除、重复、错误 ID、只在 fenced example 中保留、加入另一个 Stage C `$skill-id`，正式 CLI 均 exit 1；诊断包含 Skill 和 `package-prompt/invocation`。
+- `project-bootstrap-fill` 与 `document-backfill` 仍在 `agents/openai.yaml` 顶层使用 boolean `policy.allow_implicit_invocation: false`，SKILL frontmatter 无同名字段；behavior runner 实际读取该位置。当前官方 Codex manual 也把该 policy 定义在 package YAML，并说明 explicit `$skill` 仍可调用。
+- 实际 prompt 未恢复 questionnaire / selected-stack、覆盖定制、one-source-at-a-time / 固定批次、自动修复、所有代码修改 checker、固定问题数或八章节。
+- 用户给出的五个正向阈值和 checker 的 `Twelve packages...`、`six components...` 均以 `package-prompt/fixed-quantity-risk-threshold` 失败；四个安全否定/低风险示例均通过。
+- 仍开放的反例：仅向 `large-change-planning/agents/openai.yaml` prompt 加入 `A 42-directory change requires independent planning.`，同时保持 SKILL 正文、根/template bytes 和 manifest checksum 自洽，正式 CLI exit 0。该明确固定数量门槛满足本轮反向合同，故 C-M01 OPEN。
+
+### C-M02: template manifest completeness
+
+- `config/skill-projections.json` 动态得到 9 个 Skill、每项 `SKILL.md` + `agents/openai.yaml`、共 18 个不同 POSIX target。
+- `project-template/.forgekit/template-manifest.json` 对 18 项全部恰好一次，Stage C 十个 package 文件 10/10；上轮缺失的 handover-review 与 large-change-planning YAML 均存在。
+- 每项 checksum 由当前 template 原始 bytes 计算；`.gitattributes` 唯一 entry 存在且正确；template version 仍为 `0.44.1`。
+- root validators/tests、development draft 与 `.claude` 未误入 manifest。
+- 独立 mutation：删除 handover YAML、large-change YAML、非 Stage C code-review YAML，添加 duplicate，篡改 checksum，projection config 新增 target 而不更新 manifest，全部非零并定位实际路径/category。
+- `update-template-manifest.py` 从 projection config 补齐/检查完整集合，而非只依赖当前手工 manifest。C-M02 CLOSED。
+
+### C-M03 and C-M04/C-M05 regression
+
+- Reinitialize 七个正向反例中五个失败；以下两个保留全部正向 marker、同步 root/template/manifest 后仍 exit 0：
+  - 用户指定：`An initialized project is required to go through project setup again before review.`
+  - checker 变体：`Before review, reinitialize every previously initialized repository.`
+- Mandatory pipeline 七个正向反例中四个失败；以下三个仍 exit 0：
+  - 用户指定：`All Stage C Skills form a mandatory one-by-one workflow for each project.`
+  - checker 变体：`For every project request, all five Skills have to be processed sequentially as one required workflow.`
+  - checker 变体：`Always take each task through every Stage C Skill in a fixed order.`
+- 用户给出的四个 reinitialize 安全句与四个 pipeline 安全句全部通过，没有否定作用域误报。
+- 这些是 action-before-subject、`project setup again`、hyphenated one-by-one、`sequentially`、`fixed order` 的清晰等价表达，不是复杂隐喻；C-M03 因正式 CLI 明确漏检而 OPEN。
+- C-M04 最小回归：fenced/heading marker 不能伪造 required contract，fenced legacy 不误报，inline/link/path/navigation 不误报，list/table 普通正文 contradiction 失败，safe negation 通过。C-M04 维持 CLOSED。
+- C-M05 最小回归：tasks SC-01..SC-05 与 ownership matrix 各派生五项且集合相等；matrix 或 tasks 缩为四项均失败。C-M05 维持 CLOSED。
+
+### C-M06: behavior evidence and explicit renderer
+
+- 13 个 cases 的 required evidence 在 dry-run 中明确列出；required 状态保持 `not-obtained`，grader=`not-run`，failure=`GRADER_UNCERTAIN`，cleanup 全部 passed，未伪造 PASS。
+- bounded/local write 将 `write_behavior=false`、allowed paths 清空、expected behavior 明确要求写入但删除 evidence、错误类型、标成 not-required，均 validate exit 2，并包含 case ID 与缺失条件。
+- handover read-only 关闭或删除 write oracle 均 exit 2；当前 allowlist 为空。
+- 对 `project-bootstrap-fill` 和 `document-backfill`，checker 通过 capture adapter 检查实际收到的 prompt：无 marker 时插入一次且 `invocation_inserted=true`；已有一个独立 marker 时不重复且 `false`；两个正式 marker 被拒绝；inline backtick example 不算正式调用，renderer 另插一个正式 marker；错误 Skill 被拒绝。
+- implicit handover 不注入 marker；explicit-only bootstrap 改为 implicit positive 时 schema exit 2。C-M06 CLOSED。
+
+### C-M07: raw bytes, LF content, and fresh checkout
+
+- `sync-skill-projections.py`、`update-template-manifest.py`、`validate-stage-c-skills.py`、`validate-stage-b-entry-migration.py` 的 identity/hash/compare 均使用 `read_bytes()` 或 binary stream；语义解析使用 `read_text()`，未参与 byte identity。smoke 的 CRLF/LF 构造只用于证明 raw checksum helper 不归一化。
+- 正式 LF gate 覆盖 projection config 的 18 个 root/template package、template manifest、migration descriptor、全部 draft baseline/incoming、根/template `.gitattributes`，并以 `b"\r"` 同时拒绝 CRLF 与 lone CR；错误包含路径与 `checkout-contract` / LF category。
+- Root-only SKILL CRLF：LF SHA `15591041...c02ce` -> CRLF `24ea0791...7929`；Stage C 与 projection 均失败。
+- Root/template 双侧 CRLF，即使同步 manifest 到 CRLF SHA，Stage C、projection、manifest 三个 gate 仍失败；YAML 双侧同步同样失败，LF `512070ce...49908` -> CRLF `4fbf81ea...dc6a7`。
+- Migration incoming CRLF + 同步 descriptor 失败于 incoming LF/current anchor；baseline CRLF + 同步 descriptor 失败于 LF/Stage B Git anchor，baseline LF `6561a5c2...14482` -> CRLF `8313ae0d...de1cd`。lone CR mutation 也以明确路径失败。
+- 三路 runner 临时 commit `2e25bd47ad16e6c567d3993d391d2e53b3b93768`：current scoped snapshot smoke PASS，`core.autocrlf=false` 和 `true` clone 的 Stage C/migration/projection/template/full smoke 全部 PASS，无 post-clone overlay，排除用户 `usage.html` 删除。
+- 两种 clone 的代表 blob=working SHA：project-init SKILL `15591041...c02ce`、YAML `512070ce...49908`、template manifest `0e386223...0634f`、migration descriptor `afa2c5a1...d18e`；`git check-attr` 均为 `text: set`、`eol: lf`。
+- 删除根 Markdown LF rule 后，真实 `core.autocrlf=true` checkout 产生 `15591041...c02ce` -> `24ea0791...7929` drift，正式 validator exit 1。
+- Generated project 临时 commit `10943f5ff748d631b27442c9e0a5c430242621ce`；autocrlf=true clone 中 `.gitattributes`、template lock 与十个 Stage C package blob=working，harness、doc-sync、current-docs、upgrade-check 全部 PASS。C-M07 CLOSED。
+
+### Development migration
+
+- 唯一 development draft 共有 12 actions：AGENTS、CLAUDE 加五份 Stage C SKILL.md 与五份 Stage C `agents/openai.yaml`；Stage C package target 为 10/10。
+- 十项 package baseline 逐字节来自 Stage B Git object；incoming 逐字节等于当前 template projection；descriptor checksum 均按原始 bytes 正确，全部 LF。
+- 23 个 migration tests 覆盖 stock/custom/unknown/missing/mixed、完整升级起点 rollback、同路径 origin rollback、五份 YAML、Git/current anchors、production discovery 隔离；23/23 PASS。Custom/unknown 不覆盖，missing 安全，rollback 恢复升级起点。
+- production discovery 不发现 draft；未建立正式 `migrations/0.45.0` 或 `project-template/migrations/0.45.0`。
+
+### Tests, formal gates, and smoke
+
+| Target | Actual result |
+| --- | --- |
+| Stage C contract tests | 25/25 PASS |
+| behavior runner | 21/21 PASS |
+| behavior adapters | 4/4 PASS |
+| projection tests | 11/11 PASS |
+| development migration tests | 23/23 PASS |
+| fresh-clone tests | 3/3 PASS |
+| full unittest discovery | 160/160 PASS |
+| Stage C / projection / ownership / entries / migration validators | PASS |
+| behavior validate / list / dry-run | PASS，13 cases |
+| plugin assets / template / manifest | PASS |
+| release consistency mutations | PASS；串行执行并全部恢复 |
+| `git diff --check` | PASS |
+| current scoped snapshot smoke | PASS |
+| `core.autocrlf=false` fresh clone full smoke | PASS |
+| `core.autocrlf=true` fresh clone full smoke | PASS |
+| generated-project autocrlf=true checkout | PASS |
+
+正式测试全绿不能覆盖 checker 已复现的 C-M01/C-M03 明确反例。一次将 template 与 release-consistency 并行运行导致 checker 自身读取到瞬时 shared-helper mutation；对应源 bytes 已恢复，两个 checker 临时目录已删除，串行重跑两项均 PASS，不作为 maker finding。
+
+### BLOCKER
+
+None. explicit-only policy 生效；behavior read-only/write oracle 未放宽；custom/unknown migration 内容不覆盖；development draft 未被 production discovery 发现；clone 后无 tracked overlay；检查器未修改真实 `usage.html`。
+
+### MAJOR
+
+1. C-M01 OPEN：明确固定数量门槛 `42-directory ... requires independent planning` 可在 default prompt 中通过正式 validator。
+2. C-M03 OPEN：一个用户指定 reinitialize 等价句、一个用户指定 mandatory pipeline 等价句及 checker 变体可通过正式 validator。
+
+### NOTE
+
+1. 更复杂自然语言仍可能超出有限静态 gate；本轮 MAJOR 只依据清晰、可复现且在冻结反例族内的表达。
+2. 真实 Codex/Claude 行为、selector、Skill source、token/context 效果与 manual merge 体验仍为 `NEEDS_TEST`；这不构成本轮失败原因。
+3. C-M02/C-M04/C-M05/C-M06/C-M07 已关闭；Stage D/E 与正式 release migration 尚未完成不构成本轮失败原因。
+
+### Stage decision
+
+Stage C final remaining findings recheck FAILS with 0 BLOCKER and 2 OPEN MAJOR findings. Status remains `stage-c-implemented-awaiting-independent-check`. Stage C is not approved and Stage D is not authorized.
+
+`VERSION` remains `0.44.1`. No real model prompt was executed. No formal v0.45.0 release migration was created. v0.45.0 is not release-ready. This checker did not implement fixes, enter Stage D/E, commit, push, tag, release, deploy, or modify/stage/restore the user's deleted `usage.html`.
+
+## Stage C Final C-M01 C-M03 Recheck
+
+- Date: 2026-07-21
+- Checker: Codex independent checker (`/root`)
+- Stage B baseline: `d02b496971db3773ac0c1435a423198189d6d8d8`
+- Scope: only C-M01 fixed-quantity risk thresholds, C-M03A existing-project reinitialization, and C-M03B mandatory five-Skill pipelines. C-M02/C-M04/C-M05/C-M06/C-M07 and the previously accepted Skill/migration/Stage A/Stage B contracts were not reopened.
+- Decision: `FAIL`. C-M01 is CLOSED. C-M03A and C-M03B remain OPEN. There are 0 BLOCKER and 2 MAJOR findings. Status remains `stage-c-implemented-awaiting-independent-check`; Stage D is not authorized.
+
+### Implementation quality
+
+The validator still consumes the Stage B Markdown policy-prose layer rather than raw Markdown. The new rules use small factor families rather than complete checker sentences: quantity/unit/trigger/target/safe context for C-M01; existing subject/action/repeat/mandatory/negation for C-M03A; and full set/scope/mandatory/sequence/no-skip/negation for C-M03B. This is the right structure, but the independently tested C-M03 vocabularies and composition rules remain incomplete. No complete-sentence allowlist or denylist was found in production validator code.
+
+### C-M01 fixed-quantity thresholds — CLOSED
+
+- Formal CLI mutations: 18/18 positive thresholds failed and 18/18 safe or factual expressions passed.
+- The six required positives all failed, including `A 42-directory change requires independent planning.`, services/folders/packages/endpoints/documents variants, with `large-change-planning`, `package-prompt/fixed-quantity-risk-threshold`, matched prose, and non-empty `quantity`, `unit`, `trigger`, and `target` evidence.
+- Twelve novel positives covered `19`, `64`, `two`, `eight`, `eleven`, `dozens`; classes, repositories, projects, folders, endpoints, components; and counts-as, mandates, must-trigger, qualifies-as, threshold, escalation, checker, formal-review, high-risk, and staged-workflow forms. All failed as required.
+- Eighteen safe expressions covered must-not, never, cannot, does-not, not-required, may-remain-low-risk, example, count-alone, regardless-of-count, deterministic projections, and bare factual quantities. All passed. The validator does not reject every number-plus-unit occurrence.
+- The release gate independently injected the `42-directory` default-prompt threshold, checked the formal category and structured evidence, restored both root/template YAML byte-for-byte, and passed after restoration.
+
+### C-M03A existing-project reinitialization — OPEN
+
+- All six required/original reinitialization positives failed via formal CLI, including the two previous checker misses: `An initialized project is required to go through project setup again before review.` and `Before review, reinitialize every previously initialized repository.` Diagnostics contained `project-init`, `existing-project-reinitialize`, and the matched prose.
+- Novel expressions were only 8/10. These clear command/action-before-subject forms still passed the formal validator:
+  - `Run the bootstrap process once more for repositories that are already initialized.`
+  - `For each project that has already been initialized, run project setup again.`
+- Safe expressions were only 11/12. `Existing repositories may continue to handover-review without repeating setup.` was incorrectly reported as `existing-project-reinitialize` despite expressing the safe continuation route without repeating setup.
+- Because explicit new equivalents still escape and a normal safe sentence is falsely rejected, C-M03A remains OPEN and is MAJOR.
+
+### C-M03B mandatory five-Skill pipeline — OPEN
+
+- All seven required/original positives failed via formal CLI, including all three previous checker misses: one-by-one workflow, processed sequentially, and fixed-order variants. Diagnostics contained `project-init`, `mandatory-five-skill-pipeline`, and matched prose.
+- Novel expressions were only 6/12. The following clear full-set mandatory equivalents still passed:
+  - `Every request must complete each Stage C Skill before finishing.`
+  - `The complete Stage C Skill set is a required chain for any change.`
+  - `Every Stage C Skill is compulsory for every project request.`
+  - `Each of the five Skills is mandatory for every task.`
+  - `The complete set of five forms a prerequisite chain for each change.`
+  - `All five Skills are required one at a time for any project request.`
+- All 13 safe/alternative/optional/no-fixed-order/not-all/only-when-applicable expressions passed.
+- The missed `compulsory`, `required chain`, and full-set mandatory forms are explicit equivalents inside the requested boundary, not complex metaphorical language. C-M03B remains OPEN and is MAJOR.
+
+### Formal CLI and release mutation evidence
+
+- Independent mutation repo included `.git`, used temporary commit `16f2647f96d31335eb0dbb8ca3035a2ff4935516`, preserved all positive markers, synchronized root/template and the temporary manifest, ran the production CLI for all 96 cases, and ended clean after every reset. The six former checker misses all returned non-zero with Skill/category/matched prose; the newly listed C-M03 misses returned zero.
+- `scripts/test-release-consistency.ps1` passed in 255.4 seconds. Its directory-threshold, setup-again, and one-by-one mutations entered real policy/default-prompt files, asserted the formal validator category and prose, restored bytes, and the post-mutation baseline passed.
+- All checker-created mutation repositories, behavior temp roots, fresh clones, and orphan processes were removed. No source-tree mutation remained.
+
+### Minimal regression for findings kept CLOSED
+
+- C-M02: projection check reported 9 Skills / 18 managed files and manifest check passed; Stage C package remains 10/10.
+- C-M04: fenced/heading required-marker regression passed and the policy-prose layer remains in use.
+- C-M05: SC-01..SC-05 and the ownership matrix still derive the same five-Skill set.
+- C-M06: bounded-write/read-only evidence and explicit invocation idempotence regression passed.
+- C-M07: synchronized bilateral CRLF rejection regression passed. Independent fresh-clone commit `4aafb972346f22e104ddd2584f42d61758ae9cdd` passed both `core.autocrlf=false` and `core.autocrlf=true`; blob and working-tree SHA-256 matched under `text: set`, `eol: lf`. Release consistency's independent fresh-clone baseline also passed.
+- The six focused closed-finding regression tests passed 6/6.
+
+### Tests and gates
+
+| Target | Actual result |
+| --- | --- |
+| Independent formal CLI semantic cases | 87/96 matched expectation; 9 C-M03 failures detailed above |
+| Stage C contract unittest | 28/28 PASS |
+| Closed-finding focused regression | 6/6 PASS |
+| Full unittest discovery | 163/163 PASS |
+| Stage C validator | PASS |
+| Projection / manifest / ownership / agent-entry validators | PASS |
+| Development migration validator | PASS |
+| Behavior validate | PASS, 13 cases |
+| Behavior dry-run | PASS using an isolated `D:\tmp` temp root; records remain `GRADER_UNCERTAIN/not-run` and cleanup passed |
+| Fresh-clone LF/CRLF gate | PASS, temporary commit `4aafb972346f22e104ddd2584f42d61758ae9cdd` |
+| Template validation | PASS |
+| Release consistency restoring mutations | PASS |
+| `git diff --check` before writeback | PASS |
+
+Initial non-elevated runs of the D:\tmp-backed unittest/fresh-clone/template checks stalled or hit sandbox cleanup permissions. Each was rerun with the required filesystem permission and then passed; checker-owned orphan processes and exact temporary directories were removed. This environment issue does not change the C-M03 semantic findings.
+
+### BLOCKER
+
+None.
+
+### MAJOR
+
+1. C-M03A remains OPEN: two clear existing-project reinitialization commands pass the formal validator, and one safe continuation sentence is falsely rejected.
+2. C-M03B remains OPEN: six clear universal/full-set mandatory pipeline equivalents pass the formal validator, including the explicitly required `compulsory for every project request` form.
+
+### NOTE
+
+1. C-M01 is CLOSED; C-M02/C-M04/C-M05/C-M06/C-M07 remain CLOSED and were not reopened.
+2. More complex natural language may remain outside a finite static gate. The failure here relies only on clear, requested equivalents.
+3. Real Codex/Claude behavior, selector/Skill-source/token-context effects, and manual merge experience remain `NEEDS_TEST`; these are not failure reasons.
+
+### Stage decision
+
+Stage C final C-M01/C-M03 recheck FAILS. Status remains `stage-c-implemented-awaiting-independent-check`. Stage C is not approved and Stage D is not authorized.
+
+`VERSION` remains `0.44.1`. No real model prompt was executed. No formal v0.45.0 release migration was created. v0.45.0 is not release-ready. This checker did not implement fixes, enter Stage D/E, commit, push, tag, release, deploy, or modify/stage/restore the user's deleted `usage.html`.
+## Stage C Final C-M03 Recheck
+
+- Date: 2026-07-21
+- Checker: Codex independent checker (`/root`)
+- Stage B baseline: `d02b496971db3773ac0c1435a423198189d6d8d8`
+- Scope: only C-M03A existing-project reinitialization and C-M03B mandatory full-Skill execution. C-M01/C-M02/C-M04/C-M05/C-M06/C-M07 remained CLOSED and received only the requested minimal regression.
+- Decision: `FAIL`. C-M03A remains OPEN; C-M03B is CLOSED. There are 0 BLOCKER and 1 MAJOR. Status remains `stage-c-implemented-awaiting-independent-check`; Stage D is not authorized.
+
+### Feature model
+
+The production validator uses sentence-level, order-independent feature families rather than a complete-sentence denylist. C-M03A evaluates `existing_subject`, `init_action`, `repeat_action`, `positive_requirement`, `negated_init`, and `alternative_route`; C-M03B evaluates `full_skill_set`, `universal_scope`, `mandatory`, `sequence`, `non_skippable`, and `negated_pipeline`. Its three pipeline branches are full-set/scope/mandatory, full-set/scope/sequence, and non-skippable/scope. Diagnostics contain Skill, category, matched prose, and enabled features. The closed C-M04 policy-prose extractor remains the input layer.
+
+### Nine checker scenarios
+
+All nine historical checker scenarios now satisfy their expected formal CLI result in an isolated Git repository:
+
+- Reinitialize positives `Run the bootstrap process once more for repositories that are already initialized.` and `For each project that has already been initialized, run project setup again.` returned 1 with `project-init`, `existing-project-reinitialize`, matched prose, and `features=existing_subject,init_action,repeat_action,positive_requirement`.
+- Safe `Existing repositories may continue to handover-review without repeating setup.` returned 0; `without repeating setup` and the handover alternative route no longer produce a finding.
+- All six former pipeline misses returned 1 with `mandatory-five-skill-pipeline`, matched prose, and features. The two expressions without sequence words — `Every Stage C Skill is compulsory for every project request.` and `Each of the five Skills is mandatory for every task.` — were rejected through full-set/scope/mandatory rather than a sequence requirement.
+
+### C-M03A — OPEN
+
+- Fixed positives: 6/6 failed as required.
+- Fixed safe expressions: 6/6 passed.
+- Checker scenarios: 3/3 matched expectation.
+- Independent novel positives: only 4/6 failed. Two clear command forms still passed the formal validator with exit 0 while all original contract markers remained present:
+  - `Bootstrap an already initialized repository again.`
+  - `Set up each existing workspace from scratch.`
+- Independent novel safe/alternative expressions: 6/6 passed, covering without, must-not, not-required, handover-review and project-bootstrap-fill alternatives.
+
+Both missed sentences contain an existing/initialized subject, an initialization/setup/bootstrap action, repeat/from-scratch semantics, and an imperative positive requirement. The feature implementation recognizes only selected imperative lead verbs and does not recognize `Bootstrap ...` or phrasal `Set up ...` as the complete positive feature set. Because explicit command-form reinitialization remains undetected, C-M03A remains OPEN and is MAJOR.
+
+### C-M03B — CLOSED
+
+- Six historical checker misses: 6/6 failed with category, matched prose and feature evidence.
+- Fixed positives: 7/7 failed.
+- Fixed safe expressions: 8/8 passed.
+- Eight independent novel mandatory expressions without `sequential`, `sequence`, `order`, `pipeline`, or `workflow`: 8/8 failed. They covered every/all/each/full-set, every task/request/change/project/all-work, compulsory/required/must/has-to, and no-skip forms.
+- Seven independent safe expressions covering alternatives, optional, not-every, need-not-use-all, only-matching, no-fixed-order and only-when-applicable: 7/7 passed.
+
+C-M03B no longer requires sequence vocabulary for every violation and is CLOSED.
+
+### Formal CLI and release mutation
+
+- The independent mutation repository contained `.git`, used temporary commit `192993ba63a2f074d9d06dfb86df28fa6d6f8a86`, synchronized root/template/manifest in the temporary tree, and ran the production CLI for all 63 cases. Result: 61/63 matched expectation; the two failures are the C-M03A novel command forms above. The temporary repository ended clean and was destroyed.
+- Release consistency contains and passed real restoring mutations for setup-again, action-first bootstrap-once-more, one-by-one pipeline, and full-set mandatory without sequence. Each asserted category/matched prose/features, restored root/template bytes, and the post-mutation baseline passed.
+
+### Closed-finding minimal regression
+
+- C-M01: directory threshold rejection and safe quantity expression passed.
+- C-M02: projection targets remain 18/18 and Stage C package files 10/10; manifest check passed.
+- C-M04: fenced required marker cannot fake the contract; safe negation passed.
+- C-M05: tasks and ownership matrix still each derive the same five-Skill set.
+- C-M06: disabling bounded-write evidence fails; an existing explicit marker is not duplicated.
+- C-M07: bilateral CRLF plus synchronized manifest still fails. Fresh-clone temporary commit `ea2a14f35d8217b8fa9d354edf5f8bfb79bd91cc` passed `core.autocrlf=false` and `true` with blob bytes equal to working-tree bytes.
+- Focused closed-finding regression: 8/8 PASS.
+
+### Tests and formal gates
+
+| Target | Actual result |
+| --- | --- |
+| Independent C-M03 formal CLI cases | 61/63 matched expectation |
+| Stage C unittest | 28/28 PASS |
+| Full unittest discovery | 163/163 PASS |
+| Closed-finding focused regression | 8/8 PASS |
+| Stage C validator | PASS |
+| Projection / manifest / ownership / agent-entry validators | PASS |
+| Development migration validator | PASS |
+| Behavior validate / dry-run | PASS; 13 cases, grader remains `GRADER_UNCERTAIN/not-run` |
+| Fresh-clone LF/CRLF | PASS; commit `ea2a14f35d8217b8fa9d354edf5f8bfb79bd91cc` |
+| Template validation | PASS |
+| Release consistency restoring mutations | PASS in 255.8 seconds |
+| `git diff --check` before writeback | PASS |
+
+### BLOCKER
+
+None.
+
+### MAJOR
+
+1. C-M03A remains OPEN because the formal validator accepts two explicit imperative reinitialization requirements: `Bootstrap an already initialized repository again.` and `Set up each existing workspace from scratch.`
+
+### NOTE
+
+1. C-M03B is CLOSED. C-M01/C-M02/C-M04/C-M05/C-M06/C-M07 remain CLOSED.
+2. More complex natural language may exceed a finite static gate; the MAJOR above relies only on direct command forms within the required feature model.
+3. Real Codex/Claude behavior, selector/Skill-source/token-context effects, and manual merge experience remain `NEEDS_TEST`; these are not failure reasons.
+
+### Stage decision
+
+Stage C final C-M03 recheck FAILS. Status remains `stage-c-implemented-awaiting-independent-check`. Stage C is not approved and Stage D is not authorized.
+
+`VERSION` remains `0.44.1`. No real model prompt was executed. No formal v0.45.0 release migration was created. v0.45.0 is not release-ready. This checker did not implement fixes, enter Stage D/E, commit, push, tag, release, deploy, or modify/stage/restore the user's deleted `usage.html`.
+
+## Stage C Final Imperative Reinitialize Recheck
+
+- Date: 2026-07-21
+- Checker: Codex independent checker (`/root`)
+- Stage B baseline: `d02b496971db3773ac0c1435a423198189d6d8d8`
+- Scope: only C-M03A imperative existing-project reinitialization. C-M01/C-M02/C-M03B/C-M04/C-M05/C-M06/C-M07 remained CLOSED and received only the requested minimal regression.
+- Decision: `FAIL`. C-M03A remains OPEN. There are 0 BLOCKER and 1 MAJOR. Status remains `stage-c-implemented-awaiting-independent-check`; Stage D is not authorized.
+
+### Implementation and feature model
+
+The validator uses sentence-level features and the shared Markdown policy-prose extractor; no complete-sentence special case for the two historical misses was found. It covers the `bootstrap` inflections, adjacent and separated `set up`, sentence-initial commands, and allowed `Before ...` / `For each|every|any ...` prefaces. Analysis-only normalization leaves matched prose unchanged. The Boolean contract remains `existing_subject AND init_action AND repeat_action AND positive_requirement AND NOT negated_init AND NOT alternative_route`.
+
+The positive implementation is structurally sound, but its negation vocabulary is not morphologically aligned: passive `bootstrapped` is an initialization action but is not recognized after `must not` by `negated_init`.
+
+### Historical commands and supplementary positives
+
+- `Bootstrap an already initialized repository again.`: formal CLI exit 1 with `project-init`, `existing-project-reinitialize`, complete matched prose, and `features=existing_subject,init_action,repeat_action,positive_requirement`.
+- `Set up each existing workspace from scratch.`: formal CLI exit 1 with the same category and feature evidence.
+- Supplementary positives: 11/11 correctly rejected. They covered sentence-initial bootstrap, `Before` / `For each` prefaces, adjacent/separated `set up`, passive `be set up`, all requested bootstrap inflections, and repeat forms `again`, `once more`, `anew`, and `from scratch`.
+- The independent `.git` mutation repository used temporary commit `567ae670d1ce3a95a136419a8fd1105c10787986`, retained positive markers, synchronized root/template/manifest in isolation, restored every case byte-for-byte, and was destroyed.
+
+### Safety, word boundaries, and Markdown
+
+- Required `Do not`, `Never`, `without`, `instead of`, explanatory, example-only, noun, and handover-continuation expressions passed. The straight-quoted ASCII equivalent of the `set up` example was used because Skill files are ASCII-only.
+- `bootstrappable`, `bootstrapper`, `setup-like`, `upset`, inline code, fenced legacy prose, and a Skill path did not trigger.
+- Safe coverage was only 19/20: `An already initialized project must not be bootstrapped again.` incorrectly returned exit 1 with `project-init [existing-project-reinitialize]` and all four positive features. This common passive negative is neither ambiguous nor complex. Negation precedence is therefore incomplete.
+
+### Release mutation and minimal regression
+
+- Release consistency's imperative bootstrap-again and phrasal-set-up mutations entered real policy prose, asserted category/matched prose/features, restored root/template bytes, and passed after restoration.
+- The requested minimal regressions for C-M01/C-M02/C-M03B/C-M04/C-M05/C-M06/C-M07 passed 9/9: directory threshold and safe context; manifest 18/18 and Stage C package 10/10; mandatory full-set without sequence; fenced marker and safe negation; dual-source five-Skill set; bounded-write evidence and explicit idempotence; bilateral CRLF plus synchronized-manifest rejection.
+- Fresh-clone temporary commit `3e6750d732952d4fda2c6130ce4a4aa78f0ae976` passed `core.autocrlf=false` and `true`; Stage C, migration, projection, and template checks passed without post-checkout overlay.
+
+### Tests and gates
+
+| Target | Actual result |
+| --- | --- |
+| Independent C-M03A formal CLI | 32/33: positive 13/13, safe 19/20 |
+| Historical imperative commands | 2/2 correctly rejected |
+| Stage C unittest | 28/28 PASS |
+| Full unittest discovery | 163/163 PASS |
+| Closed-finding focused regression | 9/9 PASS |
+| Stage C / projection / manifest / ownership / agent-entry / migration | PASS |
+| Behavior validate / dry-run | PASS; 13 cases, `GRADER_UNCERTAIN/not-run` |
+| Fresh-clone LF/CRLF | PASS; commit `3e6750d732952d4fda2c6130ce4a4aa78f0ae976` |
+| Template validation | PASS |
+| Release consistency restoring mutations | PASS in 281 seconds |
+| `git diff --check` before writeback | PASS |
+
+### BLOCKER
+
+None.
+
+### MAJOR
+
+1. C-M03A remains OPEN because `An already initialized project must not be bootstrapped again.` is falsely rejected. The positive family recognizes `bootstrapped`, but the `must not` negation family does not give that inflection safe scope.
+
+### NOTE
+
+1. Both historical imperative misses are fixed; all 13 positive variants were caught.
+2. C-M01/C-M02/C-M03B/C-M04/C-M05/C-M06/C-M07 remain CLOSED.
+3. Complex language, real model behavior, selector/Skill-source/token-context effects, and manual merge experience remain non-blocking `NEEDS_TEST` notes.
+
+### Stage decision
+
+C-M03A remains OPEN. Stage C FAILS this recheck, status remains `stage-c-implemented-awaiting-independent-check`, and Stage D is not authorized.
+
+`VERSION` remains `0.44.1`. No real model prompt was executed. No formal v0.45.0 release migration was created. v0.45.0 is not release-ready. No fix, Stage D/E work, commit, push, tag, release, deploy, or change to the user's deleted `usage.html` was performed.
+
+## Stage C Closed Final Recheck
+
+- Date: 2026-07-21
+- Checker: Codex independent checker (`/root`)
+- Scope: closed verification of C-M03A initialization-action positive/negative morphology only. No matrix-external synonym fuzzing or new semantic category was introduced. C-M01/C-M02/C-M03B/C-M04/C-M05/C-M06/C-M07 remained CLOSED.
+- Decision: `PASS WITH NOTES`. C-M03A is CLOSED. Stage C status is `stage-c-approved-for-stage-d`; Stage D is authorized but was not implemented in this review.
+
+### Implementation confirmation
+
+- The competing `NEGATED_INIT_PATTERNS` action vocabulary is absent.
+- `INIT_ACTION_SPECS` is the single action vocabulary. `find_init_action_matches()` returns `start`, `end`, normalized `family`, and original `text`; directive feature detection, imperative detection, and local negation consume those shared matches.
+- No complete fixed-matrix sentence special case was found. The C-M03A Boolean contract remains `existing_subject AND init_action AND repeat_action AND positive_requirement AND NOT negated_init AND NOT alternative_route`.
+- C-M03B and the other closed findings were not changed or reopened by this recheck.
+
+### Original false positive and positive control
+
+- `An already initialized project must not be bootstrapped again.` returned 0 and did not report `existing-project-reinitialize`. The matcher recorded span `43..55`, family `bootstrap`, original text `bootstrapped`, and local negation `true`.
+- `An already initialized project must be bootstrapped again.` returned 1 with `project-init [existing-project-reinitialize]`, complete matched prose, and `features=existing_subject,init_action,repeat_action,positive_requirement`. The action used family `bootstrap`, text `bootstrapped`, and negation `false`.
+
+### Fixed matrix and minimal regression
+
+- Fixed matrix: 14/14 matched expectation. Bootstrap was 3/3 safe plus 3/3 positive; set-up was 2/2 safe plus 2/2 positive; initialize/reinitialize was 2/2 safe plus 2/2 positive.
+- Across the original pair, fixed matrix, and three minimal regression sentences, formal CLI was 19/19: 9/9 safe returned 0 and 10/10 positive returned non-zero with the required category/prose/features.
+- No tested action family showed positive recognition with missing negative recognition. Span/family/original-text evidence was present for bootstrap, set-up, initialize, reinitialize, and the existing repeat-init handover sentence.
+- `Bootstrap an already initialized repository again.` and `Set up each existing workspace from scratch.` still failed. `Existing repositories may continue to handover-review without repeating setup.` still passed.
+- C-M01 and C-M03B remained CLOSED. Projection targets were 18/18 and Stage C package files were 10/10.
+- Fresh-clone temporary commit `805fe258f2212f59a0aa176bcfb3e3618b507b39` passed `core.autocrlf=false` and `core.autocrlf=true` without post-checkout overlays.
+
+### Tests and gates
+
+| Target | Actual result |
+| --- | --- |
+| Fixed formal CLI matrix plus controls/regressions | 19/19 PASS |
+| Stage C validator | PASS |
+| Stage C unittest | 29/29 PASS |
+| Full unittest discovery | 164/164 PASS |
+| Projection / manifest | PASS; 18/18 targets, Stage C package 10/10 |
+| Fresh-clone LF/CRLF | PASS; commit `805fe258f2212f59a0aa176bcfb3e3618b507b39` |
+| Template validation | PASS |
+| Release consistency | PASS in 288.2 seconds; negated/positive bootstrapped guards and byte restoration passed |
+| `git diff --check` before writeback | PASS |
+
+### BLOCKER / MAJOR / NOTE
+
+- BLOCKER: none.
+- MAJOR: none.
+- NOTE: matrix-external complex natural language and real Codex/Claude behavior remain `NEEDS_TEST`; selector, Skill-source, token/context effects, and manual merge experience remain non-blocking future evidence.
+
+### Stage decision
+
+C-M03A is CLOSED. Stage C passes with notes, status is `stage-c-approved-for-stage-d`, and entry into Stage D is allowed. This review stops before Stage D implementation.
+
+`VERSION` remains `0.44.1`. Real model behavior remains `NEEDS_TEST`. No formal v0.45.0 migration was created. No commit, push, tag, release, or deployment was performed, and the user's deleted `usage.html` was not restored, modified, or staged.

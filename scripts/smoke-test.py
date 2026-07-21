@@ -157,6 +157,8 @@ REQUIRED_REPO_PATHS = [
     "scripts/validate-rule-ownership.py",
     "scripts/validate-agent-entries.py",
     "scripts/validate-stage-b-entry-migration.py",
+    "scripts/validate-stage-c-skills.py",
+    "scripts/test-fresh-clone-crlf.py",
     "scripts/test-skill-behavior.py",
     "scripts/skill_behavior_adapters/codex.py",
     "scripts/skill_behavior_adapters/claude.py",
@@ -164,6 +166,7 @@ REQUIRED_REPO_PATHS = [
     ".claude-plugin/plugin.json",
 ]
 REQUIRED_GENERATED_PATHS = [
+    ".gitattributes",
     "AGENTS.md",
     "CLAUDE.md",
     ".forgekit/project-boundary.yml",
@@ -448,8 +451,12 @@ def assert_manifest_checksum_stability(repo):
             expected = entry["checksum"]
             if tool.sha256_file(source) != expected:
                 fail(f"Manifest checksum does not match source: {source_path}")
-            if tool.sha256_file(lf_path) != expected or tool.sha256_file(crlf_path) != expected:
-                fail(f"Manifest checksum is not LF/CRLF stable: {source_path}")
+            if b"\r" in source.read_bytes():
+                fail(f"Manifest source violates the LF checkout contract: {source_path}")
+            if tool.sha256_file(lf_path) != expected:
+                fail(f"Manifest LF checksum does not match source: {source_path}")
+            if tool.sha256_file(crlf_path) == expected:
+                fail(f"Manifest checksum helper normalized CRLF instead of hashing raw bytes: {source_path}")
 
     if ".forgekit/state.json" in entries:
         fail("Generated .forgekit/state.json must not be manifest-managed")
@@ -3407,6 +3414,7 @@ def main():
     assert_paths(repo, REQUIRED_REPO_PATHS)
     run([sys.executable, "-B", str(repo / "scripts/validate-agent-entries.py"), "--repo-root", str(repo)], cwd=repo)
     run([sys.executable, "-B", str(repo / "scripts/validate-stage-b-entry-migration.py"), "--repo-root", str(repo)], cwd=repo)
+    run([sys.executable, "-B", str(repo / "scripts/validate-stage-c-skills.py"), "--repo-root", str(repo)], cwd=repo)
     assert_no_escaped_filenames(repo)
     assert_no_noise_files(repo / "project-template")
     assert_no_forbidden_text(repo, FORBIDDEN_LEGACY_REFS, "Forbidden legacy path text found", LEGACY_REF_ALLOWLIST)
@@ -3535,6 +3543,7 @@ def main():
     run([sys.executable, str(repo / "scripts" / "update-template-manifest.py"), "--check"], cwd=repo)
     run([sys.executable, str(repo / "scripts" / "sync-skill-projections.py"), "check", "--repo-root", str(repo)], cwd=repo)
     run([sys.executable, str(repo / "scripts" / "validate-rule-ownership.py"), "--repo-root", str(repo)], cwd=repo)
+    run([sys.executable, str(repo / "scripts" / "validate-stage-c-skills.py"), "--repo-root", str(repo)], cwd=repo)
     run([sys.executable, str(repo / "scripts" / "test-skill-behavior.py"), "validate", "--repo-root", str(repo)], cwd=repo)
     assert_skill_frontmatter(repo / "skills")
     assert_skill_frontmatter(repo / "project-template" / ".agents" / "skills")

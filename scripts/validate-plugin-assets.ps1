@@ -121,6 +121,18 @@ function Test-SharedSkillDistribution {
     if ($projectionExitCode -ne 0) {
         Add-Error "Skill projection check failed: $($output -join [Environment]::NewLine)"
     }
+    $stageCValidator = Join-Path $repoRoot "scripts\validate-stage-c-skills.py"
+    $previousErrorPreference = $ErrorActionPreference
+    try {
+        $ErrorActionPreference = "Continue"
+        $stageCOutput = & python -B $stageCValidator --repo-root $repoRoot 2>&1
+        $stageCExitCode = $LASTEXITCODE
+    } finally {
+        $ErrorActionPreference = $previousErrorPreference
+    }
+    if ($stageCExitCode -ne 0) {
+        Add-Error "Stage C Skill contract check failed: $($stageCOutput -join [Environment]::NewLine)"
+    }
 }
 
 function Test-PluginManifest {
@@ -157,6 +169,8 @@ Test-RequiredPath ".agents\plugins\marketplace.json"
 Test-RequiredPath ".claude-plugin\marketplace.json"
 Test-RequiredPath "config\skill-projections.json"
 Test-RequiredPath "scripts\sync-skill-projections.py"
+Test-RequiredPath "scripts\validate-stage-c-skills.py"
+Test-RequiredPath "scripts\test-fresh-clone-crlf.py"
 Test-RequiredPath "project-template\AGENTS.md"
 Test-RequiredPath "project-template\CLAUDE.md"
 Test-RequiredPath "project-template\.claude\skills\forgekit-project-workflow\SKILL.md"
@@ -169,9 +183,9 @@ Test-RequiredPath "scripts\test-release-consistency.ps1"
 
 Test-RequiredPattern "README.md" "可选原生 agent 配置" "Current native adapter entry"
 Test-RequiredPattern "scripts\init-project-template.ps1" "CLAUDE.md" "Unified initializer Claude guidance"
-Test-RequiredPattern "skills\project-init\SKILL.md" "Classify the discovery state" "Project init discovery state"
+Test-RequiredPattern "skills\project-init\SKILL.md" "## Trigger Boundary" "Project init trigger boundary"
 Test-RequiredPattern "skills\project-suitability\SKILL.md" "Suitable, Conditional, or Custom" "Project suitability outcome"
-Test-RequiredPattern "skills\large-change-planning\SKILL.md" "staged implementation plan" "Large change planning output"
+Test-RequiredPattern "skills\large-change-planning\SKILL.md" "## Impact Branch" "Large change impact branch"
 
 Test-ForbiddenPath "plugins\forgekit-codex-workflow"
 Test-ForbiddenPath "plugins\forgekit-claude-workflow"

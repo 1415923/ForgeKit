@@ -73,6 +73,15 @@ function Test-AgentEntryContracts {
             Add-Error "Stage B entry migration validation failed: $($migrationOutput -join [Environment]::NewLine)"
         }
     }
+    $stageCValidator = Join-Path $repoRoot "scripts\validate-stage-c-skills.py"
+    Test-RequiredPath "scripts\validate-stage-c-skills.py"
+    Test-RequiredPath "scripts\test-fresh-clone-crlf.py"
+    if (Test-Path -LiteralPath $stageCValidator) {
+        $stageCOutput = & python -B $stageCValidator --repo-root $repoRoot 2>&1
+        if ($LASTEXITCODE -ne 0) {
+            Add-Error "Stage C Skill contract validation failed: $($stageCOutput -join [Environment]::NewLine)"
+        }
+    }
 }
 
 function Test-SkillAscii {
@@ -109,6 +118,7 @@ function Test-StageADeterministicContracts {
     $checks = @(
         @("Skill projection", @((Join-Path $repoRoot "scripts\sync-skill-projections.py"), "check", "--repo-root", $repoRoot)),
         @("Rule ownership", @((Join-Path $repoRoot "scripts\validate-rule-ownership.py"), "--repo-root", $repoRoot)),
+        @("Stage C Skill contracts", @((Join-Path $repoRoot "scripts\validate-stage-c-skills.py"), "--repo-root", $repoRoot)),
         @("Skill behavior cases", @((Join-Path $repoRoot "scripts\test-skill-behavior.py"), "validate", "--repo-root", $repoRoot))
     )
     foreach ($check in $checks) {
@@ -779,7 +789,7 @@ function Test-LargeChangeProtocol {
     Test-RequiredPath "project-template\governance\large-change-execution.md"
     Test-RequiredPath (Get-ExplorationReportPath)
     Test-RequiredPath (Get-ImplementationPlanPath)
-    Test-RequiredPattern "project-template\.agents\skills\project-init\SKILL.md" "large-change protocol" "Project init large-change gate"
+    Test-RequiredPattern "project-template\.agents\skills\large-change-planning\SKILL.md" "## Impact Branch" "Impact-based large-change gate"
     Test-RequiredPattern "project-template\.agents\skills\code-review\SKILL.md" "large-change protocol" "Code review large-change gate"
     Test-RequiredPattern "project-template\.agents\skills\release-check\SKILL.md" "large-change protocol" "Release check large-change gate"
     Test-RequiredPattern "usage.html" "data-prompt=""large""" "HTML large-change tab"
@@ -1005,12 +1015,9 @@ function Test-StaleText {
     Test-NoPattern (Get-VersionRoadmapPath) "FEAT-HARNESS" "ForgeKit harness feature leaked into generated roadmap"
     Test-NoPattern (Get-ProjectTaskBoardPath) "TASK-HARNESS" "ForgeKit harness task leaked into generated task board"
     Test-NoPattern (Get-ProjectTaskBoardPath) "FEAT-HARNESS" "ForgeKit harness feature leaked into generated task board"
-    Test-RequiredPattern "project-template\.agents\skills\project-init\SKILL.md" "Execution Confirmation" "Project init execution confirmation gate"
-    Test-RequiredPattern "project-template\.agents\skills\project-init\SKILL.md" "Do not make stack selection the first user task" "Project init deferred stack rule"
-    Test-RequiredPattern "project-template\.agents\skills\project-init\SKILL.md" "Infer stack" "Project init existing-project stack inference"
-    Test-RequiredPattern "project-template\.agents\skills\project-init\SKILL.md" "Classify the discovery state" "Project init discovery state gate"
-    Test-RequiredPattern "project-template\.agents\skills\project-init\SKILL.md" "options-needed" "Project init options state"
-    Test-RequiredPattern "project-template\.agents\skills\project-init\SKILL.md" "research-needed" "Project init research state"
+    Test-RequiredPattern "project-template\.agents\skills\project-init\SKILL.md" "## Trigger Boundary" "Project init trigger boundary"
+    Test-RequiredPattern "project-template\.agents\skills\project-init\SKILL.md" "Initialization does not authorize business implementation" "Project init implementation boundary"
+    Test-RequiredPattern "project-template\.agents\skills\project-init\SKILL.md" "TODO_REVIEW`` or ``UNKNOWN" "Project init unknown-evidence policy"
     Test-RequiredPath "project-template\.codex\stacks\README.md"
     Test-RequiredPattern (Get-CodexNextWorkOrderPath) "Execution Confirmation" "Next work order execution confirmation gate"
     Test-RequiredPattern (Get-ProjectPlanPath) "Product Shape Options" "Project plan product-shape section"
@@ -1141,14 +1148,13 @@ function Test-PluginDistribution {
     Test-RequiredPath "skills\security-review\SKILL.md"
     Test-RequiredPath "scripts\validate-plugin-assets.ps1"
     Test-RequiredPath "scripts\test-release-consistency.ps1"
-    Test-RequiredPattern "skills\project-init\SKILL.md" "existing-project-scan" "Root project-init discovery state"
-    Test-RequiredPattern "skills\project-init\SKILL.md" "evidence extracted" "Root project-init evidence summary"
-    Test-RequiredPattern "skills\handover-review\SKILL.md" "Evidence-first gate" "Root handover evidence-first gate"
-    Test-RequiredPattern "skills\project-init\SKILL.md" "document backfill pass" "Root project-init document backfill pass"
-    Test-RequiredPattern "skills\handover-review\SKILL.md" "Document backfill pass" "Root handover document backfill pass"
-    Test-RequiredPattern "skills\document-backfill\SKILL.md" "Process exactly one source document at a time" "Root document backfill one-source rule"
+    Test-RequiredPattern "skills\project-init\SKILL.md" "## Trigger Boundary" "Root project-init trigger boundary"
+    Test-RequiredPattern "skills\project-init\SKILL.md" "Route those intents to ``handover-review``, ``project-bootstrap-fill``" "Root project-init existing-project routes"
+    Test-RequiredPattern "skills\handover-review\SKILL.md" "Handover review is read-only by default" "Root handover read-only gate"
+    Test-RequiredPattern "skills\handover-review\SKILL.md" "Current code, configuration, and files" "Root handover evidence priority"
+    Test-RequiredPattern "skills\document-backfill\SKILL.md" "Choose a reviewable batch based on shared fact domain" "Root document backfill proportional batching"
     Test-RequiredPattern "skills\project-suitability\SKILL.md" "Suitable, Conditional, or Custom" "Root project suitability outcome"
-    Test-RequiredPattern "skills\large-change-planning\SKILL.md" "staged implementation plan" "Root large-change planning output"
+    Test-RequiredPattern "skills\large-change-planning\SKILL.md" "## Planning Contract" "Root large-change planning output"
 
     $pluginValidatorPath = Join-Path $repoRoot "scripts\validate-plugin-assets.ps1"
     if (Test-Path -LiteralPath $pluginValidatorPath) {

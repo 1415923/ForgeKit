@@ -1,74 +1,52 @@
 ---
 name: large-change-planning
-description: Plan large, cross-module, migration, refactor, or high-risk changes before implementation. Use when a task may touch many files, unclear boundaries, API/data/config/deployment behavior, or needs staged execution.
+description: Plan a high-impact or genuinely multi-stage change whose trust boundary, public contract, migration, security, rollback, external coordination, or evidence uncertainty requires frozen scope and staged authorization. Do not trigger from file or module count alone.
 ---
 
 # Large Change Planning
 
-## Trigger
+## Trigger Boundary
 
-Use this skill before coding when any condition is true:
+Use when objective impact requires a staged plan: crossing a trust boundary, changing a public interface, migrating persistent data, changing authentication or permissions, introducing an irreversible step, creating high rollback cost, coordinating independent projects or release units, or resolving uncertainty that materially changes safe implementation.
 
-- The change may touch more than 5 files or more than 2 modules.
-- The change affects API, database, permissions, configuration, deployment, external services, hardware interfaces, or data migration.
-- The user asks for a major version, subsystem, rewrite, migration, inherited-project remediation, or broad refactor.
-- Ownership, validation commands, rollback, or non-goals are unclear.
-- A previous review, refactor, release, or defect gate is still open.
+A small diff can trigger this Skill when its impact is high. A broad deterministic projection or other local, reversible, fully verifiable change does not trigger it merely because many files or modules are involved. Do not use it for an ordinary bounded fix whose scope and validation are already clear.
 
-## Workflow
+## Read-Only Default and Authorization
 
-1. Define task boundaries:
-   - goal
-   - non-goals
-   - affected users or workflows
-   - expected version or milestone
-   - safety constraints and actions that require user confirmation
-   - risk level from `governance/ai-engineering-loop.md`
-2. Explore before editing:
-   - read `AGENTS.md` or `CLAUDE.md`
-   - read the codebase map doc
-   - inspect relevant source files, tests, configs, build files, scripts, and docs
-   - search for existing implementations and duplicated concepts
-   - identify current validation commands
-3. Produce or update the exploration report:
-   - current behavior and evidence
-   - modules, entry points, data flow, and integration points
-   - risks, unknowns, constraints, and likely blast radius
-   - files read and important source paths
-4. Produce or update the implementation plan:
-   - staged tasks
-   - files likely to change
-   - validation per stage
-   - rollback or recovery notes
-   - user decisions still needed
-   - session boundary for each stage
-5. For medium or high risk work, prepare the required `.forgekit/changes/<id>/` artifacts:
-   - medium: proposal, tasks, verification, review
-   - high: proposal, design, tasks, verification, review, ship
-   - retro is recommended only for high-risk, major, surprising, or user-requested changes
-6. Ask for confirmation before broad implementation:
-   - summarize planned edits and validation
-   - name unresolved risks
-   - wait for explicit approval when the task involves broad code changes, dependency install, migrations, external services, push, tag, deploy, or long-running services
-7. Implement one stage at a time after confirmation:
-   - stay inside the approved scope
-   - update docs and task state as work proceeds
-   - run agreed validation or record why it could not run
-   - stop and revise the plan if evidence contradicts the plan
+Assessment and planning are read-only by default. Only an explicit request to create or update a named change artifact authorizes that bounded local write, without asking again for equivalent authorization. Approval of a plan or design authorizes only the stage stated in the plan; it is not authorization for every implementation stage.
 
-## Required Outputs
+Planning never authorizes dependency installation, commit, push, publish, release, deploy, production change, data deletion, irreversible migration, permission or credential change, or work in an adjacent project. Those actions require specific target-and-impact authorization.
 
-- Exploration report in the project docs when the change is broad or risky.
-- Staged implementation plan in the project docs before broad implementation.
-- Current stage summary before edits.
-- Validation result after each stage.
-- Remaining risks and next stage recommendation.
+## Impact Branch
 
-## Rules
+Use `governance/ai-engineering-loop.md` to state risk from trust boundary, irreversibility, persistent data, public compatibility, security and permissions, external effects, rollback difficulty, deployment impact, verification capability, and evidence uncertainty. Do not score risk from counts or use a fixed threshold.
 
-- Do not start broad implementation from a vague user request.
-- Do not replace exploration with a generic checklist.
-- Do not read the whole repository without a search strategy.
-- Do not merge unrelated refactors into the stage.
-- Do not skip user confirmation for high-risk actions.
-- Prefer small staged edits with clear validation over one large change.
+When scope is clear, local, reversible, low impact, and deterministically verifiable, use a short plan or explicitly route back to direct implementation. Do not create a long planning document merely to prove this Skill was selected.
+
+## Planning Contract
+
+For a genuinely high-impact or multi-stage change, establish only the artifacts proportionate to risk and freeze:
+
+- scope and affected users or systems
+- trust boundary and authorized project roots
+- non-goals
+- confirmed facts, assumptions, and unresolved evidence
+- stage authorization and the paths each stage may write
+- acceptance IDs with positive and rejection cases
+- dependencies, risks, and verification evidence per stage
+- rollback or recovery mechanism
+- independent checker conditions for medium/high-impact work or an explicit gate
+
+An active change artifact is the plan authority. Do not create a competing implementation plan or copy the same contract across several documents.
+
+## Stage Boundary
+
+Explore before proposing edits. Do not start implementation in this Skill. At each handoff, state the currently authorized stage, allowed write scope, required validation, rollback, blockers, and which acceptance IDs remain open. If evidence changes scope, trust boundary, or acceptance, return to planning instead of silently expanding implementation.
+
+Independent review is required when objective impact or an explicit gate requires it; it is not mandatory for every low-risk code edit. Self-review does not satisfy an independent gate.
+
+## Minimum Writeback and Output
+
+Without explicit artifact-write authorization, return the plan in chat and make no repository change. With authorization, update only the active change artifacts that own the plan and confirmed state. Do not write speculation as fact or historical intent as current completion.
+
+End with the risk rationale, scope/trust boundary/non-goals, assumptions, stage authorization, acceptance IDs, verification and rollback, checker condition, and the next authorized decision. Do not proceed into a later stage automatically.

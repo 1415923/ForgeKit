@@ -1,162 +1,41 @@
 ---
 name: project-init
-description: Initialize or repair a project's Codex workflow, discover product requirements, inspect existing projects before asking stack questions, and fill first-version `.codex/` and `.forgekit/docs/` files from confirmed facts. Use when Codex is asked to set up a project, clarify a vague idea, process initialization answers, discuss architecture before implementation, or decide whether coding may start.
+description: Initialize the minimum ForgeKit boundary and governance entry for a new or not-yet-initialized project. Use only when the user asks to initialize the current project; route existing-project audits, bootstrap gap filling, implementation, review, and suitability assessment elsewhere.
 ---
 
 # Project Init
 
+## Trigger Boundary
+
+Use only when all of these are true:
+
+- The user explicitly wants to initialize a new project or the current directory.
+- The directory has not completed ForgeKit project initialization.
+- The task is to establish the minimum project boundary and governance entry.
+
+Do not use for an existing-project takeover audit, partial bootstrap placeholders, an implementation or bug fix, a read-only review, or a ForgeKit suitability assessment. Route those intents to `handover-review`, `project-bootstrap-fill`, the specific implementation or review Skill, or `project-suitability`. Do not run all of these Skills in sequence.
+
+## Default Mode and Authorization
+
+Status discovery and initialization assessment are read-only by default. When the user has explicitly asked to initialize this project, that request authorizes reversible local writes inside the named project and initialization scope; do not ask again for equivalent authorization.
+
+That authorization does not include adjacent projects, dependency installation, remote repository operations, service creation, commit, push, publish, release, deploy, deletion, or irreversible conversion. Stop before any such action and obtain authorization for the specific target and impact.
+
 ## Workflow
 
-1. Read `AGENTS.md` first if present, then read the governance overview, `.codex/init.generated.md`, `.codex/questionnaires/`, existing `.codex/`, existing business `docs/`, `.forgekit/docs/`, and project root files.
-   - If `governance/ai-engineering-loop.md` exists, use it to classify later implementation work as low, medium, or high risk before coding starts.
-   - Do not force a `.forgekit/changes/<id>/` folder for low-risk work. Medium-risk work needs proposal, tasks, verification, and review. High-risk work also needs design and ship notes.
-2. Identify whether this is a new project idea, an existing project handover, or a feature/change request inside an existing project.
-3. Inspect local evidence before asking stack questions:
-   - For existing projects, scan README files, usage docs, setup docs, test docs, deployment docs, build files, dependency manifests, scripts, tests, source roots, and config files to infer the current stack and constraints.
-   - Treat existing project documentation as evidence, not as a note to review later. Read the docs and extract answers before asking the user.
-   - For new empty projects, treat missing `.codex/stacks/` or empty stacks as a normal planning state, not an error.
-   - Read `.codex/stacks/<stack>/` only when the stack is already present, selected in metadata, or clearly inferred from local evidence.
-4. If questionnaire answers exist, use `governance/project-bootstrap-fill.md` to convert them into first-version `.codex/` rules and `.forgekit/docs/`.
-5. Interview the user before large-scale coding when key facts are unclear. Do not start with a fixed list of technical questions. Choose the next question from the current uncertainty:
-   - product goal and target users
-   - current workflow or pain point
-   - success criteria and acceptance evidence
-   - product shape options and non-goals
-   - existing system constraints, if any
-   - research needed before deciding
-   - v0.1.0 minimum closed loop
-   - risks and blockers
-   - Epic / Feature / Task / Bug model
-   - version roadmap
-6. Classify the discovery state before asking the next question:
-   - `unclear`: The user has an idea, complaint, or goal, but the target users, problem, product shape, or success criteria are not coherent yet. Ask product-level questions only.
-   - `options-needed`: The problem is understandable, but there are multiple viable product shapes or scope paths. Present 2 to 4 options with tradeoffs, recommend one default, and ask the user to choose or reject.
-   - `research-needed`: A decision depends on external facts, official docs, public examples, compatibility, policy, market behavior, or unfamiliar technology. Propose concrete references to inspect, search queries to run, GitHub examples to compare, or a throwaway prototype.
-   - `existing-project-scan`: The user is handing over a repo, adding a feature, fixing a bug, or refactoring existing code. Scan local files first, infer stack and constraints, then ask only targeted questions about contradictions or missing evidence.
-   - `ready-for-plan`: The problem, users, product shape, v0.1.0 closed loop, constraints, validation evidence, and major risks are coherent enough to write a plan. Produce the plan and execution summary instead of continuing broad discovery.
-7. Apply the discovery state rules:
-   - In `unclear`, ask at most 3 high-leverage questions about WHAT, WHY, WHO, success, and non-goals. Do not ask framework, database, auth, hosting, or directory questions.
-   - In `options-needed`, provide a comparison table: option, scope, cost, risk, validation path, and why it may fit. Include a recommended default and a conservative fallback.
-   - In `research-needed`, do not pretend to know. State the unknown, the decision it blocks, the sources or repositories to check, and what evidence would change the recommendation.
-   - In `existing-project-scan`, report the files inspected, inferred stack, commands, test strategy, integration points, and contradictions before asking the user.
-   - In `ready-for-plan`, stop asking exploratory questions and write the structured project plan, roadmap, task model, risks, and execution confirmation.
-8. Use iterative solution shaping, not a one-shot questionnaire:
-   - Ask only the next 3 to 5 highest-leverage questions.
-   - If the user cannot answer, provide 2 to 4 realistic options with tradeoffs and a recommended default.
-   - If current knowledge is insufficient, propose a research path: local docs to inspect, official docs to search, example projects to compare, or small throwaway prototypes to run.
-   - For new product ideas, treat product discovery and architecture discussion as a dedicated phase. Do not collapse it into engineering parameter questions such as framework, database, login, or directory structure.
-   - Clearly mark each item as Confirmed, Assumption, Research needed, or Deferred.
-   - Keep interviewing and revising the plan until the problem, product shape, v0.1.0 scope, validation evidence, and safety boundary are coherent. Technical stack may remain undecided until product constraints justify it.
-   - Do not treat "unknown" as a reason to stop; turn unknowns into decision options, research tasks, or deferred non-goals.
-9. When the user describes a product idea in natural language, translate it into:
-   - problem and target users
-   - MVP workflow
-   - explicit non-goals
-   - data and state boundaries
-   - technical constraints and research options, without forcing a stack decision too early
-   - validation strategy
-   - risks and open decisions
-   - first implementation slice, only when coding is allowed
-10. For new projects, discuss product shape before implementation:
-   - Provide 2 to 4 possible product shapes when the user's goal is broad or ambiguous.
-   - Compare scope, complexity, deployment cost, long-term evolution, and non-goals.
-   - Propose a long-term version roadmap with concrete v0.1.0, v0.2.0, v0.3.0, and v1.0.0 outcomes.
-   - If public references would help, ask whether to search official docs, public projects, or product examples before finalizing the plan.
-   - Summarize what was learned from local files or external research, and say when research has not been done.
-   - Do not ask the user to choose a stack at the beginning. Present stack options only after product shape, runtime constraints, integration points, team skills, and validation needs are known.
-11. For existing projects, use repository evidence first:
-   - Read candidate docs before asking broad handover questions: root README, docs README, usage guide, install/setup guide, quick start, test guide, deployment guide, API docs, architecture notes, changelog, CI config, and script files.
-   - Infer stack, commands, architecture, test strategy, deployment path, and known constraints from files before asking the user.
-   - Produce a brief "evidence extracted" summary before questions: files read, facts found, commands found, tests found, deployment or runtime notes found, contradictions, and remaining unknowns.
-   - Do not ask for information already present in inspected docs unless it is contradictory, stale, unsafe, or incomplete. Quote the source file path when asking about such a conflict.
-   - New features and fixes should default to the existing stack and architecture.
-   - Ask about stack migration, database replacement, framework changes, or major refactors only when the user explicitly requests them or local evidence shows a blocking conflict.
-   - If local evidence is missing or contradictory, summarize what was found and ask targeted questions about the contradiction.
-   - When the user asks to fill ForgeKit managed docs from existing project documents, use a document backfill pass: list candidate source docs, process one source document at a time, update target `.forgekit/docs` immediately, record source paths for imported facts when practical, and only then move to the next source document.
-   - Do not read all old documents into one large summary before writing. Preserve detailed test plans, usage steps, setup assumptions, deployment notes, known issues, and acceptance evidence.
-12. For large, cross-module, migration, refactor, or high-risk work, require the large-change protocol before implementation:
-   - read `governance/ai-engineering-loop.md`
-   - read `governance/large-change-execution.md`
-   - create or update the exploration report in `.forgekit/docs/`
-   - create or update the implementation plan in `.forgekit/docs/`
-   - do not start broad coding until the implementation plan says coding is allowed
-13. Fill or update:
-   - `.codex/project.md`
-   - `.codex/scope.md`
-   - `.codex/commands.md`
-   - `.codex/style.md`
-   - `.codex/testing.md`
-   - `.codex/security.md`
-   - `.codex/git.md`
-   - `.codex/version-gates.md`
-   - `.forgekit/docs/project-plan.md`
-   - version roadmap document in `.forgekit/docs/`
-   - `.forgekit/docs/requirements.md`
-   - `.forgekit/docs/architecture.md`
-   - `.forgekit/docs/tech-decisions.md`
-   - `.forgekit/docs/environment-matrix.md`
-   - `.forgekit/docs/release-pipeline.md`
-   - `.forgekit/docs/task-board.md`
-14. Preserve existing project-specific facts. Do not overwrite real information with template text.
-15. Remove or replace template history that belongs to ForgeKit itself. Generated projects must not keep ForgeKit Agent Harness roadmap tasks as if they were project tasks.
-16. Do not modify business code unless the user explicitly asks.
+1. Read the project boundary, startup entry, codebase map, and deterministic ForgeKit initialization state. Use the unified `scripts/forgekit-project.py --target <ProjectRoot>` state result when that entry is available; do not reproduce its init/current/upgrade/adoption algorithm in this Skill.
+2. Confirm the minimum project root, project purpose, task scope, and required validation from existing files and user facts.
+3. Ask only for information that cannot be obtained from evidence and would change the initialization result. Do not use a fixed interview length, repeat facts already supplied, or block on non-critical preferences.
+4. Mark unsupported fields `TODO_REVIEW` or `UNKNOWN`. Never invent architecture, technology stack, owners, commands, deployment, or external-system details.
+5. Create only the minimum ForgeKit structure required for the selected initialization mode. Preserve existing files and user customization.
+6. Run proportionate deterministic validation and report what is confirmed, unknown, changed, and still outside scope.
 
-## Gate Before Coding
+## Risk Branch
 
-If the development plan, version roadmap, landing conditions, or first implementation slice are unclear, ask follow-up questions instead of starting implementation.
+Ordinary initialization is a bounded local write when it creates new, reversible project files inside the confirmed root. Escalate risk before overwriting existing content, moving across projects, deleting data, changing remote repositories or external systems, or performing an irreversible conversion. State the affected trust boundary, rollback, verification gap, and required authorization.
 
-If the user cannot answer a gate question, do not repeat the same question. Provide a decision table, a recommended default, and a concrete way to verify the choice.
+## Writeback and Stop Boundary
 
-If the requested work is large or cross-module, require exploration and implementation planning before coding.
+Write only confirmed initialization facts and the minimum current state to their owning project files. Do not create a complete governance system merely for completeness, copy the same fact into several owner documents, or write assumptions as current truth.
 
-Before creating business code, installing dependencies, initializing Git, committing, pushing, or performing any external write, output an "Execution Confirmation" summary and wait for explicit user confirmation. The summary must include:
-
-- one-sentence final project goal
-- product shape chosen and alternatives rejected
-- v0.1.0, v0.2.0, v0.3.0, and v1.0.0 roadmap
-- what this implementation will do and explicitly not do
-- product constraints, technology stack status, storage/auth/deployment status, and validation choices
-- reference or research status, including whether web research was skipped
-- major risks and safety boundaries
-- files to create or modify
-- commands to run
-- external actions such as Git init, commit, push, issue/PR updates, deployment, or service start
-
-User replies such as "allow generating the project", "use MySQL", or "go ahead with dependencies" are not enough by themselves. Treat them as partial decisions unless they explicitly confirm the full execution summary.
-
-Do not recommend large-scale coding until there is at least a first version of:
-
-- project plan
-- version roadmap
-- technical stack status: confirmed, inferred from existing project, assumption, research needed, or deferred
-- software/hardware conditions
-- architecture governance and ADR needs
-- RFC needs, traceability IDs, readiness, and risks
-- v0.1.0 scope and v0.1.1 review/refactor gate
-- first-pass environment matrix and release pipeline assumptions
-- first-pass Epic / Feature / Task / Bug model
-- exploration report and implementation plan for large changes
-
-## Selection Rules
-
-- Do not make stack selection the first user task.
-- Use `templates/README.md` only after a stack is confirmed or inferred from local evidence.
-- For existing projects, infer stack from repository files before asking the user.
-- For Java projects, read `java-springboot` only when Java/Spring Boot is present or selected after planning.
-- For FPGA projects, read `fpga-vivado-vitis` only when Vivado/Vitis/HLS is present or selected after planning.
-- For full-stack projects, read only the backend and frontend stacks actually present or selected after planning.
-
-## Output
-
-End with:
-
-- Project classification.
-- Discovery state: unclear, options-needed, research-needed, existing-project-scan, or ready-for-plan.
-- Stack status: none yet, selected by metadata, inferred from files, or deferred pending planning.
-- Files created or updated.
-- Plan status: confirmed, partial, or blocked.
-- Confirmed decisions, assumptions, research-needed items, and deferred non-goals.
-- The next 3-5 questions or decision options to continue the project planning discussion.
-- Reference or research suggestions when the user cannot decide from current context.
-- Suggested first implementation slice only if coding is allowed.
-- Validation commands that are safe to run.
+Initialization does not authorize business implementation. End with the initialization result, validation evidence, unresolved `TODO_REVIEW` or `UNKNOWN` items, and the single appropriate next route. Do not automatically enter bootstrap filling, handover repair, large-change implementation, or any external action.

@@ -46,6 +46,11 @@ def sha256_file(path: Path) -> str:
     return digest.hexdigest()
 
 
+def require_lf(path: Path, label: str) -> None:
+    if path.is_file() and b"\r" in path.read_bytes():
+        raise ProjectionError(f"{label} violates the LF checkout contract: {path}")
+
+
 def safe_posix_relative(value: object, label: str, *, single_segment: bool = False) -> str:
     if not isinstance(value, str) or not value:
         raise ProjectionError(f"{label} must be a non-empty POSIX relative path")
@@ -166,6 +171,12 @@ def render_projection(item: Projection) -> tuple[str, str]:
 def check(plan: list[Projection]) -> bool:
     valid = True
     for item in plan:
+        try:
+            require_lf(item.source, f"Skill {item.skill} source")
+            require_lf(item.target, f"Skill {item.skill} target")
+        except ProjectionError as exc:
+            print(f"[fail] {exc}", file=sys.stderr)
+            valid = False
         source_hash, target_hash = render_projection(item)
         if source_hash == "<missing>" or target_hash == "<missing>" or source_hash != target_hash:
             valid = False
@@ -201,6 +212,7 @@ def apply(plan: list[Projection]) -> bool:
         ensure_no_reparse(item.repo_root, item.target, "target")
         if not _regular_file(item.source):
             raise ProjectionError(f"source is missing or not a regular file: {item.source_relative}")
+        require_lf(item.source, f"Skill {item.skill} source")
         _preflight_target(item)
     print("Skill projection apply plan:")
     for item in plan:

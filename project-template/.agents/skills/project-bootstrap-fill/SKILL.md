@@ -1,71 +1,34 @@
 ---
 name: project-bootstrap-fill
-description: Fill first-version Codex project documents from initialization questionnaire answers and produce the next planning questions. Use when Codex is asked to convert questionnaire answers, pasted project facts, or `.codex/questionnaires/` content into initial `.codex/` rules and `.forgekit/docs/` files while preparing a project-plan discussion before coding.
+description: Fill confirmed gaps or placeholders in bootstrap documents for an already initialized ForgeKit project. Use only after an explicit fill request or an explicit project-init handoff; do not use for initialization, takeover audit, broad documentation rewrite, implementation, or release review.
 ---
 
 # Project Bootstrap Fill
 
-## Workflow
+## Trigger Boundary
 
-1. Read `AGENTS.md` if present, then read `governance/project-bootstrap-fill.md`, `.codex/init.generated.md`, `.codex/questionnaires/`, `.codex/stacks/`, existing `.codex/`, and existing business `docs/` and `.forgekit/docs/`.
-2. Extract stable facts from the questionnaire or user-provided answers:
-   - project identity
-   - project goal
-   - project type
-   - selected stacks
-   - delivery target
-   - landing environment
-   - version scope
-   - risks
-   - required commands
-   - security and permission boundaries
-3. Do not invent facts. If information is unknown, keep `TBD` or `needs confirmation` and list open questions.
-4. Fill or update the first version of:
-   - `.codex/project.md`
-   - `.codex/scope.md`
-   - `.codex/commands.md`
-   - `.codex/style.md`
-   - `.codex/testing.md`
-   - `.codex/security.md`
-   - `.codex/git.md`
-   - `.codex/version-gates.md`
-   - `.forgekit/docs/project-plan.md`
-   - `.forgekit/docs/tech-decisions.md`
-   - `.forgekit/docs/version-roadmap.md`
-   - `.forgekit/docs/requirements.md`
-   - `.forgekit/docs/environment-matrix.md`
-   - `.forgekit/docs/release-pipeline.md`
-   - `.forgekit/docs/code-ownership.md`
-   - `.forgekit/docs/task-board.md`
-   - `.forgekit/docs/traceability.md`
-   - `.forgekit/docs/risk-register.md`
-5. Preserve user-edited content. Merge facts into existing documents instead of replacing them wholesale.
-6. After filling documents, start the planning loop: summarize what is known, identify important unknowns, and ask the next 3-5 questions needed to confirm the project plan.
+Use only when the project is already initialized, bootstrap owner documents contain placeholders or clear omissions, and the user asks to fill those gaps from existing evidence. An explicit handoff from `project-init` is also valid.
 
-## Filling Rules
+Do not replace `project-init`, `handover-review`, `document-backfill`, project implementation, a full documentation rewrite, or release review. Do not create a chain that routes back into initialization.
 
-- Map project goal and success criteria to project plan and requirements.
-- Map selected stacks to project rules, commands, style, testing, and technology selection.
-- Map landing conditions to environment matrix, release pipeline, deployment notes, and risk register.
-- Map v0.1.0 and v0.1.1 answers to version roadmap, task board, traceability matrix, and version gates.
-- Map permissions and security answers to `.codex/security.md`, dependency review needs, and risk register.
-- Map ownership facts to code ownership. If no people are known, use roles.
+## Default Mode and Authorization
 
-## Gate
+When the request is only to inspect gaps, produce a read-only preview. When the user explicitly asks to fill bootstrap documents in the current project, perform reversible local edits within those documents without asking again for equivalent authorization.
 
-If project plan, technology choice, landing conditions, v0.1.0 scope, or review/refactor gate are still unclear, say coding is not ready.
+Local fill authorization never includes business code, unrelated documents, adjacent projects, commit, push, publish, release, deploy, deletion, external systems, or irreversible migration.
 
-If enough facts exist for a first implementation slice, say coding is allowed only for the listed scope.
+## Evidence Fill Contract
 
-## Output
+1. Read existing project evidence before editing: the boundary, initialization state, selected stack material, current owner documents, relevant README or build configuration, and the user's confirmed facts.
+2. Identify the exact placeholder or missing field and the document that owns it. Use `governance/project-bootstrap-fill.md` and `.forgekit/docs/document-responsibility.md` for mapping; do not copy their full mapping into this Skill.
+3. Fill only gaps supported by code, configuration, tests, commands, current project files, or explicit user facts.
+4. Preserve existing customization and confirmed content. Merge surgically; do not rewrite a document merely to normalize its style.
+5. Use `TODO_REVIEW` or `UNKNOWN` when evidence is insufficient. Do not invent stack, commands, owners, environments, deployment, security, roadmap, or task state.
+6. If new evidence conflicts with an existing confirmed fact, do not write the conflicting field or choose the newest guess. Report both sources and request resolution only when it changes the fill result.
+7. Validate the changed documents and stop when the requested gaps are addressed. Do not require every section to be filled, use a fixed question count, or create unrelated documents.
 
-End with:
+## Minimum Writeback
 
-- Files updated.
-- Filled facts.
-- Plan status: confirmed, partial, or blocked.
-- Next planning questions.
-- Missing commands.
-- Initial EPIC / FEAT / TASK / BUG entries.
-- Risks and assumptions.
-- Whether coding is allowed.
+Write each confirmed fact once, in its owning bootstrap document. Record only the minimum state needed to explain the fill, including explicit unresolved items. Do not turn historical plans into current completion, duplicate facts across owners, or place project business facts in governance templates.
+
+End with the gaps inspected, files actually changed, evidence used, conflicts left untouched, unresolved markers, and validation performed. Filling bootstrap facts does not authorize implementation or external actions.

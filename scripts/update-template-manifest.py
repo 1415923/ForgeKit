@@ -46,19 +46,9 @@ def fail(message):
     raise SystemExit(f"[fail] {message}")
 
 
-def canonical_checksum_bytes(content):
-    if b"\x00" in content:
-        return content
-    try:
-        text = content.decode("utf-8")
-    except UnicodeDecodeError:
-        return content
-    return text.replace("\r\n", "\n").replace("\r", "\n").encode("utf-8")
-
-
 def sha256_file(path):
     digest = hashlib.sha256()
-    digest.update(canonical_checksum_bytes(path.read_bytes()))
+    digest.update(path.read_bytes())
     return "sha256:" + digest.hexdigest()
 
 
@@ -70,7 +60,61 @@ def load_json(path):
 
 
 def save_json(path, data):
-    path.write_text(json.dumps(data, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
+    path.write_bytes((json.dumps(data, indent=2, ensure_ascii=False) + "\n").encode("utf-8"))
+
+
+def projection_targets(repo_root):
+    config_path = repo_root / "config" / "skill-projections.json"
+    data = load_json(config_path)
+    target_root = normalize_posix(data.get("target_root", ""))
+    entries = data.get("entries")
+    if not target_root or not isinstance(entries, list):
+        fail("skill projection manifest has an invalid target_root or entries")
+    targets = []
+    seen = set()
+    for index, entry in enumerate(entries):
+        if not isinstance(entry, dict) or not isinstance(entry.get("skill"), str):
+            fail(f"skill projection entry {index} is invalid")
+        managed = entry.get("managed_files")
+        if not isinstance(managed, list) or not managed:
+            fail(f"skill projection entry {index} has no managed files")
+        for managed_file in managed:
+            target = normalize_posix(f"{target_root}/{entry['skill']}/{managed_file}")
+            if target in seen:
+                fail(f"Duplicate skill projection target: {target}")
+            seen.add(target)
+            targets.append(target.removeprefix("project-template/"))
+    if len(targets) != 18:
+        fail(f"skill projection manifest must declare exactly 18 target files, actual {len(targets)}")
+    return targets
+
+
+def projection_manifest_item(source_path, template_root):
+    return {
+        "source_path": source_path,
+        "target_path": source_path,
+        "role": "skill",
+        "update_policy": "replace",
+        "render_mode": "copy",
+        "checksum": sha256_file(template_root / Path(source_path)),
+    }
+
+
+def require_projection_coverage(manifest, repo_root):
+    expected = projection_targets(repo_root)
+    counts = {}
+    for item in manifest["files"]:
+        source = normalize_posix(item.get("source_path", ""))
+        counts[source] = counts.get(source, 0) + 1
+    for target in expected:
+        if counts.get(target, 0) != 1:
+            fail(f"Projection target must appear exactly once in template manifest: {target}")
+    return expected
+
+
+def require_lf_bytes(path, label):
+    if b"\r" in path.read_bytes():
+        fail(f"{label} violates the LF checkout contract: {path}")
 
 
 def normalize_posix(path):
@@ -177,6 +221,8 @@ def validate_manifest(manifest, template_root, check_checksums=False):
         source_file = template_root / Path(source_path)
         if not source_file.is_file():
             fail(f"Manifest source_path does not exist: {source_path}")
+        if source_file.suffix.lower() in {".md", ".json", ".yaml", ".yml"} or source_file.name == ".gitattributes":
+            require_lf_bytes(source_file, source_path)
         actual_checksum = sha256_file(source_file)
         if check_checksums and item.get("checksum") != actual_checksum:
             fail(f"Checksum mismatch for {source_path}: manifest={item.get('checksum')} actual={actual_checksum}")
@@ -189,7 +235,25 @@ def update_manifest(args):
     manifest = load_json(manifest_path)
     validate_manifest(manifest, template_root, check_checksums=False)
 
-    changed = False
+    expected_targets = projection_targets(repo_root)
+    existing = {
+        normalize_posix(item["source_path"]): item
+        for item in manifest["files"]
+    }
+    missing = [target for target in expected_targets if target not in existing]
+    if args.check and missing:
+        fail("Projection target(s) missing from template manifest: " + ", ".join(missing))
+    if missing:
+        insertion = max(
+            (index for index, item in enumerate(manifest["files"])
+             if normalize_posix(item["source_path"]).startswith(".agents/skills/")),
+            default=-1,
+        ) + 1
+        manifest["files"][insertion:insertion] = [
+            projection_manifest_item(target, template_root) for target in missing
+        ]
+
+    changed = bool(missing)
     for item in manifest["files"]:
         source_path = normalize_posix(item["source_path"])
         actual = sha256_file(template_root / Path(source_path))
@@ -198,6 +262,8 @@ def update_manifest(args):
                 fail(f"Checksum mismatch for {source_path}: manifest={item.get('checksum')} actual={actual}")
             item["checksum"] = actual
             changed = True
+
+    require_projection_coverage(manifest, repo_root)
 
     if not args.check and changed:
         save_json(manifest_path, manifest)
@@ -211,6 +277,7 @@ def load_manifest(repo_root):
     manifest_path = template_root / ".forgekit" / "template-manifest.json"
     manifest = load_json(manifest_path)
     validate_manifest(manifest, template_root, check_checksums=True)
+    require_projection_coverage(manifest, repo_root)
     return manifest
 
 

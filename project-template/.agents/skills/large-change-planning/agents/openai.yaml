@@ -1,4 +1,4 @@
 interface:
   display_name: "Large Change Planning"
   short_description: "Plan broad or risky changes before coding"
-  default_prompt: "Use large-change-planning to explore the current project and prepare a staged implementation plan before broad implementation."
+  default_prompt: "$large-change-planning\n\nPlan this change only when impact warrants staged planning. Freeze scope, trust boundaries, non-goals, stage authorization, acceptance IDs, rollback, evidence, dependencies, and checker conditions; do not use file, module, or line counts as risk thresholds."

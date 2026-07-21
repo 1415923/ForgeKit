@@ -1,16 +1,16 @@
 # v0.45.0 发布 / 交接设计
 
-Status: stage-b-implemented-awaiting-independent-check
+Status: stage-c-implemented-awaiting-independent-check
 DesignStatus: design-approved-for-stage-a
-AuthorizedStage: stage-b
+AuthorizedStage: stage-c
 
 ## 发布 / 交接步骤
 
-当前不得发布。阶段 A 已通过独立 checker；阶段 B maker 已完成实施和确定性自验，等待独立 checker；阶段 C-E 未进入。后续交接条件为：
+当前不得发布。阶段 A、阶段 B 已通过独立 checker；阶段 C maker 已完成实施和确定性自验，等待独立 checker；阶段 D-E 未进入。后续交接条件为：
 
 1. DECISION-01 至 DECISION-03 已冻结，不再作为未决项退回。
 2. M-01、M-03、A21 保持上一轮已关闭；`review.md` 的两次 blocker-recheck 已关闭 M-02、M-04，设计状态为 `design-approved-for-stage-a`。
-3. 阶段 B 的独立 checker 必须复核入口、migration、mutation、回归和残留证据；阶段 C-E 仍需逐段授权、实现、验证和独立复查。
+3. 阶段 C 的独立 checker 必须以新鲜只读上下文复核五个 Skill、development migration、mutation、回归和残留证据；阶段 D-E 仍需逐段授权、实现、验证和独立复查。
 4. 完成新安装、新项目、v0.44.1 stock/custom 升级、plugin+local、Codex-only 和 Claude-only 验收。
 5. 执行完整 template/plugin/release smoke 与 mutation，确认自动恢复。
 6. 最后才更新正式版本元数据、changelog 和发布说明。
@@ -67,6 +67,28 @@ checker 五个漏检反例均由正式 CLI 以退出码 1 拒绝；must not、ne
 
 状态仍是 `stage-b-implemented-awaiting-independent-check`，只等待原 checker 复核 Markdown 误报修复。M-B2 保持 CLOSED；VERSION 仍为 `0.44.1`；未修改入口、migration、upgrader、Skills、prompts、`review.md` 或 `usage.html`，未进入 Stage C，未执行真实模型 prompt，未 commit、push、tag 或 release。
 
+## Stage C maker 交接
+
+五个 Stage C Skill 已在根级权威源收敛，并经 manifest/sync 确定性投影到 template `.agents`。`project-init` 只处理未初始化新项目并在覆盖、跨项目、删除、远程或不可逆动作前升级风险；`project-bootstrap-fill` 只补已初始化项目中有证据的 placeholder；`handover-review` 默认只读且代码/可重复运行证据优先；`document-backfill` 只回填已有实现事实并按事实域、owner、风险和上下文容量分批；`large-change-planning` 按信任边界、公共接口、migration、安全、回滚和证据不确定性触发，并冻结阶段授权与 acceptance IDs。
+
+Stage C validator 从 41-rule matrix 派生五项 owner，检查触发、授权、外部保护、事实边界、旧固定门槛回流、路由循环和 projection 漂移。13 项定向测试覆盖 9 个要求的 mutation：mutation 正式 CLI 均 exit 1，逐字节恢复后 exit 0。behavior manifest 为 13 cases，Stage C 新增 10 个正/负场景；只运行 validate/list/dry-run，真实 Codex/Claude 仍为 `NEEDS_TEST`。
+
+既有单一 development migration draft 已扩展五项 Skill；baseline 锚定已审批 Stage B commit，incoming 锚定当前 projection，stock/custom/unknown/missing/rollback 和 production-discovery gate 通过。未建立正式 `migrations/0.45.0`。完整 136 项单测、plugin/template/manifest、release mutation 和含 `.git` 的短路径 smoke 通过；隔离目录和 mutation 均已恢复/清理。
+
+当前只允许交给新鲜只读独立 checker。状态是 `stage-c-implemented-awaiting-independent-check`，不是 `stage-c-approved`；不得进入 Stage D/E。VERSION 保持 `0.44.1`，用户原有 `D usage.html` 未恢复、未修改、未暂存；未 commit、push、tag、release。
+
+### Stage C 七项 MAJOR 修复交接
+
+C-M01 至 C-M07 已完成 maker 限定修复与确定性自验，等待原 checker recheck。公开 Skill ID、name、display name 和已通过的五份核心执行语义保持不变；错误 frontmatter implicit policy 已删除，bootstrap/backfill 在 package YAML 顶层 `policy.allow_implicit_invocation` 设置 boolean false，三个冲突 default prompt 已收敛。根/template package 逐字节投影，唯一 development migration 同时覆盖五份 SKILL 和三份 changed YAML。
+
+Template manifest 现完整覆盖五份 Stage C SKILL、三份 changed YAML 与 generated-project `.gitattributes`。Stage C validator 使用 tasks SC-01..05 与 41-rule matrix 双源五项锁定，并复用 Stage B Markdown policy-prose 层；reinitialize-existing-project、mandatory-five-Skill-pipeline、fence/heading fake、安全否定、matrix/tasks 缩减和 package/manifest mutation 均失败关闭。
+
+Behavior fixture 运行时从根级权威 package 物化到 `.agents/skills`，explicit prompt 实际包含 `$skill-id`，case-level evidence requirement 在 dry-run 中保持未取得状态。根和 generated project 均发布 LF checkout 合同；双 `--no-local` fresh clone 在 autocrlf=false/true 下不做 post-clone overlay，byte-exact、migration、projection、template 门禁通过，删除 LF rule mutation 失败。真实模型 prompt 未执行。
+
+最终临时 Stage C snapshot smoke、autocrlf=false fresh-clone full smoke、autocrlf=true fresh-clone full smoke 三路均通过；两种 clone 的 Stage C、migration、projection、template、完整 smoke 全部 PASS，代表性 Git blob 与 working-tree SHA-256 相等。release consistency 的既有 mutation 和新增 fresh-clone gate 通过并恢复，临时 repo/clone/TEMP 均清理。
+
+当前仍只允许原 checker 做七项 findings recheck。状态保持 `stage-c-implemented-awaiting-independent-check`；VERSION 仍为 `0.44.1`；未进入 Stage D/E，未建立正式 release migration，未 commit、push、tag 或 release。
+
 ## 回滚
 
 - 每阶段使用独立提交候选和 baseline-guarded migration。
@@ -89,3 +111,47 @@ checker 五个漏检反例均由正式 CLI 以退出码 1 拒绝；must not、ne
 
 - 尚无已实施的稳定结果，不更新 changelog、README 或版本路线图。
 - 只有阶段 E 完成并验证后，才能把用户可见变化同步到发布文档。
+
+### Stage C recheck 剩余五项交接
+
+原 checker 已关闭 C-M04 Markdown/policy-prose 分层与 C-M05 tasks/matrix 双源五项锁定；本轮只修复仍 OPEN 的 C-M01、C-M02、C-M03、C-M06、C-M07。五个 package default prompt 现各含唯一独立 $skill-id，fixed-count 风险门槛同时受正文与 package prompt gate；template manifest 覆盖 projection config 的完整 18/18 target 与 Stage C 10/10 package 文件。
+
+reinitialize 与 mandatory-pipeline detector 已扩展为 subject/action/mandatory/sequence/scope 组合 family，checker 等价句及额外变体由正式 CLI 失败关闭，安全否定和 C-M04/C-M05 回归通过。Behavior bounded-write/read-only case 必须提供相称 write evidence；explicit renderer 对已有 marker 幂等，对缺失 marker 只插入一次，重复/错误 marker 失败，implicit 不注入。
+
+所有 checksum/projection 比较均使用 raw bytes；独立 LF content gate 阻止双侧 CRLF 与同步 manifest/descriptor checksum 绕过。根和 generated project checkout contract 覆盖完整 manifest 文本扩展。唯一 development migration 管理五份 Stage C YAML，仍保持 Stage B Git baseline、current template incoming 与 stock/custom/unknown/missing/rollback 合同。
+
+定向 83/83、全量 160/160、正式快速门禁、release consistency、scoped snapshot 与两种 autocrlf fresh-clone full smoke 均通过；临时 commit 477e041183602ca9cc1ddc006404ca98084a7441，clone 后无 tracked-byte overlay，删除 LF rule mutation exit 1。真实模型 prompt 未执行。
+
+当前只等待原 checker 复核剩余五项。状态继续为 stage-c-implemented-awaiting-independent-check，不是 Stage C approved；VERSION 保持 0.44.1，未进入 Stage D/E，未建立正式 migration，未 commit、push、tag、release 或 deploy。
+
+### Stage C 最后两个 OPEN finding 交接
+
+本轮只修复 C-M01 与 C-M03。fixed-count gate 现按 quantity/workload-unit/mandatory-trigger/risk-target 要素组合，覆盖 directory/folder/service/package/endpoint 等词根式单复数与数字词；reinitialize 和 mandatory pipeline 分别按 subject/action/repeat/command 与 full-set/scope/mandatory/sequence 组合，未维护完整 checker 句库。安全否定作用域继续通过。
+
+checker 六句由真实 Stage C CLI 在隔离 package 副本中逐项 exit 1 并定位 Skill/category/matched prose。Stage C tests 28/28、全量 unittest 163/163；release consistency 的 directory threshold、setup again、one-by-one pipeline mutation 均非零并逐字节恢复。fresh-clone 临时提交 `a4debe204d2ade609a83950fb49bb2bd987b722d` 的 autocrlf=false/true checkout 均通过 byte/LF/attribute 快速门禁。
+
+C-M02/C-M04/C-M05/C-M06/C-M07 保持 CLOSED，相关实现未修改且回归通过。当前只等待原 checker 复核 C-M01 与 C-M03；状态仍为 `stage-c-implemented-awaiting-independent-check`。VERSION 为 `0.44.1`；未进入 Stage D/E，未执行真实模型 prompt，未建立正式 migration，未 commit、push、tag、release 或 deploy。
+
+### Stage C 最后一个 OPEN finding（C-M03）交接
+
+C-M03 已完成 maker 限定修复。reinitialize 使用同句 `existing_subject + init_action + repeat_action + positive_requirement` 不变量，并以动作局部否定和 handover/bootstrap-fill 替代路由排除安全句；mandatory full-Skill execution 分别拒绝 `S+U+M`、`S+U+Q` 与 `non-skippable+U`，不再把 sequence/order/pipeline 词作为所有违规表达的必要条件。未新增完整 forbidden-sentence 清单，也未修改 Markdown policy-prose helper。
+
+checker 的两个 reinitialize 漏检、一个安全误报与六个 pipeline 漏检已逐项通过正式 CLI 预期/实际退出码、category、matched prose 和 feature 集合断言。Stage C 定向测试 28/28、全量 unittest 163/163；template、projection、18/18 manifest、ownership、entry、migration、behavior、LF/CRLF fresh clone 与 release consistency 全部 PASS。Release mutation 覆盖 setup-again、action-first bootstrap-once-more、one-by-one 及无 sequence 的 full-set compulsory，并逐字节恢复。
+
+C-M01/C-M02/C-M04/C-M05/C-M06/C-M07 保持 CLOSED；五个 Skill 正文、package YAML、projection、manifest、behavior、migration、`.gitattributes` 和 fresh-clone runner 均未修改。当前只等待原 checker 复核 C-M03，状态继续为 `stage-c-implemented-awaiting-independent-check`。VERSION 仍为 `0.44.1`；未进入 Stage D/E，未执行真实模型 prompt，未建立正式 migration，未 commit、push、tag、release 或 deploy。
+
+### Stage C C-M03A 最后两个命令式表达交接
+
+C-M03A 已完成 maker 限定修复：bootstrap 完整动词词形与 `set up` 短语动词在分析副本中归一化，句首及允许前置状语后的 init command 满足既有 positive-requirement feature。原始 matched prose、A+B+C+D 布尔判定、C-M03B 和 Markdown policy-prose helper 均未改变。
+
+`Bootstrap an already initialized repository again.` 与 `Set up each existing workspace from scratch.` 均由正式 CLI exit 1，并回显正确 category、原句和四项 feature。安全否定/说明/示例/alternative/inline/fence 回归通过。Stage C 28/28、全量 163/163、template、18/18 manifest、behavior、migration、autocrlf=false/true fresh clone 与 release consistency 全部 PASS；两项新 mutation 均逐字节恢复。
+
+当前只等待原 checker 复核这两个命令式表达及安全回归。状态继续为 `stage-c-implemented-awaiting-independent-check`；VERSION 仍为 `0.44.1`，未进入 Stage D/E，未执行真实模型 prompt，未建立正式 migration，未 commit、push、tag、release 或 deploy。
+
+### Stage C C-M03A 正负词形对称交接
+
+C-M03A 最后一个 maker bug 已定向修复。初始化动作现在只由 `find_init_action_matches` 从唯一词法源产出带 span/family/original-text 的 match；`init_action`、imperative 和 `negated_init` 共享这些 match。竞争的否定动作词表已删除，否定只在每个 directive action 的局部上下文判定；C-M03A A+B+C+D 和 C-M03B 未修改。
+
+原误报 `An already initialized project must not be bootstrapped again.` 正式 CLI exit 0；对应正向句 exit 1 并返回正确 Skill/category/matched prose/features。bootstrap、bootstrapped、bootstrapping、set-up、split set-up、initialized、reinitialize 七组正负对称测试通过。Release expected-pass guard 先验证安全句通过，再验证正向句失败，三份受管文件逐字节恢复。
+
+Stage C 29/29、全量 164/164、template、manifest 18/18、behavior、migration、LF/CRLF fresh clone 与 release consistency 全部 PASS。当前只等待原 checker 复核正负词形对称性；状态继续为 `stage-c-implemented-awaiting-independent-check`。VERSION 仍为 `0.44.1`，未进入 Stage D/E，未执行真实模型 prompt，未建立正式 migration，未 commit、push、tag、release 或 deploy。

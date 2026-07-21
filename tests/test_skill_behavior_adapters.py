@@ -160,6 +160,8 @@ class SkillBehaviorCliExitTests(unittest.TestCase):
         self.root = Path(self.temp.name)
         (self.root / "scripts/skill_behavior_adapters").mkdir(parents=True)
         shutil.copyfile(REPO / "scripts/test-skill-behavior.py", self.root / "scripts/test-skill-behavior.py")
+        shutil.copytree(REPO / "config", self.root / "config")
+        shutil.copytree(REPO / "skills", self.root / "skills")
         (self.root / "VERSION").write_text("0.44.1\n", encoding="utf-8")
         fixture = self.root / "fixture"
         fixture.mkdir()
@@ -169,12 +171,18 @@ class SkillBehaviorCliExitTests(unittest.TestCase):
         self.temp.cleanup()
 
     def write_case(self, failure):
-        expected_skill = "wanted" if failure in {"ROUTING_FAILURE", "GRADER_UNCERTAIN"} else ""
+        expected_skill = "project-init" if failure in {"ROUTING_FAILURE", "GRADER_UNCERTAIN"} else ""
         case = {
             "id": "cli-case", "title": "CLI class", "client": "codex", "fixture": "fixture",
             "prompt": "safe prompt", "invocation_mode": "implicit", "expected_skill": expected_skill,
             "forbidden_skills": [], "authorization": "read_only", "allowed_write_paths": [],
             "forbidden_actions": [], "expected_behavior": "classify", "grader": {"type": "deterministic"}, "tags": ["test"],
+            "materialized_skills": [expected_skill] if expected_skill else [],
+            "evidence_requirements": {
+                "routing": bool(expected_skill), "skill_source": bool(expected_skill),
+                "write_behavior": True, "forbidden_actions": False,
+                "model": False, "tool_trace": False,
+            },
         }
         (self.root / "cases.json").write_text(json.dumps({"schema_version": 1, "cases": [case]}), encoding="utf-8")
         probe = "{'available': False, 'reason': 'missing', 'executable': None, 'version': None}" if failure == "ENVIRONMENT_UNAVAILABLE" else "{'available': True, 'executable': 'fake', 'version': '1'}"

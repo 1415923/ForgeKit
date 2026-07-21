@@ -36,7 +36,7 @@ def make_directory_link(link, target):
 
 class SkillProjectionTests(unittest.TestCase):
     def setUp(self):
-        self.temp = tempfile.TemporaryDirectory(prefix="forgekit-projection-")
+        self.temp = tempfile.TemporaryDirectory(prefix="forgekit-projection-", dir=Path("D:/tmp"))
         self.root = Path(self.temp.name)
         for marker in ("VERSION", ".codex-plugin/plugin.json"):
             path = self.root / marker
@@ -48,7 +48,7 @@ class SkillProjectionTests(unittest.TestCase):
         manifest_path.write_text(json.dumps(self.manifest), encoding="utf-8")
         for entry in self.manifest["entries"]:
             for managed in entry["managed_files"]:
-                data = f"{entry['skill']}:{managed}\r\n".encode("utf-8")
+                data = f"{entry['skill']}:{managed}\n".encode("utf-8")
                 for base in (self.manifest["source_root"], self.manifest["target_root"]):
                     path = self.root / base / entry["skill"] / managed
                     path.parent.mkdir(parents=True, exist_ok=True)
@@ -92,6 +92,17 @@ class SkillProjectionTests(unittest.TestCase):
         source_item.source.write_bytes(b"restored\n")
         source_item.target.unlink()
         self.assertFalse(projection.check(self.plan()))
+
+    def test_single_and_double_sided_crlf_violate_raw_lf_contract(self):
+        item = self.plan()[0]
+        original = item.source.read_bytes()
+        crlf = original.replace(b"\n", b"\r\n")
+        item.source.write_bytes(crlf)
+        self.assertFalse(projection.check(self.plan()))
+        item.target.write_bytes(crlf)
+        self.assertFalse(projection.check(self.plan()))
+        with self.assertRaisesRegex(projection.ProjectionError, "LF checkout contract"):
+            projection.apply(self.plan())
 
     def test_apply_only_copies_declared_files(self):
         target_root = self.root / self.manifest["target_root"]

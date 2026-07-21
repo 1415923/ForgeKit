@@ -87,6 +87,65 @@ class StageBMigrationIdentityTests(ExplicitTempMixin, unittest.TestCase):
         errors = validator.validate_draft(REPO, self.package)
         self.assertTrue(any("CLAUDE.md: current incoming mismatch" in item for item in errors), errors)
 
+    def test_stage_c_skill_baseline_is_anchored_to_approved_stage_b_commit(self):
+        target = validator.stage_c_skill_targets(REPO)[0]
+        path = self.package / "baseline" / target
+        mutated = path.read_bytes() + b"\ncoherent but unapproved skill baseline\n"
+        path.write_bytes(mutated)
+        descriptor = self.descriptor()
+        action = next(item for item in descriptor["actions"] if item["target"] == target)
+        action["baseline_sha256"] = hashlib.sha256(mutated).hexdigest()
+        self.write_descriptor(descriptor)
+        errors = validator.validate_draft(REPO, self.package)
+        joined = "\n".join(errors)
+        self.assertIn(f"{target}: approved baseline mismatch", joined)
+        self.assertIn(validator.APPROVED_STAGE_B_COMMIT, joined)
+
+    def test_stage_c_skill_baseline_commit_field_is_frozen(self):
+        target = validator.stage_c_skill_targets(REPO)[0]
+        descriptor = self.descriptor()
+        action = next(item for item in descriptor["actions"] if item["target"] == target)
+        action["baseline_commit"] = validator.APPROVED_STAGE_A_COMMIT
+        self.write_descriptor(descriptor)
+        errors = validator.validate_draft(REPO, self.package)
+        self.assertTrue(any(f"{target}: baseline_commit must equal approved Stage B commit" in item for item in errors), errors)
+
+    def test_stage_c_skill_incoming_is_anchored_to_current_projection(self):
+        target = validator.stage_c_skill_targets(REPO)[-1]
+        path = self.package / "files" / target
+        mutated = path.read_bytes() + b"\ncoherent but stale skill incoming\n"
+        path.write_bytes(mutated)
+        descriptor = self.descriptor()
+        action = next(item for item in descriptor["actions"] if item["target"] == target)
+        action["incoming_sha256"] = hashlib.sha256(mutated).hexdigest()
+        self.write_descriptor(descriptor)
+        errors = validator.validate_draft(REPO, self.package)
+        self.assertTrue(any(f"{target}: current incoming mismatch" in item for item in errors), errors)
+
+    def test_all_five_stage_c_yaml_packages_are_managed(self):
+        yaml_targets = [
+            target for target in validator.stage_c_skill_targets(REPO)
+            if target.endswith("/agents/openai.yaml")
+        ]
+        self.assertEqual(5, len(yaml_targets))
+        descriptor_targets = {item["target"] for item in self.descriptor()["actions"]}
+        self.assertTrue(set(yaml_targets) <= descriptor_targets)
+
+    def test_migration_crlf_with_synchronized_checksum_still_fails_lf_contract(self):
+        target = next(
+            target for target in validator.stage_c_skill_targets(REPO)
+            if target.endswith("/agents/openai.yaml")
+        )
+        path = self.package / "files" / target
+        mutated = path.read_bytes().replace(b"\n", b"\r\n")
+        path.write_bytes(mutated)
+        descriptor = self.descriptor()
+        action = next(item for item in descriptor["actions"] if item["target"] == target)
+        action["incoming_sha256"] = hashlib.sha256(mutated).hexdigest()
+        self.write_descriptor(descriptor)
+        errors = validator.validate_draft(REPO, self.package)
+        self.assertTrue(any(f"{target}: incoming fixture violates the LF checkout contract" in item for item in errors), errors)
+
 
 class StageBProductionDiscoveryTests(ExplicitTempMixin, unittest.TestCase):
     def candidate_repo(self):
@@ -164,6 +223,13 @@ class StageBMigrationBehaviorTests(ExplicitTempMixin, unittest.TestCase):
         self.assertEqual({"stock"}, {item["classification"] for item in scenario["report"]["items"]})
         self.assertEqual([], scenario["state"]["last_upgrade"]["review_needed_actions"])
         for target in validator.ENTRY_NAMES:
+            packet = scenario["packets"][target]
+            self.assertEqual((DRAFT / "files" / target).read_bytes(), scenario["after_entries"][target])
+            self.assertEqual(scenario["before_entries"][target], packet["artifacts"]["rollback"])
+
+    def test_stock_stage_c_skills_update_with_origin_rollback_bytes(self):
+        scenario = self.scenario("stock")
+        for target in validator.stage_c_skill_targets(REPO):
             packet = scenario["packets"][target]
             self.assertEqual((DRAFT / "files" / target).read_bytes(), scenario["after_entries"][target])
             self.assertEqual(scenario["before_entries"][target], packet["artifacts"]["rollback"])

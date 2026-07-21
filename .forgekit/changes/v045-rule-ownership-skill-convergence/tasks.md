@@ -1,9 +1,9 @@
 DesignStatus: design-approved-for-stage-a
-ImplementationStatus: stage-b-implemented-awaiting-independent-check
+ImplementationStatus: stage-c-implemented-awaiting-independent-check
 
 # v0.45.0 分阶段实施计划
 
-本计划冻结阶段 A-E 的实施切片。阶段 A 已通过独立 checker；阶段 B 已按审批设计完成 maker 实施和确定性自验，正等待独立 checker；阶段 C-E 未进入。
+本计划冻结阶段 A-E 的实施切片。阶段 A、阶段 B 已通过独立 checker；阶段 C 已按审批设计完成 maker 实施和确定性自验，正等待独立 checker；阶段 D-E 未进入。
 
 ## 设计阶段工作记录
 
@@ -194,6 +194,48 @@ M-B2 保持 CLOSED。本轮不缩小 subject/action/no-repair family，不增加
 
 ## 阶段 C：高优先级 Skills 收敛
 
+### Stage-C task—acceptance 实施映射
+
+| Stage-C task | Skill owner path | Invocation policy | Acceptance IDs | 确定性验证 | 真实行为状态 | 后续阶段 |
+| --- | --- | --- | --- | --- | --- | --- |
+| SC-01 新项目轻量初始化 | `skills/project-init/SKILL.md` | implicit eligible | A01-A03、A08、A19 | owner/trigger/route/TODO/授权与外部动作 marker；正负路由及 fixed-question mutation；投影逐字节检查 | 2 个行为 case 已 validate/list/dry-run；真实 Codex/Claude 为 `GRADER_UNCERTAIN/not-run`、`NEEDS_TEST` | A22 的真实单平台证据留待 release evidence |
+| SC-02 已初始化项目 bootstrap 补缺 | `skills/project-bootstrap-fill/SKILL.md` | explicit-only | A02-A03、A10、A19 | placeholder-only、保留定制、冲突不覆盖、无关文档禁止、explicit-only；覆盖定制 mutation | 2 个行为 case 已声明；真实模型 `NEEDS_TEST` | A22 同上 |
+| SC-03 只读接手审计 | `skills/handover-review/SKILL.md` | implicit eligible | A01、A03、A09、A20 | read-only、证据优先、无自动修复、owner-only writeback；read-only/auto-repair mutation | 2 个行为 case 已声明；真实模型 `NEEDS_TEST` | A12-A16 的 review/release convergence 属 Stage D；A22 留待真实证据 |
+| SC-04 已实现事实回填 | `skills/document-backfill/SKILL.md` | explicit-only | A01-A03、A10、A19 | owner/fact/conflict/batch/保留定制合同；推测补全 mutation | 2 个行为 case 已声明；真实模型 `NEEDS_TEST` | A22 留待真实证据 |
+| SC-05 高影响变更规划 | `skills/large-change-planning/SKILL.md` | implicit eligible | A01-A03、A11、A19-A20 | scope/trust boundary/non-goals/stage authorization/acceptance/rollback；单文件高风险与多文件低风险；数量门槛/universal-checker mutation | 2 个行为 case 已声明；真实模型 `NEEDS_TEST` | 独立 checker 的具体 review workflow 属 Stage D；A22 留待真实证据 |
+| SC-06 投影与开发期升级兼容 | 由 SC-01 至 SC-05 owner path 派生 | package policy follows owner | A05-A07 | tasks mapping 与 41-rule matrix 双源锁定；root→`.agents` 字节一致；Stage B commit baseline、当前 projection incoming、stock/custom/unknown/missing/rollback | 不需要模型 | 正式 `migrations/0.45.0` 与发布迁移留 Stage E |
+| SC-07 Stage C validator、mutation 与 runner cases | 由 SC-01 至 SC-05 owner path 派生 | case-specific | A01-A03、A08-A11、A19-A20 | 正式 validator、package/Markdown/集合/behavior/CRLF mutation；13-case manifest validate/list/dry-run | dry-run 不伪造结果；真实客户端继续 `NEEDS_TEST` | A17/A21 属 Stage E；A18 仅作为最终 release consistency gate；A22 为最终真实客户端证据 |
+
+A12-A16 明确属于 Stage D；A17、A21 属于 Stage E；A18 只是最终 release/version consistency gate；A22 必须由真实 Codex/Claude 单平台运行证据完成。本阶段不为填满映射而实施这些后续项。
+
+### Stage C independent-review findings 修复映射
+
+| Finding | 根因 | 修改文件 | 新增失败路径 | 验收命令 |
+| --- | --- | --- | --- | --- |
+| C-M01 | implicit policy 误放在 SKILL frontmatter，且三个 active default prompt 与已通过正文冲突 | bootstrap/backfill `SKILL.md` frontmatter；project-init/bootstrap/backfill 根与投影 `agents/openai.yaml`；Stage C validator/tests；development migration | frontmatter policy、YAML policy 缺失/字符串/错层；questionnaire/selected-stack；one-source/fixed batch；YAML projection drift | Stage C package tests；projection check；migration validator |
+| C-M02 | template manifest refresh 只更新已列 checksum，不发现漏项；缺少 Stage C package completeness gate | template manifest；Stage C validator/tests；template validator | 任一五项 SKILL 或变更 YAML 缺失、checksum 错误、duplicate | Stage C manifest tests；manifest `--check`；template gate |
+| C-M03 | marker/有限 regex 未识别保留正向 marker 的直接反向语义 | Stage C validator/tests | existing-project reinitialize 三类；mandatory five-Skill sequence 三类；安全否定必须通过 | Stage C semantic tests；正式 validator CLI |
+| C-M04 | Stage C 直接扫描 raw Markdown，未复用 Stage B policy-prose 层 | Stage C validator/tests；复用 Stage B extractor（仅必要时最小公共化） | fenced/heading required marker 伪造；fenced/heading legacy；safe negation；navigation；list/table/link 后真实反例 | Stage C Markdown tests；Stage B entry tests 回归 |
+| C-M05 | 只从 matrix 的单一文案筛选 owner，且正式 CLI 未锁定 cardinality | tasks SC-01..05 mapping；Stage C validator/tests | matrix/tasks 缩为四项、集合不同、Stage D owner、duplicate | Stage C skill-set tests；ownership validator |
+| C-M06 | runtime fixture 无权威 Skill package，explicit prompt 未渲染 `$skill-id`，case 无 evidence contract | behavior runner/cases/fixtures/tests；adapter context | 缺 materialized source；explicit 未渲染；implicit 被注入；explicit-only implicit positive；evidence 缺失/类型错误 | behavior runner tests；validate/list/dry-run |
+| C-M07 | byte-sensitive文本无 LF checkout contract，maker smoke 用 overlay 掩盖 fresh clone | 根/模板 `.gitattributes`；fresh-clone gate/tests；migration/smoke/release/template 接入 | autocrlf true/false fresh checkout；删 LF rule 后失败；generated-project contract | fresh-clone tests；release consistency；三类 smoke |
+
+实现结果：C-M01 至 C-M07 均为 `Fixed / self-verified / awaiting original checker recheck`。这只表示 maker 已关闭确定性失败路径；不表示 Stage C 已获独立批准。双 fresh-clone gate 从临时 Stage C commit 直接 checkout，clone 后不覆盖 tracked bytes；真实模型证据仍为 `NEEDS_TEST`。
+
+本映射只授权关闭 C-M01 至 C-M07。状态继续为 `stage-c-implemented-awaiting-independent-check`；不得修改 `review.md`，不得进入 Stage D/E。
+
+### Stage C findings recheck 剩余五项修复映射
+
+| Finding | 剩余根因 | 修改文件 | 独立反例 | 正式门禁 |
+| --- | --- | --- | --- | --- |
+| C-M01 | package prompt 未执行 `$skill-id` authoring 合同，且 fixed-count risk threshold 未覆盖 default prompt | 五个根/投影 `agents/openai.yaml`；Stage C package validator/tests；development migration | 缺失/重复/错误/inline-only `$skill-id`；`5 files` 与通用数值阈值；安全否定 | Stage C package validator；projection；migration |
+| C-M02 | template manifest 只覆盖 changed files，未锁定 projection manifest 的完整 18-file target 集合 | manifest generator/checker；template manifest；Stage C/manifest tests | handover/large-change unchanged YAML 缺失；非 Stage C target 缺失；duplicate/checksum；projection 新 target 未同步 | manifest `--check`；Stage C validator；template gate |
+| C-M03 | reinitialize 与 mandatory pipeline detector 仍过度贴近冻结句式 | Stage C semantic validator/tests | checker 四条等价表达；额外 subject/action/order 变体；安全否定 | Stage C semantic CLI；Stage C tests；C-M04/C-M05 回归 |
+| C-M06 | bounded-write authorization 未绑定 write evidence/allowed paths，explicit renderer 对已有 marker 非幂等 | behavior schema/runner/cases/tests | bounded-write evidence false/空 allowlist；handover write oracle false；已有/重复/inline/错误 marker；implicit case | behavior validate/list/dry-run；behavior tests |
+| C-M07 | projection、manifest 或 migration checksum/comparison 仍可能在 text decode 后规范化换行，且无完整 LF content gate | raw-byte/checksum helpers；projection/manifest/Stage C/migration validators；release/smoke tests | root 单侧 CRLF；root/template 双侧 CRLF；同步 manifest checksum；YAML CRLF；migration CRLF+descriptor | byte-exact projection/manifest/migration；LF content gate；fresh-clone/smoke |
+
+本映射只授权修复仍 OPEN 的 C-M01、C-M02、C-M03、C-M06、C-M07。C-M04、C-M05 保持 CLOSED，仅运行回归；状态继续为 `stage-c-implemented-awaiting-independent-check`。
+
 ### 修改范围
 
 - `project-init`、`project-bootstrap-fill`、`handover-review`、`document-backfill`、`large-change-planning`。
@@ -226,6 +268,13 @@ M-B2 保持 CLOSED。本轮不缩小 subject/action/no-repair family，不增加
 ### Checker 与提交切分
 
 - 每个高优先级 Skill 至少一次独立 checker；可按 `init/bootstrap`、`handover/backfill`、`large-change` 三个提交候选切分。
+
+### Maker 实施结果
+
+- 五个根级权威 `SKILL.md` 已按影响型风险、只读审计、局部授权、外部动作保护和最小写回合同收敛；没有要求五项串行执行。
+- `config/skill-projections.json` 未另建竞争清单；`.agents` 投影由既有同步器确定性生成。
+- change-local 单一 development migration draft 已扩展五个 Skill；baseline 锚定阶段 B 提交，incoming 锚定当前 projection；未创建正式 migration。
+- Stage C 当前状态为 `stage-c-implemented-awaiting-independent-check`；不得视为 `stage-c-approved`，不得授权 Stage D。
 
 ## 阶段 D：审查和发布 Skills
 
@@ -306,3 +355,65 @@ M-B2 保持 CLOSED。本轮不缩小 subject/action/no-repair family，不增加
 - 阶段严格按 A -> B -> C -> D -> E 推进；任何阶段的行为合同变化先更新 acceptance matrix，再实现。
 - 每个阶段只授权自身范围，不因前一阶段通过而自动授权下一阶段。
 - 阶段内可以拆更小提交，但不得跨阶段混合入口、Skill 语义、prompts 和发布元数据。
+
+### Stage C recheck 剩余五项 maker 实施结果
+
+- C-M01：五个 package default prompt 分别以唯一独立的 $project-init、$project-bootstrap-fill、$handover-review、$document-backfill、$large-change-planning 开头。validator 同时扫描 Skill policy prose 和 package prompt；缺失、重复、错误/其他 Skill invocation、fenced-only invocation、任意正向固定文件/模块/行数门槛均失败，安全否定通过。
+- C-M02：manifest generator 从 config/skill-projections.json 派生完整 target 集合，正式合同为 18/18、每项恰好一次、raw-byte SHA-256；Stage C 五个 package 为 10/10。handover、large-change 的 unchanged YAML 与其余通用 Skill projection 不再遗漏。
+- C-M03：existing-project subject、repeat/restart/from-scratch action、mandatory/universal/scope/sequence family 已扩展。checker 四个漏检句和额外变体由真实 CLI 非零拒绝并定位 Skill/category/matched prose；安全否定通过。C-M04 Markdown 分层与 C-M05 tasks/matrix 双源集合保持 CLOSED。
+- C-M06：bounded_local_write 必须同时有非空 allowed paths 与 write_behavior=true；handover read-only 仍要求 write oracle。renderer 对已有独立 $skill-id 保持幂等，无 marker 插入一次，多 marker/错误 marker 失败，inline 示例不算正式调用，implicit 不注入。
+- C-M07：projection、manifest、Stage C 与 migration checksum 全部使用原始 bytes；LF content gate 独立拒绝 CRLF/lone CR。根与 generated-project checkout contract 覆盖 manifest 实际管理的 Markdown/JSON/YAML/YML/TOML/Python/PowerShell/Shell 文本。单侧 CRLF、双侧 CRLF、双侧加 manifest checksum、YAML CRLF、migration CRLF 加 descriptor checksum mutation 均非零。
+- 唯一 development migration 现管理五份 Stage C SKILL.md 与五份 agents/openai.yaml；baseline 来自 Stage B commit，incoming 与当前 template projection 一致，stock/custom/unknown/missing/rollback 回归通过。没有建立正式 migration。
+- 定向 83/83、全量 unittest 160/160；正式快速门禁、release consistency 通过。临时 commit 477e041183602ca9cc1ddc006404ca98084a7441 的 scoped snapshot、autocrlf=false、autocrlf=true 三路完整 smoke 均 PASS；clone 后无 byte overlay，删除 Markdown LF rule 后 validator exit 1。
+
+以上只构成 maker 自验。状态保持 stage-c-implemented-awaiting-independent-check，等待原 checker 只复核 C-M01、C-M02、C-M03、C-M06、C-M07。
+
+### Stage C 最后两个 OPEN finding 修复映射
+
+| Finding | 剩余根因 | 修改文件 | 独立反例 | 正式门禁 |
+| --- | --- | --- | --- | --- |
+| C-M01 | 固定数量检测的 workload unit 词形不完整，且 trigger/target 组合未覆盖 directory、service、package、endpoint 等等价风险流程表达 | `scripts/validate-stage-c-skills.py`、`tests/test_stage_c_skills.py`、release consistency mutation | `A 42-directory change requires independent planning.`；quantity × unit × trigger/target 表驱动变体；安全否定 | Stage C validator；Stage C tests；template gate；release consistency directory mutation |
+| C-M03 | reinitialize 与 mandatory pipeline 规则仍依赖有限句式，未完整组合已有状态主体、初始化/再次语义、全量集合、普遍范围和顺序/不可跳过语义 | `scripts/validate-stage-c-skills.py`、`tests/test_stage_c_skills.py`、release consistency mutation | setup-again、action-first reinitialize、one-by-one、processed sequentially、take-through-fixed-order；安全否定 | Stage C semantic CLI；Stage C tests；template gate；release consistency setup/pipeline mutations |
+
+本映射只授权关闭 C-M01 与 C-M03。C-M02/C-M04/C-M05/C-M06/C-M07 保持 CLOSED，仅做最小回归；状态继续为 `stage-c-implemented-awaiting-independent-check`。
+
+### Stage C 最后两个 OPEN finding maker 结果
+
+- C-M01：fixed-count detector 已改为 `quantity expression + workload unit + mandatory trigger + risk/process target` 的数据驱动组合。数量覆盖任意阿拉伯数字、one 至 twelve 与 dozens；unit 使用词根式单复数 family，覆盖 file/directory/folder/module/line/component/package/service/endpoint/document/class/repository/project；安全否定、example-only 和 may/can-remain-low-risk 上下文不报错。错误包含 Skill/package、`fixed-quantity-risk-threshold`、matched prose 以及 quantity/unit/trigger/target。
+- C-M03：reinitialize detector 组合 existing/initialized subject、initialization/setup/bootstrap action、again/from-scratch/anew/repeat/rerun/restart/reinitialize 语义与 modal/命令式；mandatory pipeline detector 组合 full Skill set、universal scope、mandatory 与 sequence/workflow，另行拒绝 no-Skill-may-be-skipped 语义。安全否定、alternatives、rather-than、no-fixed-order 与 not-required 继续通过。
+- checker 六句均在保留正向合同的隔离 package 副本中运行真实 Stage C CLI，逐项 exit 1，并回显 Skill/package、category 与 matched prose。Stage C 定向模块 28/28；完整 unittest 163/163。
+- release consistency 新增 directory threshold、setup again、one-by-one pipeline 三项正式 mutation，均非零失败并逐字节恢复。Stage C、projection、18/18 manifest、ownership、entry、migration、behavior validate/dry-run、template、fresh-clone 与 release consistency 全部 PASS。
+- C-M02/C-M04/C-M05/C-M06/C-M07 保持 CLOSED；未修改五个 Skill 正文/package YAML、projection、manifest、behavior、migration、`.gitattributes`、fresh-clone runner或 Stage B validator。
+
+以上仍只构成 maker 自验。当前状态保持 `stage-c-implemented-awaiting-independent-check`，等待原 checker 只复核 C-M01 与 C-M03。
+
+### Stage C 最后一个 OPEN finding（C-M03）修复映射与结果
+
+| Finding | 剩余根因 | 修改文件 | 独立反例 | 正式门禁 |
+| --- | --- | --- | --- | --- |
+| C-M03 | reinitialize 检测仍受 subject/action 词序影响，且 mandatory full-Skill 检测错误地把 sequence/order 词作为必要条件 | `scripts/validate-stage-c-skills.py`、`tests/test_stage_c_skills.py`、`scripts/test-release-consistency.ps1`；本节同步 `tasks.md`、`verification.md`、`ship.md` | action-first bootstrap once more、relative-clause setup again、局部 `without repeating`；full set + universal scope + mandatory、full set + scope + chain、non-skippable + scope | Stage C validator CLI；Stage C 28 项定向测试；template gate；release consistency 四项 C-M03 mutation |
+
+- C-M03A 现按句子计算 `existing_subject + init_action + repeat_action + positive_requirement`，feature 顺序不影响判断；`negated_init` 与 `alternative_route` 阻止局部否定和 handover/bootstrap-fill 替代路由误报。
+- C-M03B 现分别拒绝 `full_skill_set + universal_scope + mandatory`、`full_skill_set + universal_scope + sequence`、`non_skippable + universal_scope`，不再要求每条违规句都出现 sequence、pipeline 或 order。
+- 错误输出包含 Skill/package、category、matched prose 和 feature 集合。checker 的两个 reinitialize 漏检与六个 pipeline 漏检均由正式 CLI exit 1；`Existing repositories may continue to handover-review without repeating setup.` exit 0。
+- C-M01 与 C-M02/C-M04/C-M05/C-M06/C-M07 只做回归；其已关闭实现未修改。状态继续为 `stage-c-implemented-awaiting-independent-check`，只等待原 checker 复核 C-M03。
+
+### Stage C C-M03A 最后两个命令式漏检
+
+| Finding | 剩余根因 | 修改文件 | 独立反例 | 正式门禁 |
+| --- | --- | --- | --- | --- |
+| C-M03A | `bootstrap` 句首命令未满足 positive requirement；`set up` 短语动词未归一化为初始化动作 | `scripts/validate-stage-c-skills.py`、`tests/test_stage_c_skills.py`、`scripts/test-release-consistency.ps1`；同步本 change 的 `tasks.md`、`verification.md`、`ship.md` | `Bootstrap an already initialized repository again.`；`Set up each existing workspace from scratch.`；否定、说明、inline/fence 安全句 | Stage C CLI/28 项定向测试；template gate；release consistency 两项 C-M03A mutation |
+
+- 仅拆分初始化 noun/verb/phrasal-verb pattern，并在 feature 分析副本中将相邻 `set up/sets up/setting up` 规范化；原始文件和 matched prose 不变。
+- 句首或允许的 `Before ...` / `For each ...` 前置状语后的 init command 满足既有 `positive_requirement` feature。C-M03A 布尔表达式和 C-M03B 实现未修改。
+- 两个原漏检均由正式 CLI exit 1，返回 `existing-project-reinitialize` 与四项 feature；安全反例 exit 0。状态继续为 `stage-c-implemented-awaiting-independent-check`。
+
+### Stage C C-M03A 正负词形对称修复
+
+| Finding | 剩余根因 | 修改文件 | 独立反例 | 正式门禁 |
+| --- | --- | --- | --- | --- |
+| C-M03A | 正向 `init_action` 与 `negated_init` 使用不同动作词形来源，导致 passive `bootstrapped` 可正向命中却不能被局部否定 | `scripts/validate-stage-c-skills.py`、`tests/test_stage_c_skills.py`、`scripts/test-release-consistency.ps1`；同步 `tasks.md`、`verification.md`、`ship.md` | `must not be bootstrapped again` 对照 `must be bootstrapped again`；bootstrap/set-up/initialize/reinitialize 七组正负对称 | Stage C CLI；29 项定向测试；release expected-pass + positive guard；完整 template/fresh-clone/release gate |
+
+- 删除竞争的 `NEGATED_INIT_PATTERNS` 动作词表。`find_init_action_matches()` 从唯一 `INIT_ACTION_SPECS` 返回 span、family、原始 text；`init_action`、imperative 和局部否定共同消费这些 match。
+- 已初始化主体中的描述性 `initialized` match 从 directive action 中剔除；否定只检查每个实际 directive action 前后局部上下文。C-M03A A+B+C+D 合同和 C-M03B 未修改。
+- 原误报正式 CLI exit 0；对应正向句 exit 1 并返回原句、category 和 feature。状态继续为 `stage-c-implemented-awaiting-independent-check`。
