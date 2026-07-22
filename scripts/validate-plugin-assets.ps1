@@ -133,6 +133,18 @@ function Test-SharedSkillDistribution {
     if ($stageCExitCode -ne 0) {
         Add-Error "Stage C Skill contract check failed: $($stageCOutput -join [Environment]::NewLine)"
     }
+    $stageDValidator = Join-Path $repoRoot "scripts\validate-stage-d-skills.py"
+    $previousErrorPreference = $ErrorActionPreference
+    try {
+        $ErrorActionPreference = "Continue"
+        $stageDOutput = & python -B $stageDValidator --repo-root $repoRoot 2>&1
+        $stageDExitCode = $LASTEXITCODE
+    } finally {
+        $ErrorActionPreference = $previousErrorPreference
+    }
+    if ($stageDExitCode -ne 0) {
+        Add-Error "Stage D Skill contract check failed: $($stageDOutput -join [Environment]::NewLine)"
+    }
 }
 
 function Test-PluginManifest {
@@ -170,6 +182,7 @@ Test-RequiredPath ".claude-plugin\marketplace.json"
 Test-RequiredPath "config\skill-projections.json"
 Test-RequiredPath "scripts\sync-skill-projections.py"
 Test-RequiredPath "scripts\validate-stage-c-skills.py"
+Test-RequiredPath "scripts\validate-stage-d-skills.py"
 Test-RequiredPath "scripts\test-fresh-clone-crlf.py"
 Test-RequiredPath "project-template\AGENTS.md"
 Test-RequiredPath "project-template\CLAUDE.md"
@@ -184,7 +197,9 @@ Test-RequiredPath "scripts\test-release-consistency.ps1"
 Test-RequiredPattern "README.md" "可选原生 agent 配置" "Current native adapter entry"
 Test-RequiredPattern "scripts\init-project-template.ps1" "CLAUDE.md" "Unified initializer Claude guidance"
 Test-RequiredPattern "skills\project-init\SKILL.md" "## Trigger Boundary" "Project init trigger boundary"
-Test-RequiredPattern "skills\project-suitability\SKILL.md" "Suitable, Conditional, or Custom" "Project suitability outcome"
+Test-RequiredPattern "skills\project-suitability\SKILL.md" "suitable-with-constraints" "Project suitability constrained outcome"
+Test-RequiredPattern "skills\project-suitability\SKILL.md" "not-recommended" "Project suitability negative outcome"
+Test-RequiredPattern "skills\project-suitability\SKILL.md" "insufficient-evidence" "Project suitability evidence outcome"
 Test-RequiredPattern "skills\large-change-planning\SKILL.md" "## Impact Branch" "Large change impact branch"
 
 Test-ForbiddenPath "plugins\forgekit-codex-workflow"

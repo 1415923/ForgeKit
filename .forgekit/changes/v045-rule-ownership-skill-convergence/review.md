@@ -1691,3 +1691,151 @@ C-M03A remains OPEN. Stage C FAILS this recheck, status remains `stage-c-impleme
 C-M03A is CLOSED. Stage C passes with notes, status is `stage-c-approved-for-stage-d`, and entry into Stage D is allowed. This review stops before Stage D implementation.
 
 `VERSION` remains `0.44.1`. Real model behavior remains `NEEDS_TEST`. No formal v0.45.0 migration was created. No commit, push, tag, release, or deployment was performed, and the user's deleted `usage.html` was not restored, modified, or staged.
+
+## Stage D Independent Review
+
+- Date: 2026-07-21
+- Checker: Codex independent checker (`/root`)
+- Baseline branch / commit: `main` / `868846da54634899141047951b0f4275ad378966` (`feat(governance): implement v0.45 stage C skill convergence`)
+- Reviewed state: `stage-d-implemented-awaiting-independent-check`
+- Scope: the four Stage D Skills, their package prompts and template projections, behavior cases, finite validator and mutations, development migration draft, gate wiring, tests, scoped smoke, and LF/CRLF fresh clones. No Stage D redesign or open-ended synonym fuzzing was performed.
+- Decision: **FAIL**. Status remains `stage-d-implemented-awaiting-independent-check`; Stage E is not authorized.
+
+### Four-Skill responsibility, routing, and authorization
+
+| Skill | Responsibility / trigger result | Read-only and external-action result | Stage D result |
+| --- | --- | --- | --- |
+| `code-review` | Correctly limited to existing implementation/diff/tests/evidence, initial review, independent checker, and findings recheck. It emits `BLOCKER` / `MAJOR` / `NOTE`, uses `NEEDS_TEST`, does not absorb security/release, and does not use file/line/module counts as the checker trigger. | Default read-only; finding discovery is not repair authority; a separately authorized maker is path-bounded and records changed-path plus validation evidence; recheck returns to read-only. Commit/push/tag/release/deploy remain separately authorized. | Body contract PASS; shared validator finding below prevents Stage D approval. |
+| `security-review` | Correctly limited to explicit or real auth/authz, secret/credential/token, sensitive-data, command, path/file, network/external-system, dependency/supply-chain, production/security-sensitive boundaries. Ordinary code/backend/config/style work is not enough. | Default read-only and report-only; no automatic fix or external action. | **MAJOR**: bounded-fix text requires writable paths and changed-path evidence but omits validation evidence. |
+| `release-check` | Correctly limited to release/version/migration/package/tag/RC/publication/readiness. Ordinary commits, daily tests, and non-release review are excluded. Decision vocabulary is exactly `ready`, `blocked`, or `not-verified`. | Default read-only; no automatic VERSION bump, formal migration, tag, push, publish, release, or deploy. | **MAJOR**: bounded metadata-fix text requires writable paths and validation evidence but omits changed-path evidence. |
+| `project-suitability` | Correctly evaluates ForgeKit fit, full/constrained/light/no adoption, cost, constraints, governance conflict, and possible prior read-only audit. Results are `suitable`, `suitable-with-constraints`, `not-recommended`, or `insufficient-evidence`. | Read-only advisory by default; no `.forgekit` creation, init, Git init, entry rewrite, rule migration, governance overwrite, or automatic Skill pipeline. | Body contract PASS; shared validator finding below prevents Stage D approval. |
+
+The primary routing remains implemented diff -> `code-review`, actual security boundary -> `security-review`, release readiness -> `release-check`, and ForgeKit adoption fit -> `project-suitability`. Multiple Skills may be selected for actual risk, but the four are not a mandatory pipeline. Review authorization is not write authorization; local write authorization is not external-action authorization; internal stage authorization is not push/release authorization.
+
+### Package and default prompts
+
+- All four `agents/openai.yaml` files contain only supported `interface` fields: `display_name`, `short_description`, and `default_prompt`. No invented policy metadata was added.
+- Each default prompt contains exactly one standalone matching marker: `$code-review`, `$security-review`, `$release-check`, or `$project-suitability`. No prompt invokes another Stage D Skill or forms a pipeline.
+- Root and template packages are byte-identical. Public Skill IDs, frontmatter names, and display names are unchanged from the baseline commit. Default prompts do not expand the corresponding `SKILL.md` authority.
+
+### Behavior cases and evidence contract
+
+- Manifest validation and listing passed with 31 total cases: 13 earlier cases plus 18 Stage D cases. Stage D distribution is code-review 4, security-review 4, release-check 5, and project-suitability 5.
+- The cases cover initial review, recheck, no automatic repair, one bounded maker case, security positive/negative/report-only/boundary cases, release readiness/ordinary commit/version-migration-manifest/no external action/insufficient evidence, and suitability new/mature/not-recommended/insufficient/no-auto-init cases.
+- Explicit invocation markers are inserted into the rendered adapter prompt exactly once; implicit prompts remain unmodified. Read-only cases require write-behavior evidence and empty allowlists; bounded-write cases require non-empty allowed paths; forbidden external actions require tool-trace evidence.
+- Dry-run executed all 31 cases, invoked no real client, produced no changed paths, cleaned its workspaces, and correctly reported `GRADER_UNCERTAIN` / `not-run`. Real Codex/Claude prompt behavior remains `NEEDS_TEST`.
+
+### Validator and finite acceptance corpus
+
+- `scripts/validate-stage-d-skills.py` correctly derives exactly SD-01..SD-04 from `tasks.md`, derives four Stage D ROUTE owners from the 41-rule ownership matrix, requires equal sets, verifies owner/package/projection, requires one package marker, checks default read-only, some bounded-write and external-action markers, and uses finite regex categories rather than a general natural-language analyzer.
+- The validator baseline passes, but its bounded-write evidence expression is an OR: `(?:changed-path|validation) evidence`. This accepts a contract that supplies only one required evidence dimension.
+- The six formal mutations all failed non-zero with the expected category and byte restoration: automatic maker, security always-on, ordinary-commit release-check, suitability auto-init, mandatory four-Skill pipeline, and fixed-count checker threshold.
+- Eight additional finite scenarios were run in an isolated Git repository and restored byte-for-byte. The validator rejected 3/8: reviewer automatically modifies tests (`review-auto-maker`), removal of bounded writable-path/evidence text (`required-contract`), and removal of default read-only (`required-contract`). It incorrectly accepted 5/8 with exit 0:
+  1. `Finding a defect directly authorizes repair.`
+  2. `Every ordinary backend change must run security review.`
+  3. `Treat every ordinary commit as a release and run release-check.`
+  4. `After every suitability assessment, automatically create .forgekit.`
+  5. `Internal stage authorization automatically permits push and release.`
+- These five are not open-ended rare synonyms: they are direct instances of the frozen finding/maker, ordinary-backend/security, ordinary-commit/release, suitability/init, and internal/external authorization categories. Final validator baseline passed after every restoration.
+
+### BLOCKER / MAJOR / NOTE
+
+- BLOCKER: none. No unauthorized real-worktree write, reviewer-to-maker transition, external action, custom/unknown migration overwrite, rollback failure, or Stage E work occurred.
+- **MAJOR M-D01 — incomplete bounded-write evidence contract.** `skills/security-review/SKILL.md:18` omits validation evidence; `skills/release-check/SKILL.md:18` omits changed-path evidence. `scripts/validate-stage-d-skills.py:115` requires either changed-path or validation evidence instead of both, so the current incomplete contracts pass.
+- **MAJOR M-D02 — systematic failure of the finite semantic contract.** The formal validator accepted all five contradictory scenarios listed above, including frozen ordinary-backend/security, ordinary-commit/release, suitability/init, finding-to-repair, and internal-stage-to-external-action boundaries. The narrow official sentences still fail, but the structured gate does not protect the frozen categories as a whole.
+- NOTE: real model routing, selector behavior, Skill-source observation, token/context effects, and manual merge experience remain `NEEDS_TEST`.
+- NOTE: `D:\tmp\fc-ge1jyo7z` (created 2026-07-21 22:27, containing `lf`, `s`, and `t`) existed before this checker run and remains an old fresh-clone residue. It was not created or deleted by this review. All temporary trees created by this checker were cleaned.
+
+### Projection, manifest, and development migration
+
+- Root `skills/` remains the unique semantic source. All 18 projection files are root/template byte-identical; the Stage D subset is 8/8. The template manifest covers 18/18 projection targets with no duplicate, and Stage C's five Skills plus `.claude/skills/` have no diff.
+- One-sided Stage D YAML drift failed projection check. Removing `.agents/skills/release-check/agents/openai.yaml` from the template manifest failed with the missing target. Synchronized root/template YAML without updating the manifest passed projection equality but failed manifest checksum. Every path was restored and both checks then passed.
+- The change-local draft contains 20 unique actions, including 8 Stage D targets. Each Stage D `baseline_commit` is exactly `868846da54634899141047951b0f4275ad378966`; all eight baseline fixtures equal that Git object's raw bytes, all eight incoming fixtures equal the current template projection, and all 16 fixture paths are present with no duplicate.
+- Migration validation passed stock/custom/unknown/missing/mixed/rollback and same-path origin rollback. Production discovery does not expose the draft. No formal `migrations/0.45.0` exists.
+
+### Gate wiring and executed tests
+
+- The diffs in `scripts/smoke-test.py`, `scripts/test-fresh-clone-crlf.py`, `scripts/validate-plugin-assets.ps1`, `scripts/validate-template.ps1`, and `scripts/test-release-consistency.ps1` only register Stage D validators/tests/fixtures or replace obsolete Stage D content markers with the new contract markers. No Stage A-C gate, exit code, warning/error, raw-byte/LF contract, or production behavior was relaxed.
+- Directed Stage D unittest: 11/11 PASS. Stage D migration identity tests: 2/2 PASS. Full unittest discovery: 177/177 PASS. Behavior manifest: 31/31 structurally valid; dry-run 31/31 `GRADER_UNCERTAIN/not-run` with zero changed paths.
+- Stage D, projection, manifest, ownership (41 rules), agent entries, Stage C, development migration, plugin assets, template, release consistency, scoped smoke, and `git diff --check` passed. Release consistency's six Stage D mutations and all 18 managed projection mutations failed as expected and restored bytes.
+- Scoped snapshot commit `dd6b0f0d348b45338034959b8c61bd05d61fa0d3` passed release consistency and smoke after an isolated dirty-input marker was restored. The marker was needed only because the release-consistency harness expects a dirty maker input when it constructs its nested fresh-clone commit.
+- Fresh-clone full gate used temporary commit `5e3e569a6ef34b7731c9b4a6107de178b02d8d7a`. The scoped snapshot, `core.autocrlf=false` clone, and `core.autocrlf=true` clone all passed Stage C, Stage D, migration, projection, template, and full smoke. Git blobs equaled checked-out bytes; no tracked-byte overlay was applied after cloning; the user's `usage.html` deletion was excluded.
+
+### Stage decision and closure
+
+Stage D does not pass because M-D01 and M-D02 are open. Status remains:
+
+`stage-d-implemented-awaiting-independent-check`
+
+Stage E is not allowed. `VERSION` remains `0.44.1`; real model prompts were not executed; no formal v0.45.0 migration was created; v0.45.0 is not release-ready. No maker implementation, tasks, verification, ship, VERSION, formal migration, `usage.html`, commit, push, tag, release, publication, or deployment was changed or performed by this checker.
+## Stage D M-D01 M-D02 Recheck
+
+- Date: 2026-07-22
+- Checker: Codex independent checker (`/root`)
+- Baseline branch / commit: `main` / `868846da54634899141047951b0f4275ad378966` (`feat(governance): implement v0.45 stage C skill convergence`)
+- Recheck scope: only M-D01, the five frozen M-D02 responsibility/authorization categories, their safe controls, the original six Stage D mutations, and the requested minimal regressions. Previously passed Skill responsibilities, default read-only and external-action body boundaries, package contract, behavior base contract, projection, migration classification, LF/raw-byte/fresh-clone, and Stage A-C findings were not reopened.
+- Decision: **PASS WITH NOTES**. M-D01 and M-D02 are CLOSED. Stage D status is `stage-d-approved-for-stage-e`; Stage E is allowed after Stage D is submitted, but was not implemented in this recheck.
+
+### M-D01: bounded-write evidence
+
+- All four Stage D Skills now use the same bounded-write conjunction: a separate and explicit named repair/recording authorization, non-empty explicit writable paths, changed-path evidence, validation evidence, and no expansion to another finding, path, project, or external action.
+- `scripts/validate-stage-d-skills.py` defines and checks `changed_path_evidence` and `validation_evidence` as separate structured features within the same non-example writable-path contract segment. The prior `changed-path OR validation` expression is absent.
+- The six required mutations all returned non-zero with the expected category: security-review without validation evidence; release-check without changed-path evidence; code-review with only changed-path evidence; project-suitability with only validation evidence; generic `evidence required`; and evidence present only in fenced example text. The generic and fenced cases reported both `missing-changed-path-evidence` and `missing-validation-evidence`.
+- Every mutation changed both root and template copies inside an isolated repository containing `.git`, then restored the original bytes. The restored validator passed and the isolated repository was Git-clean before deletion.
+
+### M-D02: five frozen categories and safe controls
+
+The five sentences from the first Stage D Independent Review were all rejected by the formal CLI with Skill, category, matched prose, and structured feature names:
+
+| Skill | Frozen mutation | Category | Structured features |
+| --- | --- | --- | --- |
+| `code-review` | `Finding a defect directly authorizes repair.` | `finding-auto-authorizes-repair` | `finding,permission,repair` |
+| `security-review` | `Every ordinary backend change must run security review.` | `ordinary-change-requires-security-review` | `ordinary_change,mandatory,security_review` |
+| `release-check` | `Treat every ordinary commit as a release and run release-check.` | `ordinary-commit-is-release` | `ordinary_commit,automatic_release,release` |
+| `project-suitability` | `After every suitability assessment, automatically create .forgekit.` | `suitability-auto-initialization` | `suitability,automatic,initialization` |
+| `code-review` | `Internal stage authorization automatically permits push and release.` | `internal-authorization-external-action` | `internal_authorization,permission,external_action` |
+
+- The five required safe expressions passed: findings require separate repair authorization; ordinary backend/config changes alone do not require security-review; ordinary commits are not releases; suitability is read-only and does not initialize; internal authorization does not permit external action.
+- One bounded structural companion per category also passed, for 10/10 safe controls in total. No open-ended fuzzing or matrix-external synonym expansion was performed.
+- The original formal six mutations remained closed, 6/6: automatic maker, security always-on, ordinary-commit release-check, suitability auto-init, mandatory four-Skill pipeline, and fixed-count checker threshold all returned non-zero with their expected categories.
+
+### Minimal regression evidence
+
+- Package markers: 4/4 packages contain exactly one matching standalone marker and no other Stage D marker: `$code-review`, `$security-review`, `$release-check`, and `$project-suitability`.
+- Behavior: manifest validation passed with 31 cases. The bounded-write case has a non-empty allowed path, write-behavior evidence, changed-path evidence in expected behavior, and validation evidence; recheck remains read-only. Dry-run completed with no real client and correctly remained `GRADER_UNCERTAIN/not-run`.
+- Projection and manifest: 9 projected Skills x 2 managed files = 18/18 byte-identical targets; the manifest covers 18 Skill files with no duplicate source path.
+- Development migration: validator passed 20 actions, including 8 unique Stage D targets. Stock/custom/unknown/missing/mixed/rollback and same-path origin rollback passed. No formal `project-template/migrations/0.45.0` exists.
+- Fresh clone: the exact non-full fresh-clone command passed a temporary commit that excluded the user's `usage.html` deletion. Both `core.autocrlf=false` and `core.autocrlf=true` clones passed Stage C, Stage D, migration, projection, and template checks without post-clone overlays.
+- Release consistency ran only in a short-path isolated Git snapshot. All Stage D responsibility/evidence mutations and projection mutations failed as expected, safe negations passed, every file was restored byte-for-byte, the nested fresh-clone gate passed, the isolated repository ended clean, and the directory was removed.
+
+### Tests and gates
+
+| Target | Actual result |
+| --- | --- |
+| Stage D validator | PASS; 4 Skills dual-source locked |
+| Stage D unittest | 18/18 PASS |
+| Full unittest discovery | 184/184 PASS |
+| Behavior validate / dry-run | PASS; 31 cases; real model `GRADER_UNCERTAIN/not-run` |
+| Projection / manifest | PASS; 18/18 managed files |
+| Development migration | PASS; 20 actions, 8 Stage D targets |
+| Fresh-clone LF/CRLF | PASS; `core.autocrlf=false/true`, no overlay |
+| Template validation | PASS |
+| Release consistency | PASS in isolated Git snapshot; byte restoration and clean state confirmed |
+| `git diff --check` | PASS before writeback |
+
+### BLOCKER / MAJOR / NOTE
+
+- BLOCKER: none.
+- MAJOR: none. M-D01 and M-D02 are CLOSED; no previously closed structured contract was reopened.
+- NOTE: real Codex/Claude prompts were not executed, so model routing and behavior remain `NEEDS_TEST`. Matrix-external rare or complex language remains NOTE/NEEDS_TEST and did not extend this recheck.
+- NOTE: the pre-existing `D:\tmp\fc-ge1jyo7z` residue documented by the first Stage D review remains untouched. All temporary repositories and workspaces created by this recheck were cleaned; no recheck mutation, clone, cache, packet, or evidence directory remains.
+
+### Stage decision
+
+Stage D passes with notes. M-D01 is CLOSED and M-D02 is CLOSED. Status is:
+
+`stage-d-approved-for-stage-e`
+
+Stage E is allowed after Stage D is submitted. This recheck stops before Stage E and does not implement it.
+
+`VERSION` remains `0.44.1`. Real model behavior remains `NEEDS_TEST`; no real model prompt was executed. No formal v0.45.0 migration was created, and v0.45.0 is not release-ready. No maker implementation, Stage E work, commit, push, tag, release, publication, deployment, or change to the user's deleted `usage.html` was performed.

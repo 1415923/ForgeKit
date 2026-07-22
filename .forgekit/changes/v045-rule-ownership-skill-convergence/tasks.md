@@ -1,9 +1,9 @@
 DesignStatus: design-approved-for-stage-a
-ImplementationStatus: stage-c-implemented-awaiting-independent-check
+ImplementationStatus: stage-d-implemented-awaiting-independent-check
 
 # v0.45.0 分阶段实施计划
 
-本计划冻结阶段 A-E 的实施切片。阶段 A、阶段 B 已通过独立 checker；阶段 C 已按审批设计完成 maker 实施和确定性自验，正等待独立 checker；阶段 D-E 未进入。
+本计划冻结阶段 A-E 的实施切片。阶段 A、阶段 B、阶段 C 已通过独立 checker；阶段 D 已按审批设计完成 maker 实施和确定性自验，正等待独立 checker；阶段 E 未进入。
 
 ## 设计阶段工作记录
 
@@ -278,6 +278,29 @@ A12-A16 明确属于 Stage D；A17、A21 属于 Stage E；A18 只是最终 relea
 
 ## 阶段 D：审查和发布 Skills
 
+### Stage-D task—acceptance 实施映射
+
+本阶段按维护者当前授权只收敛四个通用 Skill；设计中 A16 的 Claude first-principles 输出行为继续为 `NEEDS_TEST`，不在本阶段修改 `.claude/skills/` 或扩大为第五个实现 owner。
+
+| Stage-D task | Skill owner path | Acceptance IDs | 确定性验证 | 行为状态 | 后续阶段 |
+| --- | --- | --- | --- | --- | --- |
+| SD-01 实现审查与 findings recheck | `skills/code-review/SKILL.md` | A01-A03、A12-A13、A20 | package/只读/证据/严重度/initial-recheck/非自动 maker/影响型 checker/外部动作合同；正负路由与 mutation | cases 只做 validate/list/dry-run；真实模型 `GRADER_UNCERTAIN/not-run` | A22 真实客户端证据留最终 release evidence |
+| SD-02 安全边界审查 | `skills/security-review/SKILL.md` | A01-A03、A14、A20 | 实际安全影响触发、只读、证据等级、人工复核、非普通必经、非自动 maker、外部动作合同 | 同上 | A22 同上 |
+| SD-03 发布准备审查 | `skills/release-check/SKILL.md` | A01-A03、A15、A18、A20 | release-only trigger、渐进加载、ready/blocked/not-verified、无自动 bump/tag/push/release、普通 commit 负路由 | 同上 | 正式 migration、VERSION 与 release metadata 留 Stage E |
+| SD-04 ForgeKit 适配评估 | `skills/project-suitability/SKILL.md` | A01-A03、A19、A22 | 只读建议、四类结论、采用成本/约束、无自动初始化/迁移/全 Skill pipeline | 同上 | 初始化或治理改造只能由后续明确请求另行路由 |
+| SD-05 投影与开发期升级兼容 | 由 SD-01 至 SD-04 owner path 派生 | A05-A07、A18 | root→template raw-byte 投影；18/18 manifest；Stage C commit baseline、当前 projection incoming；stock/custom/unknown/missing/rollback | 不需要模型 | 正式 `migrations/0.45.0` 留 Stage E |
+| SD-06 validator、behavior 与正式门禁 | 由 SD-01 至 SD-04 owner path 派生 | A01-A03、A12-A15、A19-A20 | 双源四项集合、有限语料、package prompt、只读/授权/外部动作、路由/非 mandatory pipeline、mutation、dry-run | 不伪造真实结果 | A16 与真实 A22 证据保持 `NEEDS_TEST` |
+
+Stage D 的静态 gate 只覆盖本映射和 `verification.md` 冻结的有限语料类别；矩阵外罕见同义词默认记为 NOTE / `NEEDS_TEST`，除非揭示未授权写入、外部发布、安全边界或真实常见路由的系统性破坏。
+
+### Stage D maker 实施结果
+
+- SD-01 至 SD-04 的四个权威 Skill 已完成：默认只读；finding 不产生 maker 权限；明确本地修复授权必须限定 writable paths 和 changed-path/validation evidence；commit/push/tag/release/deploy 等外部动作仍要求用户明确授权。
+- 四个 package default prompt 各包含唯一独立 `$skill-id`，未调用其他 Stage D Skill；public ID、name 和 display name 未变。
+- SD-05 development draft 在既有唯一 package 中新增 8 个 Stage D target；baseline 均锚定 Stage C commit `868846da54634899141047951b0f4275ad378966`，incoming 与当前 template projection 逐字节一致。
+- SD-06 新增双源四项 validator、11 项 Stage D 定向单测和 18 个 behavior cases；release consistency 保留六类有限 mutation。真实模型未运行，behavior 仍为 `GRADER_UNCERTAIN/not-run`。
+- Maker 状态为 `stage-d-implemented-awaiting-independent-check`；A16 和真实 A22 证据继续 `NEEDS_TEST`，正式 migration、VERSION 与 release metadata 留 Stage E。
+
 ### 修改范围
 
 - `code-review`、`security-review`、`release-check`、`project-suitability`、first-principles 及 Claude review adapters。
@@ -417,3 +440,15 @@ A12-A16 明确属于 Stage D；A17、A21 属于 Stage E；A18 只是最终 relea
 - 删除竞争的 `NEGATED_INIT_PATTERNS` 动作词表。`find_init_action_matches()` 从唯一 `INIT_ACTION_SPECS` 返回 span、family、原始 text；`init_action`、imperative 和局部否定共同消费这些 match。
 - 已初始化主体中的描述性 `initialized` match 从 directive action 中剔除；否定只检查每个实际 directive action 前后局部上下文。C-M03A A+B+C+D 合同和 C-M03B 未修改。
 - 原误报正式 CLI exit 0；对应正向句 exit 1 并返回原句、category 和 feature。状态继续为 `stage-c-implemented-awaiting-independent-check`。
+
+### Stage D independent review：M-D01 / M-D02 修复映射
+
+| Finding | 根因 | 修改文件 | 新增失败路径 | 验收命令 |
+| --- | --- | --- | --- | --- |
+| M-D01 | 四份有限写入合同措辞不一致，validator 将 changed-path evidence 与 validation evidence 作为 OR | 四个 Stage D `SKILL.md`、template projection、Stage D validator/tests、development draft incoming/descriptor、manifest、release mutation | 各 Skill 分别删除任一证据；只保留笼统 evidence；只在 fence/example 出现 | Stage D CLI；18 项定向测试；migration/template/release gates |
+| M-D02 | 既有 regex 只覆盖六条冻结句式，未覆盖 checker 暴露的五个系统性权限/路由类别 | Stage D validator/tests、release mutation | finding 自动授权 repair；普通 backend 强制 security；普通 commit 自动 release；suitability 自动初始化；内部授权允许外部动作 | Stage D CLI；安全 expected-pass guard；release consistency |
+
+- 四项有限写入现统一要求：独立明确授权、非空 explicit writable paths、changed-path evidence、validation evidence，以及不得扩张到其他 finding、路径、项目或外部动作。
+- M-D02 只增加五个有限的数据驱动 category；未构建通用自然语言分析器，未修改 Stage A-C validator。
+- 正式 Stage D failure mutation 共 14 项：原六项、checker 五条原句、M-D01 三项；另有一组五类安全否定 expected-pass guard。所有 mutation 逐字节恢复。
+- Maker 状态继续为 `stage-d-implemented-awaiting-independent-check`；不得据此进入 Stage E。

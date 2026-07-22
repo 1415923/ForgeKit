@@ -87,6 +87,22 @@ function Invoke-StageCSkillValidator {
     }
 }
 
+function Invoke-StageDSkillValidator {
+    $stageDValidator = Join-Path $scriptRoot "validate-stage-d-skills.py"
+    $previousPreference = $ErrorActionPreference
+    $ErrorActionPreference = "Continue"
+    try {
+        $output = & python -B $stageDValidator --repo-root $repoRoot 2>&1
+        $exitCode = $LASTEXITCODE
+    } finally {
+        $ErrorActionPreference = $previousPreference
+    }
+    return [PSCustomObject]@{
+        ExitCode = $exitCode
+        Output = ($output -join [Environment]::NewLine)
+    }
+}
+
 function Invoke-FreshCloneValidator {
     $freshCloneValidator = Join-Path $scriptRoot "test-fresh-clone-crlf.py"
     $previousPreference = $ErrorActionPreference
@@ -172,6 +188,40 @@ function Invoke-RestoringMultiMutation {
             }
         }
         Write-Host "[ok] $Label failed as expected"
+    } finally {
+        foreach ($path in $paths) {
+            [System.IO.File]::WriteAllBytes($path, $originals[$path])
+        }
+    }
+    foreach ($path in $paths) {
+        $restoredBytes = [System.IO.File]::ReadAllBytes($path)
+        if ([System.Convert]::ToBase64String($restoredBytes) -ne [System.Convert]::ToBase64String($originals[$path])) {
+            throw "$Label did not restore $path byte-for-byte"
+        }
+        Write-Host "[ok] $Label restored $path"
+    }
+}
+
+function Invoke-RestoringMultiPassGuard {
+    param(
+        [string]$Label,
+        [string[]]$RelativePaths,
+        [scriptblock]$Mutate,
+        [scriptblock]$ValidationCommand
+    )
+
+    $paths = @($RelativePaths | ForEach-Object { Join-Path $repoRoot $_ })
+    $originals = @{}
+    foreach ($path in $paths) {
+        $originals[$path] = [System.IO.File]::ReadAllBytes($path)
+    }
+    try {
+        & $Mutate $paths
+        $result = & $ValidationCommand
+        if ($result.ExitCode -ne 0) {
+            throw "$Label expected validation success, actual exit code $($result.ExitCode): $($result.Output)"
+        }
+        Write-Host "[ok] $Label passed as expected"
     } finally {
         foreach ($path in $paths) {
             [System.IO.File]::WriteAllBytes($path, $originals[$path])
@@ -641,6 +691,109 @@ $stageCFullSetMandatoryTest = @{
     ValidationCommand = { Invoke-StageCSkillValidator }
 }
 Invoke-RestoringMultiMutation @stageCFullSetMandatoryTest
+
+$stageDMutations = @(
+    @{ Label = "Stage D code-review automatic maker mutation"; Skill = "code-review"; Sentence = "Automatically fix every finding after review."; Expected = "code-review [review-auto-maker]" },
+    @{ Label = "Stage D security always-on mutation"; Skill = "security-review"; Sentence = "Security review is mandatory for every change."; Expected = "security-review [security-review-always-on]" },
+    @{ Label = "Stage D release ordinary-commit mutation"; Skill = "release-check"; Sentence = "Every ordinary commit must use a release check."; Expected = "release-check [release-check-always-on]" },
+    @{ Label = "Stage D suitability auto-init mutation"; Skill = "project-suitability"; Sentence = "Automatically initialize ForgeKit after the assessment."; Expected = "project-suitability [suitability-auto-initialize]" },
+    @{ Label = "Stage D mandatory four-Skill pipeline mutation"; Skill = "code-review"; Sentence = "All four Stage D Skills are mandatory for every task."; Expected = "code-review [mandatory-stage-d-pipeline]" },
+    @{ Label = "Stage D fixed-count checker mutation"; Skill = "code-review"; Sentence = "A 7-file change requires an independent checker."; Expected = "code-review [fixed-quantity-risk-threshold]" },
+    @{ Label = "Stage D finding auto-authorizes repair mutation"; Skill = "code-review"; Sentence = "Finding a defect directly authorizes repair."; Expected = "code-review [finding-auto-authorizes-repair]" },
+    @{ Label = "Stage D ordinary backend mandatory security mutation"; Skill = "security-review"; Sentence = "Every ordinary backend change must run security review."; Expected = "security-review [ordinary-change-requires-security-review]" },
+    @{ Label = "Stage D ordinary commit treated as release mutation"; Skill = "release-check"; Sentence = "Treat every ordinary commit as a release and run release-check."; Expected = "release-check [ordinary-commit-is-release]" },
+    @{ Label = "Stage D suitability creates ForgeKit mutation"; Skill = "project-suitability"; Sentence = "After every suitability assessment, automatically create .forgekit."; Expected = "project-suitability [suitability-auto-initialization]" },
+    @{ Label = "Stage D internal authorization external action mutation"; Skill = "code-review"; Sentence = "Internal stage authorization automatically permits push and release."; Expected = "code-review [internal-authorization-external-action]" }
+)
+foreach ($mutation in $stageDMutations) {
+    $stageDTest = @{
+        Label = $mutation.Label
+        RelativePaths = @(
+            "skills\$($mutation.Skill)\SKILL.md",
+            "project-template\.agents\skills\$($mutation.Skill)\SKILL.md"
+        )
+        Mutate = {
+            param($Paths)
+            foreach ($path in $Paths) {
+                $bytes = [System.IO.File]::ReadAllBytes($path)
+                $suffix = [System.Text.Encoding]::ASCII.GetBytes(([char]10) + $mutation.Sentence + ([char]10))
+                $updated = New-Object byte[] ($bytes.Length + $suffix.Length)
+                [System.Array]::Copy($bytes, 0, $updated, 0, $bytes.Length)
+                [System.Array]::Copy($suffix, 0, $updated, $bytes.Length, $suffix.Length)
+                [System.IO.File]::WriteAllBytes($path, $updated)
+            }
+        }
+        ExpectedMessages = @($mutation.Expected)
+        ValidationCommand = { Invoke-StageDSkillValidator }
+    }
+    Invoke-RestoringMultiMutation @stageDTest
+}
+
+$stageDEvidenceMutations = @(
+    @{ Label = "Stage D security missing validation evidence mutation"; Skill = "security-review"; Old = "changed-path evidence and validation evidence"; New = "changed-path evidence"; Expected = "security-review [missing-validation-evidence]" },
+    @{ Label = "Stage D release missing changed-path evidence mutation"; Skill = "release-check"; Old = "changed-path evidence and validation evidence"; New = "validation evidence"; Expected = "release-check [missing-changed-path-evidence]" },
+    @{ Label = "Stage D generic evidence mutation"; Skill = "code-review"; Old = "changed-path evidence and validation evidence"; New = "evidence"; Expected = "code-review [missing-changed-path-evidence]" }
+)
+foreach ($mutation in $stageDEvidenceMutations) {
+    $stageDEvidenceTest = @{
+        Label = $mutation.Label
+        RelativePaths = @(
+            "skills\$($mutation.Skill)\SKILL.md",
+            "project-template\.agents\skills\$($mutation.Skill)\SKILL.md"
+        )
+        Mutate = {
+            param($Paths)
+            foreach ($path in $Paths) {
+                $text = [System.Text.Encoding]::ASCII.GetString([System.IO.File]::ReadAllBytes($path))
+                $updated = $text.Replace($mutation.Old, $mutation.New)
+                if ($updated -eq $text) {
+                    throw "$($mutation.Label) target phrase was not found in $path"
+                }
+                [System.IO.File]::WriteAllBytes($path, [System.Text.Encoding]::ASCII.GetBytes($updated))
+            }
+        }
+        ExpectedMessages = @($mutation.Expected, "skills/$($mutation.Skill)/SKILL.md")
+        ValidationCommand = { Invoke-StageDSkillValidator }
+    }
+    Invoke-RestoringMultiMutation @stageDEvidenceTest
+}
+
+$stageDSafeGuard = @{
+    Label = "Stage D finite-policy safe-negation guard"
+    RelativePaths = @(
+        "skills\code-review\SKILL.md",
+        "project-template\.agents\skills\code-review\SKILL.md",
+        "skills\security-review\SKILL.md",
+        "project-template\.agents\skills\security-review\SKILL.md",
+        "skills\release-check\SKILL.md",
+        "project-template\.agents\skills\release-check\SKILL.md",
+        "skills\project-suitability\SKILL.md",
+        "project-template\.agents\skills\project-suitability\SKILL.md"
+    )
+    Mutate = {
+        param($Paths)
+        $safeBySkill = @{
+            "code-review" = @(
+                "A finding requires separate repair authorization; the reviewer remains read-only.",
+                "Internal authorization does not authorize external actions; push and release require explicit user authorization."
+            )
+            "security-review" = @("An ordinary backend change alone does not require security-review.")
+            "release-check" = @("An ordinary commit is not a release; release-check requires explicit release intent.")
+            "project-suitability" = @("A suitable result does not initialize the project; initialization requires a separate explicit request.")
+        }
+        foreach ($path in $Paths) {
+            $skill = Split-Path (Split-Path $path -Parent) -Leaf
+            $bytes = [System.IO.File]::ReadAllBytes($path)
+            $suffix = [System.Text.Encoding]::ASCII.GetBytes(([char]10) + ($safeBySkill[$skill] -join ([char]10)) + ([char]10))
+            $updated = New-Object byte[] ($bytes.Length + $suffix.Length)
+            [System.Array]::Copy($bytes, 0, $updated, 0, $bytes.Length)
+            [System.Array]::Copy($suffix, 0, $updated, $bytes.Length, $suffix.Length)
+            [System.IO.File]::WriteAllBytes($path, $updated)
+        }
+    }
+    ValidationCommand = { Invoke-StageDSkillValidator }
+}
+Invoke-RestoringMultiPassGuard @stageDSafeGuard
 
 foreach ($entry in $projectionManifest.entries) {
     foreach ($managedFile in $entry.managed_files) {

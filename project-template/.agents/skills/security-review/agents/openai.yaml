@@ -1,4 +1,6 @@
 interface:
   display_name: "Security Review"
-  short_description: "Review security-sensitive changes"
-  default_prompt: "Review this project or change for secrets, permissions, unsafe input handling, and external-action risks."
+  short_description: "Audit real security boundaries read-only"
+  default_prompt: |-
+    $security-review
+    Review the specified security boundary and report severity, evidence level, impact, and verification gaps without modifying files.

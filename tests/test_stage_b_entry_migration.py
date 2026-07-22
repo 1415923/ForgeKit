@@ -131,6 +131,25 @@ class StageBMigrationIdentityTests(ExplicitTempMixin, unittest.TestCase):
         descriptor_targets = {item["target"] for item in self.descriptor()["actions"]}
         self.assertTrue(set(yaml_targets) <= descriptor_targets)
 
+    def test_all_four_stage_d_packages_use_stage_c_baseline(self):
+        targets = validator.stage_d_skill_targets(REPO)
+        self.assertEqual(8, len(targets))
+        self.assertEqual(4, len([target for target in targets if target.endswith("/agents/openai.yaml")]))
+        descriptor = self.descriptor()
+        actions = {item["target"]: item for item in descriptor["actions"]}
+        for target in targets:
+            self.assertIn(target, actions)
+            self.assertEqual(validator.APPROVED_STAGE_C_COMMIT, actions[target]["baseline_commit"])
+
+    def test_stage_d_baseline_commit_field_is_frozen(self):
+        target = validator.stage_d_skill_targets(REPO)[0]
+        descriptor = self.descriptor()
+        action = next(item for item in descriptor["actions"] if item["target"] == target)
+        action["baseline_commit"] = validator.APPROVED_STAGE_B_COMMIT
+        self.write_descriptor(descriptor)
+        errors = validator.validate_draft(REPO, self.package)
+        self.assertTrue(any(f"{target}: baseline_commit must equal approved Stage C commit" in item for item in errors), errors)
+
     def test_migration_crlf_with_synchronized_checksum_still_fails_lf_contract(self):
         target = next(
             target for target in validator.stage_c_skill_targets(REPO)

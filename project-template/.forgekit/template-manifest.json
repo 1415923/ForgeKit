@@ -553,7 +553,7 @@
       "role": "skill",
       "update_policy": "replace",
       "render_mode": "copy",
-      "checksum": "sha256:95cbe56b82efd53873534932eae39e48e755327cc0994ee3c8da5e7a6e66740d"
+      "checksum": "sha256:fa64b56c56ea05a4c860f8076e21d9fbd1b28aa8eff0e9fce903bf36ffbff00a"
     },
     {
       "source_path": ".agents/skills/handover-review/agents/openai.yaml",
@@ -577,7 +577,7 @@
       "role": "skill",
       "update_policy": "replace",
       "render_mode": "copy",
-      "checksum": "sha256:3c092e9667b4596e5b1574363a2b53879f55c9f623e26642ac77057ff5b3f664"
+      "checksum": "sha256:4ee8e99c7cb743ed35ffe12d796348beba17584cf08ce1b059bf66bfe3192ffa"
     },
     {
       "source_path": ".agents/skills/code-review/SKILL.md",
@@ -585,7 +585,7 @@
       "role": "skill",
       "update_policy": "replace",
       "render_mode": "copy",
-      "checksum": "sha256:b498ab405e5d882f7e49ccbd5da7eec793e541101a512b4d727eca5948bf46f1"
+      "checksum": "sha256:e908b11a98022dee77d840f43e3b5581d14cbc4d6db89dcc4628147dd376b5ee"
     },
     {
       "source_path": ".agents/skills/code-review/agents/openai.yaml",
@@ -593,7 +593,7 @@
       "role": "skill",
       "update_policy": "replace",
       "render_mode": "copy",
-      "checksum": "sha256:87b878a47fa122da0b571bb8b5a4d51533fc14f1eb5fbdbac36c628c823d9558"
+      "checksum": "sha256:0f82980442ec0531073318bb1506688be8b59f509bb4ebaa874fedba85669cd3"
     },
     {
       "source_path": ".agents/skills/project-suitability/SKILL.md",
@@ -601,7 +601,7 @@
       "role": "skill",
       "update_policy": "replace",
       "render_mode": "copy",
-      "checksum": "sha256:662abebca818a5b2e36c169b4921f7fa4c74008f2e298db6bae58453df8be19d"
+      "checksum": "sha256:1086d522559f5b1a1b8f62252aa1544459ce338f46d288efcd2fc2636b37d17c"
     },
     {
       "source_path": ".agents/skills/project-suitability/agents/openai.yaml",
@@ -609,7 +609,7 @@
       "role": "skill",
       "update_policy": "replace",
       "render_mode": "copy",
-      "checksum": "sha256:2d27b13327f9d67631358e7f1df4241d3a3d509da83999da678660aefe000096"
+      "checksum": "sha256:dbc380eb083d7047b9af7ecd5f7818e21026f4b31b8826bf0731635c77635391"
     },
     {
       "source_path": ".agents/skills/security-review/SKILL.md",
@@ -617,7 +617,7 @@
       "role": "skill",
       "update_policy": "replace",
       "render_mode": "copy",
-      "checksum": "sha256:812c3500b5151b70df2da83e83beca7393b4dc984ce13fa6e9458da367c65fb8"
+      "checksum": "sha256:e9188d060320c36b5f7e83c6e643cfadcaf433ac93c49923fc89f3a3f765df41"
     },
     {
       "source_path": ".agents/skills/security-review/agents/openai.yaml",
@@ -625,7 +625,7 @@
       "role": "skill",
       "update_policy": "replace",
       "render_mode": "copy",
-      "checksum": "sha256:fe4d5a9ddc3c47461720509fa2c04b5ecf2e864fa8fb9268bfa55a544de4cc82"
+      "checksum": "sha256:29f6969f4ccead02a98509a34e03df44e3a98d39d07d2e9d82ef791046d5fc28"
     },
     {
       "source_path": ".claude/agents/forgekit-code-reviewer.md",

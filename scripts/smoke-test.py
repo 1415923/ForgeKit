@@ -158,6 +158,7 @@ REQUIRED_REPO_PATHS = [
     "scripts/validate-agent-entries.py",
     "scripts/validate-stage-b-entry-migration.py",
     "scripts/validate-stage-c-skills.py",
+    "scripts/validate-stage-d-skills.py",
     "scripts/test-fresh-clone-crlf.py",
     "scripts/test-skill-behavior.py",
     "scripts/skill_behavior_adapters/codex.py",
@@ -3415,6 +3416,7 @@ def main():
     run([sys.executable, "-B", str(repo / "scripts/validate-agent-entries.py"), "--repo-root", str(repo)], cwd=repo)
     run([sys.executable, "-B", str(repo / "scripts/validate-stage-b-entry-migration.py"), "--repo-root", str(repo)], cwd=repo)
     run([sys.executable, "-B", str(repo / "scripts/validate-stage-c-skills.py"), "--repo-root", str(repo)], cwd=repo)
+    run([sys.executable, "-B", str(repo / "scripts/validate-stage-d-skills.py"), "--repo-root", str(repo)], cwd=repo)
     assert_no_escaped_filenames(repo)
     assert_no_noise_files(repo / "project-template")
     assert_no_forbidden_text(repo, FORBIDDEN_LEGACY_REFS, "Forbidden legacy path text found", LEGACY_REF_ALLOWLIST)
@@ -3544,6 +3546,7 @@ def main():
     run([sys.executable, str(repo / "scripts" / "sync-skill-projections.py"), "check", "--repo-root", str(repo)], cwd=repo)
     run([sys.executable, str(repo / "scripts" / "validate-rule-ownership.py"), "--repo-root", str(repo)], cwd=repo)
     run([sys.executable, str(repo / "scripts" / "validate-stage-c-skills.py"), "--repo-root", str(repo)], cwd=repo)
+    run([sys.executable, str(repo / "scripts" / "validate-stage-d-skills.py"), "--repo-root", str(repo)], cwd=repo)
     run([sys.executable, str(repo / "scripts" / "test-skill-behavior.py"), "validate", "--repo-root", str(repo)], cwd=repo)
     assert_skill_frontmatter(repo / "skills")
     assert_skill_frontmatter(repo / "project-template" / ".agents" / "skills")

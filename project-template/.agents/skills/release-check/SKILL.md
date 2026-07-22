@@ -1,75 +1,49 @@
 ---
 name: release-check
-description: Check release readiness and version-gate compliance for a project. Use when Codex is asked to prepare a release, verify changelog contents, inspect build/test status, review deployment notes, decide whether a project can be tagged, packaged, pushed, deployed, or whether the next major/minor version can start after required review/refactor gates.
+description: Assess release readiness for an explicit release, version bump, migration, packaging, tag, release-candidate, or publication task. Use to verify version and artifact consistency, migrations, manifests, tests, smoke evidence, rollback, and release gates. Do not trigger for an ordinary commit or daily implementation task.
 ---
 
 # Release Check
 
-## Workflow
+## Trigger Boundary
 
-1. Read `governance/version-governance.md`, `governance/quality-metrics.md`, `governance/technical-debt-management.md`, `governance/change-management.md`, `governance/incident-process.md`, `governance/security-governance.md`, `governance/cicd-environment-governance.md`, `governance/code-ownership-review-governance.md`, `governance/project-management-task-model.md`, `.codex/git.md`, `.codex/commands.md`, `.codex/testing.md`, `.codex/security.md`, `.codex/version-gates.md`, the version roadmap in `.forgekit/docs/`, quality metrics in `.forgekit/docs/`, technical debt records in `.forgekit/docs/`, change impact assessment in `.forgekit/docs/`, incident or defect reviews in `.forgekit/docs/`, security threat model and dependency review documents in `.forgekit/docs/`, environment matrix and release pipeline documents in `.forgekit/docs/`, code ownership and project task board documents in `.forgekit/docs/`, deployment docs in `.forgekit/docs/`, and the project changelog or version record in `.forgekit/docs/`.
-2. Inspect `git status` and relevant diffs.
-3. Verify that docs match visible behavior, APIs, database changes, config, and deployment changes.
-4. Check whether the current release is a major feature version or a review/refactor gate version.
-5. If the user wants to start the next major/minor version, verify that the previous review/refactor gate is complete.
-6. For large, cross-module, migration, refactor, or high-risk releases, verify that the AI Engineering Loop and large-change protocol were followed and staged validation is recorded.
-7. Identify required commands from `.codex/commands.md`; do not invent release commands when the project defines them.
-8. Do not commit, tag, push, publish, or deploy unless the user explicitly asks.
+Use this Skill only when the user intends a release, version bump, migration, package, tag, release candidate, publication, or release-readiness decision.
 
-## Checklist
+An ordinary commit, code change, or code review is not a release. Route implementation correctness to `code-review`, an actual security boundary to `security-review`, and ForgeKit adoption fit to `project-suitability`. Do not run all Stage D Skills for every release or project task.
 
-- Version number and branch are clear.
-- Changelog is updated.
-- Tests and build are run or explicitly waived.
-- Security-sensitive changes are reviewed.
-- API, database, config, and deployment docs are updated.
-- Environment matrix, release pipeline, target environment, artifact, and rollback path are clear.
-- Rollback or recovery path is known for risky releases.
-- No secrets, local-only paths, or debug artifacts are included.
-- Required review/refactor gate version is complete before the next major/minor version starts.
-- Repeated code, excessive new files, unclear module boundaries, and documentation drift have been reviewed.
-- Technical debt changes are recorded.
-- Quality metrics are updated.
-- High-impact changes have change impact assessments, validation, and rollback plans.
-- Critical or Unknown ownership areas have owner or reviewer confirmation.
-- Current version tasks, features, and bugs are closed, deferred, blocked, or explicitly dropped.
-- Large changes have exploration report, implementation plan, staged validation, and review notes.
-- Medium/high risk changes have required `.forgekit/changes/<id>/` artifacts for the declared risk level; high risk changes include ship notes.
-- `.forgekit/upgrade-export/**` is ignored for release readiness; it is candidate template comparison material, not current-state docs, active changes, release evidence, or changelog content.
-- SEV-1 / SEV-2 incidents and repeated defects have reviews and action items.
-- S2/S3 security risks are closed or explicitly accepted.
-- New or upgraded dependencies have dependency security review where needed.
-- Production deploys, database migrations, Git tags, image pushes, and package publishes have explicit user approval.
+## Default Mode: Read-Only
 
-## Refuse Unsafe Version Progression
+Release check is a read-only gate by default. Inspect status, relevant diffs, release type, authoritative version fields, artifacts, migrations, manifests, tests, smoke results, required reviews, and rollback evidence. Do not modify release inputs merely because a blocker is found.
 
-If the previous major feature version does not have a completed review/refactor gate, do not approve starting the next major/minor version.
+If the user separately and explicitly authorizes a named local release-metadata repair, hand it to a bounded maker workflow. That bounded maker may change only non-empty explicit writable paths, must record changed-path evidence and validation evidence, and must not expand to another finding, path, project, or external action. That authorization does not permit a version bump, formal migration change, tag, push, publish, release, or deploy unless the user names that action.
 
-Respond with:
+## Progressive Evidence
 
-- which gate is missing
-- what must be reviewed or refactored
-- what documents must be updated
-- that the user must explicitly confirm if they want to skip the gate
+First identify the release type and changed surfaces. Load only evidence relevant to those surfaces:
 
-## Output
+- version and branch consistency
+- template state and manifest or lock identity
+- plugin or marketplace metadata when packaged
+- migration baselines, incoming files, stock/custom/unknown/missing behavior, and rollback when upgraded
+- build, tests, smoke, validation, and independent review required by objective impact
+- changelog, release notes, deployment entry, artifacts, and recovery evidence when applicable
 
-End with:
+Do not require database, deployment, security, ownership, or high-risk change material for a release that does not touch those boundaries. Do not invent commands when the project defines its own.
 
-- Release summary.
-- Pass/fail checklist.
-- Blockers.
-- Risk notes.
-- Technical debt notes.
-- Quality metric notes.
-- Change impact notes.
-- Incident or defect review notes.
-- Security gate notes.
-- CI/CD and environment gate notes.
-- Ownership and review gate notes.
-- Project task state notes.
-- Large-change execution notes.
-- Change workflow notes.
-- Suggested commands.
-- Whether release is ready.
-- Whether the next major/minor version may start.
+## Decision
+
+Return exactly one readiness state:
+
+- `ready`: required deterministic and review evidence is complete for the named release action.
+- `blocked`: a known unmet gate prevents release.
+- `not-verified`: evidence is unavailable or insufficient to decide.
+
+List blockers, evidence gaps, applicable risk, rollback or recovery, required commands, and the exact next authorization. A document that claims a test passed is not a substitute for reproducible evidence.
+
+## Version and Migration Boundary
+
+Keep current version, template version, schema version, and historical version fields separate. Do not mechanically rewrite all version-like values. Do not create or edit a formal migration unless a maker task explicitly authorizes that path and stage.
+
+## External Actions
+
+Never bump `VERSION`, commit, push, tag, publish, release, deploy, run an irreversible migration, or change an external system from a read-only release check. Commit, push, tag, publish, release, deploy, and other external actions each require explicit user authorization.

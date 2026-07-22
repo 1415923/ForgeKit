@@ -1,11 +1,11 @@
 # v0.45.0 验证与验收设计
 
 DesignStatus: design-approved-for-stage-a
-ImplementationStatus: stage-c-implemented-awaiting-independent-check
+ImplementationStatus: stage-d-implemented-awaiting-independent-check
 
 ## 1. 状态说明
 
-本文件冻结 v0.45.0 的验收合同，并记录阶段 A、阶段 B 与阶段 C maker 的确定性实施证据。阶段 A、阶段 B 已通过独立 checker；阶段 C 正等待独立 checker。真实 Codex/Claude 行为合同仍为 `NEEDS_TEST`，不得把静态、dry-run 与确定性门禁通过解释为 A01-A22 全部通过。
+本文件冻结 v0.45.0 的验收合同，并记录阶段 A 至阶段 D maker 的确定性实施证据。阶段 A、阶段 B、阶段 C 已通过独立 checker；阶段 D 正等待独立 checker。真实 Codex/Claude 行为合同仍为 `NEEDS_TEST`，不得把静态、dry-run 与确定性门禁通过解释为 A01-A22 全部通过。
 
 本验收合同应用已经冻结的 DECISION-01、DECISION-02 和 DECISION-03：不把三项决定重新列为选择题，也不以测试结果反向授权阶段 A。
 
@@ -41,6 +41,21 @@ ImplementationStatus: stage-c-implemented-awaiting-independent-check
 - 修改 A01-A22 的合同需返回设计阶段并记录原因。
 - Maker 必须把每个适用 ID 映射到实现和真实入口测试，不得只测 helper。
 - 矩阵外增强默认是 follow-up；真实数据污染、未授权外部动作、错误执行、artifact 覆盖、虚假成功或关键回归仍可阻塞。
+
+### 2.1 Stage D 有限静态验收语料
+
+本语料在 Stage D 实施前冻结。静态 validator 只检查四个 owner 的结构化合同和下列常见语义类别，不继续扩展 Stage C 式开放同义词 fuzz。
+
+| Skill | 正向场景（至少四项） | 负向 / 安全场景（至少四项） |
+| --- | --- | --- |
+| `code-review` | review an implemented diff；review correctness/regression/test evidence；initial independent review；targeted finding recheck | implement a feature；automatically fix findings；require checker for every code change；use file/line count as reviewer trigger |
+| `security-review` | explicit security audit；authentication/authorization；secret or sensitive-data handling；command/path/external-system or supply-chain risk | ordinary style review；backend/config change with no security impact；automatic repair after finding；mandatory security review for every task |
+| `release-check` | release readiness；version bump/package/tag intent；migration/manifest/version consistency；release candidate with test/smoke evidence | ordinary commit；daily implementation；automatic VERSION bump or formal migration edit；tag/push/publish/release/deploy without explicit user authorization |
+| `project-suitability` | assess a new project's fit；assess a governed existing project；recommend constrained/light/no adoption；report insufficient evidence | initialize automatically；create `.forgekit` or entry files；migrate/overwrite existing governance；run all review/init Skills as a mandatory pipeline |
+
+跨 Skill 路由固定为：implemented code/diff→`code-review`；actual security boundary→`security-review`；release/version/migration/package readiness→`release-check`；ForgeKit adoption fit→`project-suitability`。四项可以按真实意图组合，但不默认串行全部执行。
+
+授权语料固定为：纯 review/assessment 默认零写入；明确的 bounded local fix 只能在给定 allowlist 内并记录 changed-path evidence；发现 finding 本身不授权修复；commit/push/tag/release/deploy/生产权限/凭据或其他外部不可逆动作始终要求用户明确授权。
 
 ## 3. 测试类型
 
@@ -681,3 +696,62 @@ C-M01/C-M02/C-M04/C-M05/C-M06/C-M07 保持 CLOSED。当前状态仍为 `stage-c-
 | `git diff --check` | PASS |
 
 当前仍是 maker self-verified；状态保持 `stage-c-implemented-awaiting-independent-check`，等待原 checker 只复核正负词形对称性。
+
+## 24. Stage D maker 验证
+
+### 24.1 四项职责与有限语料
+
+| Owner | 正向路由 | 负向/安全路由 | 写入边界 |
+| --- | --- | --- | --- |
+| `code-review` | 已实现代码/diff、initial review、独立 checker、findings recheck | 不代替 maker，不自动吞并 security/release，不按文件或行数强制 checker | 默认只读；另行授权的 finding 交给 bounded maker，后续 recheck 恢复只读 |
+| `security-review` | 实际 auth/authz、secret、path、command、network、dependency 或供应链边界 | 普通代码/backend/config 本身不触发，不成为所有任务必经 | 只报告 severity/evidence/fix owner，不自动修复或操作外部系统 |
+| `release-check` | release/version/migration/package/tag/RC/readiness | 普通 commit 和日常实现不触发 | 默认只读；无用户明确授权不 bump、tag、push、publish、release 或 deploy |
+| `project-suitability` | ForgeKit 适配性、治理强度、采用成本与约束 | 不初始化、不改造、不串行执行其他 Skills | 默认只读建议；仅可在另行授权时写指定 assessment owner 文档 |
+
+冻结语料每项至少四个正向和四个负向/安全类别，并覆盖跨 Skill 路由、默认只读、有限本地写入和外部动作拒绝。静态 gate 只覆盖这些系统性边界，不扩展为无限英语同义句分析器。
+
+### 24.2 确定性证据
+
+| Gate | Maker result |
+| --- | --- |
+| Stage D dual-source/package/semantic validator | PASS；tasks SD-01..04 与 ownership matrix 四项集合相等 |
+| Stage D directed unittest | PASS；11/11；另有 2 项 migration Stage D identity tests |
+| behavior validate/list/dry-run | PASS；31 cases（新增 Stage D 18）；真实模型 `GRADER_UNCERTAIN/not-run` |
+| projection / manifest | PASS；根/template raw bytes 一致；manifest 18/18 |
+| development migration | PASS；20 targets，其中 Stage D 8；stock/custom/unknown/missing/mixed/rollback |
+| full unittest | PASS；177/177 |
+| Stage A-C regression | PASS；Stage C validator、ownership、entry、migration、behavior、LF contracts 均保持 |
+
+Stage D 仍是 maker self-verified，当前状态仅为 `stage-d-implemented-awaiting-independent-check`。未授权 Stage E。
+
+### 24.3 Smoke、checkout 与 mutation
+
+- 当前 scoped snapshot smoke：PASS；临时提交 `8a584282259da9223e8073dd15b4a5ae936e0228`，排除用户自有 `usage.html` 删除。
+- 完整 fresh-clone gate：临时提交 `4ac816f903ef7402e5d6124e55151c8f95924457`；`core.autocrlf=false` 与 `core.autocrlf=true` 均通过 Stage C、Stage D、migration、projection、template 和 smoke；无 clone 后 tracked-byte overlay。
+- Release consistency：PASS；Stage D 的 automatic-maker、security-always-on、ordinary-commit-release、suitability-auto-init、mandatory-four-Skill-pipeline 和 fixed-count-checker 六项 mutation 均非零并逐字节恢复。
+- `git diff --check`：PASS。
+
+## 25. Stage D M-D01 / M-D02 findings repair verification
+
+### 25.1 有限写入与五类冻结政策
+
+- M-D01：四个 Stage D Skill 的同一合同句分别包含 non-empty explicit writable paths、changed-path evidence、validation evidence 和 no-expansion；validator 以 `missing-changed-path-evidence` 与 `missing-validation-evidence` 两个独立 category 执行 AND gate。笼统 evidence、fenced-only 和 example-only 均不能满足合同。
+- M-D02：checker 五条原始 mutation 均通过正式 CLI exit 1，并输出 Skill、category、权威路径、matched prose 与 feature 名：`finding-auto-authorizes-repair`、`ordinary-change-requires-security-review`、`ordinary-commit-is-release`、`suitability-auto-initialization`、`internal-authorization-external-action`。
+- 五类安全否定 expected-pass；原六类 Stage D mutation 继续失败关闭。Stage C Markdown/policy-prose helper 和 Stage A-C validator 未修改。
+- Behavior 仍为 31 cases；bounded-write case 有非空 allowed paths、write_behavior=true、changed-path 与 validation 证据要求；read-only findings recheck 仍要求 no-write oracle。只运行 validate/dry-run，真实模型保持 `GRADER_UNCERTAIN/not-run`。
+
+### 25.2 确定性结果
+
+| Gate | Result |
+| --- | --- |
+| Stage D directed unittest | PASS；18/18 |
+| Full unittest | PASS；184/184 |
+| Projection / manifest | PASS；root/template raw bytes一致；18/18 |
+| Development migration | PASS；20 targets，Stage D 8；baseline 保持 `868846da54634899141047951b0f4275ad378966`；stock/custom/unknown/missing/mixed/rollback |
+| Behavior | PASS；31 cases validate/dry-run；真实模型 not-run |
+| Plugin / template | PASS |
+| Fresh clone | PASS；临时提交由门禁输出记录；autocrlf=false/true；无 post-clone overlay |
+| Release consistency | PASS；14 项 Stage D failure mutation与安全 guard均按预期，逐字节恢复 |
+| `git diff --check` | PASS |
+
+以上仍是 maker self-verification。状态保持 `stage-d-implemented-awaiting-independent-check`，只等待原 checker 复核 M-D01 与 M-D02。

@@ -75,11 +75,19 @@ function Test-AgentEntryContracts {
     }
     $stageCValidator = Join-Path $repoRoot "scripts\validate-stage-c-skills.py"
     Test-RequiredPath "scripts\validate-stage-c-skills.py"
+    $stageDValidator = Join-Path $repoRoot "scripts\validate-stage-d-skills.py"
+    Test-RequiredPath "scripts\validate-stage-d-skills.py"
     Test-RequiredPath "scripts\test-fresh-clone-crlf.py"
     if (Test-Path -LiteralPath $stageCValidator) {
         $stageCOutput = & python -B $stageCValidator --repo-root $repoRoot 2>&1
         if ($LASTEXITCODE -ne 0) {
             Add-Error "Stage C Skill contract validation failed: $($stageCOutput -join [Environment]::NewLine)"
+        }
+    }
+    if (Test-Path -LiteralPath $stageDValidator) {
+        $stageDOutput = & python -B $stageDValidator --repo-root $repoRoot 2>&1
+        if ($LASTEXITCODE -ne 0) {
+            Add-Error "Stage D Skill contract validation failed: $($stageDOutput -join [Environment]::NewLine)"
         }
     }
 }
@@ -119,6 +127,7 @@ function Test-StageADeterministicContracts {
         @("Skill projection", @((Join-Path $repoRoot "scripts\sync-skill-projections.py"), "check", "--repo-root", $repoRoot)),
         @("Rule ownership", @((Join-Path $repoRoot "scripts\validate-rule-ownership.py"), "--repo-root", $repoRoot)),
         @("Stage C Skill contracts", @((Join-Path $repoRoot "scripts\validate-stage-c-skills.py"), "--repo-root", $repoRoot)),
+        @("Stage D Skill contracts", @((Join-Path $repoRoot "scripts\validate-stage-d-skills.py"), "--repo-root", $repoRoot)),
         @("Skill behavior cases", @((Join-Path $repoRoot "scripts\test-skill-behavior.py"), "validate", "--repo-root", $repoRoot))
     )
     foreach ($check in $checks) {
@@ -790,8 +799,8 @@ function Test-LargeChangeProtocol {
     Test-RequiredPath (Get-ExplorationReportPath)
     Test-RequiredPath (Get-ImplementationPlanPath)
     Test-RequiredPattern "project-template\.agents\skills\large-change-planning\SKILL.md" "## Impact Branch" "Impact-based large-change gate"
-    Test-RequiredPattern "project-template\.agents\skills\code-review\SKILL.md" "large-change protocol" "Code review large-change gate"
-    Test-RequiredPattern "project-template\.agents\skills\release-check\SKILL.md" "large-change protocol" "Release check large-change gate"
+    Test-RequiredPattern "project-template\.agents\skills\code-review\SKILL.md" "objective impact" "Code review impact-based checker gate"
+    Test-RequiredPattern "project-template\.agents\skills\release-check\SKILL.md" "Progressive Evidence" "Release check progressive evidence gate"
     Test-RequiredPattern "usage.html" "data-prompt=""large""" "HTML large-change tab"
 
     $largeChangeFiles = @(
@@ -878,7 +887,7 @@ function Test-AgentSuitability {
     Test-RequiredPattern "project-template\governance\agent-suitability.md" "Suitable" "Suitability outcomes"
     Test-RequiredPattern "project-template\governance\agent-suitability.md" "Conditional" "Conditional suitability outcome"
     Test-RequiredPattern "project-template\governance\agent-suitability.md" "Custom" "Custom suitability outcome"
-    Test-RequiredPattern "project-template\.agents\skills\project-suitability\SKILL.md" "Suitable, Conditional, or Custom" "Project suitability skill outcome"
+    Test-RequiredPattern "project-template\.agents\skills\project-suitability\SKILL.md" "suitable-with-constraints" "Project suitability constrained outcome"
     Test-RequiredPattern "project-template\AGENTS.md" "project-suitability" "AGENTS suitability skill routing"
     Test-RequiredPattern "project-template\CLAUDE.md" "project-suitability" "CLAUDE suitability skill routing"
     Test-RequiredPattern "usage.html" "suitabilityList" "HTML suitability checklist"
@@ -1153,7 +1162,7 @@ function Test-PluginDistribution {
     Test-RequiredPattern "skills\handover-review\SKILL.md" "Handover review is read-only by default" "Root handover read-only gate"
     Test-RequiredPattern "skills\handover-review\SKILL.md" "Current code, configuration, and files" "Root handover evidence priority"
     Test-RequiredPattern "skills\document-backfill\SKILL.md" "Choose a reviewable batch based on shared fact domain" "Root document backfill proportional batching"
-    Test-RequiredPattern "skills\project-suitability\SKILL.md" "Suitable, Conditional, or Custom" "Root project suitability outcome"
+    Test-RequiredPattern "skills\project-suitability\SKILL.md" "suitable-with-constraints" "Root project suitability constrained outcome"
     Test-RequiredPattern "skills\large-change-planning\SKILL.md" "## Planning Contract" "Root large-change planning output"
 
     $pluginValidatorPath = Join-Path $repoRoot "scripts\validate-plugin-assets.ps1"

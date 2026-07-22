@@ -154,6 +154,7 @@ def verify_clone(clone, mode, full, temp_root):
         }
     commands = [
         ("stage_c", [sys.executable, "-B", "scripts/validate-stage-c-skills.py"]),
+        ("stage_d", [sys.executable, "-B", "scripts/validate-stage-d-skills.py"]),
         ("migration", [sys.executable, "-B", "scripts/validate-stage-b-entry-migration.py"]),
         ("projection", [sys.executable, "-B", "scripts/sync-skill-projections.py", "check"]),
         ("template", [shutil.which("pwsh") or "powershell", "-NoProfile", "-ExecutionPolicy", "Bypass", "-File", ".\\scripts\\validate-template.ps1"]),

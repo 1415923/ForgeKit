@@ -1,12 +1,12 @@
 # v0.45.0 发布 / 交接设计
 
-Status: stage-c-implemented-awaiting-independent-check
+Status: stage-d-implemented-awaiting-independent-check
 DesignStatus: design-approved-for-stage-a
-AuthorizedStage: stage-c
+AuthorizedStage: stage-d
 
 ## 发布 / 交接步骤
 
-当前不得发布。阶段 A、阶段 B 已通过独立 checker；阶段 C maker 已完成实施和确定性自验，等待独立 checker；阶段 D-E 未进入。后续交接条件为：
+当前不得发布。阶段 A、阶段 B、阶段 C 已通过独立 checker；阶段 D maker 已完成实施和确定性自验，等待独立 checker；阶段 E 未进入。后续交接条件为：
 
 1. DECISION-01 至 DECISION-03 已冻结，不再作为未决项退回。
 2. M-01、M-03、A21 保持上一轮已关闭；`review.md` 的两次 blocker-recheck 已关闭 M-02、M-04，设计状态为 `design-approved-for-stage-a`。
@@ -155,3 +155,23 @@ C-M03A 最后一个 maker bug 已定向修复。初始化动作现在只由 `fin
 原误报 `An already initialized project must not be bootstrapped again.` 正式 CLI exit 0；对应正向句 exit 1 并返回正确 Skill/category/matched prose/features。bootstrap、bootstrapped、bootstrapping、set-up、split set-up、initialized、reinitialize 七组正负对称测试通过。Release expected-pass guard 先验证安全句通过，再验证正向句失败，三份受管文件逐字节恢复。
 
 Stage C 29/29、全量 164/164、template、manifest 18/18、behavior、migration、LF/CRLF fresh clone 与 release consistency 全部 PASS。当前只等待原 checker 复核正负词形对称性；状态继续为 `stage-c-implemented-awaiting-independent-check`。VERSION 仍为 `0.44.1`，未进入 Stage D/E，未执行真实模型 prompt，未建立正式 migration，未 commit、push、tag、release 或 deploy。
+
+### Stage D maker 交接
+
+Stage D 仅收敛 `code-review`、`security-review`、`release-check` 和 `project-suitability`。四项均默认只读；review finding 不自动授权 maker；有限本地修复必须由独立授权限定 writable paths 和证据；commit、push、tag、publish、release、deploy 等外部动作必须由用户明确授权。四项按实际意图和风险选择，不构成 mandatory pipeline。
+
+四个 package prompt 各含唯一独立公开 `$skill-id`，未改变 ID/name/display name。根级与 template 八个受管文件逐字节同步，template manifest 继续覆盖 18/18 projection targets。唯一 development draft 新增八个 Stage D target，baseline 锚定 `868846da54634899141047951b0f4275ad378966`，incoming 锚定当前 template，stock/custom/unknown/missing/rollback 合同保持。
+
+Stage D 双源 validator、11 项定向单测、2 项 migration identity test 与新增 18 个 behavior cases 已落地；31 个 behavior case 只执行 validate/list/dry-run，真实模型结果保持 `GRADER_UNCERTAIN/not-run`。当前仅等待独立 checker；状态为 `stage-d-implemented-awaiting-independent-check`，不是 Stage D approved。VERSION 保持 `0.44.1`；未进入 Stage E，未建立正式 migration，未 commit、push、tag、release 或 deploy。
+
+当前 scoped snapshot smoke 及 autocrlf=false/true 两路 fresh-clone full smoke 均 PASS；最终 fresh-clone 临时提交为 `4ac816f903ef7402e5d6124e55151c8f95924457`，clone 后未覆盖 tracked bytes。Release consistency 的六项 Stage D mutation 与既有 Stage A-C mutation 全部按预期失败并逐字节恢复；全量 unittest 177/177。
+
+### Stage D M-D01 / M-D02 maker 修复交接
+
+M-D01 与 M-D02 已完成限定 maker 修复。四个 Stage D Skill 的有限写入合同现同时要求独立明确授权、非空 writable paths、changed-path evidence、validation evidence 和 no-expansion；security-review 补齐 validation evidence，release-check 补齐 changed-path evidence。validator 不再以 OR 接受任一证据。
+
+Stage D validator 只新增五个冻结 policy category：finding 自动授权 repair、普通 backend/config/code change 强制 security-review、普通 commit 自动 release、suitability 自动初始化、内部授权允许外部动作。checker 五条原句均由真实 CLI 非零拒绝并定位；对应安全否定全部通过。正式 release consistency 现有 14 项 Stage D failure mutation与一组安全 guard，全部逐字节恢复。
+
+Projection raw bytes一致，manifest 保持18/18。唯一 development draft 仍有20个 target，其中 Stage D 8个；baseline未改，四份 Skill incoming 与 descriptor checksum已同步。定向18/18、全量184/184、behavior 31 cases、plugin/template、migration、autocrlf=false/true fresh clone和release consistency均PASS；fresh-clone临时提交由门禁输出记录，无post-clone overlay。
+
+当前状态继续为 `stage-d-implemented-awaiting-independent-check`，只等待原 checker 复核 M-D01 与 M-D02。VERSION仍为0.44.1；未进入Stage E，未执行真实模型prompt，未建立正式migration，未commit、push、tag、publish、release或deploy。

@@ -11,6 +11,7 @@ from pathlib import Path
 
 APPROVED_STAGE_A_COMMIT = "506cecf8d377a17a2616bf3b9eeea483ee4039a4"
 APPROVED_STAGE_B_COMMIT = "d02b496971db3773ac0c1435a423198189d6d8d8"
+APPROVED_STAGE_C_COMMIT = "868846da54634899141047951b0f4275ad378966"
 DRAFT_RELATIVE = Path(
     ".forgekit/changes/v045-rule-ownership-skill-convergence/"
     "stage-b-migration-draft/0.45.0"
@@ -79,8 +80,25 @@ def stage_c_skill_targets(repo_root):
     return tuple(targets)
 
 
+def stage_d_skill_targets(repo_root):
+    import importlib.util
+
+    path = Path(repo_root) / "scripts/validate-stage-d-skills.py"
+    spec = importlib.util.spec_from_file_location("stage_b_stage_d_contract", path)
+    if spec is None or spec.loader is None:
+        raise RuntimeError(f"cannot load Stage D validator: {path}")
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    targets = []
+    for row in module.stage_d_rows(Path(repo_root)):
+        prefix = f".agents/skills/{row['skill']}"
+        targets.append(f"{prefix}/SKILL.md")
+        targets.append(f"{prefix}/agents/openai.yaml")
+    return tuple(targets)
+
+
 def managed_targets(repo_root):
-    return ENTRY_NAMES + stage_c_skill_targets(repo_root)
+    return ENTRY_NAMES + stage_c_skill_targets(repo_root) + stage_d_skill_targets(repo_root)
 
 
 def validate_draft(repo_root, package_root=None):
@@ -116,11 +134,11 @@ def validate_draft(repo_root, package_root=None):
     actions = descriptor.get("actions")
     expected_targets = managed_targets(repo_root)
     if not isinstance(actions, list) or len(actions) != len(expected_targets):
-        errors.append(f"Stage B/C migration draft must contain exactly {len(expected_targets)} managed actions")
+        errors.append(f"Stage B/C/D migration draft must contain exactly {len(expected_targets)} managed actions")
         return errors
     by_target = {action.get("target"): action for action in actions if isinstance(action, dict)}
     if set(by_target) != set(expected_targets):
-        errors.append("Stage B/C migration draft targets must equal the entries plus dual-source-derived Stage C package files")
+        errors.append("Stage B/C/D migration draft targets must equal entries plus dual-source-derived Stage C and Stage D package files")
         return errors
 
     for target, action in by_target.items():
@@ -137,9 +155,15 @@ def validate_draft(repo_root, package_root=None):
         if not source.is_file() or not baseline.is_file():
             errors.append(f"{target}: source or baseline fixture is missing")
             continue
-        baseline_commit = APPROVED_STAGE_A_COMMIT if target in ENTRY_NAMES else APPROVED_STAGE_B_COMMIT
+        if target in ENTRY_NAMES:
+            baseline_commit = APPROVED_STAGE_A_COMMIT
+        elif target in stage_c_skill_targets(repo_root):
+            baseline_commit = APPROVED_STAGE_B_COMMIT
+        else:
+            baseline_commit = APPROVED_STAGE_C_COMMIT
         if target not in ENTRY_NAMES and action.get("baseline_commit") != baseline_commit:
-            errors.append(f"{target}: baseline_commit must equal approved Stage B commit {baseline_commit}")
+            stage_label = "Stage B" if baseline_commit == APPROVED_STAGE_B_COMMIT else "Stage C"
+            errors.append(f"{target}: baseline_commit must equal approved {stage_label} commit {baseline_commit}")
         try:
             git_bytes = git_blob_at(repo_root, baseline_commit, Path("project-template") / target)
         except RuntimeError as exc:
