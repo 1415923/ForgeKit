@@ -2,59 +2,32 @@
 
 中文文档: [README.md](README.md)
 
-ForgeKit is a lightweight AI engineering delivery toolkit for keeping Codex, Claude Code, and adjacent coding agents inside a **reviewable, verifiable, and handoff-friendly** project workflow.
+ForgeKit is a **local project-governance scaffold** for AI coding tools such as Codex and Claude Code.
 
-It does not generate business framework code or deploy your system. ForgeKit adds a local AI delivery workspace to a project so agents know the project boundary, work sources, verification path, risks, handoff state, and when to stop for user confirmation.
-
----
-
-## One-line summary
+It does not generate your business framework, deploy your system, or operate Git on your behalf. Instead, it puts project boundaries, task sources, current state, verification evidence, risks, and handoff rules inside the repository so an AI agent can work in a **reviewable, verifiable, and recoverable** process.
 
 ```text
-ForgeKit = local delivery rules, docs, and checks for AI coding tools.
+ForgeKit = project entry + on-demand Skills + current project facts + safe checks and migrations
 ```
 
-It helps answer:
+## What it solves
 
-```text
-Where may the agent edit?
-Where did this task come from?
-What is the current status?
-How was it verified?
-What risks remain?
-When should docs be updated?
-How does the next session / reviewer / teammate resume?
-```
+AI coding usually fails because context and authority drift, not because the model cannot write code:
 
----
+- the agent edits the wrong directory or crosses a project boundary;
+- task sources, previous decisions, and unfinished work are forgotten;
+- implementation is claimed complete without reliable verification;
+- context compaction, tool switching, or handoff breaks continuity;
+- review, repair, commit, push, and release permissions get mixed together;
+- upgrades overwrite project-specific customization.
 
-## When to use ForgeKit
+ForgeKit anchors those facts in local files and checks. It is a workflow scaffold, not an agent runtime or background automation platform.
 
-| Scenario | What ForgeKit helps with |
-| --- | --- |
-| New project startup | Clarify goals, boundaries, stack choices, and validation paths before coding |
-| Existing project adoption | Inspect README files, scripts, build files, and old docs before guessing the stack |
-| Medium / high-risk changes | Require proposal, tasks, verification, and review; add design / ship when needed |
-| Long AI sessions | Checkpoint at phase boundaries, before compact, and before switching sessions |
-| Multiple AI tools | Let Codex and Claude Code share the same project facts and delivery rules |
-| Multi-repo workspaces | Separate workspace, project, repo, artifact, and archive boundaries |
-| Delivery handoff | Produce handoff, archive capsule, and review-ready summaries |
+## Quick start
 
-Not a fit for:
+### 1. Initialize or sync a target project
 
-| Not for | Why |
-| --- | --- |
-| Business framework scaffolding | ForgeKit does not generate Spring / React / FastAPI business templates |
-| Deployment platform | It does not install dependencies, start services, deploy, or release |
-| Background automation | It does not provide runners, daemons, or schedulers |
-| Automatic Git operations | It does not auto commit, tag, push, or create PRs |
-| External account integration | It does not enable GitHub issues, MCP, memory, or cloud accounts by default |
-
----
-
-## 3-minute quick start
-
-### 1. Initialize or sync a target project from the ForgeKit repo
+Run from the ForgeKit repository.
 
 Windows PowerShell:
 
@@ -68,31 +41,21 @@ macOS / Linux:
 python3 ./scripts/forgekit-project.py --target "/path/to/project"
 ```
 
-The unified entry detects:
+The unified entry inspects the target before choosing an action:
 
 | Target state | ForgeKit behavior |
 | --- | --- |
-| Not installed | Shows an initialization plan |
-| Already current | Prints up-to-date |
-| Older supported version | Runs check + plan first; applies only after confirmation |
-| Toolkit too old | Stops and asks you to update the outer ForgeKit |
-| Legacy project | Gives adoption guidance; does not force an upgrade |
+| ForgeKit is not installed | Show an initialization plan |
+| Already current | Report `up-to-date` |
+| Supported older version | Show checks and an upgrade plan before applying |
+| Outer ForgeKit is too old | Stop and ask you to update ForgeKit first |
+| Legacy or unsafe-to-migrate project | Treat it as existing-project adoption instead of forcing an upgrade |
 
-It does not write by default. Safe writes require interactive confirmation or explicit `--yes`.
+ForgeKit is plan-first. Safe writes require interactive confirmation or explicit `--yes`.
 
-Only projects initialized at v0.36.0 or later with `.forgekit/state.json` support safe migrations. Treat v0.35.x and earlier projects as existing-project adoption; do not auto-upgrade them.
+Formal safe migrations are supported for projects initialized with v0.36.0 or later and containing `.forgekit/state.json`. Earlier projects should start with a read-only handover review.
 
-To generate reviewable Claude Code / Codex agent configuration during first initialization, use the lower-level advanced entry:
-
-```powershell
-powershell -ExecutionPolicy Bypass -File .\scripts\init-project-template.ps1 -TargetPath "D:\path\to\workspace" -ProjectName "my-app" -Mode Standard -NativeAgentAdapter all
-```
-
-This option only generates configuration; it does not prove runtime agent registration.
-
----
-
-### 2. Start your AI tool from the project root
+### 2. Start the AI tool from the project root
 
 Codex:
 
@@ -108,116 +71,97 @@ cd D:\path\to\project
 claude
 ```
 
----
-
-### 3. Send the startup prompt
+### 3. Recover project context before editing
 
 Codex:
 
 ```text
-Read AGENTS.md, prefer the project-local .agents/skills/project-init/SKILL.md, and follow the ForgeKit workflow. First tell me the project boundary, current task, risks, and suggested next step. Do not edit files yet.
+Read AGENTS.md and follow the project-local ForgeKit rules. First summarize the project boundary, current task, available evidence, risks, and recommended next step. Do not edit files yet.
 ```
 
 Claude Code:
 
 ```text
-Read CLAUDE.md and follow the ForgeKit workflow. First tell me the project boundary, current task, risks, and suggested next step. Do not edit files yet.
+Read CLAUDE.md and follow the project-local ForgeKit rules. First summarize the project boundary, current task, available evidence, risks, and recommended next step. Do not edit files yet.
 ```
 
----
+## How v0.45.0 works
 
-## Copyable prompts for common situations
+v0.45.0 separates always-on boundaries from conditional workflows:
 
-Detailed variants live in the generated project at:
+- `AGENTS.md` / `CLAUDE.md` keep only always-on boundaries, authorization, and routing rules;
+- root `skills/` is the semantic authority for nine shared Skills;
+- generated `.agents/skills/` is synchronized deterministically;
+- `.claude/skills/` remains a Claude-specific adapter, not a mechanical copy.
+
+### Nine on-demand Skills
+
+| Skill | Use it for |
+| --- | --- |
+| `project-init` | Initialize a new project that does not use ForgeKit yet |
+| `project-bootstrap-fill` | Fill evidence-backed placeholders in an initialized project |
+| `handover-review` | Inspect an existing project read-only before deciding what to change |
+| `document-backfill` | Backfill factual documentation from implementation and evidence |
+| `large-change-planning` | Freeze scope, authorization, acceptance, non-goals, and rollback for high-impact work |
+| `code-review` | Review existing implementation, diff, tests, and evidence read-only |
+| `security-review` | Review a real security surface without turning every code change into a security review |
+| `release-check` | Inspect an explicit release candidate without treating every commit as a release |
+| `project-suitability` | Assess whether ForgeKit fits a project without initializing it automatically |
+
+These Skills are not a mandatory pipeline. Invoke only what the task and its actual impact require.
+
+Review, assessment, and planning are read-only by default. A finding does not grant repair permission. Local writes, commit, push, tag, publish, release, and deploy require separate authorization.
+
+Risk follows impact, not file or line counts. Consider:
+
+- trust-boundary changes;
+- external or irreversible actions;
+- data, permission, or public-interface impact;
+- rollback difficulty;
+- evidence uncertainty.
+
+## Common prompts
+
+More examples are available in the generated project:
 
 ```text
 .forgekit/docs/usage-playbook.md
 ```
 
-Use these short prompts for daily work.
+Useful short prompts:
 
-| Goal | Prompt to send to Claude / Codex |
+| Goal | Copyable prompt |
 | --- | --- |
-| Initialize a new project | `Use the ForgeKitRoot unified entry to initialize <project-root>. Show the plan first; do not commit automatically.` |
-| Adopt an existing project | `Inspect <project-root> read-only and propose an existing-project adoption plan before changes.` |
-| Upgrade ForgeKit in a project | `The outer ForgeKit is updated. Run check and plan for <project-root>; do not apply without confirmation.` |
-| Start today’s work | `Use the workflow router to read current tasks, recent progress, risks, and verification entry points; give me today’s next step.` |
-| Execute a task | `Execute <Task ID>. Confirm scope and verification first, then make a minimal checkpoint.` |
-| Save current progress | `Write back only confirmed status, verification, risks, and next steps to their responsible docs.` |
-| Before compact / clear | `Create a pre-compact checkpoint and list the files the next session should read first.` |
-| Recover after compact | `A compact / session switch just happened. Read current docs to recover the current goal, latest conclusions, risks, verification, and next step. Do not edit files.` |
-| Before commit | `Check diff, verification, independent review, risks, and minimal writeback. Do not commit automatically.` |
-| End a phase / archive | `Check current docs integrity, then generate an Archive Capsule plan. Do not apply yet.` |
-| Generate handoff | `Generate a review-ready handoff; mark missing evidence TODO_REVIEW and do not invent facts.` |
-| Multi-project read-only analysis | `Analyze only mapped project/repo scopes; do not enable the map or create capsules.` |
-| Before enabling multi-project map | `Run workspace integrity checks and provide adoption guidance only.` |
-| Create Project Capsule | `Create a minimal Project Capsule for <project-id>. First confirm the project is project-capsule in workspace-map, then run bootstrap plan. Do not apply yet.` |
-| First-principles analysis | `Analyze this from first principles: separate facts, assumptions, constraints, and the smallest correct mechanism.` |
-| Adversarial review | `Run an adversarial review and focus on failure paths, edge cases, and verification gaps.` |
+| Start today’s work | `Read the current task, recent progress, risks, and verification entry points. Recommend the next step before editing files.` |
+| Adopt an existing project | `Use $handover-review to inspect <project-root> read-only. Report boundaries, current state, risks, and adoption advice without initializing or repairing automatically.` |
+| Fill an initialized project | `Explicitly invoke $project-bootstrap-fill. Fill only evidence-backed placeholders and preserve customization.` |
+| Backfill factual docs | `Explicitly invoke $document-backfill and make the smallest evidence-backed update from implementation and verification evidence.` |
+| Plan a high-impact change | `Explicitly invoke $large-change-planning and freeze scope, authorization, acceptance, non-goals, and rollback.` |
+| Review code | `Use $code-review to inspect the current diff, tests, and evidence read-only. Do not auto-fix.` |
+| Review security | `Use $security-review for the explicit security surface. Report evidence, risk, and repair ownership without auto-fixing.` |
+| Check a release candidate | `Use $release-check to inspect versions, migrations, artifacts, and gates. Do not publish.` |
+| Assess suitability | `Use $project-suitability to assess ForgeKit fit read-only. Do not initialize automatically.` |
+| Save progress | `Write back only confirmed status, verification, risks, and next steps to the responsible documents.` |
+| Before compaction or handoff | `Create a minimal checkpoint and list the files the next session should read first.` |
+| Before commit | `Check the diff, verification, independent review, risks, and required writeback. Do not commit automatically.` |
 
----
+## Upgrade an existing project
 
-## When to update ForgeKit docs
-
-Since v0.42, doc writeback is event-triggered, not “write after every edit”.
-
-| Level | Write ForgeKit managed docs? | Typical cases |
-| --- | --- | --- |
-| Micro Update | No | typo, small parameter change, temporary experiment, one failed command, unconfirmed exploration |
-| Checkpoint Update | Minimal writeback | small closed loop, task status change, root cause confirmed, new risk, useful verification, before interruption / session switch |
-| Ship Update | Closure writeback | commit, tag, handoff, archive, release preparation |
-
-Writeback targets:
-
-| Information | Target |
-| --- | --- |
-| Progress and next step | `.forgekit/docs/work-log.md` |
-| Task status change | `.forgekit/docs/task-board.md` |
-| Verification result and gap | `.forgekit/docs/testing.md` |
-| Risk or blocker | `.forgekit/docs/risk-register.md` |
-| User-visible / version-visible change | `CHANGELOG.md` |
-| Source fact change | `task-intake.md` or project `source-links.md` |
-
-Important:
-
-```text
-Micro Update only skips ForgeKit governance-doc writeback.
-It does not prohibit authorized edits to business code, business README files, comments, tests, or configuration.
-```
-
-Before predictable compact, clear, or session switch, run a pre-compact checkpoint.
-After unexpected auto compact, start with a post-compact recovery check.
-
----
-
-## Common commands
-
-### Upgrade / sync ForgeKit in a project
+Most users should continue using the unified entry:
 
 Windows:
 
 ```powershell
 python .\scripts\forgekit-project.py --target "D:\path\to\project"
-powershell -ExecutionPolicy Bypass -File .\scripts\forgekit-project.ps1 --target "D:\path\to\project"
 ```
 
 macOS / Linux:
 
 ```bash
 python3 ./scripts/forgekit-project.py --target "/path/to/project"
-bash ./scripts/forgekit-project.sh --target "/path/to/project"
 ```
 
-### After an upgrade
-
-After the upgrade completes, the project can be used normally.
-If the current AI session was opened before the upgrade, start a new session or ask the agent to reload the project entry docs before continuing, so it does not keep following pre-upgrade rules.
-
-Copyable prompt:
-
-> ForgeKit has been upgraded. Reload the current project context using the latest ForgeKit rules. Re-read the project entry docs and the current task-related docs. Do not change files yet. After the refresh, summarize the current project state and suggested next step.
-
-### Lower-level upgrade commands
+For migration troubleshooting, use the lower-level commands:
 
 ```bash
 python scripts/forgekit-upgrade.py check --repo-root <project>
@@ -228,169 +172,126 @@ python scripts/forgekit-upgrade.py apply --safe --repo-root <project>
 | Command | Purpose |
 | --- | --- |
 | `check` | Check version and migration eligibility without writing |
-| `plan` | Print a migration plan without writing |
-| `apply --safe` | Run only migration actions explicitly marked safe |
+| `plan` | Print the migration plan without writing |
+| `apply --safe` | Execute only migration actions marked safe |
 
-### Create a minimal Project Capsule
+### Upgrade from v0.44.1 to v0.45.0
 
-When one project needs its own local tasks, tests, risks, and decisions over time, first set it to `project-capsule` in `.forgekit/workspace-map.json`, then run:
+The formal migration classifies every managed target:
+
+| State | Behavior |
+| --- | --- |
+| `stock` | Matches the previous baseline and can be updated safely |
+| `custom` | Locally modified; preserve it and require manual merge |
+| `unknown` | Cannot be identified reliably; do not overwrite |
+| `missing` | Handle according to the action contract |
+| rollback | Restore the state from the beginning of this upgrade |
+
+After upgrading, start a new AI session or ask the current session to reload the entry and current-task documents before continuing.
+
+## Multi-project workspaces
+
+Multi-project support is optional. ForgeKit does not enable it or split existing documentation automatically.
+
+| Layer | Purpose |
+| --- | --- |
+| Workspace Docs | Cross-project tasks, integration state, and overall risks |
+| Project Capsule | Local tasks, tests, and risks for one long-running subproject |
+| Repo | Business code; not a third task-fact source |
+| Artifact | Reports, logs, build outputs, and test evidence |
+| Archive | Historical material; not current truth |
+
+A common adoption path is:
+
+```text
+Register a project as workspace-only first.
+Move only long-running independent projects to project-capsule.
+```
+
+Create a minimal Project Capsule:
 
 ```powershell
 python .\scripts\bootstrap-project-capsule.py plan --repo-root "D:\path\to\workspace" --project backend
 python .\scripts\bootstrap-project-capsule.py apply --repo-root "D:\path\to\workspace" --project backend --confirm
 ```
 
-This only creates the minimal Project Capsule. It does not split existing workspace docs, migrate tasks, or generate repo-local entries.
+This does not split workspace docs, migrate tasks, or move business repositories.
 
-### Check current docs integrity
-
-Windows:
-
-```powershell
-python .\scripts\check-current-docs-integrity.py --repo-root "D:\path\to\project"
-```
-
-macOS / Linux:
-
-```bash
-python3 ./scripts/check-current-docs-integrity.py --repo-root "/path/to/project"
-```
-
-### Check multi-project workspace integrity
-
-Windows:
-
-```powershell
-python .\scripts\check-workspace-integrity.py --repo-root "D:\path\to\workspace"
-```
-
-macOS / Linux:
-
-```bash
-python3 ./scripts/check-workspace-integrity.py --repo-root "/path/to/workspace"
-```
-
----
-
-## Generated content overview
+## Generated content
 
 | Path | Purpose |
 | --- | --- |
 | `AGENTS.md` | Codex project entry |
 | `CLAUDE.md` | Claude Code project entry |
-| `.agents/skills/` | Self-contained project skills |
-| `.codex/` | Codex rules, commands, and optional agent config |
-| `.forgekit/state.json` | ForgeKit project version and feature state |
+| `.agents/skills/` | Project-local on-demand Skills |
+| `.codex/` | Codex rules, commands, and optional configuration |
+| `.forgekit/state.json` | Current ForgeKit version and feature state |
 | `.forgekit/project-boundary.yml` | Project boundary and write policy |
-| `.forgekit/workspace-map.json` | Machine-readable multi-project workspace map, disabled by default |
-| `.forgekit/docs/` | Current project facts, tasks, verification, risks, handoff, and local toolchain docs |
-| `.forgekit/projects/_template/` | Minimal Project Capsule template |
-| `.forgekit/changes/` | Proposal / design / tasks / verification / review artifacts |
-| `.forgekit/archive/` | Historical evidence and archive capsules |
-| `scripts/` | Initialization, upgrade, check, and archive scripts |
+| `.forgekit/workspace-map.json` | Optional multi-project boundary map |
+| `.forgekit/docs/` | Current tasks, sources, verification, risks, handoff, and toolchain facts |
+| `.forgekit/projects/` | Optional Project Capsules |
+| `.forgekit/changes/` | Proposals, tasks, verification, and review for medium/high-impact changes |
+| `.forgekit/archive/` | Searchable historical evidence |
+| `scripts/` | Initialization, upgrade, integrity-check, and archive tools |
 
-Existing business `docs/` is read-mostly evidence by default. AI may read and cite it, but should not write ForgeKit governance templates there by default.
+Existing business `docs/` is treated as read-mostly evidence by default. ForgeKit does not place governance templates there automatically.
 
----
+## When to write back documentation
 
-## Core capabilities
+Writeback is event-triggered, not “after every edit”.
 
-| Capability | Problem solved |
+| Situation | Recommendation |
 | --- | --- |
-| Boundary-first workspace | Prevents agents from confusing ForgeKitRoot, ProjectRoot, business repo, and artifact paths |
-| Source-first task intake | Records work sources before creating executable tasks |
-| Risk-based change artifacts | Scales proposal / tasks / verification / review / design / ship by risk |
-| Managed docs responsibility | Defines which docs own which facts and reduces duplicate writeback |
-| Work session checkpoint | Avoids both over-writing docs and losing daily progress |
-| Context Continuity Protocol | Preserves critical facts before compact, handoff, or session switch |
-| Active current docs integrity | Prevents archive from breaking active task continuity |
-| Project maintenance operations | Routes init, upgrade, archive, handoff, and reports through plan-first flows |
-| Native Agent Adapter | Optionally generates Claude Code / Codex agent config; runtime registration and invocation still require verification |
-| Independent Code Review Protocol | Separates maker from read-only reviewer |
-| First-principles pass | Derives the smallest correct mechanism from facts, assumptions, and constraints |
-| Adversarial review | Looks for failure paths before high-risk closure |
-| Multi-project scoped docs | Separates workspace, project, repo, artifact, and archive boundaries |
-| Safe migration | Uses plan-first safe upgrades without overwriting user content |
+| Typo, temporary experiment, unconfirmed exploration | Do not update ForgeKit governance docs |
+| Task-state change, confirmed root cause, new risk, useful verification | Create a minimal checkpoint |
+| Commit, handoff, archive, release preparation | Perform closure writeback |
+| Predictable compaction or session switch | Save the current goal, conclusions, risks, verification, and next step first |
 
----
+Skipping governance-doc writeback for a micro change does not prohibit authorized edits to business code, README files, comments, tests, or configuration.
 
-## Multi-project workspace model
+## Safety boundaries
 
-Since v0.41, ForgeKit supports opt-in multi-project workspaces.
+ForgeKit does not automatically:
 
-| Layer | Purpose |
-| --- | --- |
-| Workspace Docs | Cross-project facts, overall tasks, integration state, cross-project risks |
-| Project Capsule | Local project tasks, tests, risks, and source links |
-| Repo Lite | Thin code-repository pointer, not a third fact source |
-| Artifact | Report samples, runtime logs, build outputs, test evidence |
-| Archive | Historical evidence, not current truth |
+- generate Spring, React, FastAPI, or other business-project templates;
+- install dependencies, start services, or deploy your application;
+- run agents, daemons, or schedulers in the background;
+- commit, push, tag, create pull requests, or publish releases;
+- enable multi-project mode or split existing documentation;
+- overwrite customized managed files;
+- convert a review finding into repair authorization.
 
-New projects install a disabled `.forgekit/workspace-map.json` and `_template`. ForgeKit does not enable multi-project mode or split existing docs automatically.
+Agent-specific Skill loading, selection behavior, and context benefits can vary by client and version. These real-runtime items remain `NEEDS_TEST`; verify the first use in your target environment.
 
-Common path:
+## Common checks
 
-```text
-Register a project as workspace-only first.
-Switch only long-running independent projects to project-capsule later.
+Check whether current docs can still support unfinished work:
+
+```powershell
+python .\scripts\check-current-docs-integrity.py --repo-root "D:\path\to\project"
 ```
 
-A Project Capsule is not a full ForgeKit copy or an archive file. It is the smallest local documentation set for one subproject.
+Check multi-project boundaries:
 
----
-
-## Risk-based artifacts
-
-| Risk | Suggested artifacts |
-| --- | --- |
-| low | proposal / verification / review |
-| medium | proposal / tasks / verification / review |
-| high | proposal / design / tasks / verification / review / ship |
-
-Use `retro` only after major changes, incidents, failed deliveries, or explicit team requests.
-
----
-
-## Common misunderstandings
-
-| Misunderstanding | Reality |
-| --- | --- |
-| ForgeKit generates business project code | It does not; it generates an AI delivery workspace |
-| ForgeKit deploys or releases my system | It does not |
-| ForgeKit automatically commits or pushes | It does not |
-| Every small edit needs a doc update | No; Micro Update skips ForgeKit governance docs |
-| I can work all day without doc writeback | Risky; do a minimal checkpoint |
-| Archive means deleting old files | No; archive is searchable historical evidence |
-| Multi-project mode automatically splits docs | It does not; it only adds map, templates, and checks |
-| Project Capsule is a full ForgeKit copy | No; it is a minimal local fact set |
-| Codex / Claude automatically reloads new rules | Not guaranteed; after upgrade, start a new session for new work |
-| The version in `.forgekit/project-boundary.yml` is the current ForgeKit version | No. It only records the template version used when the project boundary file was created. The current ForgeKit version is tracked in `.forgekit/state.json`. |
-
----
+```powershell
+python .\scripts\check-workspace-integrity.py --repo-root "D:\path\to\workspace"
+```
 
 ## Documentation map
 
 | Need | File |
 | --- | --- |
 | Daily AI prompts | `.forgekit/docs/usage-playbook.md` |
-| When to update docs | `.forgekit/docs/work-session-checkpoint.md` |
-| Which doc owns which fact | `.forgekit/docs/document-responsibility.md` |
+| Writeback timing | `.forgekit/docs/work-session-checkpoint.md` |
+| Document ownership | `.forgekit/docs/document-responsibility.md` |
 | Current tasks | `.forgekit/docs/task-board.md` |
-| Work sources | `.forgekit/docs/task-intake.md` |
+| Task sources | `.forgekit/docs/task-intake.md` |
 | Verification | `.forgekit/docs/testing.md` |
 | Risks and blockers | `.forgekit/docs/risk-register.md` |
 | Project boundary | `.forgekit/project-boundary.yml` |
 | Multi-project boundary | `.forgekit/workspace-map.json` |
-| Version history | `CHANGELOG.md` |
-
----
+| Version changes | `CHANGELOG.md` |
 
 ## Version history
 
-For full version history, design tradeoffs, and the real pain points solved by each release, see:
-
-```text
-CHANGELOG.md
-```
-
-README intentionally keeps only the current positioning, quick start, common entries, and daily usage.
+See [CHANGELOG.md](CHANGELOG.md) for release history and upgrade notes.

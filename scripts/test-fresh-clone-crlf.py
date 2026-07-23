@@ -117,6 +117,10 @@ def stage_c_byte_paths(repo):
         for item in (draft / branch).rglob("*"):
             if item.is_file():
                 paths.add(item.relative_to(repo))
+    for package in (repo / "migrations/0.45.0", repo / "project-template/migrations/0.45.0"):
+        for item in package.rglob("*"):
+            if item.is_file():
+                paths.add(item.relative_to(repo))
     paths.update({
         Path("project-template/.forgekit/template-manifest.json"),
         Path(".forgekit/changes/v045-rule-ownership-skill-convergence/stage-b-migration-draft/0.45.0/migration.json"),
@@ -153,8 +157,10 @@ def verify_clone(clone, mode, full, temp_root):
             "attributes": attr,
         }
     commands = [
+        ("stage_e", [sys.executable, "-B", "scripts/validate-stage-e-release.py"]),
         ("stage_c", [sys.executable, "-B", "scripts/validate-stage-c-skills.py"]),
         ("stage_d", [sys.executable, "-B", "scripts/validate-stage-d-skills.py"]),
+        ("gate_wiring", [sys.executable, "-B", "scripts/validate-release-gate-wiring.py"]),
         ("migration", [sys.executable, "-B", "scripts/validate-stage-b-entry-migration.py"]),
         ("projection", [sys.executable, "-B", "scripts/sync-skill-projections.py", "check"]),
         ("template", [shutil.which("pwsh") or "powershell", "-NoProfile", "-ExecutionPolicy", "Bypass", "-File", ".\\scripts\\validate-template.ps1"]),

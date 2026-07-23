@@ -1,0 +1,6 @@
+interface:
+  display_name: "Release Check"
+  short_description: "Assess explicit release readiness read-only"
+  default_prompt: |-
+    $release-check
+    Assess readiness for the named release, version, migration, or package and report ready, blocked, or not-verified without performing release actions.

@@ -1,19 +1,33 @@
 # v0.45.0 发布 / 交接设计
 
-Status: stage-d-implemented-awaiting-independent-check
+Status: stage-e-implemented-awaiting-independent-check
 DesignStatus: design-approved-for-stage-a
-AuthorizedStage: stage-d
+AuthorizedStage: stage-e
 
 ## 发布 / 交接步骤
 
-当前不得发布。阶段 A、阶段 B、阶段 C 已通过独立 checker；阶段 D maker 已完成实施和确定性自验，等待独立 checker；阶段 E 未进入。后续交接条件为：
+Stage E maker 已将通过 Stage A-D checker 的 development migration draft 提升为正式 root/template `migrations/0.45.0`，保留 20 个 action 的分层 Git baseline、incoming、checksum、custom/unknown 保护与 rollback 合同。change-local draft 继续作为历史证据，并被 production discovery 忽略。
+
+当前 VERSION、plugin、marketplace、template state/manifest 均为 0.45.0；README 中英文、CHANGELOG、usage playbook 与七个 prompts 兼容入口已进入 release preparation。真实模型行为仍为 NOTE / `NEEDS_TEST`，没有伪造 PASS。
+
+本地候选状态仅为 `stage-e-implemented-awaiting-independent-check`。maker 不宣布 release-ready；未 commit、push、tag、publish、release 或 deploy，等待独立 Stage E checker。
+
+当前不得发布。阶段 A、阶段 B、阶段 C、阶段 D 已通过独立 checker；阶段 E maker 已完成本地 release preparation和确定性自验，正在等待独立 checker。后续交接条件为：
 
 1. DECISION-01 至 DECISION-03 已冻结，不再作为未决项退回。
 2. M-01、M-03、A21 保持上一轮已关闭；`review.md` 的两次 blocker-recheck 已关闭 M-02、M-04，设计状态为 `design-approved-for-stage-a`。
-3. 阶段 C 的独立 checker 必须以新鲜只读上下文复核五个 Skill、development migration、mutation、回归和残留证据；阶段 D-E 仍需逐段授权、实现、验证和独立复查。
+3. Stage A-D 冻结结论不得重开；Stage E独立checker必须以新鲜只读上下文复核正式migration、版本表面、文档入口、mutation、smoke和残留证据。
 4. 完成新安装、新项目、v0.44.1 stock/custom 升级、plugin+local、Codex-only 和 Claude-only 验收。
 5. 执行完整 template/plugin/release smoke 与 mutation，确认自动恢复。
-6. 最后才更新正式版本元数据、changelog 和发布说明。
+6. 只有Stage E独立checker可将候选批准为`stage-e-approved-for-release`；外部发布仍需用户另行明确授权。
+
+Stage E 生命周期兼容只修改两项临时冻结条件：Stage C现在要求根级 VERSION 与template manifest current version动态一致；Stage B migration validator按VERSION区分pre-release与release-preparation，同时始终完整验证development draft。0.44.1与0.45.0两阶段正负mutation、唯一production discovery、draft排除及`0.44.1 -> 0.45.0`路径全部通过；未改变任何Stage A-D治理语义、migration分类或rollback算法。
+
+最终maker门禁：Stage E定向25/25、全量217/217、behavior 31 cases且真实模型31项均`GRADER_UNCERTAIN/not-run`、projection 18/18、template manifest动态197项（正式0.45.0 migration 41/41）、plugin/template/release consistency、scoped snapshot smoke及autocrlf=false/true fresh clone全部PASS。fresh clone后没有tracked-byte overlay；候选仍不是release-ready，等待独立Stage E checker。
+
+M-E01/M-E02 maker修复已收口：正式template migration inventory由descriptor动态派生并完整进入manifest；独立wiring validator锁定plugin/template/release/smoke/fresh-clone五个顶层入口。真实plugin gate删除Stage E调用、改为无效路径或忽略退出码均非零，manifest缺项/重复/checksum mutation同样非零并逐字节恢复。正式migration仍为20 actions且payload/provenance未变。当前状态继续为`stage-e-implemented-awaiting-independent-check`，等待原checker只复核两项finding。
+
+M-E02-R1最终止损分工已冻结：静态wiring仅检查五个固定入口和runtime层的有限结构；正式runtime canary在Git隔离副本中证明五入口实际执行Stage E并传播固定故障。验收不再扩展PowerShell静态控制流解析，注释、`if ($false)`、删除、错误路径和吞退出码由自动runtime mutation负责。child标记只防嵌套编排，不跳过Stage E；固定canary能捕获真实断链即结束M-E02，只有令正式runtime canary错误通过的新变体才可能成为新finding。状态仍为`stage-e-implemented-awaiting-independent-check`。
 
 阶段 A 的冻结合同为：`config/skill-projections.json` 仅显式管理九个通用 Skill 的 `SKILL.md` 与 `agents/openai.yaml`，sync apply 仅供维护者显式调用；行为测试使用 `scripts/test-skill-behavior.py`、`tests/skill-behavior/cases.json`、`scripts/skill_behavior_adapters/codex.py` 与 `scripts/skill_behavior_adapters/claude.py`。确定性合同是自动 blocker；Codex/Claude 各一组代表性行为证据须由独立 checker 复核，单次非确定模型结果不直接成为无条件自动 blocker。
 

@@ -113,6 +113,27 @@ class StageCSkillContractTests(unittest.TestCase):
         self.assertEqual(5, len(rows))
         self.assertEqual(set(self.skills), {row["skill"] for row in validator.parse_matrix_sources(REPO)[0]})
 
+    def test_current_version_lifecycle_requires_manifest_consistency(self):
+        cases = (
+            ("0.45.0", "0.45.0", 0),
+            ("0.45.0", "0.44.1", 1),
+            ("0.44.1", "0.44.1", 0),
+            ("0.44.1", "0.45.0", 1),
+        )
+        for version, manifest_version, expected_exit in cases:
+            with self.subTest(version=version, manifest=manifest_version):
+                (self.root / "VERSION").write_text(version + "\n", encoding="ascii", newline="\n")
+                manifest_path = self.root / "project-template/.forgekit/template-manifest.json"
+                manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+                manifest["template_version"] = manifest_version
+                manifest_path.write_text(json.dumps(manifest, ensure_ascii=False, indent=2) + "\n", encoding="utf-8", newline="\n")
+                result = self.run_cli()
+                self.assertEqual(expected_exit, result.returncode, result.stderr)
+                if expected_exit:
+                    self.assertIn("current-version-mismatch", result.stderr)
+                    self.assertIn("VERSION", result.stderr)
+                    self.assertIn("template-manifest.json", result.stderr)
+
     def test_formal_cli_propagates_success_exit_code(self):
         result = subprocess.run(
             [sys.executable, "-B", str(REPO / "scripts/validate-stage-c-skills.py")], cwd=REPO,

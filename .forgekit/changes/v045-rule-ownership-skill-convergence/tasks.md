@@ -1,9 +1,9 @@
 DesignStatus: design-approved-for-stage-a
-ImplementationStatus: stage-d-implemented-awaiting-independent-check
+ImplementationStatus: stage-e-implemented-awaiting-independent-check
 
 # v0.45.0 分阶段实施计划
 
-本计划冻结阶段 A-E 的实施切片。阶段 A、阶段 B、阶段 C 已通过独立 checker；阶段 D 已按审批设计完成 maker 实施和确定性自验，正等待独立 checker；阶段 E 未进入。
+本计划冻结阶段 A-E 的实施切片。阶段 A、阶段 B、阶段 C、阶段 D 已通过独立 checker；阶段 E 已完成 maker 实施并等待独立 checker。
 
 ## 设计阶段工作记录
 
@@ -372,6 +372,42 @@ Stage D 的静态 gate 只覆盖本映射和 `verification.md` 冻结的有限�
 
 - 必须独立 checker，并执行发布前完整 smoke。
 - 建议分为 `prompt compatibility`、`distribution/upgrade`、`release docs/metadata` 三个提交候选。
+
+### Stage E maker 实施记录
+
+| Task | 实施结果 | 确定性验收 | 真实行为状态 |
+| --- | --- | --- | --- |
+| SE-01 正式 migration | 从唯一 development draft 提升 root/template `migrations/0.45.0`，保留 20 个 action、逐 action baseline 与 payload | Stage E validator、migration behavior、production discovery | manual merge 体验 `NEEDS_TEST` |
+| SE-02 版本表面 | VERSION、plugin、marketplace、template state/manifest 统一为 0.45.0 | plugin/template/release consistency | N/A |
+| SE-03 文档与 prompts | README 中英文、CHANGELOG、usage playbook 和七个旧 prompt 路径收敛；prompt 保留 v0.45-v0.46 弃用窗口 | Stage E validator、template manifest | 真实 selector/source `NEEDS_TEST` |
+| SE-04 发布门禁 | 新增结构化 Stage E validator/tests，并接入 template/plugin/release/smoke/fresh clone | unit、mutation、LF/CRLF、smoke | 不执行真实模型 prompt |
+| SE-05 状态收口 | 写回本 change 的 tasks/verification/ship，保持 review 历史不变 | status/content audit | 等待独立 checker |
+| SE-06 validator 生命周期兼容 | Stage C current-version gate 改为 VERSION/template manifest 动态一致；Stage B draft gate按当前 VERSION区分 pre-release 与 release-preparation，同时始终完整验证 development draft | 四组版本一致性 mutation；0.44.1/0.45.0 两阶段 migration lifecycle tests；production discovery | 不改变 Stage A-D 语义、分类或 rollback |
+| SE-07 三路发布候选 smoke | 当前 scoped snapshot、autocrlf=false fresh clone、autocrlf=true fresh clone均运行完整 smoke；临时提交排除用户删除的 `usage.html` | `test-fresh-clone-crlf.py --full`；clone 后无 tracked-byte overlay | 真实模型继续 not-run |
+| SE-08 M-E01 template migration manifest | manifest generator 从当前 template migration descriptor 动态派生 descriptor、baseline 与 incoming 的完整文件集合，不硬编码 41/197 | Stage E validator、manifest check、8 项定向反例、3 项 release mutation | N/A |
+| SE-09 M-E02 release gate wiring | 五个冻结顶层入口由独立结构化 wiring validator 复核；plugin gate 同时真实执行 Stage E 与独立 wiring gate并传播退出码 | wiring validator、6 项定向反例、3 项真实 plugin-gate mutation | N/A |
+
+Stage E 不修改九个 Skill 语义、AGENTS/CLAUDE 治理合同、Stage C/D 自然语言规则或 behavior 合同；不包含用户删除的 `usage.html`。最终 maker 状态只能是 `stage-e-implemented-awaiting-independent-check`。
+
+Stage E maker 最终确定性结果：Stage E 定向测试 25/25、全量 unittest 217/217、behavior 31 cases、projection 18/18；template manifest 由实际集合动态得到197项，其中正式0.45.0 template migration为41/41。plugin/template/release consistency、当前 scoped snapshot smoke 与 autocrlf=false/true fresh clone均 PASS。正式 migration action 仍为20项，production discovery只发现唯一正式0.45.0并忽略change-local draft。
+
+### Stage E independent review：M-E01 / M-E02 修复映射
+
+| Finding | 根因 | 修改文件 | 新增失败路径 | 正式门禁 |
+| --- | --- | --- | --- | --- |
+| M-E01 | manifest generator未把正式template migration inventory视为受管集合 | manifest generator/manifest、Stage E validator/tests、release mutation | 缺descriptor/baseline/incoming、duplicate、checksum、draft/root误入 | manifest check；Stage E CLI；template/release gates |
+| M-E02 | 顶层gate只执行Stage E，没有独立结构化接线合同；删除plugin调用仍可绿灯 | wiring validator/tests、plugin/template/release/smoke/fresh-clone接线 | plugin调用删除、忽略退出码、无效路径、template/release接线删除 | 独立wiring CLI；真实plugin gate；release consistency |
+
+两项修复只增加结构化发布集合和有限接线检查；未修改正式migration descriptor/baseline/incoming、action集合、九个Skill、Stage A-D治理语义或版本表面。状态继续为 `stage-e-implemented-awaiting-independent-check`。
+
+### Stage E M-E02-R1 runtime-canary 止损合同
+
+- 静态 `validate-release-gate-wiring.py` 只检查五个固定入口、runtime-canary脚本/测试、登记集合和正式release-consistency接线等有限结构，不证明任意PowerShell控制流。
+- `test-stage-e-gate-runtime.py` 在含`.git`的隔离候选中，以template manifest版本错配作为固定Stage E故障，真实执行plugin、template、release consistency、smoke和fresh clone，证明Stage E调用及失败传播。
+- M-E02最终验收只看上述五入口runtime canary；不再因新的PowerShell文本、注释或控制流变体扩展静态解析。
+- 注释块、`if ($false)`、删除调用、错误路径和吞退出码由runtime mutation自动覆盖；只要固定canary能捕获真实断链，M-E02即结束。
+- 新变体只有在能使正式runtime canary错误通过时，才可能成为新finding。
+- `FORGEKIT_STAGE_E_RUNTIME_CANARY_CHILD`仅阻止子进程再次启动完整编排，不跳过Stage E validator；正式入口默认路径仍执行Stage E。
 
 ## 实施顺序规则
 

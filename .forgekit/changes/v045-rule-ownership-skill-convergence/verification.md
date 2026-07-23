@@ -1,11 +1,56 @@
 # v0.45.0 验证与验收设计
 
 DesignStatus: design-approved-for-stage-a
-ImplementationStatus: stage-d-implemented-awaiting-independent-check
+ImplementationStatus: stage-e-implemented-awaiting-independent-check
 
 ## 1. 状态说明
 
-本文件冻结 v0.45.0 的验收合同，并记录阶段 A 至阶段 D maker 的确定性实施证据。阶段 A、阶段 B、阶段 C 已通过独立 checker；阶段 D 正等待独立 checker。真实 Codex/Claude 行为合同仍为 `NEEDS_TEST`，不得把静态、dry-run 与确定性门禁通过解释为 A01-A22 全部通过。
+本文件冻结 v0.45.0 的验收合同，并记录阶段 A 至阶段 E maker 的确定性实施证据。阶段 A 至 D 已通过独立 checker；阶段 E 正等待独立 checker。真实 Codex/Claude 行为合同仍为 `NEEDS_TEST`，不得把静态、dry-run 与确定性门禁通过解释为真实模型通过。
+
+## Stage E release-preparation 验证记录
+
+- 正式 migration 从唯一 development draft 派生：20 个 target 唯一且等于 AGENTS/CLAUDE 加 projection manifest 派生的 18 个 package target；每个 baseline/incoming checksum 使用原始 bytes。
+- baseline provenance 保持分层：入口锚定 Stage A commit，Stage C packages 锚定 Stage B commit，Stage D packages 锚定 Stage C commit；正式 payload 与批准 draft 逐字节一致，incoming 与最终 template target 一致。
+- production discovery 只读取根级 `migrations/`，发现唯一 0.45.0；change-local draft 保留为历史证据但不进入生产发现。
+- 0.44.1 stock/custom/unknown/missing/mixed、rollback、partial/repeated-run 继续通过既有 upgrader 合同验证；正式 migration 不覆盖 custom/unknown。
+- 所有当前版本表面统一为 0.45.0；历史 changelog、from-version、baseline 和兼容 fixture 中的 0.44.1 合法保留。
+- 七个旧 prompt 路径保留为 v0.45-v0.46 薄兼容包装；usage playbook 提供九个按需 Skill 入口，不形成 mandatory pipeline。
+- 新增 `validate-stage-e-release.py` 只检查版本、migration、production discovery、文档/提示词入口等结构合同，不分析自然语言同义词。
+- 真实模型 prompt 未运行，behavior 结果继续为 `GRADER_UNCERTAIN/not-run`；selector、Skill source、token/context 与 manual merge 体验保持 `NEEDS_TEST`。
+- Stage C 原临时硬编码 `VERSION == 0.44.1` 已改为根级 VERSION 与 template manifest current version 动态一致；0.44.1/0.44.1 和 0.45.0/0.45.0 通过，交叉不一致以 `current-version-mismatch` 失败。Stage C package、projection、语义和 LF gate未放宽。
+- Stage B migration validator始终完整检查change-local draft；VERSION低于0.45.0时禁止正式0.45.0，VERSION达到0.45.0时要求唯一正式migration、production discovery为`0.44.1 -> 0.45.0`，并继续排除draft。缺正式migration、错误from/to、目录/descriptor不一致和重复生产版本均失败。
+
+### Stage E maker最终门禁
+
+| Gate | Result |
+| --- | --- |
+| Stage E directed unittest | PASS；25/25（manifest 19 + wiring 6） |
+| Full unittest | PASS；217/217 |
+| Stage A-D validators | PASS；治理语义未修改 |
+| Behavior | PASS；31 cases；31项`GRADER_UNCERTAIN/not-run` |
+| Projection / template manifest | PASS；projection 18/18；manifest动态197项；正式template migration 41/41；raw bytes一致 |
+| Formal migration behavior | PASS；stock/custom/unknown/missing/mixed/rollback；partial/repeated-run既有合同保持 |
+| Production discovery | PASS；唯一正式0.45.0；draft未发现；路径0.44.1→0.45.0 |
+| Plugin / template / release consistency | PASS；release mutation 62项；新增manifest 3项与真实plugin wiring 3项均失败并逐字节恢复 |
+| Scoped snapshot smoke | PASS；`usage.html`使用HEAD副本且用户删除未进入临时提交 |
+| Fresh clone full smoke | PASS；autocrlf=false/true；无post-clone tracked-byte overlay |
+| `git diff --check` | PASS |
+
+### Stage E M-E01 / M-E02 findings repair verification
+
+- M-E01：`update-template-manifest.py` 从当前 template version 与正式 descriptor 的20个action动态派生 `migration.json + 20 baseline + 20 incoming`；实际inventory与descriptor集合必须完全相等。manifest当前197项且路径唯一，其中正式0.45.0 migration为41/41；projection仍为18/18。缺descriptor、baseline、incoming、duplicate、raw-byte checksum错误、change-local draft或root migration误入均由正式Stage E gate拒绝。
+- M-E02：新增有限的 `validate-release-gate-wiring.py`，固定验证plugin、template、release consistency、smoke、fresh clone五个顶层入口的可执行结构。plugin gate真实执行独立wiring gate和Stage E gate并分别传播非零退出码；Stage E validator独立复核wiring，release consistency再以真实plugin gate做调用删除、无效路径与忽略退出码mutation。
+- 定向25/25、全量217/217、behavior 31 cases、current scoped snapshot smoke、autocrlf=false/true fresh clone、plugin/template/release consistency全部PASS。fresh-clone临时提交`a0e89783fefa297386c7a94e986a8da2cd7bd16d`，无post-clone tracked-byte overlay。
+- 正式migration保持20 actions，descriptor/baseline/incoming和provenance未修改；stock/custom/unknown/missing/mixed/rollback及production discovery回归通过。以上仍是maker自验，状态保持`stage-e-implemented-awaiting-independent-check`。
+
+### Stage E M-E02-R1 runtime-canary verification contract
+
+- 静态层只验证五个固定gate文件、runtime-canary脚本与测试、固定入口登记、release-consistency接线及路径存在；不解释任意PowerShell控制流。
+- 运行时层在含`.git`的短路径隔离副本中保持`VERSION=0.45.0`，将template manifest版本注入为`0.44.1`，并要求每个入口同时满足baseline exit 0、Stage E实际调用、Stage E专属诊断传播和canary非零。
+- 固定入口为plugin、template、release consistency、smoke、fresh clone；M-E02只以这五项runtime结果验收，不再扩展静态语义。
+- 自动mutation覆盖注释完整调用块、永久`if ($false)`、删除调用、错误validator路径和吞退出码；固定canary捕获真实断链即结束finding。
+- 新PowerShell变体只有能令正式runtime canary错误通过时才构成新finding；否则不再作为静态解析扩展理由。
+- child标记只跳过嵌套runtime编排；测试同时验证该标记下Stage E结构故障仍由release gate拒绝，无递归或Stage E旁路。
 
 本验收合同应用已经冻结的 DECISION-01、DECISION-02 和 DECISION-03：不把三项决定重新列为选择题，也不以测试结果反向授权阶段 A。
 

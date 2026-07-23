@@ -120,6 +120,7 @@ REQUIRED_REPO_PATHS = [
     "project-template/migrations/0.43.0/migration.json",
     "project-template/migrations/0.44.0/migration.json",
     "project-template/migrations/0.44.1/migration.json",
+    "project-template/migrations/0.45.0/migration.json",
     "migrations/0.37.0/migration.json",
     "migrations/0.38.0/migration.json",
     "migrations/0.39.0/migration.json",
@@ -132,6 +133,7 @@ REQUIRED_REPO_PATHS = [
     "migrations/0.43.0/migration.json",
     "migrations/0.44.0/migration.json",
     "migrations/0.44.1/migration.json",
+    "migrations/0.45.0/migration.json",
     "project-template/scripts/check-codex-native-agents.py",
     "project-template/scripts/doc-health-report.py",
     "project-template/scripts/source-trace-report.py",
@@ -159,6 +161,8 @@ REQUIRED_REPO_PATHS = [
     "scripts/validate-stage-b-entry-migration.py",
     "scripts/validate-stage-c-skills.py",
     "scripts/validate-stage-d-skills.py",
+    "scripts/validate-stage-e-release.py",
+    "scripts/validate-release-gate-wiring.py",
     "scripts/test-fresh-clone-crlf.py",
     "scripts/test-skill-behavior.py",
     "scripts/skill_behavior_adapters/codex.py",
@@ -1687,13 +1691,21 @@ def assert_release_distribution_consistency(repo):
     if mismatches:
         fail("Release version metadata mismatch:\n" + "\n".join(mismatches))
 
-    root_migration = repo / "migrations/0.44.1/migration.json"
-    template_migration = repo / "project-template/migrations/0.44.1/migration.json"
-    if root_migration.read_bytes() != template_migration.read_bytes():
+    historical_root = repo / "migrations/0.44.1/migration.json"
+    historical_template = repo / "project-template/migrations/0.44.1/migration.json"
+    if historical_root.read_bytes() != historical_template.read_bytes():
         fail("v0.44.1 root and template migration descriptors must stay identical")
+    historical = json.loads(historical_root.read_text(encoding="utf-8"))
+    if historical.get("from") != "0.44.0" or historical.get("to") != "0.44.1" or historical.get("actions") != []:
+        fail("v0.44.1 migration must remain an action-free 0.44.0 -> 0.44.1 patch")
+
+    root_migration = repo / f"migrations/{expected}/migration.json"
+    template_migration = repo / f"project-template/migrations/{expected}/migration.json"
+    if root_migration.read_bytes() != template_migration.read_bytes():
+        fail(f"v{expected} root and template migration descriptors must stay identical")
     migration = json.loads(root_migration.read_text(encoding="utf-8"))
-    if migration.get("from") != "0.44.0" or migration.get("to") != expected or migration.get("actions") != []:
-        fail(f"v0.44.1 migration must be an action-free 0.44.0 -> {expected} patch")
+    if migration.get("from") != "0.44.1" or migration.get("to") != expected or len(migration.get("actions", [])) != 20:
+        fail(f"v{expected} migration must be the 20-action 0.44.1 -> {expected} package")
 
     root_helper = repo / "scripts/upgrade_review_packets.py"
     template_helper = repo / "project-template/scripts/upgrade_review_packets.py"
@@ -2061,7 +2073,10 @@ def assert_0440_review_convergence_migration(repo, current_target, temp_parent):
         if (clean / relative).read_bytes() != content:
             fail(f"0.44.0 report-only plan modified {relative}")
 
-    run([sys.executable, str(unified), "--target", str(clean), "--lang", "en-US", "--yes"], cwd=repo)
+    run([
+        sys.executable, str(unified), "--target", str(clean), "--lang", "en-US", "--yes",
+        "--review-needed-policy", "manual-merge",
+    ], cwd=repo)
     clean_state = json.loads((clean / ".forgekit/state.json").read_text(encoding="utf-8-sig"))
     if clean_state.get("forgekit_version") != FORGEKIT_VERSION or clean_state.get("features", {}).get("maker_checker_review_convergence") is not True:
         fail("0.44.0 clean apply did not advance version and feature state")
@@ -2523,7 +2538,7 @@ def assert_unified_project_entry(repo, current_target, temp_parent):
         fail("early legacy detection must not create state.json")
 
     future = temp_parent / "unified-future"
-    write_state(future, "0.45.0")
+    write_state(future, "0.45.1")
     future_result = run(
         [sys.executable, str(script), "--target", str(future), "--lang", "en-US"],
         cwd=repo,
@@ -3413,6 +3428,7 @@ def main():
 
     repo = Path(args.repo_root).resolve()
     assert_paths(repo, REQUIRED_REPO_PATHS)
+    run([sys.executable, "-B", str(repo / "scripts/validate-stage-e-release.py"), "--repo-root", str(repo)], cwd=repo)
     run([sys.executable, "-B", str(repo / "scripts/validate-agent-entries.py"), "--repo-root", str(repo)], cwd=repo)
     run([sys.executable, "-B", str(repo / "scripts/validate-stage-b-entry-migration.py"), "--repo-root", str(repo)], cwd=repo)
     run([sys.executable, "-B", str(repo / "scripts/validate-stage-c-skills.py"), "--repo-root", str(repo)], cwd=repo)
@@ -3454,6 +3470,8 @@ def main():
     assert_json(repo / "project-template" / "migrations" / "0.44.0" / "migration.json")
     assert_json(repo / "migrations" / "0.44.1" / "migration.json")
     assert_json(repo / "project-template" / "migrations" / "0.44.1" / "migration.json")
+    assert_json(repo / "migrations" / "0.45.0" / "migration.json")
+    assert_json(repo / "project-template" / "migrations" / "0.45.0" / "migration.json")
     assert_release_distribution_consistency(repo)
     assert_loop_docs(repo / "project-template", "docs/loop-readiness.md", "docs/loop-blueprint.md")
     assert_loop_operations(
@@ -3543,6 +3561,7 @@ def main():
         "project-template/.codex/agents/worktree-runner.md",
     ])
     run([sys.executable, str(repo / "scripts" / "update-template-manifest.py"), "--check"], cwd=repo)
+    run([sys.executable, str(repo / "scripts" / "validate-stage-e-release.py"), "--repo-root", str(repo)], cwd=repo)
     run([sys.executable, str(repo / "scripts" / "sync-skill-projections.py"), "check", "--repo-root", str(repo)], cwd=repo)
     run([sys.executable, str(repo / "scripts" / "validate-rule-ownership.py"), "--repo-root", str(repo)], cwd=repo)
     run([sys.executable, str(repo / "scripts" / "validate-stage-c-skills.py"), "--repo-root", str(repo)], cwd=repo)

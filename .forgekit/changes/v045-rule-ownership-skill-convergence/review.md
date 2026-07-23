@@ -1839,3 +1839,235 @@ Stage D passes with notes. M-D01 is CLOSED and M-D02 is CLOSED. Status is:
 Stage E is allowed after Stage D is submitted. This recheck stops before Stage E and does not implement it.
 
 `VERSION` remains `0.44.1`. Real model behavior remains `NEEDS_TEST`; no real model prompt was executed. No formal v0.45.0 migration was created, and v0.45.0 is not release-ready. No maker implementation, Stage E work, commit, push, tag, release, publication, deployment, or change to the user's deleted `usage.html` was performed.
+
+## Stage E Independent Release Preparation Review
+
+Review date: 2026-07-22. This was a limited-scope independent review. The source worktree was read-only except for this append; mutations and temporary commits were confined to disposable Git copies.
+
+### Baseline, scope, and lifecycle
+
+- Branch `main`; HEAD and sole baseline `1aca83de2c68db0eab624eaabad9a85197ef0faf` (`feat(governance): implement v0.45 stage D review skill convergence`); staged files zero.
+- The user's pre-existing unstaged deletion of `usage.html` remained deleted, unstaged, and untouched. The nine root Skill bodies/package YAML, root `AGENTS.md`, root `CLAUDE.md`, `.claude/skills/`, and this review file had no maker diff.
+- Stage E did not reopen frozen rule ownership, slim-entry, Skill responsibility/authorization, Stage C/D categories, behavior evidence, projection, raw-byte/LF, or migration-algorithm contracts.
+- Stage C matrix: `0.44.1/0.44.1` PASS; `0.45.0/0.45.0` PASS; both crossed pairs FAIL nonzero with category `current-version-mismatch`, both actual values, and both paths. No check was deleted, downgraded, or state-bypassed.
+- Pre-release `0.44.1` rejects a formal 0.45.0 migration, validates the draft, excludes it from production discovery, and retains pre-release latest. Release-preparation `0.45.0` requires the formal migration, discovers exactly one production 0.45.0, enforces `0.44.1 -> 0.45.0`, validates the draft, and excludes it from production discovery.
+- Missing formal migration, wrong from/to, directory/descriptor mismatch, duplicate production 0.45.0, and draft introduced under the production root all fail nonzero with locating categories.
+
+### Formal migration inventory
+
+- Root and template `migrations/0.45.0/` each contain 41 files: one descriptor, 20 baseline payloads, and 20 incoming payloads. Inventories and corresponding raw bytes are identical, with no duplicate, omission, or extra action.
+- The 20 actions are: `AGENTS.md`; `CLAUDE.md`; and `SKILL.md` plus `agents/openai.yaml` for each of `project-init`, `project-bootstrap-fill`, `handover-review`, `document-backfill`, `large-change-planning`, `code-review`, `security-review`, `release-check`, and `project-suitability`.
+
+### Baseline provenance and incoming
+
+- Both entry baselines match raw Git bytes at `506cecf8d377a17a2616bf3b9eeea483ee4039a4`; all ten Stage C baselines match `d02b496971db3773ac0c1435a423198189d6d8d8`; all eight Stage D baselines match `868846da54634899141047951b0f4275ad378966`.
+- Every descriptor baseline checksum matches its payload and provenance object. Baselines were not derived from one Stage D HEAD or current incoming files.
+- Every incoming payload matches the final `project-template` target and descriptor checksum in raw bytes. Root/template formal payloads and the validated draft agree; equality did not depend on newline normalization, and LF holds.
+
+### Production discovery and migration behavior
+
+- Production discovery searches the production root only, finds one 0.45.0, ignores the change-local draft, and does not treat the template copy as a second root migration. Current/latest/planned evidence was `0.44.1` / `0.45.0` / `0.45.0`, pending count one.
+- Duplicate version, invalid identity, and directory/version mismatch mutations fail. The formal migration, not only the draft, passed stock, custom, unknown, missing, and mixed scenarios.
+- Stock upgrades automatically. Custom and unknown files remain byte-for-byte unoverwritten. Missing is safe; mixed is classified per action. Rollback restores pre-upgrade state. Forced partial failure retains state `0.44.1` and no false success record. A repeated completed run safely retains `0.45.0` and unchanged managed bytes.
+
+### Version surfaces
+
+- Current `0.45.0` surfaces: root `VERSION`; Codex and Claude plugin manifests; Agents marketplace entry; both Claude marketplace fields; template state; template manifest; both formal migration descriptors; Chinese and English README current-version entries; and latest CHANGELOG entry.
+- Release/current-version scripts derive the current version from `VERSION`. Historical `0.44.1` uses for from-version, provenance, fixtures, compatibility, and history remain legitimate.
+- Mutations reverting VERSION, one plugin, one marketplace entry, template state, template manifest, or descriptor version all fail nonzero.
+
+### Template manifest
+
+- It reports 0.45.0 with 156 unique entries; all listed files exist and all 18 Skill projections are present. Root-only tests, review/change-local files, the draft, and `usage.html` are excluded as intended.
+- **MAJOR M-E01:** none of the 41 files under `project-template/migrations/0.45.0/` is listed. The checker passes because it validates the curated list but does not derive or require the formal migration inventory. The required mutation deleting one formal migration file from the manifest therefore cannot be made as a rejecting case. Formal migration payloads lack managed-manifest/fresh-install integrity coverage.
+
+### README, prompts, and CHANGELOG
+
+- `README.md`, `README.en.md`, template README, and usage playbook consistently describe slim entries, on-demand nine-Skill grouping, root authority, deterministic `.agents` projections, `.claude/skills` adapters, default read-only behavior, explicit bounded-write and separate external-action authorization, impact-based risk, stock/custom/unknown migration, and v0.45.0 preparation.
+- Both languages retain real-model `NEEDS_TEST` and do not claim external release. No mandatory all-Skill pipeline, file-count risk rule, review-to-maker promotion, reinitialization advice, or authorization expansion was found.
+- The seven real, thin prompt paths are `prompts/初始化项目.prompt.md`, `prompts/初始化填充.prompt.md`, `prompts/代码审查.prompt.md`, `prompts/版本发布.prompt.md`, `prompts/架构设计.prompt.md`, `prompts/代码实现.prompt.md`, and `prompts/需求分析.prompt.md`. They neither duplicate complete Skill bodies nor force all Skills.
+- CHANGELOG covers ownership, slim entry, Skill convergence, deterministic projection, package/default prompts, behavior evidence, responsibility boundaries, formal migration, raw-byte/LF/fresh clone, upgrade/breaking notes, and `NEEDS_TEST`. Its language is release preparation, not released/published/available-now.
+
+### Stage E validator and gate wiring
+
+- `validate-stage-e-release.py` is a finite structural checker for version, formal migration, discovery, template/projection, documentation entries, and `NEEDS_TEST`; it is not an open-ended synonym analyzer. Its 11 directed disposable-repository tests exercise real failure paths; 11/11 passed.
+- Current smoke, fresh clone, template, plugin, release-consistency, migration, and Stage C paths invoke Stage E without suppressing Stage A-D, reducing exit codes, weakening raw-byte/LF, or changing global Git configuration.
+- **MAJOR M-E02:** in an isolated copy, deleting the complete Stage E invocation block from `scripts/validate-plugin-assets.ps1` still let that top-level gate exit zero. No structural/meta-wiring assertion rejects removal of Stage E from this gate, so the required gate-removal mutation does not close.
+
+### Scoped snapshot, mutations, tests, and smoke
+
+- A disposable scoped snapshot contained all 115 Stage E candidate paths, including both formal migrations, validator/tests, docs, prompts, manifests, and gates. It explicitly used HEAD's `usage.html` while excluding only the user's deletion; no other dirty path was overlaid. The disposable commit ended clean.
+- Closed isolated mutations: VERSION, plugin, and marketplace rollback; template state/manifest mismatch; missing/duplicate formal action; incoming checksum; baseline provenance/checksum; wrong from/to; duplicate production; draft entering production; README `NEEDS_TEST` removal; descriptor/version errors. Each rejected nonzero with a locating diagnostic and was restored or destroyed.
+- Not closed: manifest removal of a formal migration file (M-E01, absent from manifest) and removal of Stage E from a top-level gate (M-E02, zero exit).
+- Counts: Stage E 11/11; Stage B migration 32/32; full unittest 203/203; behavior matrix 31 cases (`GRADER_UNCERTAIN/not-run` for real models); projections 18/18; manifest 156 entries; release consistency 56 paired/restoring mutation cases; formal actions 20/20.
+- Plugin, template, release-consistency, Stage C, Stage D, ownership, entries, projection, manifest, behavior validate/list/dry-run, migration, and `git diff --check` gates otherwise passed against the scoped candidate.
+- Current-snapshot smoke and `core.autocrlf=false/true` fresh-clone smoke passed with no byte overlay. Generated projects were 0.45.0; formal migration discovery, stock upgrade, custom/unknown preservation, rollback, partial-failure safety, and repeated-run safety passed.
+
+### BLOCKER / MAJOR / NOTE
+
+- BLOCKER: none.
+- MAJOR: M-E01 (formal template migration absent from managed manifest); M-E02 (Stage E gate-removal mutation is not detected).
+- NOTE: real Codex/Claude behavior remains `NEEDS_TEST`; selector/source/token-context benefits and manual-merge UX were not real-model tested.
+- NOTE: an initial long-path Windows disposable copy encountered MAX_PATH-only failures; the same suite passed 203/203 at a short isolated path.
+- NOTE: pre-existing `D:\tmp\fc-ge1jyo7z` remains outside this review. All repositories, snapshots, mutation workspaces, and behavior residues created by this review were removed.
+
+### Stage E decision
+
+FAIL: 0 BLOCKER, 2 MAJOR. Status remains:
+
+`stage-e-implemented-awaiting-independent-check`
+
+The local v0.45.0 candidate is not `stage-e-approved-for-release`; Stage E is not allowed to be committed on this result. Real-model behavior remains `NEEDS_TEST`.
+
+No Stage E commit, push, tag, publish, release, or deploy was performed. v0.45.0 has not been externally released. External release would still require explicit user authorization after correction and independent recheck.
+
+## Stage E M-E01 M-E02 Final Recheck
+
+Recheck date: 2026-07-22. Scope was closed to M-E01, M-E02, and minimum regression. No implementation was changed; mutations and temporary commits were confined to `D:\tmp\fke-final-recheck`, then removed.
+
+### M-E01
+
+M-E01 is CLOSED.
+
+- The manifest generator derives the current formal template migration from the manifest version and descriptor, enumerating `migration.json` plus every action's `baseline` and `source`. It does not hard-code 41, 197, 20 actions, or action paths.
+- Paths are normalized, relative-safe, unique, required to exist, and hashed directly from raw bytes without newline normalization. Descriptor/inventory drift fails explicitly.
+- Actual inventory is 1 descriptor + 20 baseline + 20 incoming = 41. Manifest coverage is 41/41. The complete manifest has 197 unique entries and 18/18 projections; draft, root alias, checker review, tests, and `usage.html` are excluded.
+- All nine fixed mutations failed nonzero with locating diagnostics and byte restoration: descriptor/baseline/incoming entry deletion, duplicate, checksum, draft path, root path, descriptor action deletion with stale manifest, and action addition without payload/manifest.
+
+### M-E02
+
+M-E02 remains OPEN.
+
+- Baseline wiring covers plugin, template, release consistency, smoke, and fresh clone (`required_paths=5`). The real plugin chain executes Stage E, captures `$LASTEXITCODE`, executes the independent wiring validator, and returns nonzero for a Stage E-only manifest failure.
+- All seven required mutations failed and restored: plugin block deletion, nonexistent path, ignored failing exit, and removal from template, release consistency, smoke, and fresh clone.
+- **MAJOR M-E02-R1:** the regex wiring check accepts non-executable text. When the complete plugin Stage E block was commented out, both the wiring validator and real plugin gate returned 0. Wrapping the block in `if ($false)` also returned 0. These explicitly forbidden false positives mean the structural gate does not yet prove executable wiring.
+
+### Tests and minimum regression
+
+- Wiring tests 6/6; Stage E tests 19/19; combined directed 25/25; full unittest 217/217; behavior 31 cases.
+- Stage E baseline: version 0.45.0, 20 actions, 41 manifest migration files, real model `NEEDS_TEST`.
+- Release consistency passed in the correctly dirty snapshot: 62 restoring/guard cases (60 expected rejection, two safe-pass), including formal M-E01 deletion/duplicate/checksum and M-E02 plugin deletion/path/exit mutations.
+- Plugin and template baseline gates passed. Direct `core.autocrlf=false/true` fresh clone passed Stage C, Stage D, Stage E, wiring, migration, projection, and template checks with no tracked-byte overlay.
+- Minimum regression remained closed: 20 actions; baseline provenance Entry 2 / Stage C 10 / Stage D 8 at the approved commits; incoming 20/20; unique production 0.45.0; current version surfaces 0.45.0; Stage A-D validators passed.
+
+### Severity and decision
+
+- BLOCKER: none.
+- MAJOR: M-E02-R1 only.
+- NOTE: real-model behavior remains `NEEDS_TEST`; manual-merge UX remains untested; existing MAX_PATH noise and pre-existing old temporary directories are unchanged.
+
+Final result: FAIL. M-E01 is CLOSED; M-E02 is not CLOSED. Status remains:
+
+`stage-e-implemented-awaiting-independent-check`
+
+Stage E is not approved for commit. No commit, push, tag, publish, release, or deploy was performed. v0.45.0 has not been externally released; external release still requires explicit user authorization after correction and independent recheck.
+
+## Stage E M-E02 Runtime Canary Final Recheck
+
+Recheck date: 2026-07-22. Scope was limited to M-E02-R1 and the frozen minimum regression. The source worktree was read-only except for this append. All runtime mutations used a disposable Git snapshot at `D:\tmp\fke-stagee-runtime-final`, which was removed after byte restoration.
+
+### Static and runtime responsibilities
+
+- The existing static layer remains finite: it checks the five required gate files and their agreed Stage E command shapes. It is not required to understand arbitrary PowerShell control flow.
+- The repository does not contain the required formal runtime-canary layer. `python -B -m unittest tests.test_stage_e_gate_runtime` exits 1 with `ModuleNotFoundError`; no alternative committed runtime-canary runner was found.
+- `tasks.md`, `verification.md`, and `ship.md` describe finite structural wiring only. None freezes the required split that static checks cover structure while a runtime canary proves execution and propagation, or the stop-loss rule that M-E02 closes once the five-entry canary is complete.
+
+### Runtime reference canary
+
+The checker independently injected a Stage E-only fault by removing `migrations/0.45.0/migration.json` from the template manifest while retaining VERSION 0.45.0 and LF bytes. This fault is rejected by the Stage E formal-migration manifest contract and is not a generic version mismatch.
+
+- Baseline exits were plugin 0, template 0, release consistency 0, smoke 0, and fresh clone 0.
+- Canary exits were plugin 1, template 1, release consistency 1, smoke 1, and fresh clone 1.
+- The reference orchestration did not use a recursion environment variable or production bypass. The five production entries ran their normal paths. The canary copy was isolated from the source worktree, and fresh clone used no post-clone tracked-byte overlay.
+
+This proves the proposed runtime technique is viable, but the proof currently exists only in this checker run, not in a repeatable repository gate.
+
+### M-E02-R1 reproductions
+
+- Commenting the complete plugin Stage E block: static wiring exit 0; real plugin gate with the Stage E-only canary exit 0. The external checker oracle correctly returned nonzero because the canary was swallowed.
+- Wrapping the complete plugin Stage E block in `if ($false)`: static wiring exit 0; real plugin gate with the canary exit 0. The external checker oracle again returned nonzero.
+- Deleting the invocation, using a nonexistent validator path, and replacing the captured Stage E exit code with zero each made the real plugin gate exit 1 under the canary. These fixed regressions remain closed.
+
+The first two cases therefore still pass every committed static/plugin check unless an external reviewer supplies the missing runtime oracle. The frozen acceptance standard requires that oracle to be a real, repeatable canary layer; an ad hoc checker-only script is insufficient for approving release wiring.
+
+### Tests and minimum regression
+
+- `validate-release-gate-wiring.py`: PASS, required paths 5.
+- `validate-stage-e-release.py`: PASS, version 0.45.0, actions 20, template migration manifest 41.
+- Wiring tests 6/6; Stage E release tests 19/19; full discovered unittest 217/217.
+- Required runtime test: FAIL before execution because `tests.test_stage_e_gate_runtime` is absent.
+- Manifest check PASS: 197 unique entries, formal template migration 41/41, projections 18/18. M-E01 remains CLOSED.
+- Stage B migration, Stage C, and Stage D validators PASS. Formal migration remains 20 actions; approved baseline provenance and incoming payloads are unchanged.
+- The five-entry baseline included plugin, template, release consistency, smoke, and autocrlf false/true fresh clone; all passed. Canary copies and logs were removed, and no review-created Python process remained.
+- HEAD remains `1aca83de2c68db0eab624eaabad9a85197ef0faf`; VERSION is 0.45.0; staged files are zero; `usage.html` remains the user's unstaged deletion. The nine Skills and Stage A-D governance semantics have no diff.
+
+### BLOCKER / MAJOR / NOTE
+
+- BLOCKER: none.
+- MAJOR: M-E02-R1 remains OPEN because the formal runtime-canary layer and its stop-loss contract are absent; the committed gates still return success for commented and permanently-false Stage E execution blocks.
+- NOTE: the checker reference canary demonstrates that no general PowerShell static analyzer is needed. A finite five-entry runtime oracle is sufficient once it is implemented and wired without a permanent bypass.
+- NOTE: real-model behavior remains `NEEDS_TEST`.
+
+### Decision
+
+FAIL: 0 BLOCKER, 1 MAJOR. Status remains:
+
+`stage-e-implemented-awaiting-independent-check`
+
+Stage E is not `stage-e-approved-for-release` and is not allowed to be committed on this result. No commit, push, tag, publish, release, or deploy was performed. The local v0.45.0 candidate has not been externally released; external publication still requires explicit user authorization after M-E02-R1 is closed and independently rechecked.
+
+## Stage E M-E02 Runtime Canary Closure Review
+
+Review date: 2026-07-23. Scope was closed to M-E02-R1, the frozen runtime-canary protocol, and minimum regression. No implementation was changed; source-worktree writes were limited to this append. Runtime mutations and release-consistency mutations ran only in short-path Git isolation and were cleaned.
+
+### Formal runtime layer and fixed canary
+
+- `scripts/test-stage-e-gate-runtime.py` and `tests/test_stage_e_gate_runtime.py` exist and are included by the current scoped candidate. The runtime module requires a `.git` worktree, constructs the complete candidate commit while excluding the user's `usage.html` deletion, clones with `core.autocrlf=false`, executes real subprocesses, records real exit codes, and removes its temporary tree in `finally`.
+- The only canary keeps root `VERSION=0.45.0` and changes `project-template/.forgekit/template-manifest.json` from `0.45.0` to `0.44.1`. The required Stage E diagnostic is `version [template manifest]`.
+- Stage E invocation is independently observed by a marker injected only into each isolated clone's validator. The repository validator is not modified.
+
+### Five-gate runtime evidence
+
+The formal runtime suite exited 0 with all five fixed gates:
+
+| Gate | Baseline exit | Canary exit | Baseline Stage E | Canary Stage E | Stage E diagnostic |
+| --- | ---: | ---: | --- | --- | --- |
+| plugin | 0 | 1 | true | true | propagated |
+| template | 0 | 1 | true | true | propagated |
+| release consistency | 0 | 1 | true | true | propagated |
+| smoke | 0 | 1 | true | true | propagated |
+| fresh clone | 0 | 1 | true | true | propagated |
+
+### Original finding mutations and child boundary
+
+- Runtime unittest executed seven real tests, with no skip: fixed five-gate baseline/canary, commented plugin block, `if ($false)`, deleted block, missing validator path, swallowed exit, and child marker. Result: 7/7 PASS.
+- Each of the five plugin disconnect mutations caused the formal runtime suite to exit nonzero and identify the plugin gate as not propagating the fixed canary. No additional PowerShell syntax/control-flow variant was used as a finding.
+- `FORGEKIT_STAGE_E_RUNTIME_CANARY_CHILD` is applied only to child-process environments. It skips nested runtime orchestration, not Stage E validation. Under the child marker, release consistency still exited nonzero for the template-manifest canary and emitted both the nested-orchestration message and Stage E template-manifest diagnostic.
+- Template temporarily sets and then restores/removes the child marker around nested unittest discovery. No permanent environment bypass or recursion was found.
+
+### Static wiring, release consistency, and stop-loss contract
+
+- The static validator remains finite: five fixed gate files, runtime script/test existence, exact gate registration, release-consistency invocation, exit capture/guard, and child-marker presence. It is not required to interpret arbitrary PowerShell control flow.
+- Wiring tests passed 10/10, covering the existing five-entry structure plus runtime script/test requirements and release-consistency runtime invocation/exit propagation.
+- Default production-path `test-release-consistency.ps1` was run in a dirty Git scoped snapshot. It first reported that the Stage E runtime canary propagated the fixed failure through all five gates, then passed baseline, restoring mutations, template validation, and fresh-clone validation. The snapshot returned to its pre-run `M=33`, `??=88` state with `usage.html` present from HEAD and was removed.
+- `tasks.md`, `verification.md`, and `ship.md` freeze the same stop-loss principle: finite static structure; real runtime execution/failure propagation; only the five canary gates define M-E02 closure; no expanding PowerShell static semantics; only a variant that makes the formal runtime canary incorrectly pass may become a new finding.
+
+### Tests and minimum regression
+
+- Runtime tests 7/7; wiring tests 10/10; Stage E tests 19/19; full unittest discovery 228/228.
+- Behavior validate/dry-run passed 31 cases; real models were not invoked.
+- Plugin and template top-level gates passed. Default release consistency passed with the full runtime suite wired before the existing 62 restoring/guard cases.
+- M-E01 remains CLOSED: dynamic manifest 197/197 unique; formal template migration 41/41; 20 actions; provenance Entry 2 / Stage C 10 / Stage D 8; incoming 20/20; unique production 0.45.0; current version surfaces 0.45.0.
+- Stage B, Stage C, and Stage D validators passed. Runtime fresh-clone and release-consistency fresh-clone evidence passed `core.autocrlf=false/true` with no post-clone tracked-byte overlay.
+
+### Severity and decision
+
+- BLOCKER: none.
+- MAJOR: none. M-E02-R1 is CLOSED.
+- NOTE: real-model behavior remains `NEEDS_TEST`; manual-merge UX remains untested; previously documented MAX_PATH noise and old pre-existing temporary directories are unchanged.
+
+PASS WITH NOTES. The local v0.45.0 candidate has passed Stage E release preparation. Status is:
+
+`stage-e-approved-for-release`
+
+Stage E may be committed. This does not authorize push, tag, publish, release, or deploy. Stage E has not yet been committed; v0.45.0 has not been externally released. Any external publication still requires explicit user authorization.

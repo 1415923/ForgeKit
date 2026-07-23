@@ -169,6 +169,7 @@ class StageBMigrationIdentityTests(ExplicitTempMixin, unittest.TestCase):
 class StageBProductionDiscoveryTests(ExplicitTempMixin, unittest.TestCase):
     def candidate_repo(self):
         root = self.make_root("stage-b-discovery")
+        shutil.copy2(REPO / "VERSION", root / "VERSION")
         (root / "scripts").mkdir()
         for name in ("forgekit-upgrade.py", "upgrade_review_packets.py"):
             shutil.copy2(REPO / "scripts" / name, root / "scripts" / name)
@@ -182,9 +183,9 @@ class StageBProductionDiscoveryTests(ExplicitTempMixin, unittest.TestCase):
         parent = self.make_root("stage-b-discovery-parent")
         errors, evidence = validator.validate_production_discovery(REPO, parent)
         self.assertEqual([], errors)
-        self.assertEqual("0.44.1", evidence["fields"]["Latest available"])
-        self.assertEqual("0.44.1", evidence["fields"]["Planned target"])
-        self.assertEqual("0", evidence["fields"]["Pending migrations"])
+        self.assertEqual("0.45.0", evidence["fields"]["Latest available"])
+        self.assertEqual("0.45.0", evidence["fields"]["Planned target"])
+        self.assertEqual("1", evidence["fields"]["Pending migrations"])
         self.assertEqual(evidence["state_before"], evidence["state_after"])
         self.assertTrue(evidence["project_unchanged"])
         self.assertTrue(evidence["cleaned"])
@@ -204,7 +205,13 @@ class StageBProductionDiscoveryTests(ExplicitTempMixin, unittest.TestCase):
         errors, evidence = validator.validate_production_discovery(candidate, candidate)
         self.assertTrue(errors)
         self.assertTrue(
-            any("Latest available" in item or "Planned target" in item or "0.45.0" in item for item in errors),
+            any(
+                "Latest available" in item
+                or "Planned target" in item
+                or "0.45.0" in item
+                or "change-local Stage B draft path" in item
+                for item in errors
+            ),
             errors,
         )
         self.assertTrue(evidence["cleaned"])
@@ -217,6 +224,65 @@ class StageBProductionDiscoveryTests(ExplicitTempMixin, unittest.TestCase):
         self.assertTrue(errors)
         self.assertTrue(evidence["cleaned"])
         self.assertFalse(Path(evidence["temp_root"]).exists())
+
+
+class StageBReleaseLifecycleTests(ExplicitTempMixin, unittest.TestCase):
+    def candidate_repo(self, version="0.45.0"):
+        root = self.make_root("stage-b-lifecycle")
+        (root / "VERSION").write_text(version + "\n", encoding="ascii", newline="\n")
+        for relative in ("migrations", "project-template/migrations"):
+            target = root / relative
+            target.parent.mkdir(parents=True, exist_ok=True)
+            shutil.copytree(REPO / relative, target)
+        draft_target = root / validator.DRAFT_RELATIVE
+        draft_target.parent.mkdir(parents=True, exist_ok=True)
+        shutil.copytree(DRAFT, draft_target)
+        return root
+
+    def mutate_formal_descriptors(self, root, mutate):
+        for relative in ("migrations/0.45.0/migration.json", "project-template/migrations/0.45.0/migration.json"):
+            path = root / relative
+            descriptor = json.loads(path.read_text(encoding="utf-8"))
+            mutate(descriptor)
+            path.write_text(json.dumps(descriptor, ensure_ascii=False, indent=2) + "\n", encoding="utf-8", newline="\n")
+
+    def test_pre_release_without_formal_migration_passes(self):
+        root = self.candidate_repo("0.44.1")
+        shutil.rmtree(root / "migrations/0.45.0")
+        shutil.rmtree(root / "project-template/migrations/0.45.0")
+        self.assertEqual([], validator.validate_release_lifecycle(root))
+
+    def test_pre_release_rejects_premature_formal_migration(self):
+        root = self.candidate_repo("0.44.1")
+        errors = validator.validate_release_lifecycle(root)
+        self.assertTrue(any("premature-formal-migration" in item for item in errors), errors)
+
+    def test_release_preparation_requires_formal_migration(self):
+        root = self.candidate_repo()
+        shutil.rmtree(root / "migrations/0.45.0")
+        errors = validator.validate_release_lifecycle(root)
+        self.assertTrue(any("missing-formal-migration" in item for item in errors), errors)
+
+    def test_release_preparation_valid_package_passes(self):
+        self.assertEqual([], validator.validate_release_lifecycle(self.candidate_repo()))
+
+    def test_release_preparation_rejects_wrong_from(self):
+        root = self.candidate_repo()
+        self.mutate_formal_descriptors(root, lambda item: item.update({"from": "0.44.0"}))
+        self.assertTrue(any("from-version-mismatch" in item for item in validator.validate_release_lifecycle(root)))
+
+    def test_release_preparation_rejects_wrong_to_and_directory_identity(self):
+        root = self.candidate_repo()
+        self.mutate_formal_descriptors(root, lambda item: item.update({"to": "0.45.1"}))
+        errors = validator.validate_release_lifecycle(root)
+        self.assertTrue(any("to-version-mismatch" in item for item in errors), errors)
+        self.assertTrue(any("directory-version-mismatch" in item for item in errors), errors)
+
+    def test_release_preparation_rejects_duplicate_production_target(self):
+        root = self.candidate_repo()
+        shutil.copytree(root / "migrations/0.45.0", root / "migrations/0.45.0-duplicate")
+        errors = validator.validate_release_lifecycle(root)
+        self.assertTrue(any("duplicate-production-version" in item for item in errors), errors)
 
 
 class StageBMigrationBehaviorTests(ExplicitTempMixin, unittest.TestCase):

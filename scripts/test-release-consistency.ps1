@@ -103,6 +103,58 @@ function Invoke-StageDSkillValidator {
     }
 }
 
+function Invoke-StageEReleaseValidator {
+    $stageEValidator = Join-Path $scriptRoot "validate-stage-e-release.py"
+    $previousPreference = $ErrorActionPreference
+    $ErrorActionPreference = "Continue"
+    try {
+        $output = & python -B $stageEValidator --repo-root $repoRoot 2>&1
+        $exitCode = $LASTEXITCODE
+    } finally {
+        $ErrorActionPreference = $previousPreference
+    }
+    return [PSCustomObject]@{
+        ExitCode = $exitCode
+        Output = ($output -join [Environment]::NewLine)
+    }
+}
+
+function Invoke-StageERuntimeCanary {
+    if ($env:FORGEKIT_STAGE_E_RUNTIME_CANARY_CHILD -eq "1") {
+        Write-Host "[ok] nested Stage E runtime-canary orchestration skipped; Stage E validation remains active"
+        return
+    }
+    $runtimeCanary = Join-Path $scriptRoot "test-stage-e-gate-runtime.py"
+    $previousPreference = $ErrorActionPreference
+    $ErrorActionPreference = "Continue"
+    try {
+        $runtimeCanaryOutput = & python -B $runtimeCanary --repo-root $repoRoot 2>&1
+        $runtimeCanaryExitCode = $LASTEXITCODE
+    } finally {
+        $ErrorActionPreference = $previousPreference
+    }
+    if ($runtimeCanaryExitCode -ne 0) {
+        throw "Stage E runtime canary failed: $($runtimeCanaryOutput -join [Environment]::NewLine)"
+    }
+    Write-Host "[ok] Stage E runtime canary propagated the fixed failure through all five gates"
+}
+
+function Invoke-ReleaseGateWiringValidator {
+    $wiringValidator = Join-Path $scriptRoot "validate-release-gate-wiring.py"
+    $previousPreference = $ErrorActionPreference
+    $ErrorActionPreference = "Continue"
+    try {
+        $output = & python -B $wiringValidator --repo-root $repoRoot 2>&1
+        $exitCode = $LASTEXITCODE
+    } finally {
+        $ErrorActionPreference = $previousPreference
+    }
+    return [PSCustomObject]@{
+        ExitCode = $exitCode
+        Output = ($output -join [Environment]::NewLine)
+    }
+}
+
 function Invoke-FreshCloneValidator {
     $freshCloneValidator = Join-Path $scriptRoot "test-fresh-clone-crlf.py"
     $previousPreference = $ErrorActionPreference
@@ -236,6 +288,7 @@ function Invoke-RestoringMultiPassGuard {
     }
 }
 
+Invoke-StageERuntimeCanary
 Assert-ValidationPassed "v$expectedVersion release consistency baseline"
 
 $marketplaceTest = @{
@@ -450,7 +503,7 @@ $productionDiscoveryRedirectTest = @{
         }
         [System.IO.File]::WriteAllText($Path, $mutated, $utf8NoBom)
     }
-    ExpectedMessages = @("production discovery Latest available expected 0.44.1")
+    ExpectedMessages = @("production discovery implementation references the change-local Stage B draft path")
     ValidationCommand = { Invoke-StageBMigrationValidator }
 }
 Invoke-RestoringMutation @productionDiscoveryRedirectTest
@@ -816,6 +869,115 @@ foreach ($entry in $projectionManifest.entries) {
         Invoke-RestoringMutation @skillTest
     }
 }
+
+$stageEVersionTest = @{
+    Label = "Stage E current VERSION rollback mutation"
+    RelativePath = "VERSION"
+    Mutate = {
+        param($Path)
+        [System.IO.File]::WriteAllText($Path, "0.44.1`n", $utf8NoBom)
+    }
+    ExpectedMessages = @("version [VERSION]: expected 0.45.0, got 0.44.1")
+    ValidationCommand = { Invoke-StageEReleaseValidator }
+}
+Invoke-RestoringMutation @stageEVersionTest
+
+$stageEMigrationTests = @(
+    @{ Label = "Stage E missing migration action mutation"; Kind = "missing"; Expected = "migration [action-set]" },
+    @{ Label = "Stage E duplicate migration action mutation"; Kind = "duplicate"; Expected = "migration [duplicate-action-id]" },
+    @{ Label = "Stage E migration checksum mutation"; Kind = "checksum"; Expected = "migration [incoming-checksum]" }
+)
+foreach ($mutation in $stageEMigrationTests) {
+    $stageETest = @{
+        Label = $mutation.Label
+        RelativePaths = @("migrations\0.45.0\migration.json", "project-template\migrations\0.45.0\migration.json")
+        Mutate = {
+            param($Paths)
+            foreach ($path in $Paths) {
+                $descriptor = Get-Content -LiteralPath $path -Raw | ConvertFrom-Json
+                if ($mutation.Kind -eq "missing") {
+                    $descriptor.actions = @($descriptor.actions | Select-Object -SkipLast 1)
+                } elseif ($mutation.Kind -eq "duplicate") {
+                    $descriptor.actions = @($descriptor.actions) + @($descriptor.actions[0])
+                } else {
+                    $descriptor.actions[0].incoming_sha256 = "0000000000000000000000000000000000000000000000000000000000000000"
+                }
+                $json = $descriptor | ConvertTo-Json -Depth 20
+                [System.IO.File]::WriteAllText($path, $json + "`n", $utf8NoBom)
+            }
+        }
+        ExpectedMessages = @($mutation.Expected)
+        ValidationCommand = { Invoke-StageEReleaseValidator }
+    }
+    Invoke-RestoringMultiMutation @stageETest
+}
+
+$stageEManifestTests = @(
+    @{ Label = "Stage E formal template migration manifest deletion mutation"; Kind = "missing"; Expected = "template-migration-manifest-missing" },
+    @{ Label = "Stage E formal template migration manifest duplicate mutation"; Kind = "duplicate"; Expected = "template-migration-manifest-missing" },
+    @{ Label = "Stage E formal template migration manifest checksum mutation"; Kind = "checksum"; Expected = "template-migration-manifest-checksum" }
+)
+foreach ($mutation in $stageEManifestTests) {
+    $manifestTest = @{
+        Label = $mutation.Label
+        RelativePath = "project-template\.forgekit\template-manifest.json"
+        Mutate = {
+            param($Path)
+            $manifest = Get-Content -LiteralPath $Path -Raw | ConvertFrom-Json
+            $target = "migrations/0.45.0/migration.json"
+            $entry = @($manifest.files | Where-Object { $_.source_path -eq $target })[0]
+            if ($mutation.Kind -eq "missing") {
+                $manifest.files = @($manifest.files | Where-Object { $_.source_path -ne $target })
+            } elseif ($mutation.Kind -eq "duplicate") {
+                $manifest.files = @($manifest.files) + @($entry)
+            } else {
+                $entry.checksum = "sha256:" + ("0" * 64)
+            }
+            $json = $manifest | ConvertTo-Json -Depth 20
+            [System.IO.File]::WriteAllText($Path, $json + "`n", $utf8NoBom)
+        }
+        ExpectedMessages = @($mutation.Expected, "migrations/0.45.0/migration.json")
+        ValidationCommand = { Invoke-StageEReleaseValidator }
+    }
+    Invoke-RestoringMutation @manifestTest
+}
+
+$pluginGateWiringTests = @(
+    @{ Label = "Stage E plugin gate invocation deletion mutation"; Kind = "remove"; Expected = "stage-e-gate-wiring-missing" },
+    @{ Label = "Stage E plugin gate invalid validator path mutation"; Kind = "path"; Expected = "stage-e-gate-wiring-missing" },
+    @{ Label = "Stage E plugin gate ignored exit code mutation"; Kind = "exit"; Expected = "stage-e-gate-wiring-invalid" }
+)
+foreach ($mutation in $pluginGateWiringTests) {
+    $wiringTest = @{
+        Label = $mutation.Label
+        RelativePath = "scripts\validate-plugin-assets.ps1"
+        Mutate = {
+            param($Path)
+            $text = [System.IO.File]::ReadAllText($Path)
+            if ($mutation.Kind -eq "remove") {
+                $pattern = '(?ms)^    \$stageEValidator = Join-Path.*?^    if \(\$stageEExitCode -ne 0\) \{\r?\n.*?^    \}\r?\n'
+                $changed = [regex]::Replace($text, $pattern, "", 1)
+            } elseif ($mutation.Kind -eq "path") {
+                $changed = $text.Replace("scripts\validate-stage-e-release.py", "scripts\missing-stage-e-release.py")
+            } else {
+                $changed = $text.Replace('$stageEExitCode = $LASTEXITCODE', '$stageEExitCode = 0')
+            }
+            if ($changed -eq $text) {
+                throw "$($mutation.Label) did not alter the plugin gate"
+            }
+            [System.IO.File]::WriteAllText($Path, $changed, $utf8NoBom)
+        }
+        ExpectedMessages = @($mutation.Expected, "validate-plugin-assets.ps1")
+        ValidationCommand = { Invoke-ReleaseValidator }
+    }
+    Invoke-RestoringMutation @wiringTest
+}
+
+$wiringBaseline = Invoke-ReleaseGateWiringValidator
+if ($wiringBaseline.ExitCode -ne 0) {
+    throw "Stage E gate wiring baseline expected validation success: $($wiringBaseline.Output)"
+}
+Write-Host "[ok] Stage E gate wiring baseline"
 
 Assert-ValidationPassed "post-mutation restored baseline"
 $helperBaseline = Invoke-TemplateValidator

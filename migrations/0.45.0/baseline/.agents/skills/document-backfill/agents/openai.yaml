@@ -1,0 +1,4 @@
+interface:
+  display_name: "Document Backfill"
+  short_description: "Migrate existing docs into ForgeKit docs"
+  default_prompt: "Use document-backfill to migrate existing project docs into ForgeKit docs one source document at a time."

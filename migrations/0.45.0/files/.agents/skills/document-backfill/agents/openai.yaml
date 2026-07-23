@@ -1,0 +1,6 @@
+interface:
+  display_name: "Document Backfill"
+  short_description: "Backfill verified implementation facts"
+  default_prompt: "$document-backfill\n\nBackfill only verified facts from existing implementation into the identified owner document. Choose a recoverable batch by fact domain, owner, risk, evidence consistency, rollback, and context capacity; never use a fixed document count or write future plans as completed facts."
+policy:
+  allow_implicit_invocation: false

@@ -115,12 +115,6 @@ def validate_draft(repo_root, package_root=None):
     except Exception as exc:
         return [f"invalid Stage B migration draft JSON: {exc}"]
 
-    version_path = repo_root / "VERSION"
-    if not version_path.is_file() or version_path.read_text(encoding="utf-8").strip() != "0.44.1":
-        errors.append("Stage B must keep VERSION at 0.44.1")
-    for formal in (repo_root / "migrations/0.45.0", repo_root / "project-template/migrations/0.45.0"):
-        if formal.exists():
-            errors.append(f"formal v0.45.0 migration must not exist during Stage B: {formal}")
     if descriptor.get("from") != "0.44.1" or descriptor.get("to") != "0.45.0":
         errors.append("Stage B migration draft must describe 0.44.1 -> 0.45.0")
     if descriptor.get("development_status") != "fixture-only-not-released":
@@ -130,6 +124,7 @@ def validate_draft(repo_root, package_root=None):
             "Stage B migration draft source_commit must equal approved Stage A commit "
             f"{APPROVED_STAGE_A_COMMIT}; descriptor={descriptor.get('source_commit')!r}"
         )
+    errors.extend(validate_release_lifecycle(repo_root, descriptor))
 
     actions = descriptor.get("actions")
     expected_targets = managed_targets(repo_root)
@@ -203,6 +198,79 @@ def validate_draft(repo_root, package_root=None):
     return errors
 
 
+def version_tuple(value):
+    try:
+        parts = tuple(int(part) for part in value.split("."))
+    except (AttributeError, ValueError):
+        return None
+    return parts if len(parts) == 3 else None
+
+
+def validate_release_lifecycle(repo_root, draft_descriptor=None):
+    """Validate only pre-release/released package presence and version identity."""
+    repo_root = Path(repo_root).resolve()
+    errors = []
+    if draft_descriptor is None:
+        draft_path = repo_root / DRAFT_RELATIVE / "migration.json"
+        if not draft_path.is_file():
+            return [f"release lifecycle: missing development draft descriptor: {draft_path}"]
+        draft_descriptor = json.loads(draft_path.read_text(encoding="utf-8"))
+    version_path = repo_root / "VERSION"
+    if not version_path.is_file():
+        return ["release lifecycle: missing root VERSION"]
+    current = version_path.read_text(encoding="utf-8").strip()
+    target = draft_descriptor.get("to")
+    current_key = version_tuple(current)
+    target_key = version_tuple(target)
+    if current_key is None or target_key is None:
+        return [f"release lifecycle: invalid semantic version current={current!r}, target={target!r}"]
+
+    formal_paths = (repo_root / f"migrations/{target}", repo_root / f"project-template/migrations/{target}")
+    if current_key < target_key:
+        for formal in formal_paths:
+            if formal.exists():
+                errors.append(f"release lifecycle [premature-formal-migration]: {formal}")
+        return errors
+
+    descriptors = []
+    for formal in formal_paths:
+        descriptor_path = formal / "migration.json"
+        if not descriptor_path.is_file():
+            errors.append(f"release lifecycle [missing-formal-migration]: {descriptor_path}")
+            continue
+        formal_descriptor = json.loads(descriptor_path.read_text(encoding="utf-8"))
+        descriptors.append((descriptor_path, formal_descriptor))
+        if formal.name != formal_descriptor.get("to"):
+            errors.append(
+                f"release lifecycle [directory-version-mismatch]: directory={formal.name!r}, "
+                f"descriptor.to={formal_descriptor.get('to')!r}: {descriptor_path}"
+            )
+        if formal_descriptor.get("from") != draft_descriptor.get("from"):
+            errors.append(
+                f"release lifecycle [from-version-mismatch]: expected {draft_descriptor.get('from')!r}, "
+                f"got {formal_descriptor.get('from')!r}: {descriptor_path}"
+            )
+        if formal_descriptor.get("to") != target:
+            errors.append(
+                f"release lifecycle [to-version-mismatch]: expected {target!r}, "
+                f"got {formal_descriptor.get('to')!r}: {descriptor_path}"
+            )
+    if len(descriptors) == 2 and descriptors[0][0].read_bytes() != descriptors[1][0].read_bytes():
+        errors.append("release lifecycle [formal-mirror-mismatch]: root/template migration descriptors differ")
+
+    production_matches = []
+    for descriptor_path in sorted((repo_root / "migrations").glob("*/migration.json")):
+        production = json.loads(descriptor_path.read_text(encoding="utf-8"))
+        if production.get("to") == target:
+            production_matches.append(descriptor_path)
+    if len(production_matches) != 1:
+        errors.append(
+            f"release lifecycle [duplicate-production-version]: expected one production {target}, "
+            f"found {len(production_matches)}: {[str(path) for path in production_matches]}"
+        )
+    return errors
+
+
 def write_state(project):
     state = {
         "schema_version": 1,
@@ -243,6 +311,9 @@ def validate_production_discovery(repo_root, temp_parent=None):
         (isolated / "scripts").mkdir(parents=True)
         for name in ("forgekit-upgrade.py", "upgrade_review_packets.py"):
             shutil.copy2(repo_root / "scripts" / name, isolated / "scripts" / name)
+        upgrade_source = (isolated / "scripts/forgekit-upgrade.py").read_text(encoding="utf-8")
+        if "stage-b-migration-draft" in upgrade_source or DRAFT_RELATIVE.parent.as_posix() in upgrade_source.replace("\\", "/"):
+            errors.append("production discovery implementation references the change-local Stage B draft path")
         shutil.copytree(repo_root / "migrations", isolated / "migrations")
         draft_source = repo_root / DRAFT_RELATIVE.parent
         draft_target = isolated / DRAFT_RELATIVE.parent
@@ -274,11 +345,15 @@ def validate_production_discovery(repo_root, temp_parent=None):
             if ":" in line:
                 key, value = line.split(":", 1)
                 fields[key.strip()] = value.strip()
+        current_version = (repo_root / "VERSION").read_text(encoding="utf-8").strip()
+        draft_descriptor = json.loads((repo_root / DRAFT_RELATIVE / "migration.json").read_text(encoding="utf-8"))
+        released = version_tuple(current_version) >= version_tuple(draft_descriptor["to"])
+        expected_latest = current_version if released else draft_descriptor["from"]
         expected = {
             "Current version": "0.44.1",
-            "Latest available": "0.44.1",
-            "Planned target": "0.44.1",
-            "Pending migrations": "0",
+            "Latest available": expected_latest,
+            "Planned target": expected_latest,
+            "Pending migrations": "1" if released else "0",
         }
         evidence["fields"] = fields
         for key, value in expected.items():
@@ -287,8 +362,10 @@ def validate_production_discovery(repo_root, temp_parent=None):
         lowered = (result.stdout + result.stderr).casefold()
         if "stage-b-migration-draft" in lowered or str(DRAFT_RELATIVE.parent).casefold() in lowered:
             errors.append("production discovery exposed the change-local Stage B draft path")
-        if "0.45.0" in lowered:
+        if not released and "0.45.0" in lowered:
             errors.append("production discovery incorrectly exposed Stage B target 0.45.0")
+        if released and draft_descriptor["to"] not in lowered:
+            errors.append(f"production discovery did not expose formal target {draft_descriptor['to']}")
         if before != after:
             errors.append("production check modified project state, files, or reports")
         if (project / ".forgekit/reports").exists():

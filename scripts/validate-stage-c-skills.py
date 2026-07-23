@@ -727,8 +727,13 @@ def validate_template_manifest(repo: Path, rows: list[dict[str, str]]) -> list[s
     errors: list[str] = []
     manifest = json.loads((repo / "project-template/.forgekit/template-manifest.json").read_text(encoding="utf-8"))
     version = (repo / "VERSION").read_text(encoding="ascii").strip()
-    if manifest.get("template_version") != version or version != "0.44.1":
-        errors.append(f"template-manifest [version]: expected current 0.44.1, got {manifest.get('template_version')!r}/{version!r}")
+    manifest_version = manifest.get("template_version")
+    if manifest_version != version:
+        errors.append(
+            "template-manifest [current-version-mismatch]: "
+            f"VERSION={version!r} at VERSION; template_version={manifest_version!r} "
+            "at project-template/.forgekit/template-manifest.json"
+        )
     files = manifest.get("files")
     if not isinstance(files, list):
         return errors + ["template-manifest [files]: must be a list"]

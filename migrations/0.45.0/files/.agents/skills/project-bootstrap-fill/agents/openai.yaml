@@ -1,0 +1,6 @@
+interface:
+  display_name: "Project Bootstrap Fill"
+  short_description: "Fill confirmed bootstrap placeholders"
+  default_prompt: "$project-bootstrap-fill\n\nFill only confirmed placeholders or clear gaps in this already initialized project. Preserve existing customization, leave conflicts or unknowns unresolved, do not require every section to be filled, and do not re-run project initialization."
+policy:
+  allow_implicit_invocation: false

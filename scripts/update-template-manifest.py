@@ -100,6 +100,48 @@ def projection_manifest_item(source_path, template_root):
     }
 
 
+def current_formal_migration_targets(repo_root, template_root, version):
+    migration_root = template_root / "migrations" / version
+    descriptor_path = migration_root / "migration.json"
+    if not descriptor_path.is_file():
+        fail(f"Formal template migration descriptor is missing: migrations/{version}/migration.json")
+    descriptor = load_json(descriptor_path)
+    if descriptor.get("to") != version:
+        fail(
+            f"Formal template migration directory/version mismatch: directory={version} "
+            f"descriptor={descriptor.get('to')}"
+        )
+    expected = {"migration.json"}
+    for index, action in enumerate(descriptor.get("actions", [])):
+        for field in ("baseline", "source"):
+            relative = normalize_posix(action.get(field, ""))
+            if not is_relative_safe(relative):
+                fail(f"Formal template migration action {index} has unsafe {field}: {relative}")
+            if relative in expected:
+                fail(f"Duplicate formal template migration payload: {relative}")
+            expected.add(relative)
+    actual = {
+        path.relative_to(migration_root).as_posix()
+        for path in migration_root.rglob("*") if path.is_file()
+    }
+    if actual != expected:
+        missing = sorted(expected - actual)
+        extra = sorted(actual - expected)
+        fail(f"Formal template migration inventory mismatch: missing={missing}, extra={extra}")
+    return [f"migrations/{version}/{relative}" for relative in sorted(expected)]
+
+
+def migration_manifest_item(source_path, template_root):
+    return {
+        "source_path": source_path,
+        "target_path": source_path,
+        "role": "metadata",
+        "update_policy": "readonly",
+        "render_mode": "copy",
+        "checksum": sha256_file(template_root / Path(source_path)),
+    }
+
+
 def require_projection_coverage(manifest, repo_root):
     expected = projection_targets(repo_root)
     counts = {}
@@ -109,6 +151,23 @@ def require_projection_coverage(manifest, repo_root):
     for target in expected:
         if counts.get(target, 0) != 1:
             fail(f"Projection target must appear exactly once in template manifest: {target}")
+    return expected
+
+
+def require_formal_migration_coverage(manifest, repo_root, template_root):
+    version = str(manifest.get("template_version", "")).strip()
+    expected = current_formal_migration_targets(repo_root, template_root, version)
+    counts = {}
+    for item in manifest["files"]:
+        source = normalize_posix(item.get("source_path", ""))
+        counts[source] = counts.get(source, 0) + 1
+    for target in expected:
+        if counts.get(target, 0) != 1:
+            fail(f"Formal template migration file must appear exactly once in template manifest: {target}")
+    prefix = f"migrations/{version}/"
+    extras = sorted(source for source in counts if source.startswith(prefix) and source not in expected)
+    if extras:
+        fail("Unexpected formal template migration manifest path(s): " + ", ".join(extras))
     return expected
 
 
@@ -236,6 +295,9 @@ def update_manifest(args):
     validate_manifest(manifest, template_root, check_checksums=False)
 
     expected_targets = projection_targets(repo_root)
+    expected_migrations = current_formal_migration_targets(
+        repo_root, template_root, str(manifest.get("template_version", "")).strip()
+    )
     existing = {
         normalize_posix(item["source_path"]): item
         for item in manifest["files"]
@@ -253,7 +315,24 @@ def update_manifest(args):
             projection_manifest_item(target, template_root) for target in missing
         ]
 
-    changed = bool(missing)
+    existing = {
+        normalize_posix(item["source_path"]): item
+        for item in manifest["files"]
+    }
+    missing_migrations = [target for target in expected_migrations if target not in existing]
+    if args.check and missing_migrations:
+        fail("Formal template migration file(s) missing from template manifest: " + ", ".join(missing_migrations))
+    if missing_migrations:
+        insertion = max(
+            (index for index, item in enumerate(manifest["files"])
+             if normalize_posix(item["source_path"]).startswith("migrations/")),
+            default=len(manifest["files"]) - 1,
+        ) + 1
+        manifest["files"][insertion:insertion] = [
+            migration_manifest_item(target, template_root) for target in missing_migrations
+        ]
+
+    changed = bool(missing or missing_migrations)
     for item in manifest["files"]:
         source_path = normalize_posix(item["source_path"])
         actual = sha256_file(template_root / Path(source_path))
@@ -264,6 +343,7 @@ def update_manifest(args):
             changed = True
 
     require_projection_coverage(manifest, repo_root)
+    require_formal_migration_coverage(manifest, repo_root, template_root)
 
     if not args.check and changed:
         save_json(manifest_path, manifest)
@@ -278,6 +358,7 @@ def load_manifest(repo_root):
     manifest = load_json(manifest_path)
     validate_manifest(manifest, template_root, check_checksums=True)
     require_projection_coverage(manifest, repo_root)
+    require_formal_migration_coverage(manifest, repo_root, template_root)
     return manifest
 
 

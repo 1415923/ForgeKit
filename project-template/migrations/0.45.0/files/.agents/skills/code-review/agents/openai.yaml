@@ -1,0 +1,6 @@
+interface:
+  display_name: "Code Review"
+  short_description: "Review implementation evidence without editing"
+  default_prompt: |-
+    $code-review
+    Review the existing implementation or diff for correctness, regressions, boundary failures, and test gaps without modifying files.

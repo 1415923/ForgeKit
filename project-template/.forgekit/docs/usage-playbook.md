@@ -44,6 +44,22 @@ python scripts/forgekit-project.py --target <project-root> --yes --review-needed
 
 初始化 / 升级工具支持 `--lang zh-CN` 和 `--lang en-US`；也可以用 `FORGEKIT_LANG` 选择本轮显示语言。
 
+## 3.1 v0.45 按需 Skill 入口
+
+九个 Skill 是互斥优先的路由入口，不是必须依次执行的流水线。review、assessment 和 planning 默认只读；本地写入与外部发布动作分别授权。
+
+| 意图 | 轻量提示词 |
+| --- | --- |
+| 新项目初始化 | `请使用 $project-init 建立最小 ForgeKit 边界；未知非关键项保留 TODO_REVIEW，不要实现业务。` |
+| 补已有模板缺口 | `请显式调用 $project-bootstrap-fill，只补证据支持的 placeholder 并保留现有定制。` |
+| 接手审计 | `请使用 $handover-review 只读核对仓库和历史证据；报告冲突，不自动修复。` |
+| 事实文档回填 | `请显式调用 $document-backfill，只回填已有实现事实，按 owner 做最小写回。` |
+| 高影响变更规划 | `请显式调用 $large-change-planning，按信任边界和回滚风险冻结阶段授权与验收。` |
+| 代码审查 | `请使用 $code-review 只读审查现有实现和测试，按严重度报告 finding。` |
+| 安全审查 | `请使用 $security-review 审查明确的安全边界，只报告证据和修复责任。` |
+| 发布检查 | `请使用 $release-check 只读核对发布候选；不要 bump、tag、push 或 release。` |
+| 适用性评估 | `请使用 $project-suitability 只读判断采用 ForgeKit 的收益、成本与约束，不要初始化。` |
+
 ## 4. 开始今天工作
 
 > 请先按 workflow router 读取当前任务、最近 work-log、开放风险和必要验证入口，给我一个简短的当前状态与今天下一步；不要全量读取 `.forgekit/docs/**`。

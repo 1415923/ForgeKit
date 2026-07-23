@@ -55,6 +55,17 @@ function Test-RequiredPattern {
     }
 }
 
+function Test-StageERuntimeContract {
+    $stageEValidator = Join-Path $repoRoot "scripts\validate-stage-e-release.py"
+    Test-RequiredPath "scripts\validate-stage-e-release.py"
+    if (Test-Path -LiteralPath $stageEValidator) {
+        $stageEOutput = & python -B $stageEValidator --repo-root $repoRoot 2>&1
+        if ($LASTEXITCODE -ne 0) {
+            Add-Error "Stage E release structure validation failed: $($stageEOutput -join [Environment]::NewLine)"
+        }
+    }
+}
+
 function Test-AgentEntryContracts {
     $validator = Join-Path $repoRoot "scripts\validate-agent-entries.py"
     Test-RequiredPath "scripts\validate-agent-entries.py"
@@ -77,6 +88,10 @@ function Test-AgentEntryContracts {
     Test-RequiredPath "scripts\validate-stage-c-skills.py"
     $stageDValidator = Join-Path $repoRoot "scripts\validate-stage-d-skills.py"
     Test-RequiredPath "scripts\validate-stage-d-skills.py"
+    $stageEValidator = Join-Path $repoRoot "scripts\validate-stage-e-release.py"
+    Test-RequiredPath "scripts\validate-stage-e-release.py"
+    $releaseGateWiringValidator = Join-Path $repoRoot "scripts\validate-release-gate-wiring.py"
+    Test-RequiredPath "scripts\validate-release-gate-wiring.py"
     Test-RequiredPath "scripts\test-fresh-clone-crlf.py"
     if (Test-Path -LiteralPath $stageCValidator) {
         $stageCOutput = & python -B $stageCValidator --repo-root $repoRoot 2>&1
@@ -88,6 +103,18 @@ function Test-AgentEntryContracts {
         $stageDOutput = & python -B $stageDValidator --repo-root $repoRoot 2>&1
         if ($LASTEXITCODE -ne 0) {
             Add-Error "Stage D Skill contract validation failed: $($stageDOutput -join [Environment]::NewLine)"
+        }
+    }
+    if (Test-Path -LiteralPath $stageEValidator) {
+        $stageEOutput = & python -B $stageEValidator --repo-root $repoRoot 2>&1
+        if ($LASTEXITCODE -ne 0) {
+            Add-Error "Stage E release structure validation failed: $($stageEOutput -join [Environment]::NewLine)"
+        }
+    }
+    if (Test-Path -LiteralPath $releaseGateWiringValidator) {
+        $wiringOutput = & python -B $releaseGateWiringValidator --repo-root $repoRoot 2>&1
+        if ($LASTEXITCODE -ne 0) {
+            Add-Error "Stage E gate wiring validation failed: $($wiringOutput -join [Environment]::NewLine)"
         }
     }
 }
@@ -128,6 +155,8 @@ function Test-StageADeterministicContracts {
         @("Rule ownership", @((Join-Path $repoRoot "scripts\validate-rule-ownership.py"), "--repo-root", $repoRoot)),
         @("Stage C Skill contracts", @((Join-Path $repoRoot "scripts\validate-stage-c-skills.py"), "--repo-root", $repoRoot)),
         @("Stage D Skill contracts", @((Join-Path $repoRoot "scripts\validate-stage-d-skills.py"), "--repo-root", $repoRoot)),
+        @("Stage E release structure", @((Join-Path $repoRoot "scripts\validate-stage-e-release.py"), "--repo-root", $repoRoot)),
+        @("Stage E gate wiring", @((Join-Path $repoRoot "scripts\validate-release-gate-wiring.py"), "--repo-root", $repoRoot)),
         @("Skill behavior cases", @((Join-Path $repoRoot "scripts\test-skill-behavior.py"), "validate", "--repo-root", $repoRoot))
     )
     foreach ($check in $checks) {
@@ -139,12 +168,20 @@ function Test-StageADeterministicContracts {
         }
     }
     $previousErrorPreference = $ErrorActionPreference
+    $hadRuntimeCanaryChild = Test-Path Env:FORGEKIT_STAGE_E_RUNTIME_CANARY_CHILD
+    $previousRuntimeCanaryChild = $env:FORGEKIT_STAGE_E_RUNTIME_CANARY_CHILD
     try {
         $ErrorActionPreference = "Continue"
+        $env:FORGEKIT_STAGE_E_RUNTIME_CANARY_CHILD = "1"
         $unitOutput = & python -B -m unittest discover -s (Join-Path $repoRoot "tests") -p "test_*.py" 2>&1
         $unitExitCode = $LASTEXITCODE
     } finally {
         $ErrorActionPreference = $previousErrorPreference
+        if ($hadRuntimeCanaryChild) {
+            $env:FORGEKIT_STAGE_E_RUNTIME_CANARY_CHILD = $previousRuntimeCanaryChild
+        } else {
+            Remove-Item Env:FORGEKIT_STAGE_E_RUNTIME_CANARY_CHILD -ErrorAction SilentlyContinue
+        }
     }
     if ($unitExitCode -ne 0) {
         Add-Error "Stage A deterministic unit tests failed: $($unitOutput -join [Environment]::NewLine)"
@@ -1551,10 +1588,10 @@ function Test-MinimalProjectCapsuleBootstrap {
     Test-RequiredPattern "migrations\0.43.0\migration.json" '"minimal_project_capsule_bootstrap"' "v0.43 capsule feature"
     Test-NoPattern "migrations\0.43.0\migration.json" '"target": ".forgekit/projects/' "Migration must not create real capsules"
     Test-RequiredPath "migrations\$forgekitVersion\migration.json"
-    Test-RequiredPattern "migrations\$forgekitVersion\migration.json" '"from": "0.44.0"' "Latest migration source reference"
+    Test-RequiredPattern "migrations\$forgekitVersion\migration.json" '"from": "0.44.1"' "Latest migration source reference"
     Test-RequiredPattern "migrations\$forgekitVersion\migration.json" "`"to`": `"$forgekitVersion`"" "Latest migration target"
     Test-RequiredPath "project-template\migrations\$forgekitVersion\migration.json"
-    Test-RequiredPattern "project-template\migrations\$forgekitVersion\migration.json" '"from": "0.44.0"' "Template latest migration source reference"
+    Test-RequiredPattern "project-template\migrations\$forgekitVersion\migration.json" '"from": "0.44.1"' "Template latest migration source reference"
     Test-RequiredPattern "project-template\migrations\$forgekitVersion\migration.json" "`"to`": `"$forgekitVersion`"" "Template latest migration target"
     $rootScript = Get-Content -LiteralPath (Join-Path $repoRoot "scripts\bootstrap-project-capsule.py") -Raw
     $templateScript = Get-Content -LiteralPath (Join-Path $repoRoot "project-template\scripts\bootstrap-project-capsule.py") -Raw
@@ -1587,6 +1624,7 @@ if ((Test-Path -LiteralPath $rootArchiveScript) -and (Test-Path -LiteralPath $te
     }
 }
 
+Test-StageERuntimeContract
 Test-GovernanceFiles
 Test-AIEngineeringLoop
 Test-TemplateManifest

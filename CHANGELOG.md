@@ -1,34 +1,105 @@
 # Changelog
 
+本文件记录 ForgeKit 的用户可感知变化、升级注意事项和重要边界。
 
-本文件记录 ForgeKit 的用户可感知变化。
+README 负责说明“ForgeKit 是什么、怎么开始、日常怎么用”；CHANGELOG 负责说明“每个版本为什么变化、用户会看到什么不同、升级时要注意什么”。
 
-写法参考 [Keep a Changelog](https://keepachangelog.com/zh-CN/1.1.0/) 和语义化版本风格，但 ForgeKit 的版本历史不只记录“做了什么”，也记录每个版本当时面对的问题、形成的设计结论，以及解决的真实痛点。
-
-README 只保留当前定位、快速开始和常用入口；完整版本历史、设计取舍和演进脉络放在这里维护。
-
-## 阅读方式
-
-每个版本尽量按以下结构记录：
-
-- **问题背景**：当时真实使用中遇到什么问题。
-- **设计结论**：从第一性原则出发，最终决定如何收敛。
-- **用户可感知变化**：用户实际会看到什么不同。
-- **边界**：明确没有做什么，避免误解 ForgeKit 的能力范围。
+格式参考 [Keep a Changelog](https://keepachangelog.com/zh-CN/1.1.0/) 和语义化版本。
 
 ## [Unreleased]
 
+- 暂无。
+
+---
+
+## [0.45.0] - Rule Ownership & Skill Convergence
+
+### 问题背景
+
+随着 ForgeKit 的规则、审查流程和项目维护能力不断增加，`AGENTS.md`、`CLAUDE.md`、共享 Skills、模板副本和旧 prompts 之间开始出现三个问题：
+
+- 常驻入口承载了过多条件流程，AI 每次启动都要读取大量并非当前任务所需的规则；
+- 同一规则在多个文件中重复维护，根级 Skill、模板投影和平台适配器容易发生漂移；
+- review、修复、commit、push 和 release 的授权边界不够集中，审查也容易按文件数或行数机械升级。
+
+已有项目还需要一条正式、安全的 0.44.1 → 0.45.0 升级路径，既能更新标准文件，又不能覆盖用户定制。
+
+### 设计结论
+
+v0.45.0 将 ForgeKit 收敛为“轻量常驻入口 + 九个按需 Skill + 唯一规则 owner + 可验证投影和迁移”：
+
+- `AGENTS.md` / `CLAUDE.md` 只保留始终有效的项目边界、授权和路由规则；
+- 根级 `skills/` 成为九个共享 Skill 的语义权威源；
+- 生成项目中的 `.agents/skills/` 由工具按原始字节确定性投影；
+- `.claude/skills/` 保留为 Claude 平台适配层，不作为机械副本；
+- Skill 按任务意图和实际影响调用，不组成固定流水线；
+- review、assessment 和 planning 默认只读，修复授权与外部发布授权分别确认；
+- 风险按信任边界、外部动作、数据/权限/公共接口影响、回滚难度和证据不确定性判断，不按文件数或行数机械升级。
+
 ### Added
 
-- 暂无。
+- 正式收敛九个按需 Skill：
+  - 项目流程：`project-init`、`project-bootstrap-fill`、`handover-review`、`document-backfill`、`large-change-planning`；
+  - 审查与发布：`code-review`、`security-review`、`release-check`、`project-suitability`。
+- 新增根级 Skill → 模板 `.agents/skills/` 的确定性投影和完整性校验。
+- 新增正式 `0.44.1 -> 0.45.0` migration，并同时纳入根仓库与 project template。
+- 新增 Stage E 发布一致性检查和运行时 canary，验证 plugin、template、release consistency、smoke、fresh clone 五个顶层入口能够真实传播发布校验失败。
+- 新增 Windows LF/CRLF fresh-clone 回归，防止 checkout 换行差异破坏 checksum、projection 和 migration。
 
 ### Changed
 
-- 暂无。
+- 精简 `AGENTS.md` / `CLAUDE.md`，将条件流程移入按需 Skill。
+- 明确根级 `skills/`、模板 `.agents/skills/` 和 `.claude/skills/` 的不同职责，避免共享副本和平台适配器混为一谈。
+- `code-review` 明确区分 maker、只读 checker 和 finding recheck；发现问题不自动获得修复权限。
+- `security-review` 只在存在真实安全边界时触发，不把普通 backend、config 或代码变更全部升级为安全审查。
+- `release-check` 只处理明确的 release、version、migration、packaging、tag 或 readiness 意图，普通 commit 不等于 release。
+- `project-suitability` 只读评估是否适合采用 ForgeKit，不自动初始化或改造项目。
+- 常用 prompts 收敛为轻量入口，详细职责由对应 Skill 持有；不再要求所有 Skill 顺序执行。
+- README / README.en / usage playbook 更新为 v0.45.0 的日常入口和升级说明。
 
-### Fixed
+### Upgrade notes
 
-- 暂无。
+从 v0.44.1 升级时，migration 会逐项分类：
+
+| 状态 | 处理方式 |
+| --- | --- |
+| `stock` | 与旧版基线一致，可安全更新 |
+| `custom` | 用户已修改，不覆盖，进入 manual merge |
+| `unknown` | 无法可靠识别，不覆盖 |
+| `missing` | 按 action 合同安全处理 |
+| rollback | 恢复本次升级开始前的状态 |
+
+普通用户继续使用统一入口：
+
+```powershell
+python .\scripts\forgekit-project.py --target "D:\path\to\project"
+```
+
+升级完成后，建议新开 AI 会话，或让当前会话重新读取项目入口和当前任务文档。
+
+### 用户可感知变化
+
+- AI 启动时读取的常驻入口更短，按需流程只在相关任务中加载。
+- 新项目和已有项目的处理边界更清晰：初始化、补全、接手和适配评估不再混用。
+- review 不会因为发现问题自动修改代码，也不会因为改动文件较多就机械扩大审查。
+- 发布检查不会把普通 commit 误判为 release，也不会自动执行 tag、push 或 publish。
+- 升级可以安全更新标准文件，同时保留用户定制内容并明确 manual merge。
+- 根级 Skill、模板投影、migration 和 manifest 的一致性可以由正式门禁验证。
+
+### Verification and known limitations
+
+- 自动化门禁覆盖 Skill ownership、projection、package marker、behavior evidence、正式 migration、template manifest、LF/CRLF fresh clone 和发布失败传播。
+- 自动 behavior dry-run 不等于真实 Codex / Claude 运行证明。
+- 不同客户端的 Skill 发现、选择和上下文收益仍标记为 `NEEDS_TEST`，需要在真实目标环境中验证。
+- manual merge 的实际交互体验仍标记为 `NEEDS_TEST`，需要更多真实项目反馈。
+
+### 边界
+
+- ForgeKit 仍不是业务代码脚手架、Agent 运行时、部署平台或后台调度系统。
+- 不自动 commit、push、tag、publish、release 或 deploy。
+- 不自动覆盖 custom / unknown 文件。
+- 不自动启用多项目模式、拆分现有文档或创建 Project Capsule。
+- 不把一次内部阶段授权解释为外部发布授权。
 
 ---
 

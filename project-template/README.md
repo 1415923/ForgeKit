@@ -134,11 +134,10 @@ Claude Code 入口是薄入口：`CLAUDE.md` 和 `.claude/skills/forgekit-projec
 
 如果不是新项目，而是接手已有项目，应先使用 `.agents/skills/handover-review/`：
 
-1. 完成 `.forgekit/docs/handover-audit.md`。
-2. 完成 `.forgekit/docs/defect-fix-plan.md`。
-3. 先修复 P0/P1 问题，不默认改变大架构。
-4. 记录兼容边界。
-5. 再基于当前技术栈、实际需求和版本闸门规划后续开发。
+1. 默认只读核对当前代码、可重复命令、状态文件和历史记录。
+2. 区分已确认、未确认、冲突、风险、下一步和是否可安全继续。
+3. finding 不自动授权修复；未获得写回授权时不修改仓库。
+4. 若明确授权更新 handover 状态，只修改对应 owner 文档，不顺手修代码。
 
 ## 治理层
 

@@ -145,6 +145,33 @@ function Test-SharedSkillDistribution {
     if ($stageDExitCode -ne 0) {
         Add-Error "Stage D Skill contract check failed: $($stageDOutput -join [Environment]::NewLine)"
     }
+    $stageEValidator = Join-Path $repoRoot "scripts\validate-stage-e-release.py"
+    $previousErrorPreference = $ErrorActionPreference
+    try {
+        $ErrorActionPreference = "Continue"
+        $stageEOutput = & python -B $stageEValidator --repo-root $repoRoot 2>&1
+        $stageEExitCode = $LASTEXITCODE
+    } finally {
+        $ErrorActionPreference = $previousErrorPreference
+    }
+    if ($stageEExitCode -ne 0) {
+        Add-Error "Stage E release structure check failed: $($stageEOutput -join [Environment]::NewLine)"
+    }
+}
+
+function Test-ReleaseGateWiring {
+    $wiringValidator = Join-Path $repoRoot "scripts\validate-release-gate-wiring.py"
+    $previousErrorPreference = $ErrorActionPreference
+    try {
+        $ErrorActionPreference = "Continue"
+        $wiringOutput = & python -B $wiringValidator --repo-root $repoRoot 2>&1
+        $wiringExitCode = $LASTEXITCODE
+    } finally {
+        $ErrorActionPreference = $previousErrorPreference
+    }
+    if ($wiringExitCode -ne 0) {
+        Add-Error "Stage E gate wiring check failed: $($wiringOutput -join [Environment]::NewLine)"
+    }
 }
 
 function Test-PluginManifest {
@@ -183,6 +210,8 @@ Test-RequiredPath "config\skill-projections.json"
 Test-RequiredPath "scripts\sync-skill-projections.py"
 Test-RequiredPath "scripts\validate-stage-c-skills.py"
 Test-RequiredPath "scripts\validate-stage-d-skills.py"
+Test-RequiredPath "scripts\validate-stage-e-release.py"
+Test-RequiredPath "scripts\validate-release-gate-wiring.py"
 Test-RequiredPath "scripts\test-fresh-clone-crlf.py"
 Test-RequiredPath "project-template\AGENTS.md"
 Test-RequiredPath "project-template\CLAUDE.md"
@@ -207,6 +236,7 @@ Test-ForbiddenPath "plugins\forgekit-claude-workflow"
 
 Test-PluginManifest
 Test-ReleaseVersionConsistency
+Test-ReleaseGateWiring
 Test-SharedSkillDistribution
 Test-SkillAscii
 
