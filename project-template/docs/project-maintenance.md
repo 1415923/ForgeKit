@@ -94,6 +94,22 @@ python scripts/archive-capsule.py apply --repo-root . --plan .forgekit/archive-c
 
 跨项目维护计划还必须列出 WorkspaceRoot、Project ID、Repo ID 和 Artifact ID。Artifact 只作为 evidence index；Archive 不是 current docs。`check-workspace-integrity.py` 只检查跨层关系，不替代 `check-current-docs-integrity.py` 的单作用域事实检查。
 
+### One-Time Cleanup Plan
+
+scratch、重复材料或临时文件 cleanup 只使用本次维护计划中的逐项记录：
+
+```text
+Path:
+Evidence:
+Proposed Action:
+Reason:
+Confirmation:
+```
+
+`Path` 必须是已解析的具体目标；`Evidence` 说明为何该项属于本次 cleanup；`Proposed Action` 说明保留、移动、归档或经确认清理；`Reason` 解释必要性；`Confirmation` 记录本次用户决定。未确认项不 apply。
+
+该计划是一次性 review artifact，不建立 `CURRENT/HISTORICAL` 等持久 taxonomy，不建立 inventory database、逐文件 registry、cleanup state 或自动 cleanup。后续维护重新从当前 evidence 生成新计划，不把旧计划当权威库存。
+
 ## Confirmation Rules
 
 - Archive Capsule apply 必须有本次明确确认和 `--confirm`。

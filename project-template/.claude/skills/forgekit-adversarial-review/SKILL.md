@@ -16,9 +16,12 @@ For each finding output:
 - Trigger Condition
 - Expected Failure
 - Evidence / Reproduction
-- Severity
+- ImpactSeverity: CRITICAL | MAJOR | MINOR | NOTE
+- Blocking: YES | NO
+- PrimaryConsequence, FailurePath, and BlockedScope when Blocking is YES
+- SecondaryConsequences and ValidationRelevance when applicable
 - Fix Recommendation
 - Verification Needed
 - TODO_REVIEW when uncertain
 
-Blocking findings require needs-fix or manual-review. Return fixes to the maker. Do not claim pass when evidence or an independent reviewer is unavailable.
+Apply `.forgekit/docs/maker-checker-protocol.md`. Impact severity never implies Blocking. Blocking findings require one evidence-backed primary C1-C4 consequence and a scoped failure path, and they require needs-fix. Use manual-review when scope, authority, evidence, or reviewer independence prevents a defensible decision. Return fixes to the maker.

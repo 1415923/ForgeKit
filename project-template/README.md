@@ -53,7 +53,7 @@ python scripts/forgekit-upgrade.py apply --safe --repo-root .
 
 用户说“安装/初始化/更新/同步 ForgeKit”时，优先路由到 ForgeKitRoot 的统一入口并识别 `project-bootstrap`。用户说“整理一下升级”“阶段结束了”“归档一下”时，先读 `.forgekit/docs/project-maintenance.md` 并识别其他 `MaintenanceIntent`。所有维护动作先 plan；Archive Capsule 只有在用户确认后才 apply，并生成 summary、items log 和 archive index。
 
-Archive apply 前后运行 `python scripts/check-current-docs-integrity.py --repo-root .`。active work 的 Source / Task / Risk / Traceability / Testing 链路断裂时必须先做 Current State Restoration Pass，不能继续归档或把 snapshot 写成 completed phase archive。
+Archive apply 前后运行 `python scripts/check-current-docs-integrity.py --repo-root .`。active work 的真实 Source/Task 断链，或 confirmed risk/testing/traceability/authority/status fact 在 closure 时仍未写回 owner，且存在 scoped failure path 时，先做 Current State Restoration Pass。Document ownership 不意味着 mandatory population；active task 本身不要求 lean/template owners 被填满。
 
 ## 多项目工作区
 
@@ -98,9 +98,7 @@ python scripts/check-workspace-integrity.py --repo-root .
 - `.forgekit/docs/exploration-report.md`、`.forgekit/docs/implementation-plan.md`：跨模块或高风险改动前的执行产物。
 - `.forgekit/docs/project-suitability.md`、`.forgekit/docs/project-trial-record.md`：初始化前判断适用性，并把真实项目经验回灌。
 - `.forgekit/docs/codex-next-work-order.md`：初始化后继续访谈、确认 MVP、落地条件和验证方式。
-- `.forgekit/docs/loop-readiness.md`、`.forgekit/docs/loop-blueprint.md`：判断项目是否适合安全运行 loop，并定义可审查的 loop 设计图纸；它们不是自动执行授权。
-- `.forgekit/docs/loop-operations.md`：定义用户显式触发的 loop dry-run、one-step、bounded-auto、review-only、continue、stop/handoff；它不是后台自动化或无人值守 runner。
-- `.forgekit/docs/bounded-auto-loop-policy.md`：定义有限授权的多阶段推进边界、预算、停止条件和 handoff；它不是自动 runner。
+- `.forgekit/docs/bounded-auto-loop-policy.md`：定义显式触发的 one-step、bounded-auto、review-only，以及允许/禁止路径、effect/budget envelope、停止条件、checkpoint 和 handoff；它不要求 readiness、blueprint 或 state file，也不是自动 runner。
 - Managed docs 写回默认是 `minimal`：业务文件范围不会隐式禁止 `work-log.md`、必要的 `task-board.md` / `changelog.md` / 当前 change 写回；`review-only` 和 report-only 报告仍不写或自动修复文档。
 - `.forgekit/docs/native-agent-adapter.md`：说明 Claude Code / Codex 原生 agent 配置适配、验证清单和 fallback 记录规则；生成配置不等于 runtime 已注册，只有 invoked 才能记录为 native 可用。
 - `.forgekit/docs/maker-checker-protocol.md`：定义 Maker 与独立只读 Checker 的审查协议；中高风险 change 先冻结边界和 acceptance matrix，复审默认只闭合 blocker；self-review 不能冒充独立审查。

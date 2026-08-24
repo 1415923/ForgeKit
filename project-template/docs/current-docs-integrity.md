@@ -2,16 +2,28 @@
 
 ## Purpose
 
-`.forgekit/docs/` 是当前工作状态数据库，必须足以支撑未完成任务继续推进。`.forgekit/archive/` 只保存历史证据，不能替代当前事实，也不能要求后续会话靠读取 archive 才能理解当前任务。
+`.forgekit/docs/` 保存当前工作需要的事实。`.forgekit/archive/` 只保存历史证据，不能替代已经存在的 current fact，也不能要求后续会话靠读取 archive 才能理解当前任务。
+
+Document ownership does not imply mandatory population。Active task 只要求其 Source/Task 链路可恢复；它本身不产生 risk、testing、traceability 或 project-plan 事实。
 
 ## Current Docs Invariants
 
 - `task-board.md` 中真实 `Source ID` 必须能在 `task-intake.md` 找到真实 Source Record。
 - 当前未完成任务必须留在 current docs，不能只存在于 archive。
-- 当前仍有效风险必须留在 `risk-register.md`。
-- 当前任务的最小验证基线必须留在 `testing.md`。
-- 当前 Task、Source、Requirement、Test 等追踪关系必须留在 `traceability.md`。
+- 已确认且仍影响当前工作的风险事实由 `risk-register.md` 负责；没有风险事实时可保持 lean/template。
+- 已确认的可复用验证方法、基线或缺口由 `testing.md` 负责；尚无 testing fact 时，active task alone cannot block。
+- 真实需要的 Task、Source、Requirement、Test 映射由 `traceability.md` 负责；不存在该事实时不强制创建。
+- 当前方向或范围事实变化时才更新 `project-plan.md`；active task 不自动产生 project-plan 内容。
 - 示例 ID 和模板占位不是当前事实，不能用来满足完整性检查。
+- 不得为了 checker 编造“无风险”、测试命令、traceability 或计划事实。
+
+## Fact-Triggered Population Cases
+
+1. Active task 存在，但没有实际 risk fact，`risk-register.md` 为 lean/template：`Blocking=NO`。
+2. Active task 存在，但尚无 testing fact，`testing.md` 为 lean/template：active task alone cannot block。
+3. Confirmed fact 已存在，且正在声明 closure/handover/ship，但负责 owner 仍 stale：只有按 `maker-checker-protocol.md` 建立真实 C1-C4 FailurePath 后，才对受影响的 closure/handover/ship scoped Blocking。
+
+Active work 中 confirmed fact 可暂存在 active change/checkpoint。该临时承载不能在受影响 closure 之后继续成为唯一事实来源。
 
 ## Active Work Guard
 
@@ -19,7 +31,7 @@
 
 ## Archive Preflight Check
 
-归档计划和 apply 前运行 `python scripts/check-current-docs-integrity.py --repo-root .`。检查 Source、Task、Risk、Traceability、Testing 和 work-log 状态。出现 blocking 时停止 apply，先执行 Current State Restoration Pass。普通 `--confirm` 不能绕过 blocking。
+归档计划和 apply 前运行 `python scripts/check-current-docs-integrity.py --repo-root .`。当前 v0.45 checker 输出仍按其既有 machine contract 解释；本指南不得把 legacy command nonzero、strict warning 或 template owner 自动提升为 project Blocking。证据支持的 scoped Blocking 才停止 apply 并进入 Current State Restoration Pass；普通 `--confirm` 不能绕过真实 Blocking。
 
 ## Archive Postflight Check
 
@@ -31,15 +43,15 @@ Current State Restoration Pass 从业务文档、当前代码、任务记录和�
 
 1. 恢复真实 Source Record 和 Task 反链。
 2. 恢复未完成任务及其最小 traceability。
-3. 恢复仍开放风险或人工确认的“当前无开放风险”。
-4. 恢复当前验证命令、范围、通过标准或 `TODO_REVIEW`。
+3. 仅在证据确认仍有开放风险事实时恢复 risk owner；不编造“当前无开放风险”。
+4. 仅在证据确认验证方法、范围、通过标准或缺口时恢复 testing owner；无事实时保持 lean。
 5. 在 work-log 中说明旧 handed-off 结论已 superseded/corrected。
 
 只恢复当前事实，不把 archive 全文复制回 current docs。修复后重新运行检查，并记录 `.forgekit/docs/` 是恢复后的当前事实入口。
 
 ## Template Placeholder Rules
 
-`SRC-EXAMPLE-001`、`SRC-YYYYMMDD-001`、`TASK-EXAMPLE-001`、只出现在模板区的 `TASK-001`，以及 `EPIC-001`、`FEAT-001`、`RISK-001` 等占位不参与真实任务检查。真实活跃任务存在时，`task-intake.md`、`risk-register.md`、`traceability.md`、`testing.md` 不能只剩这些占位或“待补充”。
+`SRC-EXAMPLE-001`、`SRC-YYYYMMDD-001`、`TASK-EXAMPLE-001`、只出现在模板区的 `TASK-001`，以及 `EPIC-001`、`FEAT-001`、`RISK-001` 等占位不参与真实任务检查。真实 active task 要求真实 Source/Task 链路；risk/testing/traceability/project-plan owner 是否需要非模板内容，只由已确认事实和 closure writeback deadline 决定。
 
 ## Boundaries
 

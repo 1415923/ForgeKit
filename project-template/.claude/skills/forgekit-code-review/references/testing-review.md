@@ -17,6 +17,6 @@ Load this reference when behavior changed or validation evidence is required.
 
 ## Decision impact
 
-- Missing non-critical coverage can be an `important` finding or verification gap.
-- Missing evidence for core behavior, security, data migration, or release gates requires `manual-review` or `needs-fix`.
+- Missing non-critical coverage can be a non-blocking `MINOR` or `NOTE` finding or a verification gap.
+- Missing evidence for core behavior, security, data migration, or release gates requires `manual-review` when a decision cannot be supported, or `needs-fix` only when an evidence-backed `Blocking=YES` failure path exists.
 - Never invent test output or infer that unreported tests passed.

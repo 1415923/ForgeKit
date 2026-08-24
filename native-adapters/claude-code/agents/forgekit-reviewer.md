@@ -30,7 +30,7 @@ Review focus:
 - Accidental writes to business docs, secrets, deploy files, CI, or template lock
 - Whether stable facts need current-doc updates
 
-Output findings first, ordered by severity. End with exactly one recommendation:
+Output findings first. Apply `.forgekit/docs/maker-checker-protocol.md`: each finding has `impact_severity: CRITICAL | MAJOR | MINOR | NOTE` and independent `blocking: YES | NO`; every Blocking finding also has one primary C1-C4 consequence, evidence, failure path, and blocked scope. Severity never implies Blocking. End with exactly one recommendation:
 
 - pass
 - needs-fix

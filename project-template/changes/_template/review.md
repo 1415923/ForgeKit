@@ -24,6 +24,20 @@ ValidationReviewed: yes | no
 DocsReviewed: yes | no
 RisksReviewed: yes | no
 Findings:
+
+```text
+- impact_severity: CRITICAL | MAJOR | MINOR | NOTE
+  blocking: YES | NO
+  primary_consequence: C1 | C2 | C3 | C4
+  secondary_consequences:
+  failure_path:
+  blocked_scope:
+  validation_relevance:
+  evidence:
+```
+
+`primary_consequence`、`failure_path`、`blocked_scope` 仅在 `blocking: YES` 时必填；每个 Blocking finding 只有一个 PrimaryConsequence。Impact Severity 不推导 Blocking。
+
 BlockingFindings:
 FollowUps:
 RequiredFixes:
@@ -35,7 +49,7 @@ FinalRecommendation:
 
 `pass` 只授权 `AuthorizedStage` 对应的下一步，不自动授权 commit、真实 smoke 或完整执行。
 
-`self-review` 不能满足 mandatory independent review。reviewer agent 不可用或独立执行无法确认时，使用 `manual-review`，不得写 `pass`。
+当用户、frozen contract 或真实 C1-C4 consequence 已要求 independent review 时，`self-review` 不能满足该 gate。reviewer agent 不可用或独立执行无法确认时，使用 `manual-review`，不得写 `pass`。
 
 ## 自查
 

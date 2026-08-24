@@ -40,6 +40,8 @@ Return exactly one readiness state:
 
 List blockers, evidence gaps, applicable risk, rollback or recovery, required commands, and the exact next authorization. A document that claims a test passed is not a substitute for reproducible evidence.
 
+Findings consume `.forgekit/docs/maker-checker-protocol.md`: report `impact_severity` and `blocking` independently. Every `blocking: YES` release finding requires one primary C1-C4 consequence, evidence, a failure path, and the exact release action in `blocked_scope`. Severity, a checker nonzero, or `--strict` does not independently decide release readiness.
+
 ## Version and Migration Boundary
 
 Keep current version, template version, schema version, and historical version fields separate. Do not mechanically rewrite all version-like values. Do not create or edit a formal migration unless a maker task explicitly authorizes that path and stage.

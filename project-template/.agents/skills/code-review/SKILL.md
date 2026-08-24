@@ -37,13 +37,17 @@ A review decision authorizes only the stage named by the governing proposal.
 
 Require an independent checker because of objective impact, explicit user request, or an existing stage, security, migration, or release gate. Do not require one merely because a change touches a particular number of files, lines, or modules.
 
+Apply the universal finding contract in `.forgekit/docs/maker-checker-protocol.md`. Impact severity and Blocking are independent. A high-impact consequence does not stop the current action without a supported failure path and bounded scope.
+
 ## Output
 
-Lead with findings and cite the closest available file, line, command, or test evidence.
+Lead with findings and cite the closest available file, line, command, or test evidence. Every finding reports:
 
-- `BLOCKER`: unsafe to proceed or a frozen gate is violated.
-- `MAJOR`: material correctness, authorization, compatibility, evidence, or regression defect.
-- `NOTE`: non-blocking hardening, clarity, or follow-up.
+- `impact_severity: CRITICAL | MAJOR | MINOR | NOTE`
+- `blocking: YES | NO`
+- `evidence`
+
+Every `blocking: YES` finding also reports exactly one `primary_consequence: C1 | C2 | C3 | C4`, plus `failure_path` and `blocked_scope`. Add `secondary_consequences` or `validation_relevance` only when evidence supports them. Never infer Blocking from severity, a checker exit, or `--strict`.
 
 Then state open questions, test gaps, the stage-limited decision, and residual risk. If there are no findings, say so and identify any remaining validation gap.
 

@@ -20,12 +20,15 @@
 
 ## 最小写回策略
 
+- Document ownership does not imply mandatory population。owner 表示某类真实事实出现时写到哪里，不表示 active task 存在时该文档必须非模板。
 - 默认 `ManagedDocsWriteback: minimal`。实现完成、阶段收口或版本推进后，只检查并更新真正发生变化的负责文档。
 - `Implementation Scope` 限制业务实现文件；`Governance Writeback Scope` 单独控制 ForgeKit managed docs。用户只说“只改这些业务文件”不等于禁写治理文档。
 - 最小写回限于：实际进展写 `work-log.md`；任务状态变化写 `task-board.md`；用户/版本可见变化写 `changelog.md`；当前 change 流程需要时写 `.forgekit/changes/<id>/*`。
 - 用户明确说不改文档、不改 ForgeKit 或不写 managed docs 时，使用 `ManagedDocsWriteback: off`。
 - `task-intake.md` 原文、`requirements.md` 事实源和 business docs 需要明确授权；generated report 仍是 report-only，不能自动修复或触发写回。
-- `review-only` 不写文件；`one-step` 结束前检查一次；`bounded-auto` 每个 checkpoint 检查一次。
+- `review-only` 不写文件；`one-step` 结束前检查一次；`bounded-auto` 在声明的 checkpoint 检查一次。检查无新事实时不写。
+
+Active task 本身不得推出 risk、testing、traceability 或 project-plan 内容。没有对应事实时，这些 owner 可以保持 lean/template；不得为了 checker 编造“当前无风险”、测试方法、追踪关系或项目计划。Active work 中 confirmed fact 可暂存在 active change/checkpoint；在受影响 task/change/phase 被声明 closed、shipped 或 handed off 前，才必须写回唯一负责 owner。
 
 | 文档 | 文档分类 | 读者 | 默认读取 | 写什么 | 不写什么 | 更新触发 | 相关文档 |
 | --- | --- | --- | --- | --- | --- | --- | --- |
@@ -42,7 +45,7 @@
 | `.forgekit/docs/workflow-router.md` | core | 用户、AI 工具 | yes | 用户意图到 Read / Write / Do Not Write / Required Output 的路由表 | 任务看板、执行器、自动 runner、业务事实正文 | 用户常见意图、文档读写边界或路由规则变化 | `document-responsibility.md`, `codebase-map.md` |
 | `.forgekit/docs/project-maintenance.md` | triggered | 用户、AI 工具 | no | MaintenanceIntent、upgrade sync、archive capsule 和 plan/confirm/summary 维护流程 | 自动执行器、业务事实、无确认 apply | 用户提出同步、整理、归档、checkpoint、handoff 或报告维护请求 | `workflow-router.md`, `archive-capsule.md`, `context-continuity.md` |
 | `.forgekit/docs/archive-capsule.md` | triggered | 用户、AI 工具 | no | capsule 结构、命名、summary/items/index 和 legacy archive 边界 | current truth、删除策略、自动整理旧 archive | 阶段归档计划或 apply | `project-maintenance.md`, `.forgekit/archive/index.md` |
-| `.forgekit/docs/current-docs-integrity.md` | triggered | 用户、AI 工具、维护者 | no | current Source/Task/Risk/Traceability/Testing 不变量、archive preflight/postflight 和恢复边界 | 自动恢复、全量 archive 回填、业务事实替代 | archive/maintenance 前后、当前任务断链或模板化 | `task-board.md`, `task-intake.md`, `risk-register.md`, `traceability.md`, `testing.md` |
+| `.forgekit/docs/current-docs-integrity.md` | triggered | 用户、AI 工具、维护者 | no | current Source/Task 链路、fact-triggered owner、closure writeback、archive preflight/postflight 和恢复边界 | 从 active task 推导 mandatory population、自动恢复、全量 archive 回填、业务事实替代 | archive/maintenance 前后、当前任务断链、confirmed fact owner stale 或 closure 失败 | `task-board.md`, `task-intake.md`, `risk-register.md`, `traceability.md`, `testing.md` |
 | `.forgekit/docs/scoped-docs.md` | triggered | 用户、AI 工具、维护者 | enabled-only | Workspace Docs、Project Capsule、Repo Lite、Artifact 和 Archive 的分层职责 | 实际任务状态、完整项目协议副本、自动迁移 | multi-project 启用、跨 repo 任务或 scoped docs 检查 | `workspace-map.json`, `.forgekit/projects/`, `check-workspace-integrity.py` |
 | `.forgekit/projects/<project-id>/*` | current scoped | 项目 owner、AI 工具 | selected-project | 项目局部 card、Source 引用、任务、测试、风险和 decision records | Workspace Source 原文副本、完整 ForgeKit docs、跨项目 overall truth | multi-project 已启用且任务命中该 Project ID | `scoped-docs.md`, `workspace-map.json` |
 | `.forgekit/docs/task-intake.md` | working | 用户、AI 工具 | as-needed | 工作来源原文或原始想法、Source ID、Update Notes、Task Decision、Derived Task IDs、人工确认状态 | 执行状态总表、工作流水、changelog、长分析 | 领导任务、微信任务、计划表格子、会议任务、个人规划、用户反馈、bug、技术债、测试失败；小补充默认更新已有 Source | `requirements.md`, `task-board.md`, `work-log.md` |
@@ -67,12 +70,9 @@
 | `.forgekit/docs/quality-metrics.md` | triggered | 维护者 | no | 选定质量指标和复查门槛 | 每次测试结果、每个缺陷 | 质量指标或复查门槛变化 | `testing.md`, `risk-register.md` |
 | `.forgekit/docs/technical-debt.md` | triggered | 维护者 | no | 已接受的技术债、负责人、复查条件 | 所有 TODO、已关闭风险 | 技术债被接受或退休 | `risk-register.md`, `task-board.md` |
 | `.forgekit/docs/traceability.md` | triggered | 测试、维护者 | no | 需要时的需求-任务-测试-缺陷映射 | 任务原文、长证据 | 受监管、高风险或用户要求追踪 | `requirements.md`, `testing.md`, `task-board.md` |
-| `.forgekit/docs/loop-readiness.md` | triggered | 用户、AI 工具 | no | 是否具备安全运行 loop 的条件 | loop runner 配置、daemon 设置 | loop 设计或操作前 | `loop-blueprint.md`, `loop-operations.md` |
-| `.forgekit/docs/loop-blueprint.md` | triggered | 用户、AI 工具 | no | 可审查的 loop 设计 | 自动执行授权 | 用户要求类似循环的重复工作 | `loop-readiness.md`, `work-log.md` |
-| `.forgekit/docs/loop-operations.md` | triggered | 用户、AI 工具 | no | 明确触发的 dry-run、one-step、continue、stop/handoff 协议 | 后台 runner、调度器、自动化代码 | 用户明确操作 loop | `loop-blueprint.md` |
-| `.forgekit/docs/bounded-auto-loop-policy.md` | triggered | 用户、AI 工具 | no | one-step、bounded-auto、review-only 的授权边界、预算、停止条件和交接规则 | runner、daemon、scheduler、自动 PR、worktree 编排 | 用户要求一次授权多阶段推进或审查 loop policy | `loop-blueprint.md`, `loop-operations.md`, `work-log.md` |
-| `.forgekit/docs/native-agent-adapter.md` | triggered | 用户、AI 工具 | no | 原生 agent 配置适配、runtime 验证清单、native/fallback/simulated 记录规则 | 自动执行授权、运行器配置、把 fallback 称为 native 成功 | 用户选择生成或验证 Claude Code / Codex native agent 配置 | `loop-blueprint.md`, `loop-operations.md`, `maker-checker-protocol.md` |
-| `.forgekit/docs/maker-checker-protocol.md` | triggered | 用户、AI 工具 | no | Maker/独立 Checker、最小 review packet、ReviewType 和 gate 规则 | 自动修复、PR API、多 agent 调度器或最终人工批准 | 代码变更、核心/API/数据/权限/脚本变更、发版/tag 或 bounded-auto 收口 | `changes/<id>/review.md`, `forgekit-request-code-review`, `forgekit-code-review` |
+| `.forgekit/docs/bounded-auto-loop-policy.md` | triggered | 用户、AI 工具 | no | explicit loop trigger、允许/禁止路径、effect/budget envelope、stop、checkpoint、handoff 与适用 review gate | readiness questionnaire、mandatory blueprint/state、runner、daemon、scheduler、自动 PR、worktree 编排 | 用户明确要求 one-step、bounded-auto 或 review-only | `ai-engineering-loop.md`, `agent-entry-contract.md`, `maker-checker-protocol.md`, `work-session-checkpoint.md` |
+| `.forgekit/docs/native-agent-adapter.md` | triggered | 用户、AI 工具 | no | 原生 agent 配置适配、runtime 验证清单、native/fallback/simulated 记录规则 | 自动执行授权、运行器配置、把 fallback 称为 native 成功 | 用户选择生成或验证 Claude Code / Codex native agent 配置 | `bounded-auto-loop-policy.md`, `maker-checker-protocol.md` |
+| `.forgekit/docs/maker-checker-protocol.md` | triggered | 用户、AI 工具 | no | universal Severity × Blocking finding contract；适用时的 Maker/独立 Checker、最小 review packet、ReviewType 和 gate | severity-driven gate、every-run mandatory review、自动修复、PR API、多 agent 调度器 | reviewer/checker 输出 finding，或用户/frozen contract/真实 C1-C4 consequence 要求独立审查 | `changes/<id>/review.md`, `forgekit-request-code-review`, `forgekit-code-review` |
 | `.forgekit/docs/reasoning-review.md` | triggered | 用户、开发者、reviewer | no | First-Principles Pass 与 Adversarial Review Pass 的触发、输出和写回协议 | 所有审查报告、长推理日志、自动修复或事实源 | 根因不清、高风险设计、用户明确要求或高风险收口 | `changes/<id>/design.md`, `changes/<id>/review.md`, `risk-register.md`, `context-continuity.md` |
 | `.forgekit/docs/worktree-playbook.md` | triggered | 用户、AI 工具 | no | 手动 worktree 隔离指南 | 自动 worktree 编排 | 用户要求并行隔离工作 | `work-log.md` |
 | `.forgekit/changes/<id>/*` | triggered | 开发者、复查者 | no | 单次中高风险变更过程 | 当前态事实、无关历史 | 中高风险变更开始或收口 | `document-lifecycle.md` |
@@ -91,6 +91,8 @@
 3. 相关文档只放链接或 Source ID，不复制同一段内容。
 4. 给用户看的文档先写结论，再写必要证据，避免模板腔和长过程自述。
 5. 触发式文档只有事件真的发生时才读取或更新。
+
+Closure 前额外检查：如果 confirmed testing/risk/authority/status fact 仍只在 active change/checkpoint，写回负责 owner；没有事实则不填。用户禁止该必要写回时，只能把受影响 closure/handover/ship 标为 incomplete，不阻止无关工作。
 
 用户意图不清楚时，先读 `workflow-router.md` 做 intent routing。它只负责把“我要看领导原文 / 当前任务 / 验证结果 / 今天做了什么 / 准备汇报 / 继续 loop / 收口版本”等请求映射到正确文档和输出；它不是任务看板，不替代 `task-board.md`，也不授权自动执行。
 

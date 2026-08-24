@@ -6,6 +6,8 @@
 
 Checkpoint 由事件触发，不按消息数、命令数或固定时间触发。默认使用 `ManagedDocsWriteback: minimal`，只更新事实真正变化的负责文档。
 
+Document ownership does not imply mandatory population。Active task 本身不产生 risk、testing、traceability 或 project-plan 事实；没有事实时 owner 保持 lean/template，不得为 checker 编造内容。
+
 ## Writeback Levels
 
 ### Micro Update
@@ -30,6 +32,8 @@ Micro Update 只限制 `.forgekit` managed docs 的治理写回，不限制任�
 
 在 commit、tag、handoff、发布或 Archive Capsule 前执行。除 Checkpoint Update 外，还要确认用户可见变化、验证证据、开放风险、change 状态和后续入口已经收口。Ship Update 不授权自动 commit、tag、push、PR 或 archive apply。
 
+Active work 中 confirmed fact 可以暂存在 active change/checkpoint；但受影响 task/change/phase 被声明 closed、shipped 或 handed off 前，必须写回下表中的唯一负责 owner。没有对应事实变化的 owner 不要求填充。用户禁止必要写回时，只阻止相关 closure/handover/ship declaration，不阻止无关工作。
+
 ## Write Targets
 
 | 事实类型 | 写回位置 | 最小内容 |
@@ -43,6 +47,8 @@ Micro Update 只限制 `.forgekit` managed docs 的治理写回，不限制任�
 | 来源事实变化 | `task-intake.md` 或 scoped `source-links.md` | 原始来源或引用、人工确认状态 |
 
 `task-intake.md`、`source-links.md` 和 `requirements.md` 不是一般进度写回目标。只有来源事实或已确认需求事实发生变化时才更新。
+
+上表是 fact-owner mapping，不是每次 checkpoint 的必填清单。先确认事实真实存在且已经变化，再选择 owner。
 
 ## Do Not Write Back
 
@@ -81,7 +87,7 @@ auto compact 可能不可预见，不能假设用户总能提前 checkpoint。�
 
 - `review-only`：不写 managed docs。
 - `one-step`：结束前执行一次 writeback check；无新事实则不写。
-- `bounded-auto`：每个授权 checkpoint 执行 writeback check；超范围或证据不足时停止。
+- `bounded-auto`：在授权中声明的 checkpoint 执行 writeback check；无新事实时不写，超范围或证据不足时停止受影响动作。
 - report-only 脚本：只写其声明的报告文件，不借本协议自动修复 current docs。
 
 ## Boundaries

@@ -9,7 +9,7 @@ Act as a read-only ForgeKit reviewer.
 Responsibilities:
 - Review the diff, validation evidence, scope control, risks, and current-doc sync.
 - Prioritize correctness, security, behavior regressions, missing tests, boundary violations, and stale ForgeKit records.
-- Report findings with file references and severity.
+- Report findings with file references, canonical impact severity, and an independent Blocking value.
 - Report whether native invocation was actually observed.
 
 Boundaries:
@@ -21,8 +21,11 @@ Boundaries:
 
 Output:
 - Findings first, ordered by severity.
+- For Blocking=YES, include one primary C1-C4 consequence, evidence, failure path, and blocked scope.
 - Test and validation gaps.
 - Documentation sync gaps.
 - Residual risks.
 - Pass, needs-fix, or manual-review.
+
+Impact severity does not imply Blocking. Apply .forgekit/docs/maker-checker-protocol.md.
 """

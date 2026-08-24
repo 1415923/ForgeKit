@@ -1,8 +1,8 @@
 # Native Agent Adapter
 
-用途：说明 ForgeKit 如何把现有 loop、Maker / Checker 和验证协议，映射为 Claude Code / Codex 可审查的原生 agent 配置，并区分 native agent 与 fallback 执行。
+用途：说明 ForgeKit 如何把 bounded loop、Maker / Checker 和验证协议，映射为 Claude Code / Codex 可审查的原生 agent 配置，并区分 native agent 与 fallback 执行。
 
-本文是适配说明，不是自动执行授权。ForgeKit Core 仍然负责项目边界、任务澄清、风险分级、loop 操作协议、Maker / Checker 证据和验证记录；Claude Code / Codex native agents 只是可选执行后端。
+本文是适配说明，不是自动执行授权。ForgeKit Core 仍然负责项目边界、Execution Intent、Effect Risk、bounded loop、finding contract 和验证记录；Claude Code / Codex native agents 只是可选执行后端。
 
 生成配置不等于运行时已经注册。Claude Code / Codex 是否真正加载 custom agents，取决于路径、格式、工具版本、session 启动方式，以及是否重启或按官方方式重新加载。没有观察到对应的 `forgekit-*` agent（包括 `forgekit-code-reviewer`）被实际调用前，不能把结果称为 native agent 成功。
 
@@ -69,21 +69,21 @@ Native Agent Adapter 有三种运行状态：
 
 ## 与 ForgeKit Loop 的关系
 
-`.forgekit/docs/loop-blueprint.md` 定义可审查蓝图。
+`.forgekit/docs/bounded-auto-loop-policy.md` 是 surviving loop owner，定义 explicit trigger、允许/禁止路径、bounded effect/budget envelope、stop、checkpoint 和 handoff。Execution Intent 来自 `governance/ai-engineering-loop.md`，Effect Risk 来自 `governance/agent-entry-contract.md`，review findings 来自 `.forgekit/docs/maker-checker-protocol.md`。
 
-`.forgekit/docs/loop-operations.md` 定义用户显式触发的 dry-run、one-step、continue 和 stop/handoff。
+Native Agent Adapter 只提供原生工具配置模板。即使生成了 planner、reviewer 或 verifier，也不代表 loop 自动开启，也不代表 runtime 已加载这些 agent。进入 loop 仍需要用户明确要求，并遵守上述 surviving owners；不需要 readiness questionnaire、mandatory blueprint 或 state file。
 
-Native Agent Adapter 只提供原生工具配置模板。即使生成了 planner、reviewer 或 verifier，也不代表 loop 自动开启，也不代表 runtime 已加载这些 agent。进入 loop 仍需要用户明确要求，并且必须遵守 loop 蓝图、允许路径、禁止路径、验证命令、停止条件和人工升级规则。
-
-如果 loop 使用 `bounded-auto`，必须先读取 `.forgekit/docs/bounded-auto-loop-policy.md`。`AgentModeRequired: native` 时，`native_agent_status != available` 必须停止；`fallback-allowed` 时可以降级，但必须记录 `agent_mode: fallback` 和 `fallback_reason`，不得把 fallback 称为 native。
+如果 loop 使用 `bounded-auto`，`AgentModeRequired: native` 时，`native_agent_status != available` 才停止依赖该 mode 的动作；`fallback-allowed` 时可以降级，但必须记录 `agent_mode: fallback` 和 `fallback_reason`，不得把 fallback 称为 native。bounded-auto 本身不机械要求 independent review；只在 consequence 或 explicit user/frozen gate 适用时启用。
 
 ## 与 Maker / Checker 的关系
 
 Maker / Checker 协议仍以 `.forgekit/docs/maker-checker-protocol.md` 为准。
 
 - Maker：主会话默认承担，实现并记录 ready-for-check 证据。
-- Checker：`forgekit-code-reviewer` 使用独立只读上下文执行代码复核；self-review 不能冒充 independent review，reviewer 不可用时必须 manual-review。
+- Checker：当 independent gate 适用时，`forgekit-code-reviewer` 使用独立只读上下文执行代码复核；self-review 不能冒充该 gate，reviewer 不可用时返回 manual-review。
 - Verifier：verifier agent 可以运行已确认的验证命令，但不能替代人工判断验证是否充分。
+
+Reviewer finding 必须独立表达 `impact_severity` 和 `blocking`；Severity 不拥有 gate authority。每个 `Blocking=YES` finding 按 universal contract 给出唯一 PrimaryConsequence、Evidence、FailurePath 和 BlockedScope。
 
 ## 生成方式
 

@@ -36,4 +36,6 @@ Evidence gaps remain `UNKNOWN` or `TODO_REVIEW`; they never authorize plausible 
 
 Write only the owner document required by the authorized fact domain and the minimum recoverable progress needed for a longer backfill. Do not create unrelated documents, rewrite the full documentation set, or place project business facts in governance files.
 
+Document ownership does not imply mandatory population. An active task alone does not create risk, testing, traceability, or project-plan facts, and backfill must never invent content to make an owner look complete. A confirmed fact may remain temporarily in the active change/checkpoint while work continues, but before the affected task/change/phase is declared closed, shipped, or handed off, restore it to the responsible current owner. If that write is not authorized, report that the closure declaration remains incomplete; do not block unrelated work.
+
 End each actual batch with sources processed, owner document changed, confirmed facts added, existing customization preserved, conflicts or unknowns left unresolved, validation performed, and the next optional batch. Backfill never starts implementation automatically.

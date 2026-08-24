@@ -1,6 +1,6 @@
 ---
 name: forgekit-request-code-review
-description: Prepare and request an independent ForgeKit code review after code changes, before release or commit gates, or before bounded-auto closure. Use from the maker context to build a minimal review packet and invoke forgekit-code-reviewer without passing conversation history.
+description: Prepare and request an independent ForgeKit code review when the user, frozen contract, or evidence-backed consequence makes that gate applicable. Use from the maker context to build a minimal review packet and invoke forgekit-code-reviewer without passing conversation history.
 ---
 
 # Request Independent Code Review
@@ -9,9 +9,9 @@ Use this skill from the maker context. Do not perform the independent review you
 
 ## Decide the gate
 
-- Documentation-only change: independent review is optional unless risk or user instructions require it.
-- Code change: independent review is the default.
-- Core logic, API, data, permissions, scripts, release, tag, or bounded-auto closure: independent review is mandatory.
+- Use independent review when the user or frozen contract explicitly requires it, or objective C1-C4 consequence makes independent evidence applicable.
+- Code, script, documentation, file count, and bounded-auto execution do not mechanically create the gate.
+- When an independent gate exists, self-review cannot satisfy it; when none exists, requesting review remains optional and must not become a new blocker.
 
 ## Build the review packet
 
@@ -44,9 +44,9 @@ Do not convert fallback or same-context self-review into independent review.
 
 ## Handle the decision
 
-- `pass`: allow handoff or commit preparation.
+- `pass`: authorize only the stage named by the governing review request; it does not automatically authorize handoff, commit, smoke, or release.
 - `needs-fix`: return findings to the maker; fix or obtain explicit user risk acceptance, then request review again.
-- After the normal maker fix round, request `blocker-recheck` with the prior blocking findings instead of a fresh open-ended review. If several Major findings remain, return to design rather than extending an indefinite patch loop.
+- After the normal maker fix round, request `blocker-recheck` with the prior Blocking findings instead of a fresh open-ended review. If governance-only blocking repeats without new mainline evidence, perform simplification review before adding another review layer.
 - `manual-review`: stop the gate and request human confirmation.
 
 Record the result in the active change `review.md` when a change folder exists. Otherwise report it in the final handoff.

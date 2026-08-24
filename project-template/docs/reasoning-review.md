@@ -38,14 +38,19 @@
 - **Trigger Condition**
 - **Expected Failure**
 - **Evidence / Reproduction**
-- **Severity**
+- **Impact Severity**：`CRITICAL | MAJOR | MINOR | NOTE`
+- **Blocking**：`YES | NO`
+- **PrimaryConsequence / FailurePath / BlockedScope**（仅 `Blocking=YES` 时必需）
+- **SecondaryConsequences / ValidationRelevance**（适用时）
 - **Fix Recommendation**
 - **Verification Needed**
 - **TODO_REVIEW**（不确定时）
 
+finding 统一消费 `maker-checker-protocol.md`。Impact Severity 只描述后果实现时的影响量级，不拥有 gate authority；Severity、checker exit、`--strict` 或 `TODO_REVIEW` 都不能单独推导 Blocking。每个 `Blocking=YES` finding 必须有唯一 PrimaryConsequence、可定位 Evidence、FailurePath 和受限 BlockedScope。
+
 覆盖维度按任务选择，不做机械全量清单：correctness、edge cases、reliability、security、performance、data integrity、operations、documentation drift。
 
-归档或维护场景额外检查：active task source loss、task-board 与 task-intake 断链、风险只留在 archive、traceability 退化为占位、testing baseline 丢失，以及 archive 被误写成 completed phase close。
+归档或维护场景额外检查：active task source loss、task-board 与 task-intake 断链、已确认风险只留在 archive、已确认 traceability/testing fact 在 closure 时仍未写回 owner，以及 archive 被误写成 completed phase close。Active task 本身不产生这些 facts。
 
 ### Trigger Rules
 
@@ -62,7 +67,7 @@
 ## Output Contracts
 
 - 推导必须标记事实、假设和证据，未经验证的结论不能写成事实。
-- 高严重级别 finding 默认进入 `needs-fix` 或 `manual-review`，不得静默通过。
+- 只有 `Blocking=YES` finding 进入 `needs-fix`；证据、scope 或 authority 无法支持判断时进入 `manual-review`。高 Impact Severity 不自动阻塞。
 - reviewer 不直接修代码；修复交回 maker，随后重新验证和审查。
 
 ## Writeback Rules

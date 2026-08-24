@@ -17,9 +17,9 @@
 
 ## Critical Facts
 
-First-Principles Pass 的关键机制推导，以及 Adversarial Review 的 blocking finding、失败路径和验证要求，都属于 Critical Facts。checkpoint 只记录结论摘要、证据路径、决策和 `TODO_REVIEW`，不复制完整推理或审查长日志。
+First-Principles Pass 的关键机制推导，以及 Adversarial Review 的 `Blocking=YES` finding、失败路径和验证要求，都属于 Critical Facts。checkpoint 只记录结论摘要、证据路径、决策和 `TODO_REVIEW`，不复制完整推理或审查长日志。
 
-current docs integrity failure 也是 Critical Fact。task-intake 断链、risk-register/traceability 模板化、testing 缺少当前基线都必须 checkpoint。Current State Restoration Pass 完成后，应记录 restored `.forgekit/docs/` 是当前事实入口，并附检查证据路径。
+有真实 failure path 的 current docs integrity failure 也是 Critical Fact，例如 active Source/Task 断链，或 confirmed risk/testing/authority/status fact 在 closure 时仍只存在于 archive/change/checkpoint。仅有 active task 而 risk-register、traceability、testing 或 project-plan 保持 lean/template，不构成 failure；不得为 checkpoint 编造事实。Current State Restoration Pass 完成后，应记录 restored `.forgekit/docs/` 是当前事实入口，并附检查证据路径。
 
 以下内容不能只留在聊天里：
 
@@ -47,6 +47,8 @@ current docs integrity failure 也是 Critical Fact。task-intake 断链、risk-
 - handoff、commit 或 tag 前。
 
 Checkpoint 只写发生变化且有证据的关键事实；无新事实时不为“同步”而改文档。
+
+Active work 中 confirmed fact 可暂存于 active change/checkpoint。受影响 task/change/phase 被声明 closed、shipped 或 handed off 前，必须写回唯一负责 current owner；没有事实变化的 owner 不要求 population。
 
 具体写回粒度和位置按 `work-session-checkpoint.md` 执行：日常小改默认是 Micro Update；形成可恢复结论时才升级为 Checkpoint Update；commit/tag/handoff/archive 前执行 Ship Update。
 

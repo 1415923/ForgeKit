@@ -22,10 +22,13 @@ Apply this reference to every code review.
 - Prefer evidence-backed findings over speculative style advice.
 - Treat lint and formatting as tool concerns unless they cause behavior or maintenance risk.
 
-## Severity
+## Finding contract
 
-- `blocking`: correctness, security, data loss, incompatible behavior, or release gate failure.
-- `important`: material maintainability, observability, or non-blocking regression risk.
-- `nit`: small clarity issue with no delivery impact.
-- `suggestion`: optional improvement outside the required fix.
-- `praise`: concise evidence-backed strength.
+Use the canonical contract from `.forgekit/docs/maker-checker-protocol.md`:
+
+- `impact_severity: CRITICAL | MAJOR | MINOR | NOTE` describes consequence magnitude.
+- `blocking: YES | NO` independently decides whether the current scoped action must stop.
+- Every Blocking finding needs one primary C1-C4 consequence, evidence, a failure path, and a blocked scope.
+- Optional hardening, clarity improvements, and praise remain `Blocking=NO`.
+
+Do not derive Blocking from severity, checker exit, or strict mode.

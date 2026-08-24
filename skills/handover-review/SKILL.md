@@ -36,10 +36,13 @@ Documentation that claims success is not a substitute for current code and repea
 3. Run safe read-only checks when available. Do not install missing tools or start services merely to complete the audit.
 4. Classify each material conclusion as confirmed, unconfirmed, conflicting, or historical, and include the evidence path or command.
 5. Identify risks, verification gaps, and the safest next step. High-impact findings may route to `large-change-planning`; an explicitly requested factual migration may route to `document-backfill`. Neither route runs automatically.
-6. Decide whether the project is safe to continue, safe only within a bounded area, or blocked pending evidence or authorization.
+6. Check recoverability and closure writeback: confirmed facts may be temporarily carried by an active change/checkpoint, but a declared closure, ship, or handoff must not leave the responsible current owner stale. Document ownership alone does not require risk, testing, traceability, or project-plan population when no such fact exists.
+7. Decide whether the project is safe to continue, safe only within a bounded area, or blocked pending evidence or authorization. Apply the universal finding contract in `.forgekit/docs/maker-checker-protocol.md`; severity does not imply Blocking, and any scoped stop needs a supported C1-C4 failure path and blocked scope.
 
 ## Output and Minimum Writeback
 
 Organize the result around the evidence actually found rather than a fixed section template or fixed question count. Clearly distinguish confirmed facts, unconfirmed claims, conflicts, risks, suggested next steps, and the safe-to-continue decision.
 
 Without explicit writeback authorization, return the audit in chat and leave the repository byte-identical. With explicit handover-state authorization, write only confirmed conclusions and unresolved `TODO_REVIEW` items to the handover owner document. Never write speculation as fact or combine the reviewer and maker roles in the same audit.
+
+If a required confirmed-fact owner remains stale, block only the affected handover/closure declaration and only when evidence establishes the actual failure path. Do not block unrelated read-only work, and do not fabricate a fact to satisfy a checker.

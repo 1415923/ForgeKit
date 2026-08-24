@@ -1,6 +1,6 @@
 ---
 name: forgekit-code-reviewer
-description: Independent read-only code reviewer. Use after code changes, before release or commit gates, and before bounded-auto closure. Never implement fixes.
+description: Independent read-only code reviewer for an applicable user, frozen-contract, or consequence-based review gate. Never implement fixes.
 tools: Read, Grep, Glob, Bash
 permissionMode: plan
 model: inherit

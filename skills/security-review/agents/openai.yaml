@@ -3,4 +3,4 @@ interface:
   short_description: "Audit real security boundaries read-only"
   default_prompt: |-
     $security-review
-    Review the specified security boundary and report severity, evidence level, impact, and verification gaps without modifying files.
+    Review the specified security boundary and report canonical impact severity and Blocking independently, with evidence, scoped failure paths, and verification gaps, without modifying files.

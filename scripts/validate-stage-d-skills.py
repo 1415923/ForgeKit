@@ -279,7 +279,7 @@ COMMON_FORBIDDEN = [
 
 SPECIFIC = {
     "SD-01": {
-        "required": [r"Initial review", r"Independent checker", r"Findings recheck", r"BLOCKER", r"MAJOR", r"NOTE", r"NEEDS_TEST", r"Discovering a defect does not authorize repair", r"objective impact"],
+        "required": [r"Initial review", r"Independent checker", r"Findings recheck", r"impact_severity", r"blocking", r"primary_consequence", r"failure_path", r"MAJOR", r"NOTE", r"NEEDS_TEST", r"Discovering a defect does not authorize repair", r"objective impact"],
         "forbidden": [],
     },
     "SD-02": {

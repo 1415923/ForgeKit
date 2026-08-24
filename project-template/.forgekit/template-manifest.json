@@ -25,7 +25,7 @@
       "role": "readme",
       "update_policy": "ask",
       "render_mode": "copy",
-      "checksum": "sha256:1ed6d9539c424525d5713ad67d6a4962e297f297a9ee7db1a074e4e0de23a3e1"
+      "checksum": "sha256:dddba2f01779873ee34810150569c1421dd009358ff27c51ef0c649764bb5340"
     },
     {
       "source_path": ".forgekit/project-boundary.yml",
@@ -41,7 +41,7 @@
       "role": "managed_doc",
       "update_policy": "merge",
       "render_mode": "copy",
-      "checksum": "sha256:6307569cd9472282dc3449fe0efa1798cd49ae8f8c9300c40688e11e361f10ea"
+      "checksum": "sha256:0929fa748b348329f02a70b9b26496c2db922f60b8a28be8faf41bc82a372397"
     },
     {
       "source_path": ".forgekit/docs/document-lifecycle.md",
@@ -57,7 +57,7 @@
       "role": "managed_doc",
       "update_policy": "merge",
       "render_mode": "copy",
-      "checksum": "sha256:3854aa52a478661281aa277624de76f88041e2053451294ba5bae7812e6fb643"
+      "checksum": "sha256:2a726d4228c3debe0b1442a5146aeddc0d5a4cbc1453ff1ee2f2239cf214cd80"
     },
     {
       "source_path": ".forgekit/docs/usage-playbook.md",
@@ -97,7 +97,7 @@
       "role": "codex_rule",
       "update_policy": "ask",
       "render_mode": "copy",
-      "checksum": "sha256:d623b87567766c064887a18a0c7c13d119d5fe73b0d0918cc79b20be7efdc58f"
+      "checksum": "sha256:03aa70ddd8343891fd1c5f226ab1b918562266e3ed64c86bb0f4c5bfa13bdf09"
     },
     {
       "source_path": ".codex/version-gates.md",
@@ -129,7 +129,7 @@
       "role": "codex_rule",
       "update_policy": "ask",
       "render_mode": "copy",
-      "checksum": "sha256:25dd0d149ab62b663c01c310c11e0366d0907480dcdd2a642a815df89cd3c3cf"
+      "checksum": "sha256:6499c0b9b97db0de1abb4868a15b2aeca2c36a8023dd5c355c91c2eecd75afe6"
     },
     {
       "source_path": ".codex/agents/forgekit-verifier.toml",
@@ -185,7 +185,7 @@
       "role": "change_template",
       "update_policy": "replace",
       "render_mode": "copy",
-      "checksum": "sha256:4559d4d70cdb02ded2fbefdd7d40d1e9195da83274f4f7839fc6d120a4b3d894"
+      "checksum": "sha256:a891d5c554708f784b5a6da15142c6862d1c0ea102c7a275424a9e5fb34d0420"
     },
     {
       "source_path": "changes/_template/ship.md",
@@ -233,7 +233,7 @@
       "role": "managed_doc",
       "update_policy": "merge",
       "render_mode": "copy",
-      "checksum": "sha256:34f2dbfadb0bca63f0f0f63200cb47316737448cfd49255cc6f68813fe9f99a7"
+      "checksum": "sha256:dd2f4f564630976aea83d0b5dd556dec751de8484c84dc6d685d695f7e42c29a"
     },
     {
       "source_path": "docs/work-log.md",
@@ -260,36 +260,12 @@
       "checksum": "sha256:6f8ef423867d57e4c60f4d6a74bcb8b20e4400dea07d07967f5c90b2d95e2aa4"
     },
     {
-      "source_path": "docs/loop-readiness.md",
-      "target_path": "${managed_docs_root}/loop-readiness.md",
-      "role": "managed_doc",
-      "update_policy": "merge",
-      "render_mode": "copy",
-      "checksum": "sha256:ad8127e7a68b3f584c345726a757c60959360929d951616b5bc7317a65e56216"
-    },
-    {
-      "source_path": "docs/loop-blueprint.md",
-      "target_path": "${managed_docs_root}/loop-blueprint.md",
-      "role": "managed_doc",
-      "update_policy": "merge",
-      "render_mode": "copy",
-      "checksum": "sha256:bb5e679ab40d7d0d1f1d62b3086eccbc72b97684af2679f17ca838c18845899d"
-    },
-    {
-      "source_path": "docs/loop-operations.md",
-      "target_path": "${managed_docs_root}/loop-operations.md",
-      "role": "managed_doc",
-      "update_policy": "merge",
-      "render_mode": "copy",
-      "checksum": "sha256:a7480d91e778e31441444c1626d132f681388fa1faffdf07e6d97036414ed0d3"
-    },
-    {
       "source_path": "docs/bounded-auto-loop-policy.md",
       "target_path": "${managed_docs_root}/bounded-auto-loop-policy.md",
       "role": "managed_doc",
       "update_policy": "merge",
       "render_mode": "copy",
-      "checksum": "sha256:e1534c35f5c700c23e66bc900b6d0082d7f15e246015f9c5d3767517aa3671be"
+      "checksum": "sha256:1f70455abcf5ac061c716c76fdb8cd00133a9f7f3ccb661b4d179e5ec532e283"
     },
     {
       "source_path": "docs/maker-checker-protocol.md",
@@ -297,7 +273,7 @@
       "role": "managed_doc",
       "update_policy": "merge",
       "render_mode": "copy",
-      "checksum": "sha256:7ed79586845505e8a49cf879ed39f3bb10825b5c10b64c8d8858bdaba2af7b2d"
+      "checksum": "sha256:325482c70efb89067f79e481ac30ea04e30839075d7b7ff32cf815b29179dc62"
     },
     {
       "source_path": "docs/native-agent-adapter.md",
@@ -305,7 +281,7 @@
       "role": "managed_doc",
       "update_policy": "merge",
       "render_mode": "copy",
-      "checksum": "sha256:7325985b56da8b06c58b375200eef50d46b73f97ca1efb8ea5e5c9782a8bf64e"
+      "checksum": "sha256:d90bb53747a29b51b68db44a6de88406b06f24107034be1327426aaa48edb636"
     },
     {
       "source_path": "docs/worktree-playbook.md",
@@ -361,7 +337,7 @@
       "role": "governance",
       "update_policy": "replace",
       "render_mode": "copy",
-      "checksum": "sha256:83319368356f46d2809cc44640e2e55a8c84c770ec5961185527fe09af69161e"
+      "checksum": "sha256:b2329b4923b4a5a460e2231a3d6f3e3293a52c8250cd4d8c681514e15bf02ecf"
     },
     {
       "source_path": "governance/agent-entry-contract.md",
@@ -369,7 +345,7 @@
       "role": "governance",
       "update_policy": "replace",
       "render_mode": "copy",
-      "checksum": "sha256:279388b1707debbc6ad6145d6000bcfe2264958e1ecec2202e53fa81e86aaa46"
+      "checksum": "sha256:6b61d8e521adfb6045673a6744b3eb2b48106762f3cd9befcadf76e6087505f1"
     },
     {
       "source_path": "governance/agent-harness.md",
@@ -489,7 +465,7 @@
       "role": "skill",
       "update_policy": "replace",
       "render_mode": "copy",
-      "checksum": "sha256:155910413dcdd658ac19b5f586a668db27147aaa960200666b03cd34047c02ce"
+      "checksum": "sha256:fb2db5f5598c8e80b20aba86649a12907629ac3077840fbfb55daa970e832bce"
     },
     {
       "source_path": ".agents/skills/project-init/agents/openai.yaml",
@@ -521,7 +497,7 @@
       "role": "skill",
       "update_policy": "replace",
       "render_mode": "copy",
-      "checksum": "sha256:9e1c6e60594f187aa07dcf955687ec37f4fa45e9dd329b22b171e224b5517aea"
+      "checksum": "sha256:e0f396c93b67ba4fe8c0632b5252ce5d0951fc10e10d7147161b430b62e30b20"
     },
     {
       "source_path": ".agents/skills/document-backfill/SKILL.md",
@@ -529,7 +505,7 @@
       "role": "skill",
       "update_policy": "replace",
       "render_mode": "copy",
-      "checksum": "sha256:58370bbc08935bc762452785af0802bb99239eb9a9f2f755e17397bd3aca808c"
+      "checksum": "sha256:39bd28863a1917e106f6c9312d361e51928851aa01711457f9b4f9ec9b793533"
     },
     {
       "source_path": ".agents/skills/document-backfill/agents/openai.yaml",
@@ -545,7 +521,7 @@
       "role": "skill",
       "update_policy": "replace",
       "render_mode": "copy",
-      "checksum": "sha256:919decb16d3d8033ce79592a4d42744005935aaad479bcf8844a3955f892b9e1"
+      "checksum": "sha256:1432fd110a42176c7766bdf8047b8072f3fc7028d27a434a253cd1b9d0211f71"
     },
     {
       "source_path": ".agents/skills/release-check/SKILL.md",
@@ -553,7 +529,7 @@
       "role": "skill",
       "update_policy": "replace",
       "render_mode": "copy",
-      "checksum": "sha256:fa64b56c56ea05a4c860f8076e21d9fbd1b28aa8eff0e9fce903bf36ffbff00a"
+      "checksum": "sha256:a9365e4b59ecda0bc658de7455a9b86095507ca02251cf160d8132ffdaf4670e"
     },
     {
       "source_path": ".agents/skills/handover-review/agents/openai.yaml",
@@ -585,7 +561,7 @@
       "role": "skill",
       "update_policy": "replace",
       "render_mode": "copy",
-      "checksum": "sha256:e908b11a98022dee77d840f43e3b5581d14cbc4d6db89dcc4628147dd376b5ee"
+      "checksum": "sha256:814e76b99ae3b7de53fcfc5b6b7a679f7ae633e1d5246c8cfe7e71cfcaaead1f"
     },
     {
       "source_path": ".agents/skills/code-review/agents/openai.yaml",
@@ -601,7 +577,7 @@
       "role": "skill",
       "update_policy": "replace",
       "render_mode": "copy",
-      "checksum": "sha256:1086d522559f5b1a1b8f62252aa1544459ce338f46d288efcd2fc2636b37d17c"
+      "checksum": "sha256:5683d1b1a5cc366424717f9da81944ec7d537c23458bb44ed14572a8a78fa8c1"
     },
     {
       "source_path": ".agents/skills/project-suitability/agents/openai.yaml",
@@ -617,7 +593,7 @@
       "role": "skill",
       "update_policy": "replace",
       "render_mode": "copy",
-      "checksum": "sha256:e9188d060320c36b5f7e83c6e643cfadcaf433ac93c49923fc89f3a3f765df41"
+      "checksum": "sha256:ac2af1ff6a611e19015ae30c00122f9589237197c0a6aa9838fdbb7c474eb4fe"
     },
     {
       "source_path": ".agents/skills/security-review/agents/openai.yaml",
@@ -625,7 +601,7 @@
       "role": "skill",
       "update_policy": "replace",
       "render_mode": "copy",
-      "checksum": "sha256:29f6969f4ccead02a98509a34e03df44e3a98d39d07d2e9d82ef791046d5fc28"
+      "checksum": "sha256:ec34a47844c9799e86fa07fffd08949c01e44b071abe4609fb9679930c14b571"
     },
     {
       "source_path": ".claude/agents/forgekit-code-reviewer.md",
@@ -633,7 +609,7 @@
       "role": "codex_rule",
       "update_policy": "ask",
       "render_mode": "copy",
-      "checksum": "sha256:14746e5dab027ee920d76a2df96a1e0fc2aa101a8ddf6a0e9c5ffbe75020d7b5"
+      "checksum": "sha256:f493b245dd43bf976590a99a5013bf63c371c9cab355037ec4bc12e562661a27"
     },
     {
       "source_path": ".codex/agents/forgekit-code-reviewer.toml",
@@ -641,7 +617,7 @@
       "role": "codex_rule",
       "update_policy": "ask",
       "render_mode": "copy",
-      "checksum": "sha256:fa346658d3e8649c2463a2db971b866a040f173a0807b448ec6b980441184380"
+      "checksum": "sha256:3efec83cbdb8c1f8521e7683ef79998a982bf7def0d4b44704cc899b05963cb4"
     },
     {
       "source_path": ".claude/skills/forgekit-request-code-review/SKILL.md",
@@ -649,7 +625,7 @@
       "role": "skill",
       "update_policy": "ask",
       "render_mode": "copy",
-      "checksum": "sha256:a4f915bf00ac98eb8a0a915eee21f7fbff69b32ce39e2bb5413952cdf8107934"
+      "checksum": "sha256:7371e70ee41c13b60dd3bdac673aaa4a3665e53cf06cd18df557634cbb5a07d9"
     },
     {
       "source_path": ".claude/skills/forgekit-code-review/SKILL.md",
@@ -657,7 +633,7 @@
       "role": "skill",
       "update_policy": "ask",
       "render_mode": "copy",
-      "checksum": "sha256:7a16512f6fc09f4b41db69b2edb98f3a1f884e26f3c6044d15e20ee73f499166"
+      "checksum": "sha256:9997285a7ec56a01458212220b4169064f4cd43ce2c2e6058105fce60bac071b"
     },
     {
       "source_path": ".claude/skills/forgekit-code-review/references/universal-review.md",
@@ -665,7 +641,7 @@
       "role": "skill",
       "update_policy": "ask",
       "render_mode": "copy",
-      "checksum": "sha256:f67e57f8399f2a88d42a4072dc276371fb5cedbea13dca77ce9ef80ef3c96ddc"
+      "checksum": "sha256:9f1eda949275978c52902db372fd37464da1bc5082af14d5d58e34012e77c0a4"
     },
     {
       "source_path": ".claude/skills/forgekit-code-review/references/security-review.md",
@@ -681,7 +657,7 @@
       "role": "skill",
       "update_policy": "ask",
       "render_mode": "copy",
-      "checksum": "sha256:6932e23ea283091a3a2446fea7820c646426ead49d01bfb9845458752b614613"
+      "checksum": "sha256:9e6cc741c722e04d19cf5e6a5fab5a13302d806c0427209bdc86bba3e8beb195"
     },
     {
       "source_path": "migrations/0.37.0/migration.json",
@@ -753,7 +729,7 @@
       "role": "managed_doc",
       "update_policy": "merge",
       "render_mode": "copy",
-      "checksum": "sha256:94204f87da9e1203930fc33088346c597221955c451fecceb1e051f80118ed03"
+      "checksum": "sha256:9bf85c1c882edafebd396cb03b16caaa04bd00afebafd56fa55cf201a669ce63"
     },
     {
       "source_path": "migrations/0.38.0/migration.json",
@@ -777,7 +753,7 @@
       "role": "managed_doc",
       "update_policy": "merge",
       "render_mode": "copy",
-      "checksum": "sha256:32f6e56a68920ab1a58dbf97912deb37c3403bb0f8b58ddb2c6ba333abb0b319"
+      "checksum": "sha256:0310e5fa20d8d14b4cb5bf1f3365de04da3002a05526e4950ee7ac026419ecf7"
     },
     {
       "source_path": "docs/archive-capsule.md",
@@ -785,7 +761,7 @@
       "role": "managed_doc",
       "update_policy": "merge",
       "render_mode": "copy",
-      "checksum": "sha256:ac3455bd269ab5341b849c8ef99c7c063ffa293b8099db166e96d045e2bc5e05"
+      "checksum": "sha256:7eb5ee3c45e33a5623e9bd3da9f6047313517d502bba0c04069951afcbb2e454"
     },
     {
       "source_path": "scripts/archive-capsule.py",
@@ -849,7 +825,7 @@
       "role": "managed_doc",
       "update_policy": "merge",
       "render_mode": "copy",
-      "checksum": "sha256:0aa85da0a989ce87b99705b87aebf310f902679d0be08d81a17b76cdf40f861e"
+      "checksum": "sha256:c15da85d8507def827a89f220234af46dc8c44fae1ef1cd3b9355ae9126ccc54"
     },
     {
       "source_path": ".claude/skills/forgekit-first-principles/SKILL.md",
@@ -865,7 +841,7 @@
       "role": "skill",
       "update_policy": "ask",
       "render_mode": "copy",
-      "checksum": "sha256:502176a8a468ea97cdfac544eecc5580dead72b8f8ba0f13a7f69d7673bbe2e9"
+      "checksum": "sha256:5b12627f2128f0878d7d90a4857d089dacef901631c5a1e754b5af3760775a0d"
     },
     {
       "source_path": "migrations/0.40.0/migration.json",
@@ -913,7 +889,7 @@
       "role": "managed_doc",
       "update_policy": "merge",
       "render_mode": "copy",
-      "checksum": "sha256:0413010e73d0225411aa474656e31e510fdc99a526a4f484f4ea13802fd80f3c"
+      "checksum": "sha256:e91b73644387b36973ad7be4f72ea07b197fc2b0044ac2a88f267788bebdb736"
     },
     {
       "source_path": "scripts/check-current-docs-integrity.py",

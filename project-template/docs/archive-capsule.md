@@ -49,10 +49,10 @@
 
 ## Active Work Archive Guard
 
-归档前后必须按 `current-docs-integrity.md` 检查 Source / Task / Risk / Traceability / Testing 链路。只要 task-board 仍有 active tasks：
+归档前后必须按 `current-docs-integrity.md` 检查 Source / Task 链路，以及实际存在的 Risk / Traceability / Testing / authority/status facts。Document ownership does not imply mandatory population；active task 本身不得推出 risk、testing、traceability 或 project-plan 内容。只要 task-board 仍有 active tasks：
 
 - 不得标为 completed phase archive；应明确是 legacy transition snapshot、provisional archive、evidence snapshot 或 active-work cleanup snapshot。
-- 不得把 `task-intake.md`、`risk-register.md`、`traceability.md`、`testing.md` 变成模板或空文档。
+- 不得移走真实 Source/Task current facts；confirmed fact 存在时，不得让其唯一负责 owner 在 closure 后变为 stale。没有对应事实的 owner 可保持 lean/template。
 - summary 必须指向 `.forgekit/docs/` 作为 current facts 入口。
-- preflight blocking 时停止 apply；postflight 失败时标记 needs-fix，不得声明完成。
+- 只有 evidence 建立真实 C1-C4 FailurePath 的 scoped Blocking 才停止 affected apply；postflight 对 closure 形成真实 Blocking 时标记 needs-fix，不得声明完成。
 - 发现断链后进入 Current State Restoration Pass，不继续归档，也不把 archive 全文搬回 current docs。

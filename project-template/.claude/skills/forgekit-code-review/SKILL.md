@@ -32,9 +32,10 @@ For a high-risk change, use the Adversarial Review Pass from `.forgekit/docs/rea
 - `manual-review`: scope, evidence, ownership, runtime behavior, or independent execution cannot be verified.
 - `self-review` can inform the maker but cannot satisfy an independent-review gate.
 - A blocking adversarial finding requires `needs-fix` or `manual-review`. Reviewer unavailability must not be reported as pass.
-- In initial review, block frozen-contract violations. A matrix-external issue blocks only when it can cause data leakage/contamination, wrong execution/training/evaluation/checkpoint, artifact overwrite, unauthorized formal-entry execution, false success, or clearly untrustworthy conclusions. Keep other hardening and observability ideas as follow-ups and do not expand the frozen trust boundary.
-- In `blocker-recheck`, default to the prior blocking findings and mark each Closed, Partially closed, or Still open. A regression introduced by the fix may block if it violates the frozen contract or causes a real Critical consequence. Keep unrelated new suggestions as follow-up; do not reopen architecture review or expand the trust boundary.
+- In initial review, treat an Expected Change inside the frozen contract as non-blocking. Unauthorized Post-Freeze Drift is only a possible C3 finding and blocks only when the universal contract establishes evidence, a failure path, and the affected scope. Apply the same universal contract to matrix-external issues; keep unsupported hardening and observability ideas as follow-ups and do not expand the frozen trust boundary.
+- In `blocker-recheck`, default to the prior Blocking findings and mark each Closed, Partially closed, or Still open. A regression introduced by the fix is evaluated as a new finding under the same contract. Keep unrelated new suggestions as follow-up; do not reopen architecture review or expand the trust boundary.
 - Pass applies only to the supplied authorized stage.
+- Apply `.forgekit/docs/maker-checker-protocol.md`: impact severity and Blocking are independent, and checker exit or strict mode does not decide the project gate.
 
 ## Output contract
 
@@ -48,7 +49,13 @@ FrozenAcceptanceIDs:
 AuthorizedStage:
 Summary:
 Findings:
-- severity: blocking | important | nit | suggestion | praise
+- impact_severity: CRITICAL | MAJOR | MINOR | NOTE
+  blocking: YES | NO
+  primary_consequence: C1 | C2 | C3 | C4
+  secondary_consequences:
+  failure_path:
+  blocked_scope:
+  validation_relevance:
   file:
   line:
   issue:
@@ -61,4 +68,4 @@ TODO_REVIEW:
 FinalVerdict:
 ```
 
-Use file and line references when available. Keep nits and praise non-blocking. Never report pass solely because the maker says the change is complete or fixed.
+Use file and line references when available. `primary_consequence`, `failure_path`, and `blocked_scope` are required only when `blocking: YES`; every Blocking finding must provide them. Keep optional hardening and praise non-blocking. Never infer Blocking from impact severity or report pass solely because the maker says the change is complete or fixed.

@@ -30,6 +30,10 @@ Assess only relevant dimensions:
 - likely need for initialization, bootstrap fill, handover, backfill, or later review
 - adoption cost, expected benefit, and conflict with established workflows
 
+Apply the existing-project root and topology contract in `governance/agent-entry-contract.md`. Distinguish the active GovernanceRoot/ProjectRoot from historical, archive, artifact, scratch, or materialized-workspace shadows. Do not use `nearest ancestor wins`, create a root registry, or recommend a second `.forgekit` root when one exact legacy ancestor boundary already resolves the requested ProjectRoot.
+
+Historical shadows are non-blocking by default. They can support a scoped C4 finding only when an authorized write target cannot be uniquely resolved. Evidence/archive executable source is a warning unless an active runtime/build/entry references it or creates source/authority ambiguity. A stale README is also non-blocking unless current authority contradicts it, the proposed write depends on that stale fact, and an evidence-backed C4 failure path exists. Business/workspace README remains user-owned.
+
 Use existing evidence before asking questions. Ask only for missing facts that can change the recommendation. Do not treat missing evidence as permission to automate broadly.
 
 ## Decision
@@ -42,6 +46,8 @@ Return one result:
 - `insufficient-evidence`: the available evidence cannot support a responsible recommendation.
 
 State the evidence, rationale, trust and project boundaries, adoption cost and benefit, conflicts, recommended governance intensity, and the smallest safe next step. The next step may be a separate read-only audit. Do not treat `not-recommended` as an instruction to redesign the project.
+
+When reporting findings, apply `.forgekit/docs/maker-checker-protocol.md`; impact severity does not imply Blocking.
 
 ## Authorization and External Actions
 

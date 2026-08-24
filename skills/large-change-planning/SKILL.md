@@ -19,7 +19,9 @@ Planning never authorizes dependency installation, commit, push, publish, releas
 
 ## Impact Branch
 
-Use `governance/ai-engineering-loop.md` to state risk from trust boundary, irreversibility, persistent data, public compatibility, security and permissions, external effects, rollback difficulty, deployment impact, verification capability, and evidence uncertainty. Do not score risk from counts or use a fixed threshold.
+Apply, but do not redefine, the neutral execution contract in `governance/ai-engineering-loop.md`. Declare each planned execution as `DIAGNOSTIC`, `SMOKE`, or `FORMAL`; keep Effect Risk separate under `governance/agent-entry-contract.md`. A real or paid call is not automatically Formal, and there is no release execution intent.
+
+Use the same neutral owner to state impact from trust boundary, irreversibility, persistent data, public compatibility, security and permissions, external effects, rollback difficulty, deployment impact, verification capability, and evidence uncertainty. Do not score risk from counts or use a fixed threshold.
 
 When scope is clear, local, reversible, low impact, and deterministically verifiable, use a short plan or explicitly route back to direct implementation. Do not create a long planning document merely to prove this Skill was selected.
 
@@ -35,7 +37,8 @@ For a genuinely high-impact or multi-stage change, establish only the artifacts 
 - acceptance IDs with positive and rejection cases
 - dependencies, risks, and verification evidence per stage
 - rollback or recovery mechanism
-- independent checker conditions for medium/high-impact work or an explicit gate
+- any applicable independent checker condition supported by objective consequence or an explicit gate
+- Formal claim, evidence location, retention, and applicable acceptance/review steps when Formal execution is planned
 
 An active change artifact is the plan authority. Do not create a competing implementation plan or copy the same contract across several documents.
 
@@ -44,6 +47,8 @@ An active change artifact is the plan authority. Do not create a competing imple
 Explore before proposing edits. Do not start implementation in this Skill. At each handoff, state the currently authorized stage, allowed write scope, required validation, rollback, blockers, and which acceptance IDs remain open. If evidence changes scope, trust boundary, or acceptance, return to planning instead of silently expanding implementation.
 
 Independent review is required when objective impact or an explicit gate requires it; it is not mandatory for every low-risk code edit. Self-review does not satisfy an independent gate.
+
+Expected Change inside the frozen contract is not Blocking. Treat only evidence-backed unauthorized Post-Freeze Drift under the neutral contract as a possible C3 finding. If repeated governance-only blocking produces no new mainline evidence, perform the neutral simplification review before proposing another governance layer; do not create a counter, state file, or checker.
 
 ## Minimum Writeback and Output
 

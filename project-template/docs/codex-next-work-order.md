@@ -30,7 +30,7 @@
 4. 如果用户答不上来，不要反复追问同一个问题；应给出 2 到 4 个可选方案、取舍、推荐默认值和验证办法。
 5. 如果当前上下文不足，应提出查阅路径：本地已有文档、官方文档、同类开源项目、技术选型对比资料或小型验证原型。需要联网时先说明目的并请求确认。
 6. 把每个关键项标记为：已确认、暂定假设、需要调研、延期不做。
-7. 根据用户回答更新 `.forgekit/docs/project-plan.md`、`.forgekit/docs/tech-decisions.md`、`.forgekit/docs/version-roadmap.md`、`.forgekit/docs/task-board.md` 和 `.forgekit/docs/risk-register.md`。
+7. 根据用户回答中实际确认的事实，只更新对应 owner：方向/范围事实写 `project-plan.md`，技术决策写 `tech-decisions.md`，版本或任务事实写 `version-roadmap.md` / `task-board.md`，真实开放风险写 `risk-register.md`。Document ownership 不意味着这些文档必须同时 population；不得为完整表面编造内容。
 8. 如果涉及跨模块、高风险或既有项目整改，先更新 `.forgekit/docs/exploration-report.md` 和 `.forgekit/docs/implementation-plan.md`，不要直接编码。
 
 ## 方案访谈要求

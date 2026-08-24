@@ -81,9 +81,6 @@ REQUIRED_REPO_PATHS = [
     "project-template/docs/work-log.md",
     "project-template/docs/task-intake.md",
     "project-template/docs/local-toolchain.md",
-    "project-template/docs/loop-readiness.md",
-    "project-template/docs/loop-blueprint.md",
-    "project-template/docs/loop-operations.md",
     "project-template/docs/bounded-auto-loop-policy.md",
     "project-template/docs/context-continuity.md",
     "project-template/docs/project-maintenance.md",
@@ -197,9 +194,6 @@ REQUIRED_GENERATED_PATHS = [
     ".forgekit/docs/work-log.md",
     ".forgekit/docs/task-intake.md",
     ".forgekit/docs/local-toolchain.md",
-    ".forgekit/docs/loop-readiness.md",
-    ".forgekit/docs/loop-blueprint.md",
-    ".forgekit/docs/loop-operations.md",
     ".forgekit/docs/bounded-auto-loop-policy.md",
     ".forgekit/docs/context-continuity.md",
     ".forgekit/docs/project-maintenance.md",
@@ -495,167 +489,45 @@ def assert_boundary_config(path):
         fail("Boundary config is missing required entries:\n" + "\n".join(missing))
 
 
-def assert_loop_docs(root, readiness_path, blueprint_path):
-    readiness = (root / readiness_path).read_text(encoding="utf-8")
-    blueprint = (root / blueprint_path).read_text(encoding="utf-8")
-    readiness_required = [
-        "Readiness Status: not-ready | partial | ready",
-        "有状态文件",
-        "有验证命令",
-        "已定义停止条件",
-        "已定义人工升级路径",
-        "ForgeKit Loop 五要素",
-        "未来路线图内容",
-    ]
-    blueprint_required = [
-        "不是自动执行授权",
-        "Default: manual only.",
-        "## 触发方式",
-        "## 输入来源",
-        "## 状态文件",
-        "## 允许路径",
-        "## 禁止路径",
-        "## 验证命令",
-        "## 停止条件",
-        "## 人工升级",
-        "## Token 预算",
-        "## 理解复述",
-        "## 输出 / 回写",
-        "OperationMode: dry-run | one-step | continue | stop-handoff",
-        "LoopMode: one-step | bounded-auto | review-only",
-        "AuthorizationScope:",
-        "AgentModeRequired: native | fallback-allowed | any",
-        "AllowedStages:",
-        "MaxRounds:",
-        "MaxStageCount:",
-        "MaxFixAttempts:",
-        "MaxFilesRead:",
-        "MaxFilesChanged:",
-        "MaxCommands:",
-        "ForbiddenActions:",
-        "StopConditions:",
-        "CheckpointWriteback:",
-        "FinalHandoffRequired: yes",
-        "RequiresUserConfirmation: yes",
-        "WritebackTarget:",
-        "agent_mode: native | fallback | simulated",
-        "native_agent_status: available | unavailable | unverified",
-        "agent_runtime: claude-code | codex | unknown",
-        "agent_invocation_observed:",
-        "fallback_reason:",
-        "StopOnUnclearScope: yes",
-        "StopOnValidationFailure: yes",
-        "WorktreeStrategy: none | optional | required",
-        "WorktreePath:",
-        "WorktreeBranch:",
-        "IsolationReason:",
-        "CleanupRule:",
-        "Worktree 字段只是",
-        "这些操作字段只是",
-        "daemon",
-        "cron",
-        "MCP",
-        "自动 PR",
-        "sub-agent 调度器",
-        "worktree 自动化",
-    ]
-    missing_readiness = [item for item in readiness_required if item not in readiness]
-    if missing_readiness:
-        fail(f"loop-readiness.md missing expected text:\n" + "\n".join(missing_readiness))
-    missing_blueprint = [item for item in blueprint_required if item not in blueprint]
-    if missing_blueprint:
-        fail(f"loop-blueprint.md missing expected text:\n" + "\n".join(missing_blueprint))
-
-
-def assert_loop_operations(root, operations_path, blueprint_path, agents_path, claude_path, rules_path):
-    operations = (root / operations_path).read_text(encoding="utf-8")
-    blueprint = (root / blueprint_path).read_text(encoding="utf-8")
+def assert_bounded_loop_policy(root, policy_path, rules_path):
+    policy = (root / policy_path).read_text(encoding="utf-8")
     rules = (root / rules_path).read_text(encoding="utf-8")
-    operations_required = [
-        "Loop 默认关闭",
-        "不是自动 loop runner",
-        "## Loop Dry Run",
-        "## Loop One Step",
-        "## Loop Bounded Auto",
-        "## Loop Review Only",
-        "## Loop Continue",
-        "## Loop Stop / Handoff",
-        "只读取 loop 蓝图",
-        "不修改文件",
-        "只执行一轮",
-        "只继续下一轮",
-        "不要启动另一轮 loop",
-        "每一轮实际执行过的 loop 都必须回写",
-        "AgentModeRequired",
-        "bounded-auto",
-        ".forgekit/docs/work-log.md",
-        "agent_mode: native | fallback | simulated",
-        "native_agent_status: available | unavailable | unverified",
-        "fallback_reason",
-    ]
-    blueprint_required = [
-        "OperationMode: dry-run | one-step | continue | stop-handoff",
-        "LoopMode: one-step | bounded-auto | review-only",
-        "AuthorizationScope:",
-        "AgentModeRequired: native | fallback-allowed | any",
-        "MaxRounds:",
-        "MaxStageCount:",
-        "MaxFixAttempts:",
-        "MaxFilesRead:",
-        "MaxFilesChanged:",
-        "MaxCommands:",
-        "RequiresUserConfirmation: yes",
-        "WritebackTarget:",
-        "StopOnUnclearScope: yes",
-        "StopOnValidationFailure: yes",
-    ]
-    rules_required = [
-        "不得自行进入 loop mode",
-        "bounded-auto、review-only",
-        "one-step 或 bounded-auto 前必须复述",
-        "bounded-auto 遇到范围不清",
-        "loop continue 不得自动连续运行",
-        "scope 不清、预算超限、验证失败或触及 forbidden paths",
-        "loop 输出必须写回",
-        "生成 native agent 配置不等于 runtime 已注册",
-        "bounded-auto 或 loop 执行必须写明 `agent_mode`",
-        "Implementation Scope` 与 `Governance Writeback Scope",
-        "ManagedDocsWriteback: minimal",
-        "`review-only` 不写，report-only 报告不得触发自动修复",
-    ]
-    missing_operations = [item for item in operations_required if item not in operations]
-    if missing_operations:
-        fail(f"loop-operations.md missing expected text:\n" + "\n".join(missing_operations))
-    missing_blueprint = [item for item in blueprint_required if item not in blueprint]
-    if missing_blueprint:
-        fail(f"loop-blueprint.md missing loop operation fields:\n" + "\n".join(missing_blueprint))
-    missing_rules = [item for item in rules_required if item not in rules]
-    if missing_rules:
-        fail(".codex/rules.md missing loop operation rules:\n" + "\n".join(missing_rules))
-
-    policy = (root / operations_path).with_name("bounded-auto-loop-policy.md")
-    policy_text = policy.read_text(encoding="utf-8")
     policy_required = [
+        "## Loop Mode",
         "LoopMode",
         "`one-step`",
         "`bounded-auto`",
         "`review-only`",
-        "AuthorizationScope",
-        "AgentModeRequired",
-        "Stop Conditions",
-        "Checkpoint Writeback",
-        "Final Handoff",
-        "ManagedDocsWriteback: off | minimal | full-review",
-        "Implementation Scope",
-        "Governance Writeback Scope",
-        "只改这些业务文件",
-        "`review-only` 绝不写文件",
-        "report-only 脚本仍然只生成报告",
-        "不是 runner、daemon、cron、scheduler、多 agent dispatcher、自动 PR 或 worktree orchestration",
+        "ExecutionIntent: DIAGNOSTIC | SMOKE | FORMAL",
+        "AuthorizationScope:",
+        "AllowedPaths:",
+        "ForbiddenPaths:",
+        "AllowedStages:",
+        "ExternalEffectEnvelope:",
+        "CheckpointEvents:",
+        "HandoffTarget:",
+        "## Stop Conditions",
+        "## Checkpoint Writeback",
+        "## Final Handoff",
+        "bounded-auto 本身不机械要求 independent review",
+        "Document ownership does not imply mandatory population",
+        "readiness-of-readiness",
+        "checker-of-checker",
     ]
-    missing_policy = [item for item in policy_required if item not in policy_text]
+    rules_required = [
+        "不得自行进入 loop mode",
+        "bounded-auto 遇到范围不清",
+        "loop continue 不得自动连续运行",
+        "ManagedDocsWriteback: minimal",
+        "Document ownership does not imply mandatory population",
+        "independent review 只由用户/frozen contract 明确 gate，或有证据支持的真实 C1-C4 consequence 触发",
+    ]
+    missing_policy = [item for item in policy_required if item not in policy]
     if missing_policy:
         fail("bounded-auto-loop-policy.md missing expected text:\n" + "\n".join(missing_policy))
+    missing_rules = [item for item in rules_required if item not in rules]
+    if missing_rules:
+        fail(".codex/rules.md missing bounded loop rules:\n" + "\n".join(missing_rules))
 
 
 def assert_native_agent_adapter(repo, root, adapter_path):
@@ -929,18 +801,22 @@ def assert_maker_checker_protocol(root, protocol_path, review_path, agents_path,
     rules = (root / rules_path).read_text(encoding="utf-8")
     protocol_required = [
         "Maker / Checker 协议",
-        "本文是审查流程",
-        "不是多 agent 调度器",
+        "Universal Finding Contract",
+        "Severity × Blocking",
+        "Impact Severity: CRITICAL | MAJOR | MINOR | NOTE",
+        "Blocking: YES | NO",
+        "PrimaryConsequence: C1 | C2 | C3 | C4",
+        "FailurePath:",
+        "BlockedScope:",
+        "checker nonzero != project Blocking",
+        "代码修改、文件数量、脚本修改或 bounded-auto 本身不机械产生 independent-review gate",
         "Maker",
         "Checker",
         "ready-for-check",
         "pass",
         "needs-fix",
         "manual-review",
-        "单 agent 使用",
-        "不提供 runner、自动派发",
-        "## Worktree 隔离",
-        "不会自动创建 worktree",
+        "Repeated governance-only blocking without new mainline evidence",
     ]
     review_required = [
         "## Maker 摘要",
@@ -957,6 +833,8 @@ def assert_maker_checker_protocol(root, protocol_path, review_path, agents_path,
         "DocsReviewed: yes | no",
         "RisksReviewed: yes | no",
         "Findings:",
+        "impact_severity: CRITICAL | MAJOR | MINOR | NOTE",
+        "blocking: YES | NO",
         "RequiredFixes:",
         "FinalRecommendation:",
     ]
@@ -1020,7 +898,7 @@ def assert_independent_code_review(root):
     if not protocol_path.is_file():
         protocol_path = root / "docs/maker-checker-protocol.md"
     protocol = protocol_path.read_text(encoding="utf-8")
-    for marker in ("mandatory independent review", "ReviewType: self-review", "reviewer agent 不可用时", "read-only"):
+    for marker in ("代码修改、文件数量、脚本修改或 bounded-auto 本身不机械产生 independent-review gate", "ReviewType: independent | self-review", "Severity 不拥有 gate authority", "read-only"):
         if marker not in protocol:
             fail(f"Independent review protocol missing marker: {marker}")
     for entry in (".codex/rules.md",):
@@ -1114,10 +992,10 @@ def assert_reasoning_review(root, doc_path):
         if "First-Principles Pass" not in text or "Adversarial Review Pass" not in text:
             fail(f"{entry} missing short reasoning/review rules")
     bounded = (root / ("docs/bounded-auto-loop-policy.md" if (root / "docs").is_dir() else ".forgekit/docs/bounded-auto-loop-policy.md")).read_text(encoding="utf-8")
-    if "blocking finding" not in bounded or "TODO_REVIEW" not in bounded:
+    if "Blocking=YES" not in bounded or "TODO_REVIEW" not in bounded:
         fail("bounded-auto missing high-risk reasoning/review stop gate")
     context = (root / ("docs/context-continuity.md" if (root / "docs").is_dir() else ".forgekit/docs/context-continuity.md")).read_text(encoding="utf-8")
-    if "Critical Facts" not in context or "blocking finding" not in context:
+    if "Critical Facts" not in context or "Blocking=YES" not in context:
         fail("context continuity missing reasoning/review Critical Facts")
 
 
@@ -1128,6 +1006,7 @@ def assert_project_maintenance(root):
     skill = (root / ".claude/skills/forgekit-maintenance/SKILL.md").read_text(encoding="ascii")
     for marker in [
         "Maintenance Intents", "Unified Project Bootstrap / Install-or-Upgrade Entry", "Upgrade Sync", "Archive Capsule", "Plan before Apply",
+        "One-Time Cleanup Plan", "Proposed Action:", "CURRENT/HISTORICAL", "inventory database",
         "Confirmation Rules", "Post-Operation Summary", "intent -> plan -> confirm/apply -> summary/index",
     ]:
         if marker not in maintenance:
@@ -1405,9 +1284,8 @@ def assert_project_capsule_bootstrap(target, temp_parent):
     if full_copy.returncode != 1 or "forbidden ForgeKit entry" not in full_copy.stdout:
         fail("capsule containing a full ForgeKit entry must be blocking")
 
-def assert_worktree_playbook(root, playbook_path, blueprint_path, maker_checker_path, agents_path, claude_path, rules_path):
+def assert_worktree_playbook(root, playbook_path, maker_checker_path, agents_path, claude_path, rules_path):
     playbook = (root / playbook_path).read_text(encoding="utf-8")
-    blueprint = (root / blueprint_path).read_text(encoding="utf-8")
     maker_checker = (root / maker_checker_path).read_text(encoding="utf-8")
     rules = (root / rules_path).read_text(encoding="utf-8")
     playbook_required = [
@@ -1426,15 +1304,6 @@ def assert_worktree_playbook(root, playbook_path, blueprint_path, maker_checker_
         "git status --short",
         "不要自动 merge、push、删除分支、移除 worktree、创建 PR 或启动 agent",
     ]
-    blueprint_required = [
-        "## Worktree 策略",
-        "WorktreeStrategy: none | optional | required",
-        "WorktreePath:",
-        "WorktreeBranch:",
-        "IsolationReason:",
-        "CleanupRule:",
-        "这些字段只描述可审查的隔离意图",
-    ]
     rules_required = [
         "不得自行创建 worktree",
         "git status --short",
@@ -1445,11 +1314,8 @@ def assert_worktree_playbook(root, playbook_path, blueprint_path, maker_checker_
     missing_playbook = [item for item in playbook_required if item not in playbook]
     if missing_playbook:
         fail(f"worktree-playbook.md missing expected text:\n" + "\n".join(missing_playbook))
-    missing_blueprint = [item for item in blueprint_required if item not in blueprint]
-    if missing_blueprint:
-        fail(f"loop-blueprint.md missing worktree strategy fields:\n" + "\n".join(missing_blueprint))
-    if "Worktree 隔离" not in maker_checker or "不会自动创建 worktree" not in maker_checker:
-        fail("maker-checker-protocol.md missing worktree isolation boundary")
+    if "Universal Finding Contract" not in maker_checker:
+        fail("maker-checker-protocol.md missing universal finding contract")
     missing_rules = [item for item in rules_required if item not in rules]
     if missing_rules:
         fail(".codex/rules.md missing worktree safety rules:\n" + "\n".join(missing_rules))
@@ -1610,8 +1476,6 @@ def assert_workflow_router(root, router_path, responsibility_path, codebase_path
         "changelog.md",
         "risk-register.md",
         "bounded-auto-loop-policy.md",
-        "loop-blueprint.md",
-        "loop-operations.md",
         "native-agent-adapter.md",
         "maker-checker-protocol.md",
         "worktree-playbook.md",
@@ -3473,15 +3337,7 @@ def main():
     assert_json(repo / "migrations" / "0.45.0" / "migration.json")
     assert_json(repo / "project-template" / "migrations" / "0.45.0" / "migration.json")
     assert_release_distribution_consistency(repo)
-    assert_loop_docs(repo / "project-template", "docs/loop-readiness.md", "docs/loop-blueprint.md")
-    assert_loop_operations(
-        repo / "project-template",
-        "docs/loop-operations.md",
-        "docs/loop-blueprint.md",
-        "AGENTS.md",
-        "CLAUDE.md",
-        ".codex/rules.md",
-    )
+    assert_bounded_loop_policy(repo / "project-template", "docs/bounded-auto-loop-policy.md", ".codex/rules.md")
     assert_maker_checker_protocol(
         repo / "project-template",
         "docs/maker-checker-protocol.md",
@@ -3498,7 +3354,6 @@ def main():
     assert_worktree_playbook(
         repo / "project-template",
         "docs/worktree-playbook.md",
-        "docs/loop-blueprint.md",
         "docs/maker-checker-protocol.md",
         "AGENTS.md",
         "CLAUDE.md",
@@ -3585,15 +3440,7 @@ def main():
             "archive",
         ])
         assert_boundary_config(target / ".forgekit" / "project-boundary.yml")
-        assert_loop_docs(target, ".forgekit/docs/loop-readiness.md", ".forgekit/docs/loop-blueprint.md")
-        assert_loop_operations(
-            target,
-            ".forgekit/docs/loop-operations.md",
-            ".forgekit/docs/loop-blueprint.md",
-            "AGENTS.md",
-            "CLAUDE.md",
-            ".codex/rules.md",
-        )
+        assert_bounded_loop_policy(target, ".forgekit/docs/bounded-auto-loop-policy.md", ".codex/rules.md")
         assert_maker_checker_protocol(
             target,
             ".forgekit/docs/maker-checker-protocol.md",
@@ -3612,7 +3459,6 @@ def main():
         assert_worktree_playbook(
             target,
             ".forgekit/docs/worktree-playbook.md",
-            ".forgekit/docs/loop-blueprint.md",
             ".forgekit/docs/maker-checker-protocol.md",
             "AGENTS.md",
             "CLAUDE.md",

@@ -17,13 +17,13 @@ Keep native_agent_status limited to available, unavailable, or unverified. Do no
 
 Native invocation evidence is recorded by the parent runtime. A child agent must not decide native_agent_status by itself.
 
-If native custom agents are unavailable, you may fall back to a general-purpose or worker subagent with prompt injection only when the user did not request native-only mode and the workflow allows fallback. Record agent_mode=fallback and fallback_reason in the loop state or work log only when the user asked to record the run. If the user requested native-only mode, stop when native agents are unavailable.
+If native custom agents are unavailable, you may fall back to a general-purpose or worker subagent with prompt injection only when the user did not request native-only mode and the workflow allows fallback. Record agent_mode=fallback and fallback_reason in the responsible checkpoint or owner only when the user asked to record the run. If the user requested native-only mode, stop when native agents are unavailable.
 
 If spawn fails because of a thread limit, max_threads, or completed agents that remain open, treat it as capacity blocked rather than native unavailable. Close completed agents or reduce concurrency before retrying.
 
 Never describe fallback or simulated execution as native agent success. When native status has not been verified, record native_agent_status=unverified.
 
-Native-only verification is read-only by default. Do not write task-intake.md, work-log.md, or loop state unless the user explicitly asks to record it.
+Native-only verification is read-only by default. Do not write task-intake.md, work-log.md, or a checkpoint/state artifact unless the user explicitly asks to record it.
 
 ## Read First
 
@@ -32,16 +32,16 @@ Read only the files needed for the task:
 - AGENTS.md or CLAUDE.md
 - .forgekit/project-boundary.yml
 - .forgekit/docs/native-agent-adapter.md
-- .forgekit/docs/loop-blueprint.md
-- .forgekit/docs/loop-operations.md
+- .forgekit/docs/bounded-auto-loop-policy.md
 - .forgekit/docs/maker-checker-protocol.md
 - governance/ai-engineering-loop.md
+- governance/agent-entry-contract.md
 
 Do not read secrets, .env files, tokens, keys, certificates, or credentials.
 
 ## Planner Mode
 
-Planner mode is read-only. Clarify scope, risk, allowed paths, forbidden paths, required ForgeKit artifacts, validation command, stop condition, and escalation path.
+Planner mode is read-only. Clarify Execution Intent, Effect Risk, scope, allowed paths, forbidden paths, applicable artifacts, validation, budget/effect envelope, stop condition, checkpoint, handoff, and escalation path. Do not require readiness, blueprint, or state artifacts merely because loop mode is requested.
 
 Do not edit files or run implementation commands.
 
@@ -50,6 +50,8 @@ Record whether planner execution was native, fallback, or not-run.
 ## Reviewer Mode
 
 Reviewer mode is read-only. Review diff, validation evidence, risk, documentation sync, and scope control.
+
+Apply .forgekit/docs/maker-checker-protocol.md. Report impact severity and Blocking independently; every Blocking finding needs one primary C1-C4 consequence, evidence, failure path, and blocked scope.
 
 End with one recommendation: pass, needs-fix, or manual-review.
 

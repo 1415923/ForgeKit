@@ -23,12 +23,18 @@ That authorization does not include adjacent projects, dependency installation, 
 
 ## Workflow
 
-1. Read the project boundary, startup entry, codebase map, and deterministic ForgeKit initialization state. Use the unified `scripts/forgekit-project.py --target <ProjectRoot>` state result when that entry is available; do not reproduce its init/current/upgrade/adoption algorithm in this Skill.
+1. Read the project boundary, startup entry, codebase map, and deterministic ForgeKit initialization state. Apply the root-resolution semantics in `governance/agent-entry-contract.md`. Use the unified `scripts/forgekit-project.py --target <ProjectRoot>` state result when that entry is available; do not reproduce its init/current/upgrade/adoption algorithm in this Skill.
 2. Confirm the minimum project root, project purpose, task scope, and required validation from existing files and user facts.
 3. Ask only for information that cannot be obtained from evidence and would change the initialization result. Do not use a fixed interview length, repeat facts already supplied, or block on non-critical preferences.
 4. Mark unsupported fields `TODO_REVIEW` or `UNKNOWN`. Never invent architecture, technology stack, owners, commands, deployment, or external-system details.
-5. Create only the minimum ForgeKit structure required for the selected initialization mode. Preserve existing files and user customization.
+5. Create only the minimum ForgeKit structure required for the selected initialization mode. Preserve existing files and user customization. Business/workspace `README.md` is user-owned: do not create, replace, or claim ownership of it as a ForgeKit bootstrap fact.
 6. Run proportionate deterministic validation and report what is confirmed, unknown, changed, and still outside scope.
+
+## Unified Layout Contract
+
+At the semantic level, the high-level `--target` identifies the actual ProjectRoot unless the caller explicitly chooses `--layout legacy-nested`; fresh default planning is `--layout in-place`. Existing projects are discovered and reused, never moved or rewritten because a layout option is present. A legacy inner ProjectRoot must resolve only through the exact ancestor-boundary match defined by `agent-entry-contract.md`; do not choose the nearest unrelated ancestor or create a second `.forgekit` root.
+
+Actual `--layout` CLI behavior, existing-root discovery code, manifest/install-lock README ownership, and init copy behavior are implementation concerns. Do not simulate them in this Skill or claim they exist without entry-path evidence.
 
 ## Risk Branch
 

@@ -35,7 +35,7 @@
 - 业务 `docs/` 默认是 read-mostly 证据源：允许读取、引用和抽取事实，不写 ForgeKit 治理模板。
 - `.forgekit/state.json` 是 v0.36+ versioned migration 状态。升级按 `forgekit-upgrade.py check -> plan -> apply --safe` 执行。
 - 用户表达安装、初始化、更新或同步 ForgeKit 时，优先使用 ForgeKitRoot 的 `forgekit-project.py --target <project-root>` 统一入口自动分流；升级必须先 plan，apply 必须确认。其他维护动作先识别 `MaintenanceIntent`；归档确认后生成 summary/items/index。归档不是删除。
-- archive / maintenance 前后必须检查 current docs integrity。task-board 的真实 Source ID 必须反链 task-intake，active tasks 不得只存在 archive；current docs 模板化或断链时先做 Current State Restoration Pass，不继续归档。示例 ID 不参与真实任务检查。
+- archive / maintenance 前后必须检查 current docs integrity。task-board 的真实 Source ID 必须反链 task-intake，active tasks 不得只存在 archive；真实 Source/Task 断链，或 confirmed fact 在 closure 时仍没有写回负责 owner，才进入 scoped Current State Restoration Pass。owner 保持 lean/template 不因 active task 自动成为 failure；示例 ID 不参与真实任务检查。
 - 缺少 state 或版本低于 v0.36 的项目按既有项目 adoption 处理；未经用户确认不得创建 state，不得声称已自动升级。
 - `upgrade-forgekit.*`、`.forgekit/upgrade-export/**` 和 `.forgekit/upgrade/**` 仅为 legacy 兼容；不得默认读取或导出全量 candidates，不得把它们当当前事实。
 - `.forgekit/template-lock.json` 是 legacy 安装基线；v0.36 migration 模型不更新它。
@@ -44,6 +44,8 @@
 - 更新 managed docs 前先按 `.forgekit/docs/workflow-router.md` 判断是否有写入触发；没有写入触发时不要改文档。
 - 区分 `Implementation Scope` 与 `Governance Writeback Scope`；“只改这些业务文件”默认不关闭 ForgeKit managed docs 的最小写回，只有用户明确禁写文档时才关闭。
 - 默认 `ManagedDocsWriteback: minimal`：实际进展写 `work-log.md`，真实状态变化写 `task-board.md`，用户/版本可见变化写 `changelog.md`，当前 change 按流程写回。
+- Document ownership does not imply mandatory population。active task 本身不产生 risk、testing、traceability 或 project-plan 内容；没有真实事实时保持 lean/template，不得为 checker 编造。
+- Active work 中 confirmed fact 可暂存在 active change/checkpoint；受影响 task/change/phase 被声明 closed、shipped 或 handed off 前，必须写回唯一负责 owner。用户禁止所需 writeback 时，只阻止该 closure declaration。
 - 按 `work-session-checkpoint.md` 选择 Micro / Checkpoint / Ship 写回。Micro Update 只是不写 ForgeKit governance docs，不限制授权范围内的业务代码、README、注释、测试或配置修改。
 - 可预见的 compact/clear/换会话前做 pre-compact checkpoint；不可预见的 auto compact 后先做 post-compact recovery check，不把不确定摘要写成事实。
 - 最小写回不得修改 `task-intake.md` 原文、`requirements.md` 事实源或 business docs；`review-only` 不写，report-only 报告不得触发自动修复。
@@ -65,9 +67,7 @@
 - `.forgekit/docs/work-log.md` 只记录推进过程、验证、提交/推送、阻塞和确认，并引用 `Task ID` / `Source ID`。工作日志里的后续跟进不自动成为任务；先回到 task-intake 做 Task Decision。
 - 拆解任务必须引用 Source ID；未经人工确认的派发内容必须保持 `Human Review: pending`，不得视为最终事实；不得把账号、密码、token、证书、环境地址或敏感配置原样写入 managed docs。
 - `.forgekit/docs/work-log.md` 是个人工作顺序记录，用于交接上下文和中断会话恢复；用户要求“更新 ForgeKit 文档”且本轮包含阶段收口、验证、提交/推送、阻塞、领导/组长确认时应同步，用户明确要求“同步工作日志”时必须同步；仅更新稳定技术事实时不强制同步。
-- `.forgekit/docs/loop-readiness.md` 和 `.forgekit/docs/loop-blueprint.md` 是可审查的 loop 设计文档，不是自动执行授权。
-- `.forgekit/docs/loop-operations.md` 是显式触发的操作协议，不是自动 runner 或无人值守 loop 授权。
-- `.forgekit/docs/bounded-auto-loop-policy.md` 只是 bounded-auto policy；用户未明确授权时不得进入 bounded-auto。
+- `.forgekit/docs/bounded-auto-loop-policy.md` 是 surviving loop owner；用户未明确授权时不得进入 bounded-auto。它保留 allowed/forbidden paths、effect/budget envelope、stop、checkpoint 和 handoff，不要求 readiness questionnaire、blueprint 或 state file。
 - `.forgekit/docs/maker-checker-protocol.md` 是审查协议，不是多 agent 调度或自动 checker 授权。
 - `.forgekit/docs/worktree-playbook.md` 是手动隔离指南，不是自动 worktree 调度或 agent 编排。
 - `.forgekit/docs/native-agent-adapter.md` 是 opt-in 原生 agent 配置适配说明，不授权自动执行、调度、merge、commit、push 或 PR。
@@ -79,7 +79,7 @@
 - native-only verification 默认只读；除非用户明确要求“记录到文档”，不得自动写 task-intake、work-log 或 loop state。
 - fallback 必须有用户明确允许，或由 workflow 规则明确允许。
 - bounded-auto 或 loop 执行必须写明 `agent_mode`；native custom agent 未观察到前，`native_agent_status` 必须是 `unverified`。
-- loop 必须有状态文件、验证命令、停止条件和人工升级入口。
+- loop 必须有与当前 scope 相关的验证、停止条件和人工升级入口；只有用户任务真实需要时才指定 state/writeback target。
 - loop 不默认修改 business docs、secrets、deploy 或 CI。
 - 不得自行进入 loop mode；只有用户明确要求 loop dry-run、one-step、bounded-auto、review-only、continue 或 stop/handoff 时才按 loop operation 规则执行。
 - one-step 或 bounded-auto 前必须复述 scope、stages、budget、forbidden actions、stop conditions、agent mode 和本轮是否会修改文件。
@@ -87,22 +87,22 @@
 - one-step 每轮结束必须停；review-only 绝不能改文件或运行写操作。
 - loop continue 不得自动连续运行，每一轮都需要用户明确触发。
 - scope 不清、预算超限、验证失败或触及 forbidden paths 时必须停止并升级给人。
-- loop 输出必须写回 `.forgekit/docs/work-log.md` 或指定 state file；bounded-auto 每阶段必须 checkpoint，最终必须 handoff。
+- loop 只在 confirmed fact 变化或预声明 checkpoint event 发生时写回唯一负责 owner；无新事实不写，不要求逐阶段 work-log 或 state file。结束时必须 handoff。
 - 不得默认修改 business docs、secrets、deploy、CI 或 `.forgekit/template-lock.json`。
 - 中高风险代码变更应区分 Maker phase 和 Checker phase。
 - Maker phase 可以声明 `ready for check`，但不得把自己的实现视为最终通过。
 - Checker phase 应优先复核 diff、验证结果、风险和文档同步，并输出 `pass`、`needs-fix` 或 `manual-review`。
 - Checker 不应扩大需求范围，不应顺手实现新功能，除非用户明确要求。
-- 修改代码默认需要 independent review；核心逻辑、API、数据、权限、脚本、发版/tag 和 bounded-auto 收口必须 independent review。
+- independent review 只由用户/frozen contract 明确 gate，或有证据支持的真实 C1-C4 consequence 触发；代码、脚本、文件数量、发版标签或 bounded-auto 本身不机械产生 gate。
 - Maker 只向 `forgekit-code-reviewer` 传任务摘要、diff/stat、changed files、验证输出和已知风险，不传完整会话历史或自我评价。
 - self-review 必须标为 `ReviewType: self-review`，不能冒充 independent review；reviewer 不可用时必须 `manual-review`，不得写 `pass`。
 - 用户要求第一性原理时，按 `.forgekit/docs/reasoning-review.md` 执行 First-Principles Pass；高风险设计前先推导根因和最小正确机制。
-- 用户要求对抗式审查或高风险变更收口时，执行 Adversarial Review Pass；blocking finding 或 `TODO_REVIEW` 必须停止自动推进并 checkpoint。
+- 用户要求对抗式审查或高风险变更收口时，执行 Adversarial Review Pass；`Blocking=YES` finding 停止其 BlockedScope 并 checkpoint。`TODO_REVIEW` 按 ValidationRelevance 处理，不自动扩大为 Blocking。
 - 不得把未经验证的推导写成事实，也不得把完整推理或审查长日志写进常驻 managed docs。
 - 关键结论不能只留在聊天里；阶段边界、compact/clear 前、子 agent 返回关键结论后、handoff/commit/tag 前，按 `context-continuity.md` 做 minimal checkpoint。
 - ForgeKit 升级更新 AGENTS/CLAUDE/rules、skills 或 agents 后，旧会话只用于 checkpoint、`ManagedDocsWriteback: minimal` 和当前收口；新任务应新开会话或重启工具，不假设当前会话自动加载新规则。
 - 长工具输出只保留摘要和路径，不写全文；不确定项标 `TODO_REVIEW`，不要把所有事实塞进 `CLAUDE.md` / `AGENTS.md`。
-- reviewer 必须 read-only；`needs-fix` 阻断 handoff/commit，除非修复或用户明确接受风险；`manual-review` 必须人工确认。
+- reviewer 必须 read-only；`needs-fix` 只阻断 finding 声明的 scope，除非修复或用户明确接受风险；`manual-review` 对适用 gate 必须人工确认。所有 findings 独立表达 `impact_severity` 与 `blocking`，Severity 不拥有 gate authority。
 - 对公司或业务项目，Checker 必须检查是否误写敏感信息、业务 docs、secrets、deploy 或 CI。
 - 不得自行创建 worktree，除非用户明确要求。
 - 创建 worktree 前必须确认 `git status --short` 干净，并说明 base branch、worktree path、branch name、allowed paths、validation command 和 cleanup plan。
@@ -190,12 +190,12 @@
 ## 开发方案与版本路线图
 
 - SDLC、架构治理、版本治理、质量指标统一记录在 `governance/`。
-- 项目初期必须先讨论并形成 `.forgekit/docs/project-plan.md`。
+- 只有已确认的项目目标、非目标、范围或落地条件需要持久化时，才更新 `.forgekit/docs/project-plan.md`；active task alone 不要求 population。
 - 大版本规划必须写入 `.forgekit/docs/version-roadmap.md`。
 - 重要架构决策必须写入 `.forgekit/docs/adr/`。
 - 重要方案讨论必须先写入 `.forgekit/docs/rfc/`。
-- 需求、RFC、ADR、任务、测试、缺陷应维护在 `.forgekit/docs/traceability.md`。
-- 高风险必须写入 `.forgekit/docs/risk-register.md`。
+- 只有真实需要的需求、RFC、ADR、任务、测试、缺陷映射才维护在 `.forgekit/docs/traceability.md`。
+- 已确认且仍开放的风险事实写入 `.forgekit/docs/risk-register.md`；不得编造“当前无风险”满足模板。
 - 高影响变更必须写入 `.forgekit/docs/change-impact.md`，并参考 `governance/change-management.md`。
 - 开发前检查 `governance/definition-of-ready.md`，完成时检查 `governance/definition-of-done.md`。
 - 如果项目开发方案、技术选型、软硬件落地条件没有明确结论，不应直接进入大规模编码。

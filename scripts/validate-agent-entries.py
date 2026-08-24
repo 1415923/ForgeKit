@@ -54,7 +54,7 @@ FORBIDDEN_PATTERNS = {
     "expanded archive protocol": r"archive\s*/\s*maintenance before and after|current state restoration pass",
     "expanded checkpoint protocol": r"pre-compact checkpoint|post-compact recovery check|micro update|checkpoint update|ship update",
     "expanded worktree protocol": r"before creating a worktree|worktree results must be written",
-    "expanded loop protocol": r"a loop must have a state file|loop continue must not run continuously|bounded-auto must stop",
+    "expanded loop protocol": r"bounded execution envelope|allowedpaths:|external effect envelope|checkpoint events",
     "maker-checker state machine": r"maker phase|checker phase|checkerstatus:|makerstatus:",
     "code-review convergence copy": r"blocker-recheck|initial review blocks|re-review defaults|reviewdecision:",
     "fixed file threshold": r"more than\s+5\s+files|>\s*5\s+files",
