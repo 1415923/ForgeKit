@@ -214,9 +214,9 @@ class MigrationPayloadTests(StageDTestCase):
         self.assertEqual("0.46.0", descriptor["to"])
         self.assertEqual(38, len(descriptor["actions"]))
         self.assertEqual(tree_snapshot(PACKAGE), tree_snapshot(TEMPLATE_PACKAGE))
-        self.assertEqual("0.45.0", (REPO / "VERSION").read_text(encoding="utf-8").strip())
+        self.assertEqual("0.46.0", (REPO / "VERSION").read_text(encoding="utf-8").strip())
         self.assertEqual(
-            "0.45.0",
+            "0.46.0",
             load_json(REPO / "project-template/.forgekit/state.json")["forgekit_version"],
         )
 

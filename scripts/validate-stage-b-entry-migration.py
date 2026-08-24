@@ -146,7 +146,14 @@ def validate_draft(repo_root, package_root=None):
             continue
         source = package / expected_source
         baseline = package / expected_baseline
-        template_entry = repo_root / "project-template" / target
+        current_version = version_tuple((repo_root / "VERSION").read_text(encoding="utf-8").strip())
+        target_version = version_tuple(descriptor.get("to"))
+        if current_version is not None and target_version is not None and current_version > target_version:
+            incoming_anchor = repo_root / "migrations" / descriptor["to"] / expected_source
+            incoming_label = "released"
+        else:
+            incoming_anchor = repo_root / "project-template" / target
+            incoming_label = "current"
         if not source.is_file() or not baseline.is_file():
             errors.append(f"{target}: source or baseline fixture is missing")
             continue
@@ -177,20 +184,20 @@ def validate_draft(repo_root, package_root=None):
                 f"draft baseline SHA-256={draft_sha}; descriptor SHA-256={descriptor_baseline}"
             )
 
-        if not template_entry.is_file():
-            errors.append(f"{target}: current project-template entry is missing")
+        if not incoming_anchor.is_file():
+            errors.append(f"{target}: {incoming_label} incoming anchor is missing: {incoming_anchor}")
             continue
         incoming_bytes = source.read_bytes()
         if b"\r" in incoming_bytes:
             errors.append(f"{target}: incoming fixture violates the LF checkout contract")
-        template_bytes = template_entry.read_bytes()
+        template_bytes = incoming_anchor.read_bytes()
         descriptor_incoming = action.get("incoming_sha256")
         template_sha = sha256_bytes(template_bytes)
         draft_incoming_sha = sha256_bytes(incoming_bytes)
         if incoming_bytes != template_bytes or descriptor_incoming != template_sha:
             errors.append(
-                f"{target}: current incoming mismatch; managed path={target}; "
-                f"current template SHA-256={template_sha}; draft incoming SHA-256={draft_incoming_sha}; "
+                f"{target}: {incoming_label} incoming mismatch; managed path={target}; "
+                f"{incoming_label} anchor SHA-256={template_sha}; draft incoming SHA-256={draft_incoming_sha}; "
                 f"descriptor SHA-256={descriptor_incoming}"
             )
         if incoming_bytes == baseline_bytes:

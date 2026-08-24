@@ -9,6 +9,6 @@
 | SD-05 | 覆盖 stock/custom/unknown/missing/README/current facts/idempotency/rollback。 | Done | `tests/test_stage_d_migration.py` |
 | SD-06 | 覆盖 fresh layouts、legacy outer/inner、ambiguous root、scope 和 checker compatibility。 | Done | `tests/test_stage_d_migration.py` |
 | SD-07 | 运行 targeted regression、manifest、compile、diff/scope checks。 | Done | `verification.md` |
-| SD-08 | Fresh independent read-only review。 | Pending | 本轮不以 self-review 满足 independent gate |
+| SD-08 | Fresh independent read-only review。 | Done | 正式状态 `STAGE_D_APPROVED`；implementation commit `0127e85`。 |
 
-Stage E、release、commit、push、tag 均未授权。
+Stage E maker 已完成 release-candidate 收口并等待独立审查；release、commit、push、tag 仍未授权。

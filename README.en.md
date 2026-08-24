@@ -2,7 +2,7 @@
 
 中文文档: [README.md](README.md)
 
-ForgeKit is a **local project-governance scaffold** for AI coding tools such as Codex and Claude Code.
+ForgeKit is a **local project-governance scaffold** for AI coding tools such as Codex and Claude Code. The current version is **v0.46.0**.
 
 It does not generate your business framework, deploy your system, or operate Git on your behalf. Instead, it puts project boundaries, task sources, current state, verification evidence, risks, and handoff rules inside the repository so an AI agent can work in a **reviewable, verifiable, and recoverable** process.
 
@@ -53,7 +53,16 @@ The unified entry inspects the target before choosing an action:
 
 ForgeKit is plan-first. Safe writes require interactive confirmation or explicit `--yes`.
 
-Formal safe migrations are supported for projects initialized with v0.36.0 or later and containing `.forgekit/state.json`. Earlier projects should start with a read-only handover review.
+For a fresh project, `--target` is the actual `ProjectRoot`; interactive and dry-run use in-place layout by default. Unattended writes must choose a layout explicitly so historical nested behavior cannot change silently:
+
+```powershell
+python .\scripts\forgekit-project.py --target "D:\path\to\project" --yes --layout in-place
+python .\scripts\forgekit-project.py --target "D:\path\to\outer" --yes --layout legacy-nested
+```
+
+Existing layouts are never moved. For a legacy-nested project, entering from its outer GovernanceRoot or inner ProjectRoot resolves the same existing topology.
+
+Formal safe migrations are supported for projects initialized with v0.36.0 or later and containing `.forgekit/state.json`. v0.35.x and earlier projects should start with a read-only handover review.
 
 ### 2. Start the AI tool from the project root
 
@@ -85,14 +94,26 @@ Claude Code:
 Read CLAUDE.md and follow the project-local ForgeKit rules. First summarize the project boundary, current task, available evidence, risks, and recommended next step. Do not edit files yet.
 ```
 
-## How v0.45.0 works
+## Core Capabilities
 
-v0.45.0 separates always-on boundaries from conditional workflows:
+ForgeKit v0.46.0 provides on-demand project governance, safe migrations, current-truth writeback, the Context Continuity Protocol, and the Independent Code Review Protocol. They follow actual task impact and do not form a mandatory pipeline.
+
+## How v0.46.0 works
+
+v0.46.0 keeps the lightweight entry and on-demand Skills while making governance preserve progress instead of creating recursive gates:
 
 - `AGENTS.md` / `CLAUDE.md` keep only always-on boundaries, authorization, and routing rules;
 - root `skills/` is the semantic authority for nine shared Skills;
 - generated `.agents/skills/` is synchronized deterministically;
 - `.claude/skills/` remains a Claude-specific adapter, not a mechanical copy.
+- execution intent is explicitly `DIAGNOSTIC`, `SMOKE`, or `FORMAL`; a real call is not automatically Formal or release evidence;
+- findings separate impact magnitude from whether the current action must stop: `Impact Severity != Blocking`;
+- checker nonzero and `--strict` failure are command results, not automatic project blockers;
+- document ownership does not require every owner to be populated; writeback is triggered only by confirmed fact changes;
+- fresh init defaults to in-place while `--layout legacy-nested` remains an explicit compatibility path;
+- a fresh generated project does not create, overwrite, or claim the user's business-root `README.md`.
+
+See `.forgekit/docs/maker-checker-protocol.md` for the complete finding contract and `governance/ai-engineering-loop.md` for execution boundaries. Both `MAJOR + Blocking=NO` and `MINOR + Blocking=YES` can be valid; stopping requires an evidenced failure path for the current scope.
 
 ### Nine on-demand Skills
 
@@ -109,6 +130,12 @@ v0.45.0 separates always-on boundaries from conditional workflows:
 | `project-suitability` | Assess whether ForgeKit fits a project without initializing it automatically |
 
 These Skills are not a mandatory pipeline. Invoke only what the task and its actual impact require.
+
+### Optional native agent configuration
+
+The Codex and Claude Code native-agent adapters are opt-in configuration templates. Generating a configuration does not prove that the runtime loaded or invoked it; see `.forgekit/docs/native-agent-adapter.md` in a generated project.
+
+The low-level PowerShell initializer still supports explicit `-NativeAgentAdapter all`; the project-local startup Skill is `.agents/skills/project-init/SKILL.md`. These low-level options do not change the high-level `--target` / `--layout` contract.
 
 Review, assessment, and planning are read-only by default. A finding does not grant repair permission. Local writes, commit, push, tag, publish, release, and deploy require separate authorization.
 
@@ -175,7 +202,7 @@ python scripts/forgekit-upgrade.py apply --safe --repo-root <project>
 | `plan` | Print the migration plan without writing |
 | `apply --safe` | Execute only migration actions marked safe |
 
-### Upgrade from v0.44.1 to v0.45.0
+### Upgrade from v0.45.0 to v0.46.0
 
 The formal migration classifies every managed target:
 
@@ -186,6 +213,10 @@ The formal migration classifies every managed target:
 | `unknown` | Cannot be identified reliably; do not overwrite |
 | `missing` | Handle according to the action contract |
 | rollback | Restore the state from the beginning of this upgrade |
+
+The v0.46 migration follows the exact chain (for example, `0.44.1 -> 0.45.0 -> 0.46.0`) and does not add shortcuts from arbitrary historical versions. Existing layouts do not move. Legacy business-README ownership is retired from stock metadata only; README bytes remain untouched.
+
+Fresh projects no longer install `loop-readiness.md`, `loop-blueprint.md`, or `loop-operations.md`. Their surviving contracts live in `bounded-auto-loop-policy.md`, `agent-entry-contract.md`, `work-session-checkpoint.md`, `maker-checker-protocol.md`, and `ai-engineering-loop.md`. Upgrade removes only exact-stock copies; custom or unknown copies are preserved for manual review.
 
 After upgrading, start a new AI session or ask the current session to reload the entry and current-task documents before continuing.
 
@@ -236,6 +267,8 @@ This does not split workspace docs, migrate tasks, or move business repositories
 
 Existing business `docs/` is treated as read-mostly evidence by default. ForgeKit does not place governance templates there automatically.
 
+The business-root `README.md` is not fresh v0.46 generated content: absence stays absent, and existing content remains user-owned even with `--force`.
+
 ## When to write back documentation
 
 Writeback is event-triggered, not “after every edit”.
@@ -248,6 +281,8 @@ Writeback is event-triggered, not “after every edit”.
 | Predictable compaction or session switch | Save the current goal, conclusions, risks, verification, and next step first |
 
 Skipping governance-doc writeback for a micro change does not prohibit authorized edits to business code, README files, comments, tests, or configuration.
+
+Document ownership does not imply mandatory population. If there is no real risk or testing fact, `risk-register.md` and `testing.md` may remain lean or templated; do not fabricate content to satisfy a checker. Confirmed facts may stay in an active checkpoint temporarily, but real changed facts must reach their current owner before the affected closure, handoff, or ship claim.
 
 ## Safety boundaries
 

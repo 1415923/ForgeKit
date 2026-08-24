@@ -49,32 +49,35 @@ Final State: PLAN_APPROVED_FOR_STAGE_A
 | NF-02 | ACCEPTED | Stage C：workspace checker machine output 保持 additive compatibility，包括既有 `summary`、`path`、`not-enabled`、`runtime-error`、status/code/stdout markers。 |
 | NF-03 | ACCEPTED | Stage B：由现有 `project-template/docs/project-maintenance.md` 承载一次性 cleanup plan；不新增 taxonomy/database。 |
 
-## Stage A independent review
+## Approved phase baseline
 
-CheckerStatus: not-run
-ReviewDecision: not-run
+| Stage | Formal state | Implementation commit |
+| --- | --- | --- |
+| A | `STAGE_A_APPROVED` | `9e2f35d` |
+| B | `STAGE_B_APPROVED` | `30b1c21` |
+| C | `STAGE_C_APPROVED` | `9dc8b6a` |
+| D | `STAGE_D_APPROVED` | `0127e85` |
+
+上述状态来自本轮用户给出的正式 authority；Stage E 以这些已 commit 且独立批准的实现为 baseline，不重开其设计。
+
+## Stage E maker handoff
+
+MakerStatus: ready-for-check
+ReviewDecision: pending-independent-review
 ReviewType: independent-required
-ReviewerAgent: pending
-ReviewMode: initial
-ReviewedRange: `.forgekit/changes/v046-semantic-freeze/*.md`
+ReviewedRange: Stage E staged diff and release-candidate evidence
 FrozenAcceptanceIDs: A1-A9, B1-B12
-AuthorizedStage: stage-a-independent-review-only
-DiffReviewed: no
-ValidationReviewed: no
-DocsReviewed: no
-RisksReviewed: no
-Findings: pending
-BlockingFindings: pending
-FollowUps: pending
-RequiredFixes: pending
-VerificationGaps: Stage A representation has not received independent review.
-TODO_REVIEW: Verify exact fidelity to Frozen Plan r2, artifact ownership uniqueness, full matrices, BF/NF absorption, no new mechanism, no Stage B/C implementation, and `usage.html` preservation.
-FinalRecommendation: Await fresh read-only independent review; do not start Stage B.
+AuthorizedStage: stage-e-independent-review-only
+Findings: none from maker validation
+BlockingFindings: none
+VerificationGaps: independent reviewer has not yet reviewed the Stage E candidate.
+TODO_REVIEW: Fresh read-only reviewer must verify version owners, migration wiring, user docs, release notes, pristine/full versus targeted evidence levels, machine compatibility, SC-BF-01/02, README ownership, current-truth closure, `usage.html` preservation, and absence of release side effects.
+FinalRecommendation: Proceed only to Stage E independent review; do not release.
 
 ## Current-doc / release sync
 
-CurrentDocsSync: not-needed — Stage A creates the active change contract; it does not establish implemented product/current-version facts.
-ChangelogUpdated: no — prohibited in Stage A.
-ArchitectureUpdated: not-needed — no long-term managed doc changed.
-TestingUpdated: not-needed — only this change's verification artifact records Stage A checks.
+CurrentDocsSync: confirmed — only changed release/version, user workflow, verification, phase status and ship facts were written to their existing owners.
+ChangelogUpdated: yes — v0.46.0 user-visible release entry added in Stage E.
+ArchitectureUpdated: not-needed — no new architecture, protocol, checker, Skill, registry or state machine was introduced.
+TestingUpdated: confirmed — `verification.md` separates targeted, pristine/full, dirty-worktree and validator evidence.
 RequirementsUpdated: not-needed — approved source remains referenced, not replaced.

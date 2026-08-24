@@ -76,7 +76,7 @@ class StageBMigrationIdentityTests(ExplicitTempMixin, unittest.TestCase):
         errors = validator.validate_draft(REPO, self.package)
         self.assertTrue(any("source_commit must equal approved Stage A commit" in item for item in errors), errors)
 
-    def test_incoming_and_checksum_synchronized_mutation_still_fails_current_template_anchor(self):
+    def test_incoming_and_checksum_synchronized_mutation_still_fails_released_anchor(self):
         path = self.package / "files/CLAUDE.md"
         mutated = path.read_bytes() + b"\ncoherent but stale incoming\n"
         path.write_bytes(mutated)
@@ -85,7 +85,7 @@ class StageBMigrationIdentityTests(ExplicitTempMixin, unittest.TestCase):
         action["incoming_sha256"] = hashlib.sha256(mutated).hexdigest()
         self.write_descriptor(descriptor)
         errors = validator.validate_draft(REPO, self.package)
-        self.assertTrue(any("CLAUDE.md: current incoming mismatch" in item for item in errors), errors)
+        self.assertTrue(any("CLAUDE.md: released incoming mismatch" in item for item in errors), errors)
 
     def test_stage_c_skill_baseline_is_anchored_to_approved_stage_b_commit(self):
         target = validator.stage_c_skill_targets(REPO)[0]
@@ -120,7 +120,7 @@ class StageBMigrationIdentityTests(ExplicitTempMixin, unittest.TestCase):
         action["incoming_sha256"] = hashlib.sha256(mutated).hexdigest()
         self.write_descriptor(descriptor)
         errors = validator.validate_draft(REPO, self.package)
-        self.assertTrue(any(f"{target}: current incoming mismatch" in item for item in errors), errors)
+        self.assertTrue(any(f"{target}: released incoming mismatch" in item for item in errors), errors)
 
     def test_all_five_stage_c_yaml_packages_are_managed(self):
         yaml_targets = [

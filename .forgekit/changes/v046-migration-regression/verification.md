@@ -37,3 +37,5 @@ AcceptanceStatus: maker-verified
 - full smoke 被 unrelated user deletion `usage.html` 在入口阻止。
 - full validator 在有限 90 秒窗口内无输出；Stage D 未新增 validator-of-validator。
 - 未迁移或写入任何真实项目。
+
+以上 limitations 是 Stage D maker 当时的 evidence boundary，不能改写为 Stage D full PASS。Stage E 另行取得并分级记录：targeted PASS、release-consistency PASS、基于当前 candidate snapshot 的 pristine/full smoke PASS、不带 skip 的 `validate-template.ps1` PASS，以及真实 dirty worktree 因 unstaged `D usage.html` 的 `KNOWN_UNRELATED_FAILURE`。该补充关闭 NB-D-01 的最终报告风险，但不改变 Stage D 历史证据标签。

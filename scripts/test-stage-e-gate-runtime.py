@@ -29,7 +29,7 @@ GATE_WORK_NAMES = {
     "smoke": "s", "fresh-clone": "f",
 }
 CANARY_MANIFEST = Path("project-template/.forgekit/template-manifest.json")
-CANARY_VERSION = "0.44.1"
+CANARY_VERSION = "0.45.0"
 CANARY_DIAGNOSTIC = "version [template manifest]"
 
 
@@ -119,9 +119,9 @@ def install_stage_e_observer(repo: Path) -> None:
 def inject_canary(repo: Path) -> None:
     path = repo / CANARY_MANIFEST
     data = json.loads(path.read_bytes().decode("utf-8"))
-    if data.get("template_version") != "0.45.0":
+    if data.get("template_version") != "0.46.0":
         raise RuntimeError(
-            f"runtime canary requires template_version=0.45.0 before mutation: {path}"
+            f"runtime canary requires template_version=0.46.0 before mutation: {path}"
         )
     data["template_version"] = CANARY_VERSION
     path.write_bytes((json.dumps(data, ensure_ascii=False, indent=2) + "\n").encode("utf-8"))

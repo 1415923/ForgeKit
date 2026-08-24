@@ -12,6 +12,67 @@ README 负责说明“ForgeKit 是什么、怎么开始、日常怎么用”；C
 
 ---
 
+## [0.46.0] - Progress-Preserving Governance & Unified Init
+
+### 问题背景
+
+ForgeKit v0.45 已经完成轻量入口与按需 Skill 收敛，但真实使用仍可能遇到三类摩擦：治理检查因自身存在继续升级、current docs 因 owner 存在被机械要求填满，以及高层 `--target` 与历史 implicit nested 初始化行为不一致。checker 的影响严重度、命令退出码和项目 blocker 也需要明确分离。
+
+### Progress-preserving governance
+
+- 执行目的统一为 `DIAGNOSTIC`、`SMOKE`、`FORMAL`。真实或付费调用不自动成为 Formal，也不自动触发 release-check。
+- Formal evidence 保持 claim provenance，但不建立永久物理保存制度，也不为每次 Formal run 自动增加 review/checker。
+- 重复 governance-only blocking 且没有新 mainline evidence 时，先简化现有流程；不新增 readiness-of-readiness 或 validator-of-validator。
+- bounded-auto 保留 trigger、scope、budget、stop 与 handoff，不再要求每次 run 都做 independent review。
+
+### Current-truth behavior
+
+- Document ownership does not imply mandatory population。只有 confirmed fact 变化时才写回负责 owner。
+- 没有真实 risk/testing/traceability/plan fact 时，相关文档可以保持 lean/template；checker 不要求编造事实。
+- active work 可先把 confirmed fact 留在 checkpoint；相关 closure、handover 或 ship 前必须把真实 changed fact 写回 current owner。
+
+### Unified project initialization
+
+- 高层 `--target` 现在表示实际 `ProjectRoot`；fresh interactive 与 dry-run 默认 `in-place`。
+- fresh unattended `--yes` 必须显式提供 `--layout in-place|legacy-nested`，因此不会发生 silent behavior change。
+- `--layout legacy-nested` 保留历史 nested compatibility；低层 init 的显式 `ProjectName` 行为保持。
+- existing project 不移动 layout。legacy outer GovernanceRoot 和 inner ProjectRoot entry 会解析到同一 existing topology，inner entry 不创建第二套 `.forgekit`。
+
+### Checker semantics
+
+- canonical finding 字段为 `impact_severity` 与 `blocking`：Severity 表示影响大小，Blocking 表示当前 scoped action 是否必须停止。
+- `MAJOR + Blocking=NO` 与 `MINOR + Blocking=YES` 都是合法组合；每个 Blocking finding 必须提供唯一 C1-C4 consequence、failure path、evidence 和 blocked scope。
+- `--strict` 或 checker nonzero 是 command-level result，不自动等于 project Blocking。
+- 为兼容 v0.45 consumers，继续保留 legacy `severity`、`code`、`message`、`blocking_count`、`warning_count`、`status`、`active_tasks`、`summary`、`path`、`not-enabled`、`runtime-error` 与既有 stdout markers。
+
+### Safe migration from v0.45
+
+- 新增正式 `0.45.0 -> 0.46.0` migration，并沿用精确 predecessor chain（例如 `0.44.1 -> 0.45.0 -> 0.46.0`），不增加任意历史版本 shortcut。
+- exact stock 文件安全更新；custom/unknown 保留并进入 manual review；dry-run 只读；apply 需要既有确认；异常恢复 upgrade-start state；重复 apply 幂等。
+- fresh surface 移除 `loop-readiness.md`、`loop-blueprint.md`、`loop-operations.md`。其 surviving contract 由 bounded-auto policy、agent entry、checkpoint、maker-checker 和 engineering-loop owners 承载。
+- 升级仅删除 exact-stock loop docs；custom/unknown legacy copies 保留并标记 manual，不声称全部旧文件都会被删除。
+
+### README ownership
+
+- fresh generated project 不再创建或 claim 业务根 `README.md`。
+- absent README 保持 absent；custom 和 legacy README 字节保留；`--force` 也不会取得 ownership。
+- 本 ForgeKit 仓库的 `README.md` / `README.en.md` 仍是产品文档；toolkit source 中的 `project-template/README.md` 不进入 fresh business root。
+
+### Compatibility and verification notes
+
+- `project-boundary.yml` 的 created-with metadata 与 `.forgekit/state.json` current version 分离；历史 created-with 值不会因升级被机械改写。
+- workspace malformed-map 与 dry-run CurrentWriteScope failure paths 继续作为 SC-BF-01 / SC-BF-02 regression 保留。
+- 自动化覆盖 fresh in-place/legacy-nested、README ownership、migration stock/custom/rollback/idempotency、root discovery、checker machine compatibility 和 migration mirrors。
+- 不同客户端的真实 Skill discovery/selection 与上下文收益仍为 `NEEDS_TEST`；这不改变 deterministic release artifact 的验证结论。
+
+### 边界
+
+- 不新增 Skill、checker、protocol、registry、version source 或 persisted root identity。
+- 不自动 commit、push、tag、publish、release 或 deploy。
+- 不迁移真实业务项目，不覆盖 user-owned README 或 custom managed file。
+
+---
+
 ## [0.45.0] - Rule Ownership & Skill Convergence
 
 ### 问题背景

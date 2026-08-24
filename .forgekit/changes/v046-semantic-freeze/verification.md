@@ -1,4 +1,4 @@
-AcceptanceStatus: frozen
+AcceptanceStatus: stage-e-maker-verified
 
 # ForgeKit v0.46.0 Verification Contract
 
@@ -70,3 +70,23 @@ AcceptanceStatus: frozen
 
 - Stage B/C/D/E 的 protocol、consumer、checker、init、migration 与 release 行为均未实现、未运行，也不得由 Stage A 文档检查推断通过。
 - Stage A fresh read-only independent review 尚未执行。
+
+以上第 4～6 节是 Stage A 的历史证据快照，不因后续阶段完成而改写。当前 phase truth 与 Stage E evidence 如下。
+
+## 7. Stage E release-candidate evidence
+
+执行日期：2026-08-24。
+
+| Evidence level | Result | Evidence |
+| --- | --- | --- |
+| TARGETED | PASS | Stage E release structure 19/19、Stage D migration 13/13、upgrade review packets 11/11、release gate wiring 10/10、Stage B migration identity 12/12、agent-entry fixture、manifest、plugin assets、compile 均通过。 |
+| RELEASE CONSISTENCY | PASS | runtime canary、version/marketplace/migration/manifest/wiring negative mutations、restored baselines 与 fresh-clone LF/CRLF gate 全部通过。 |
+| PRISTINE/FULL SMOKE | PASS | `scripts/test-fresh-clone-crlf.py --full` 在由当前 release-candidate snapshot 生成的 LF/CRLF checkout 中完成全部 gates 与 smoke；fixture 由 runner 清理。 |
+| REAL DIRTY-WORKTREE SMOKE | KNOWN_UNRELATED_FAILURE | `scripts/smoke-test.py --repo-root .` 仅因用户拥有的 unstaged `D usage.html` 在 required-path gate fail-fast；未恢复、修改或暂存该文件。 |
+| VALIDATE-TEMPLATE | PASS | 不带 skip 参数的 `powershell -NoProfile -ExecutionPolicy Bypass -File .\\scripts\\validate-template.ps1` 完成并输出 `[ok] Template validation passed`。 |
+
+NB-D-01 closure：Stage D 的 targeted PASS 保持 targeted 标签；Stage E 的 pristine/full PASS、dirty-worktree known unrelated failure 与完整 validator PASS 分别记录，不合并声称为单一“all tests passed”。
+
+SC-BF-01/02：Stage D regression 与 Stage E full smoke 均保持 malformed workspace-map → `runtime-error` 且无 project Blocking，以及 dry-run → read-only `CurrentWriteScope`。
+
+Stage E independent review 尚未执行；上述 maker evidence 只支持 `STAGE_E_READY_FOR_INDEPENDENT_REVIEW`，不授权 commit、push、tag、release 或 publish。

@@ -1,10 +1,10 @@
 Status: active
-ContractStatus: frozen-awaiting-independent-review
+ContractStatus: frozen-approved-through-stage-d
 Risk: high
 Created: 2026-08-24
 Owner: ForgeKit Maintainers
 Reason: 冻结 ForgeKit v0.46.0 后续 Stage B-E 的唯一实施合同。
-AuthorizedStage: stage-a-independent-review
+AuthorizedStage: stage-e-independent-review
 
 # ForgeKit v0.46.0 Semantic Freeze 提案
 
@@ -59,9 +59,9 @@ v0.46 涉及执行意图、影响风险、Formal evidence、finding、Current Tr
 
 ## 阶段授权
 
-- Frozen Plan r2 只授权 Stage A maker 落地；本轮 maker representation 完成后，下一步仅允许 fresh read-only independent review。
-- Stage A independent review PASS 只可授权另行明确的 Stage B；本 change 当前不授权 Stage B、commit 或任何外部动作。
-- Stage B-E 的已冻结边界见 `tasks.md`，其存在是实施路由合同，不表示已经授权或实施。
+- Frozen Plan r2 仍是 v0.46 唯一实施合同；Stage A semantic freeze、Stage B consumer convergence、Stage C runtime/checker/init compatibility 与 Stage D migration/regression 已分别独立批准。
+- 当前仅授权 Stage E release candidate 的 fresh read-only independent review；尚未授权 commit、push、tag、GitHub release、publish 或 deployment。
+- Stage E independent review PASS 后，最终 release side effects 仍须用户单独明确授权。
 
 ## 冻结规则
 
@@ -71,6 +71,6 @@ v0.46 涉及执行意图、影响风险、Formal evidence、finding、Current Tr
 
 ## 生命周期说明
 
-- 当前 `Status: active` 表示 v0.46 change 仍在推进，不表示产品实现完成。
-- `ContractStatus: frozen-awaiting-independent-review` 表示 Stage A maker 已冻结仓库内 representation，但独立审查尚未执行。
-- 只有 Stage B-E 实现、验证、current-owner writeback 与发布收口完成后，整个 v0.46 change 才可进入 `done`；Stage A 不更新版本或发布记录。
+- 当前 `Status: active` 表示 v0.46 release candidate 已完成 maker 收口、仍待 Stage E independent review，不表示已经发布。
+- `ContractStatus: frozen-approved-through-stage-d` 表示冻结合同与 Stage A-D 产品 baseline 已获批准；Stage E 不重新设计该合同。
+- 只有 Stage E independent review PASS 且用户另行授权最终 release 后，整个 v0.46 change 才可进入 `done`。

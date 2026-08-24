@@ -6,7 +6,22 @@
 
 ## 1. 初始化新项目
 
-> 请使用 ForgeKitRoot 的统一入口初始化 `<project-root>`，先展示检测结果和计划；不要自动 commit、push 或创建 PR。
+> 请使用 ForgeKitRoot 的统一入口初始化 `<project-root>`。`--target` 就是实际 ProjectRoot；先展示检测结果和 in-place 计划，不要自动 commit、push 或创建 PR。
+
+交互式 fresh init 和 dry-run 未指定 layout 时默认 `in-place`：
+
+```bash
+python scripts/forgekit-project.py --target <project-root>
+```
+
+fresh 无人值守写入必须显式选择 layout：
+
+```bash
+python scripts/forgekit-project.py --target <project-root> --yes --layout in-place
+python scripts/forgekit-project.py --target <outer-root> --yes --layout legacy-nested
+```
+
+`legacy-nested` 只用于显式 fresh compatibility。已有项目不移动 layout；从 legacy outer GovernanceRoot 或 inner ProjectRoot 进入时，existing discovery 会解析同一 topology。
 
 ## 2. 接手已有项目
 
@@ -44,7 +59,7 @@ python scripts/forgekit-project.py --target <project-root> --yes --review-needed
 
 初始化 / 升级工具支持 `--lang zh-CN` 和 `--lang en-US`；也可以用 `FORGEKIT_LANG` 选择本轮显示语言。
 
-## 3.1 v0.45 按需 Skill 入口
+## 3.1 v0.46 按需 Skill 入口
 
 九个 Skill 是互斥优先的路由入口，不是必须依次执行的流水线。review、assessment 和 planning 默认只读；本地写入与外部发布动作分别授权。
 
@@ -55,7 +70,7 @@ python scripts/forgekit-project.py --target <project-root> --yes --review-needed
 | 接手审计 | `请使用 $handover-review 只读核对仓库和历史证据；报告冲突，不自动修复。` |
 | 事实文档回填 | `请显式调用 $document-backfill，只回填已有实现事实，按 owner 做最小写回。` |
 | 高影响变更规划 | `请显式调用 $large-change-planning，按信任边界和回滚风险冻结阶段授权与验收。` |
-| 代码审查 | `请使用 $code-review 只读审查现有实现和测试，按严重度报告 finding。` |
+| 代码审查 | `请使用 $code-review 只读审查现有实现和测试；分别报告 Impact Severity 与 Blocking，只有 Blocking=YES 才给出 C1-C4 failure path 和受阻 scope。` |
 | 安全审查 | `请使用 $security-review 审查明确的安全边界，只报告证据和修复责任。` |
 | 发布检查 | `请使用 $release-check 只读核对发布候选；不要 bump、tag、push 或 release。` |
 | 适用性评估 | `请使用 $project-suitability 只读判断采用 ForgeKit 的收益、成本与约束，不要初始化。` |
@@ -71,6 +86,8 @@ python scripts/forgekit-project.py --target <project-root> --yes --review-needed
 ## 6. 文档 Checkpoint
 
 > 对本轮做一次 Checkpoint Update。只把已确认的进展、真实状态变化、验证结论、风险和下一步写入负责文档；无变化的文档不要改。
+
+Document ownership does not imply mandatory population。没有风险事实时不填 risk register，没有测试事实时不为 checker 编造 testing。active work 可以先在 checkpoint 保存 confirmed fact；在相关 closure、handover 或 ship 前，再把真实 changed fact 收口到负责它的 current owner。
 
 ## 7. Compact / Clear 前保存上下文
 
@@ -90,7 +107,7 @@ python scripts/forgekit-project.py --target <project-root> --yes --review-needed
 
 ## 8.2 Reviewer 首审
 
-> 在独立上下文中按冻结合同只读首审。违反合同或会造成数据污染、错误执行/结果、artifact 覆盖或虚假成功的问题才作为 blocker；其他新增建议记 follow-up，不扩大 trust boundary。优先验证矩阵中的拒绝反例，并检查正式入口而不只检查 helper。
+> 在独立上下文中按冻结合同只读首审。分别报告 Impact Severity 与 Blocking；Blocking=YES 必须给出唯一 PrimaryConsequence（C1-C4）、FailurePath、Evidence 和 BlockedScope。高 Severity 不自动阻塞，其他建议记 follow-up。优先验证矩阵中的拒绝反例，并检查正式入口而不只检查 helper。
 
 ## 8.3 Reviewer 限定复审
 
@@ -122,3 +139,6 @@ python scripts/forgekit-project.py --target <project-root> --yes --review-needed
 - “只改业务文件”不自动关闭 ForgeKit 最小写回；用户明确说不改 ForgeKit docs 时才关闭。
 - Micro Update 不写 ForgeKit governance docs，但仍可在授权范围内修改业务代码、业务 README、注释、测试或配置。
 - 未确认内容不写成事实；report-only / review-only 不借机修改 current docs。
+- checker 的 `--strict` 或命令 nonzero 不自动等于 project Blocking；先看 finding 的 canonical `blocking` 与当前 ValidationRelevance。
+- business README 是 user-owned；fresh v0.46 不创建它，existing/custom README 不因 `--force` 被接管。
+- fresh v0.46 不再安装三个 legacy loop docs；custom legacy copies 只保留并 manual review，不声称全部自动删除。

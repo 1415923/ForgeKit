@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "template_version": "0.45.0",
+  "template_version": "0.46.0",
   "boundary_aware": true,
   "files": [
     {
@@ -57,7 +57,7 @@
       "role": "managed_doc",
       "update_policy": "merge",
       "render_mode": "copy",
-      "checksum": "sha256:f23308837f8a11ed5c3f73e00b511344d375ec5b3a088233b4cb62dac9b3b390"
+      "checksum": "sha256:292ae574f532a8ffafa8f7148f833ae224bc6febdc34eca749047ae530baa282"
     },
     {
       "source_path": ".forgekit/archive/README.md",

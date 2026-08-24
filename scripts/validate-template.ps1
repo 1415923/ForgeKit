@@ -1555,10 +1555,10 @@ function Test-MinimalProjectCapsuleBootstrap {
     Test-RequiredPattern "migrations\0.43.0\migration.json" '"minimal_project_capsule_bootstrap"' "v0.43 capsule feature"
     Test-NoPattern "migrations\0.43.0\migration.json" '"target": ".forgekit/projects/' "Migration must not create real capsules"
     Test-RequiredPath "migrations\$forgekitVersion\migration.json"
-    Test-RequiredPattern "migrations\$forgekitVersion\migration.json" '"from": "0.44.1"' "Latest migration source reference"
+    Test-RequiredPattern "migrations\$forgekitVersion\migration.json" '"from": "0.45.0"' "Latest migration source reference"
     Test-RequiredPattern "migrations\$forgekitVersion\migration.json" "`"to`": `"$forgekitVersion`"" "Latest migration target"
     Test-RequiredPath "project-template\migrations\$forgekitVersion\migration.json"
-    Test-RequiredPattern "project-template\migrations\$forgekitVersion\migration.json" '"from": "0.44.1"' "Template latest migration source reference"
+    Test-RequiredPattern "project-template\migrations\$forgekitVersion\migration.json" '"from": "0.45.0"' "Template latest migration source reference"
     Test-RequiredPattern "project-template\migrations\$forgekitVersion\migration.json" "`"to`": `"$forgekitVersion`"" "Template latest migration target"
     $rootScript = Get-Content -LiteralPath (Join-Path $repoRoot "scripts\bootstrap-project-capsule.py") -Raw
     $templateScript = Get-Content -LiteralPath (Join-Path $repoRoot "project-template\scripts\bootstrap-project-capsule.py") -Raw
@@ -1614,8 +1614,8 @@ function Test-V046StageDMigration {
     $rootUpgrade = Get-Content -LiteralPath (Join-Path $repoRoot "scripts\forgekit-upgrade.py") -Raw
     $templateUpgrade = Get-Content -LiteralPath (Join-Path $repoRoot "project-template\scripts\forgekit-upgrade.py") -Raw
     if ($rootUpgrade -ne $templateUpgrade) { Add-Error "Root and project-template forgekit-upgrade.py must stay identical" }
-    if ((Get-Content -LiteralPath (Join-Path $repoRoot "VERSION") -Raw).Trim() -ne "0.45.0") {
-        Add-Error "Stage D must leave root VERSION at 0.45.0"
+    if ((Get-Content -LiteralPath (Join-Path $repoRoot "VERSION") -Raw).Trim() -ne "0.46.0") {
+        Add-Error "Stage E release candidate must set root VERSION to 0.46.0"
     }
 }
 

@@ -1,6 +1,6 @@
 # 项目模板
 
-把本目录内容复制到具体项目根目录后使用。
+本文件说明 ForgeKit toolkit 中的模板 source，不是生成项目的业务 README。fresh v0.46 初始化不会复制、创建、覆盖或接管业务根 `README.md`；应通过统一入口安装模板内容。
 
 ForgeKit 在生成项目内提供轻量 AI Engineering Loop：澄清目标、判断风险、准备必要 change 工件、实施、验证、审查、发布记录和复盘。低风险改动保持轻流程；中高风险改动使用 `.forgekit/changes/<id>/` 留下可审查工件。
 
@@ -16,6 +16,8 @@ ForgeKit 在生成项目内提供轻量 AI Engineering Loop：澄清目标、判
 8. 触发式文档只在事件发生时更新：缺陷复盘、事故复盘、依赖审查、威胁建模、发布流水线、traceability、loop、maker-checker、worktree 等都不是日常必填。
 9. 长会话阶段边界、compact/clear 前、子 agent 返回关键结论后，以及 handoff/commit/tag 前，按 `.forgekit/docs/context-continuity.md` 做最小 checkpoint；不复制完整聊天或长日志。
 10. 编码前分别确认业务 `Implementation Scope` 与 `Governance Writeback Scope`。默认 `ManagedDocsWriteback: minimal`：完成后最小更新实际进展、真实任务状态、用户/版本可见变化和当前 change；只有用户明确禁写文档时才关闭，不把同一事实重复写入多个文件。
+
+Document ownership does not imply mandatory population。没有真实 risk/testing/traceability/plan fact 时，对应 owner 可以保持 lean/template；active work 可暂存在 checkpoint，但 closure、handover 或 ship 前必须把真实 changed fact 写回负责 owner。
 
 日常不知道如何触发 ForgeKit 时，读取 `.forgekit/docs/usage-playbook.md`。写回时机按 `.forgekit/docs/work-session-checkpoint.md`：小改不写治理文档，小闭环做最小 checkpoint，交付前做 Ship Update；auto compact 后先恢复检查。
 
@@ -39,6 +41,15 @@ bash ./scripts/forgekit-project.sh --target "/path/to/project"
 
 该统一入口属于 ForgeKitRoot，不复制到生成项目。它自动识别 init、up-to-date、upgrade-sync、工具版本过旧和 legacy adoption；非交互默认只展示计划，显式 `--yes` 才写入。下面的 `forgekit-upgrade.py` 是项目内高级入口。
 
+对 fresh project，`--target` 是实际 `ProjectRoot`，交互式和 dry-run 默认 `in-place`。无人值守写入必须显式选择：
+
+```powershell
+python .\scripts\forgekit-project.py --target "D:\path\to\project" --yes --layout in-place
+python .\scripts\forgekit-project.py --target "D:\path\to\outer" --yes --layout legacy-nested
+```
+
+低层 `init-project-template.ps1/.sh` 的显式 `ProjectName` nested 行为继续保留。existing project 不移动 layout；legacy outer GovernanceRoot 与 inner ProjectRoot entry 会解析到同一 topology。
+
 v0.36.0 及以后初始化的项目使用 `.forgekit/state.json` 和 `migrations/` 做版本迁移：
 
 ```bash
@@ -48,6 +59,8 @@ python scripts/forgekit-upgrade.py apply --safe --repo-root .
 ```
 
 `check` 和 `plan` 不改文件；`apply --safe` 只执行 migration 明确标记为 safe 的动作。v0.35.x 及更早项目不自动升级，统一按接手既有项目做 adoption inventory，并在用户确认后建立新 state。旧 guided upgrade 脚本仅作为 legacy report-only 兼容入口保留；不要默认读取全量 candidates 或 upgrade-export。
+
+v0.45.0 → v0.46.0 沿精确 migration chain 升级：stock 安全更新，custom/unknown 保留并进入 manual review，异常 apply 可 rollback，重复 apply 幂等。business README 始终 user-owned。三个退休 loop docs 只在 exact-stock 时删除，custom copy 保留；surviving contract 位于 bounded-auto、agent entry、checkpoint、maker-checker 与 engineering-loop owners。
 
 ## 项目维护
 

@@ -1685,8 +1685,8 @@ def assert_release_distribution_consistency(repo):
     if root_migration.read_bytes() != template_migration.read_bytes():
         fail(f"v{expected} root and template migration descriptors must stay identical")
     migration = json.loads(root_migration.read_text(encoding="utf-8"))
-    if migration.get("from") != "0.44.1" or migration.get("to") != expected or len(migration.get("actions", [])) != 20:
-        fail(f"v{expected} migration must be the 20-action 0.44.1 -> {expected} package")
+    if migration.get("from") != "0.45.0" or migration.get("to") != expected or len(migration.get("actions", [])) != 38:
+        fail(f"v{expected} migration must be the 38-action 0.45.0 -> {expected} package")
 
     root_helper = repo / "scripts/upgrade_review_packets.py"
     template_helper = repo / "project-template/scripts/upgrade_review_packets.py"
@@ -2507,16 +2507,24 @@ def assert_unified_project_entry(repo, current_target, temp_parent):
     )
     same_before = same_maintenance.read_bytes()
     upgrade_script = repo / "scripts/forgekit-upgrade.py"
-    same_plan = run([sys.executable, str(upgrade_script), "plan", "--repo-root", str(same_target)], cwd=repo)
+    same_migrations = temp_parent / "upgrade-same-migrations"
+    shutil.copytree(repo / "migrations/0.40.2", same_migrations / "0.40.2")
+    same_plan = run([
+        sys.executable, str(upgrade_script), "plan", "--repo-root", str(same_target),
+        "--migration-root", str(same_migrations),
+    ], cwd=repo)
     if "ALREADY-PRESENT: install-current-project-maintenance-guide" not in same_plan.stdout:
         fail("plan must classify identical existing migration file as already-present")
-    same_apply = run([sys.executable, str(upgrade_script), "apply", "--safe", "--repo-root", str(same_target), "--review-needed-policy", "replace-template"], cwd=repo)
+    same_apply = run([
+        sys.executable, str(upgrade_script), "apply", "--safe", "--repo-root", str(same_target),
+        "--migration-root", str(same_migrations), "--review-needed-policy", "replace-template",
+    ], cwd=repo)
     if "[already-present] install-current-project-maintenance-guide" not in same_apply.stdout:
         fail("safe apply must treat identical existing migration file as no-op")
     if same_maintenance.read_bytes() != same_before:
         fail("safe apply rewrote an identical existing managed doc")
-    if json.loads(same_state.read_text(encoding="utf-8"))["forgekit_version"] != FORGEKIT_VERSION:
-        fail(f"same-content idempotent migration did not reach {FORGEKIT_VERSION}")
+    if json.loads(same_state.read_text(encoding="utf-8"))["forgekit_version"] != "0.40.2":
+        fail("same-content idempotent migration did not reach its isolated 0.40.2 target")
 
     old = temp_parent / "unified-old-no-confirm"
     old_state = write_state(old, "0.38.0")
@@ -2713,7 +2721,9 @@ def assert_unified_project_entry(repo, current_target, temp_parent):
         fail("early legacy detection must not create state.json")
 
     future = temp_parent / "unified-future"
-    write_state(future, "0.45.1")
+    current_parts = [int(part) for part in FORGEKIT_VERSION.split(".")]
+    future_version = f"{current_parts[0]}.{current_parts[1]}.{current_parts[2] + 1}"
+    write_state(future, future_version)
     future_result = run(
         [sys.executable, str(script), "--target", str(future), "--lang", "en-US"],
         cwd=repo,

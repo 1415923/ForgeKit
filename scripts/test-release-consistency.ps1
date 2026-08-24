@@ -875,9 +875,9 @@ $stageEVersionTest = @{
     RelativePath = "VERSION"
     Mutate = {
         param($Path)
-        [System.IO.File]::WriteAllText($Path, "0.44.1`n", $utf8NoBom)
+        [System.IO.File]::WriteAllText($Path, "0.45.0`n", $utf8NoBom)
     }
-    ExpectedMessages = @("version [VERSION]: expected 0.45.0, got 0.44.1")
+    ExpectedMessages = @("version [VERSION]: expected 0.46.0, got 0.45.0")
     ValidationCommand = { Invoke-StageEReleaseValidator }
 }
 Invoke-RestoringMutation @stageEVersionTest
@@ -885,12 +885,12 @@ Invoke-RestoringMutation @stageEVersionTest
 $stageEMigrationTests = @(
     @{ Label = "Stage E missing migration action mutation"; Kind = "missing"; Expected = "migration [action-set]" },
     @{ Label = "Stage E duplicate migration action mutation"; Kind = "duplicate"; Expected = "migration [duplicate-action-id]" },
-    @{ Label = "Stage E migration checksum mutation"; Kind = "checksum"; Expected = "migration [incoming-checksum]" }
+    @{ Label = "Stage E unknown migration action mutation"; Kind = "unknown"; Expected = "migration [unknown-action]" }
 )
 foreach ($mutation in $stageEMigrationTests) {
     $stageETest = @{
         Label = $mutation.Label
-        RelativePaths = @("migrations\0.45.0\migration.json", "project-template\migrations\0.45.0\migration.json")
+        RelativePaths = @("migrations\0.46.0\migration.json", "project-template\migrations\0.46.0\migration.json")
         Mutate = {
             param($Paths)
             foreach ($path in $Paths) {
@@ -900,7 +900,7 @@ foreach ($mutation in $stageEMigrationTests) {
                 } elseif ($mutation.Kind -eq "duplicate") {
                     $descriptor.actions = @($descriptor.actions) + @($descriptor.actions[0])
                 } else {
-                    $descriptor.actions[0].incoming_sha256 = "0000000000000000000000000000000000000000000000000000000000000000"
+                    $descriptor.actions[0].type = "unsupported_release_action"
                 }
                 $json = $descriptor | ConvertTo-Json -Depth 20
                 [System.IO.File]::WriteAllText($path, $json + "`n", $utf8NoBom)
@@ -924,7 +924,7 @@ foreach ($mutation in $stageEManifestTests) {
         Mutate = {
             param($Path)
             $manifest = Get-Content -LiteralPath $Path -Raw | ConvertFrom-Json
-            $target = "migrations/0.45.0/migration.json"
+            $target = "migrations/0.46.0/migration.json"
             $entry = @($manifest.files | Where-Object { $_.source_path -eq $target })[0]
             if ($mutation.Kind -eq "missing") {
                 $manifest.files = @($manifest.files | Where-Object { $_.source_path -ne $target })
@@ -936,7 +936,7 @@ foreach ($mutation in $stageEManifestTests) {
             $json = $manifest | ConvertTo-Json -Depth 20
             [System.IO.File]::WriteAllText($Path, $json + "`n", $utf8NoBom)
         }
-        ExpectedMessages = @($mutation.Expected, "migrations/0.45.0/migration.json")
+        ExpectedMessages = @($mutation.Expected, "migrations/0.46.0/migration.json")
         ValidationCommand = { Invoke-StageEReleaseValidator }
     }
     Invoke-RestoringMutation @manifestTest

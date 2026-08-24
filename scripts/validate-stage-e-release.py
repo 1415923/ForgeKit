@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Validate the finite, structured ForgeKit v0.45.0 release-preparation contract."""
+"""Validate the finite, structured ForgeKit v0.46.0 release-candidate contract."""
 
 from __future__ import annotations
 
@@ -10,11 +10,21 @@ import json
 from pathlib import Path
 
 
-RELEASE_VERSION = "0.45.0"
-PREVIOUS_VERSION = "0.44.1"
-DRAFT = Path(".forgekit/changes/v045-rule-ownership-skill-convergence/stage-b-migration-draft/0.45.0")
-FORMAL = Path("migrations/0.45.0")
-TEMPLATE_FORMAL = Path("project-template/migrations/0.45.0")
+RELEASE_VERSION = "0.46.0"
+PREVIOUS_VERSION = "0.45.0"
+FORMAL = Path("migrations/0.46.0")
+TEMPLATE_FORMAL = Path("project-template/migrations/0.46.0")
+BASELINE_COMMIT = "fb69601da2de6b1fb85f8a6f2efb63781aeab728"
+EXPECTED_ACTION_TYPES = {
+    "replace_file_if_baseline_matches": 35,
+    "remove_file_if_baseline_matches": 3,
+}
+RETIRED_TARGETS = {
+    "README.md",
+    ".forgekit/docs/loop-readiness.md",
+    ".forgekit/docs/loop-blueprint.md",
+    ".forgekit/docs/loop-operations.md",
+}
 PROMPTS = {
     "初始化项目.prompt.md": "$project-init",
     "初始化填充.prompt.md": "$project-bootstrap-fill",
@@ -143,10 +153,9 @@ def validate_gate_wiring(repo: Path, errors: list[str]) -> None:
 
 
 def validate_migration(repo: Path, errors: list[str]) -> int:
-    draft_root = repo / DRAFT
     formal_root = repo / FORMAL
     template_root = repo / TEMPLATE_FORMAL
-    for path in (draft_root, formal_root, template_root):
+    for path in (formal_root, template_root):
         if not path.is_dir():
             errors.append(f"migration [missing-package]: {path.relative_to(repo).as_posix()}")
             return 0
@@ -160,50 +169,71 @@ def validate_migration(repo: Path, errors: list[str]) -> int:
 
     descriptor = load_json(formal_root / "migration.json")
     template_descriptor = load_json(template_root / "migration.json")
-    draft_descriptor = load_json(draft_root / "migration.json")
     if descriptor != template_descriptor:
         errors.append("migration [descriptor-mirror]: root/template descriptors differ")
     if descriptor.get("from") != PREVIOUS_VERSION or descriptor.get("to") != RELEASE_VERSION:
-        errors.append("migration [version]: descriptor must be 0.44.1 -> 0.45.0")
+        errors.append(f"migration [version]: descriptor must be {PREVIOUS_VERSION} -> {RELEASE_VERSION}")
     if descriptor.get("development_status") is not None:
         errors.append("migration [development-marker]: formal descriptor remains fixture-only")
+    if descriptor.get("baseline_commit") != BASELINE_COMMIT:
+        errors.append("migration [baseline-commit]: v0.46 baseline must identify the approved v0.45.0 release commit")
+    retire_targets = set(descriptor.get("template_lock", {}).get("retire_targets", []))
+    if retire_targets != RETIRED_TARGETS:
+        errors.append(
+            f"migration [retire-targets]: expected={sorted(RETIRED_TARGETS)}, actual={sorted(retire_targets)}"
+        )
 
     actions = descriptor.get("actions", [])
-    draft_actions = draft_descriptor.get("actions", [])
+    manifest = load_json(repo / "project-template/.forgekit/template-manifest.json")
+    target_sources = {}
+    for item in manifest.get("files", []):
+        target_name = item.get("target_path", "")
+        target_name = target_name.replace("${managed_docs_root}", ".forgekit/docs")
+        target_name = target_name.replace("${change_root}", ".forgekit/changes")
+        target_sources[target_name] = repo / "project-template" / item.get("source_path", "")
     ids = [item.get("id") for item in actions]
     targets = [item.get("target") for item in actions]
     if len(ids) != len(set(ids)):
         errors.append("migration [duplicate-action-id]: action ids must be unique")
     if len(targets) != len(set(targets)):
         errors.append("migration [duplicate-target]: action targets must be unique")
-    expected_targets = {"AGENTS.md", "CLAUDE.md"} | projected_targets(repo)
-    if set(targets) != expected_targets:
-        missing = sorted(expected_targets - set(targets))
-        extra = sorted(set(targets) - expected_targets)
-        errors.append(f"migration [action-set]: missing={missing}, extra={extra}")
-    if actions != draft_actions:
-        errors.append("migration [draft-provenance]: formal actions differ from approved development draft")
+    type_counts = {kind: 0 for kind in EXPECTED_ACTION_TYPES}
+    for action in actions:
+        action_type = action.get("type")
+        type_counts[action_type] = type_counts.get(action_type, 0) + 1
+    if type_counts != EXPECTED_ACTION_TYPES:
+        errors.append(f"migration [action-set]: expected={EXPECTED_ACTION_TYPES}, actual={type_counts}")
+    if "README.md" in targets:
+        errors.append("migration [readme-ownership]: business README must not be an action target")
 
     for action in actions:
         action_id = action.get("id", "<unknown>")
-        source = formal_root / action["source"]
         baseline = formal_root / action["baseline"]
-        target = repo / "project-template" / action["target"]
-        draft_source = draft_root / action["source"]
-        draft_baseline = draft_root / action["baseline"]
-        for kind, path in (("source", source), ("baseline", baseline), ("target", target)):
-            if not path.is_file():
-                errors.append(f"migration [{kind}-missing]: {action_id}: {path}")
-        if not all(path.is_file() for path in (source, baseline, target, draft_source, draft_baseline)):
+        if not baseline.is_file():
+            errors.append(f"migration [baseline-missing]: {action_id}: {baseline}")
             continue
-        if digest(source) != action.get("incoming_sha256"):
-            errors.append(f"migration [incoming-checksum]: {action_id}")
-        if digest(baseline) != action.get("baseline_sha256"):
-            errors.append(f"migration [baseline-checksum]: {action_id}")
-        if source.read_bytes() != target.read_bytes():
-            errors.append(f"migration [incoming-template]: {action_id}: {action['target']}")
-        if source.read_bytes() != draft_source.read_bytes() or baseline.read_bytes() != draft_baseline.read_bytes():
-            errors.append(f"migration [payload-provenance]: {action_id}")
+        action_type = action.get("type")
+        target = target_sources.get(action["target"], repo / "project-template" / action["target"])
+        if action.get("safety") != "safe":
+            errors.append(f"migration [safety]: {action_id}: expected safe")
+        if action_type == "replace_file_if_baseline_matches":
+            source_name = action.get("source")
+            source = formal_root / source_name if source_name else None
+            if source is None or not source.is_file():
+                errors.append(f"migration [source-missing]: {action_id}: {source}")
+            if not target.is_file():
+                errors.append(f"migration [target-missing]: {action_id}: {target}")
+            if source is not None and source.is_file() and target.is_file() and source.read_bytes() != target.read_bytes():
+                errors.append(f"migration [incoming-template]: {action_id}: {action['target']}")
+        elif action_type == "remove_file_if_baseline_matches":
+            if action.get("source"):
+                errors.append(f"migration [removal-source]: {action_id}: removal must not install a source")
+            if target.exists():
+                errors.append(f"migration [retired-target-present]: {action_id}: {action['target']}")
+            if not action.get("deprecation_notice"):
+                errors.append(f"migration [deprecation-notice]: {action_id}")
+        else:
+            errors.append(f"migration [unknown-action]: {action_id}: {action_type}")
 
     discovered = []
     for migration in sorted((repo / "migrations").glob("*/migration.json")):
@@ -216,6 +246,13 @@ def validate_migration(repo: Path, errors: list[str]) -> int:
         errors.append(f"migration [production-discovery]: expected one {RELEASE_VERSION}, got {versions.count(RELEASE_VERSION)}")
     if len(versions) != len(set(versions)):
         errors.append("migration [duplicate-version]: production migration versions must be unique")
+    predecessor = repo / "migrations" / PREVIOUS_VERSION / "migration.json"
+    if not predecessor.is_file():
+        errors.append(f"migration [chain]: missing predecessor package {PREVIOUS_VERSION}")
+    else:
+        previous = load_json(predecessor)
+        if previous.get("from") != "0.44.1" or previous.get("to") != PREVIOUS_VERSION:
+            errors.append("migration [chain]: expected supported chain 0.44.1 -> 0.45.0 -> 0.46.0")
     return len(actions)
 
 
@@ -233,7 +270,7 @@ def validate_docs_and_prompts(repo: Path, errors: list[str]) -> None:
             errors.append(f"docs [usage-skill-entry]: missing ${skill_id}")
     for name, preferred in PROMPTS.items():
         text = (repo / "prompts" / name).read_text(encoding="utf-8")
-        if "Deprecated compatibility prompt: v0.45-v0.46" not in text:
+        if "Deprecated compatibility prompt for v0.46" not in text:
             errors.append(f"prompt [deprecation-window]: {name}")
         if preferred not in text:
             errors.append(f"prompt [preferred-entry]: {name}: missing {preferred}")
