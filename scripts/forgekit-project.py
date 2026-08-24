@@ -12,6 +12,8 @@ from pathlib import Path
 
 MIN_MIGRATION_VERSION = (0, 36, 0)
 STATE_RELATIVE_PATH = Path(".forgekit/state.json")
+BOUNDARY_RELATIVE_PATH = Path(".forgekit/project-boundary.yml")
+WORKSPACE_MAP_RELATIVE_PATH = Path(".forgekit/workspace-map.json")
 LANGUAGES = {"en-US", "zh-CN"}
 
 MESSAGES = {
@@ -127,6 +129,197 @@ def load_json(path, label):
         fail(f"Invalid {label} JSON at {path}: {exc}")
 
 
+def try_load_json(path):
+    try:
+        return json.loads(path.read_text(encoding="utf-8-sig")), None
+    except FileNotFoundError:
+        return None, f"not found: {path}"
+    except (OSError, json.JSONDecodeError) as exc:
+        return None, f"invalid JSON at {path}: {exc}"
+
+
+def parse_boundary(governance_root):
+    path = governance_root / BOUNDARY_RELATIVE_PATH
+    try:
+        lines = path.read_text(encoding="utf-8-sig").splitlines()
+    except OSError as exc:
+        return None, f"cannot read boundary {path}: {exc}"
+    section = None
+    roots = {}
+    write_policy = {}
+    policy_name = None
+    for raw in lines:
+        stripped = raw.strip()
+        if not stripped or stripped.startswith("#"):
+            continue
+        indent = len(raw) - len(raw.lstrip())
+        if indent == 0 and stripped.endswith(":"):
+            section = stripped[:-1]
+            policy_name = None
+            continue
+        if section == "roots" and indent >= 2 and ":" in stripped:
+            key, value = stripped.split(":", 1)
+            roots[key.strip()] = value.strip().strip('"').strip("'")
+        elif section == "write_policy" and indent == 2 and stripped.endswith(":"):
+            policy_name = stripped[:-1]
+            write_policy[policy_name] = []
+        elif section == "write_policy" and indent >= 4 and stripped.startswith("-") and policy_name:
+            write_policy[policy_name].append(stripped[1:].strip().strip('"').strip("'"))
+    if not roots.get("project_root") or not roots.get("forgekit_root"):
+        return None, f"boundary roots are incomplete: {path}"
+    return {"path": path, "roots": roots, "write_policy": write_policy}, None
+
+
+def resolved_boundary_path(governance_root, raw):
+    value = str(raw).strip()
+    if not value or value.startswith("<"):
+        return None
+    path = Path(value).expanduser()
+    return path.resolve() if path.is_absolute() else (governance_root / path).resolve()
+
+
+def valid_state(governance_root):
+    state, error = try_load_json(governance_root / STATE_RELATIVE_PATH)
+    if error:
+        return None, error
+    required = {
+        "schema_version", "forgekit_version", "managed_docs_root", "change_root",
+        "mode", "features", "last_upgrade",
+    }
+    if not isinstance(state, dict) or state.get("schema_version") != 1 or required - set(state):
+        return None, f"invalid active state: {governance_root / STATE_RELATIVE_PATH}"
+    try:
+        parse_version(state.get("forgekit_version", ""), "installed ForgeKit")
+    except SystemExit as exc:
+        return None, str(exc)
+    return state, None
+
+
+def is_within(path, parent):
+    try:
+        path.resolve().relative_to(parent.resolve())
+        return True
+    except ValueError:
+        return False
+
+
+def classified_shadow(candidate, requested):
+    lowered = [part.lower() for part in candidate.parts]
+    for index, part in enumerate(lowered[:-1]):
+        if part == ".forgekit" and lowered[index + 1] in {"archive", "upgrade", "upgrade-export", "reports"}:
+            return True
+    for owner in candidate.parents:
+        workspace_map, error = try_load_json(owner / WORKSPACE_MAP_RELATIVE_PATH)
+        if error or not isinstance(workspace_map, dict) or not workspace_map.get("enabled"):
+            continue
+        workspace = workspace_map.get("workspace", {})
+        raw_roots = [workspace.get("archive_root"), workspace.get("artifact_root")]
+        raw_roots.extend(item.get("path") for item in workspace_map.get("artifacts", []) if isinstance(item, dict))
+        for raw in raw_roots:
+            if not isinstance(raw, str) or not raw.strip():
+                continue
+            classified = (owner / raw).resolve()
+            if is_within(candidate, classified) or is_within(requested, classified):
+                return True
+    return False
+
+
+def topology_from_governance_root(governance_root):
+    state, state_error = valid_state(governance_root)
+    boundary, boundary_error = parse_boundary(governance_root)
+    if state_error or boundary_error:
+        return None, state_error or boundary_error
+    project_root = resolved_boundary_path(governance_root, boundary["roots"]["project_root"])
+    if project_root is None:
+        return None, f"boundary project_root is unresolved: {boundary['path']}"
+    forgekit_root = resolved_boundary_path(governance_root, boundary["roots"]["forgekit_root"])
+    return {
+        "governance_root": governance_root.resolve(),
+        "workspace_root": governance_root.resolve(),
+        "project_root": project_root,
+        "forgekit_root": forgekit_root,
+        "state": state,
+        "boundary": boundary,
+    }, None
+
+
+def discover_existing_topology(requested):
+    direct_state = requested / STATE_RELATIVE_PATH
+    direct_boundary = requested / BOUNDARY_RELATIVE_PATH
+    if direct_state.exists() or direct_boundary.exists():
+        topology, error = topology_from_governance_root(requested)
+        return {"status": "FOUND", "topology": topology} if topology else {"status": "INVALID", "reason": error}
+
+    candidates = []
+    for candidate in requested.parents:
+        if not (candidate / STATE_RELATIVE_PATH).is_file() or not (candidate / BOUNDARY_RELATIVE_PATH).is_file():
+            continue
+        topology, error = topology_from_governance_root(candidate)
+        if error or topology["project_root"] != requested.resolve() or classified_shadow(candidate, requested):
+            continue
+        candidates.append(topology)
+    if len(candidates) == 1:
+        return {"status": "FOUND", "topology": candidates[0]}
+    if len(candidates) > 1:
+        return {"status": "AMBIGUOUS", "candidates": candidates}
+    return {"status": "NOT_FOUND"}
+
+
+def git_top_level(path):
+    probe = path if path.exists() else next((parent for parent in path.parents if parent.exists()), None)
+    if probe is None:
+        return None
+    try:
+        completed = subprocess.run(
+            ["git", "-C", str(probe), "rev-parse", "--show-toplevel"],
+            text=True, encoding="utf-8", errors="replace",
+            stdout=subprocess.PIPE, stderr=subprocess.DEVNULL, check=False,
+        )
+    except OSError:
+        return None
+    return Path(completed.stdout.strip()).resolve() if completed.returncode == 0 and completed.stdout.strip() else None
+
+
+def mapped_repo_root(topology, requested):
+    workspace_map, error = try_load_json(topology["governance_root"] / WORKSPACE_MAP_RELATIVE_PATH)
+    if error or not isinstance(workspace_map, dict) or not workspace_map.get("enabled"):
+        return None
+    candidates = []
+    for repo in workspace_map.get("repos", []):
+        if not isinstance(repo, dict) or not isinstance(repo.get("repo_path"), str):
+            continue
+        path = (topology["governance_root"] / repo["repo_path"]).resolve()
+        if requested.resolve() == path or is_within(requested, path):
+            candidates.append(path)
+    unique = sorted(set(candidates), key=str)
+    if len(unique) == 1:
+        return unique[0]
+    if len(unique) > 1:
+        return "AMBIGUOUS"
+    return None
+
+
+def root_outputs(topology, requested, current_write_scope):
+    if topology is None:
+        return {
+            "GovernanceRoot": "UNKNOWN",
+            "WorkspaceRoot": "UNKNOWN",
+            "ProjectRoot": str(requested),
+            "RepoRoot": str(git_top_level(requested) or "UNKNOWN"),
+            "ForgeKitRoot": "UNKNOWN",
+            "CurrentWriteScope": current_write_scope,
+        }
+    repo_root = git_top_level(requested) or mapped_repo_root(topology, requested) or git_top_level(topology["project_root"])
+    return {
+        "GovernanceRoot": str(topology["governance_root"]),
+        "WorkspaceRoot": str(topology["workspace_root"]),
+        "ProjectRoot": str(topology["project_root"]),
+        "RepoRoot": str(repo_root or "UNKNOWN"),
+        "ForgeKitRoot": str(topology["forgekit_root"] or "UNKNOWN"),
+        "CurrentWriteScope": current_write_scope,
+    }
+
+
 def toolkit_version(toolkit_root):
     state = load_json(toolkit_root / "project-template/.forgekit/state.json", "toolkit state")
     return parse_version(state.get("forgekit_version", ""), "toolkit")
@@ -190,15 +383,29 @@ def show_current_docs_integrity(toolkit_root, target):
         print("Current docs integrity: unavailable (checker missing in ForgeKitRoot)")
         return
     completed = subprocess.run(
-        [sys.executable, str(checker), "--repo-root", str(target)],
+        [sys.executable, str(checker), "--repo-root", str(target), "--json"],
         text=True, encoding="utf-8", errors="replace",
         stdout=subprocess.PIPE, stderr=subprocess.STDOUT, check=False,
     )
-    print(completed.stdout.rstrip())
-    if completed.returncode == 1:
-        print("[needs-fix] Safe migration may continue, but run a Current State Restoration Pass before archive or cleanup.")
-    elif completed.returncode == 2:
+    try:
+        report = json.loads(completed.stdout)
+    except json.JSONDecodeError:
+        report = None
+    if completed.returncode == 2 or not isinstance(report, dict) or report.get("status") == "error":
         print("[warn] Current docs integrity could not be evaluated; safe migration is not blocked.")
+        return
+    print("ForgeKit Current Docs Integrity Check")
+    print("Mode: read-only")
+    print(f"Status: {report.get('status', 'error')}")
+    print(f"Active tasks: {len(report.get('active_tasks', []))}")
+    print(f"Blocking: {report.get('blocking_count', 0)}")
+    print(f"Warnings: {report.get('warning_count', 0)}")
+    blocking_findings = [item for item in report.get("findings", []) if item.get("blocking") is True]
+    for item in report.get("findings", []):
+        print(f"[{item.get('severity', 'warning')}] {item.get('code', 'unknown')}: {item.get('message', '')}")
+    if blocking_findings:
+        scopes = sorted({item.get("blocked_scope", "UNKNOWN") for item in blocking_findings})
+        print("[needs-fix] Blocking is scoped to: " + "; ".join(scopes))
 
 
 def confirmed(prompt, assume_yes, non_writing):
@@ -213,9 +420,25 @@ def confirmed(prompt, assume_yes, non_writing):
     return answer in {"y", "yes"}
 
 
-def print_detection(target, installed, toolkit, action):
+def derived_current_write_scope(args, task_scope, write_constraints_met=True):
+    if args.dry_run or args.no_apply:
+        return "read-only (dry-run/no-apply; no write authorization)"
+    if not write_constraints_met:
+        return f"UNKNOWN ({task_scope} write constraints are not satisfied; no write authorization)"
+    if args.yes:
+        return f"boundary policy intersection {task_scope} intersection apply authorization granted by --yes"
+    if sys.stdin.isatty():
+        return f"boundary policy intersection {task_scope} intersection user authorization pending confirmation"
+    return f"boundary policy intersection {task_scope} intersection user authorization not granted (--yes absent)"
+
+
+def print_detection(target, installed, toolkit, action, topology=None, *, layout=None, current_write_scope="read-only"):
     print("ForgeKit Unified Project Entry")
-    print(f"ProjectRoot: {target}")
+    print(f"RequestedTarget: {target}")
+    for name, value in root_outputs(topology, target, current_write_scope).items():
+        print(f"{name}: {value}")
+    if layout:
+        print(f"Layout: {layout}")
     print(f"Installed ForgeKit version: {version_text(installed) if installed else 'not installed'}")
     print(f"Toolkit ForgeKit version: {version_text(toolkit)}")
     print(f"Detected action: {action}")
@@ -231,8 +454,23 @@ def default_project_name(target):
 
 
 def init_project(args, toolkit_root, target, toolkit, lang):
-    print_detection(target, None, toolkit, "init")
+    layout = args.layout or "in-place"
+    project_root = target if layout == "in-place" else target / default_project_name(target)
     nonempty = target_has_content(target)
+    write_constraints_met = (not nonempty or args.force_init) and (not args.yes or args.layout is not None)
+    topology = {
+        "governance_root": target,
+        "workspace_root": target,
+        "project_root": project_root,
+        "forgekit_root": toolkit_root,
+    }
+    print_detection(
+        target, None, toolkit, "init", topology,
+        layout=layout,
+        current_write_scope=derived_current_write_scope(
+            args, "fresh initialization task scope", write_constraints_met,
+        ),
+    )
     if nonempty and not args.force_init:
         print("Check result: uninstalled-nonempty")
         print("Plan summary: initialization requires --force-init because the target is not empty.")
@@ -244,6 +482,12 @@ def init_project(args, toolkit_root, target, toolkit, lang):
     print("Plan summary: initialize the ForgeKit project template using the existing init script.")
     print("Safe actions count: 1")
     print("Manual actions count: 0")
+    if args.yes and args.layout is None:
+        print("[stop] Fresh noninteractive initialization requires an explicit --layout.")
+        print(f'python scripts/forgekit-project.py --target "{target}" --yes --layout in-place')
+        print(f'python scripts/forgekit-project.py --target "{target}" --yes --layout legacy-nested')
+        print("No files were changed.")
+        return 2
     if not confirmed(msg(lang, "init_prompt"), args.yes, args.dry_run or args.no_apply):
         print(msg(lang, "init_skipped"))
         return 0
@@ -252,13 +496,17 @@ def init_project(args, toolkit_root, target, toolkit, lang):
         command = [
             "powershell", "-NoProfile", "-ExecutionPolicy", "Bypass", "-File",
             str(toolkit_root / "scripts/init-project-template.ps1"),
-            "-TargetPath", str(target), "-ProjectName", default_project_name(target),
+            "-TargetPath", str(target),
         ]
+        if layout == "legacy-nested":
+            command.extend(["-ProjectName", default_project_name(target)])
     else:
         command = [
             "bash", str(toolkit_root / "scripts/init-project-template.sh"),
-            "--target-path", str(target), "--project-name", default_project_name(target),
+            "--target-path", str(target),
         ]
+        if layout == "legacy-nested":
+            command.extend(["--project-name", default_project_name(target)])
     run_stream(command, cwd=toolkit_root)
     print("[ok] ForgeKit initialization completed through the existing init entry point.")
     return 0
@@ -341,15 +589,26 @@ def print_upgrade_summary(toolkit_root, target, lang):
     print(msg(lang, "summary_commit"))
 
 
-def upgrade_project(args, toolkit_root, target, installed, toolkit, lang):
+def upgrade_project(args, toolkit_root, target, installed, toolkit, lang, topology, requested):
     upgrade_script = toolkit_root / "scripts/forgekit-upgrade.py"
     base = [sys.executable, str(upgrade_script)]
     check_output = run_capture(base + ["check", "--repo-root", str(target)], cwd=toolkit_root)
     plan_output = run_capture(base + ["plan", "--repo-root", str(target)], cwd=toolkit_root)
     safe_count, manual_count = migration_counts(plan_output)
     check_status = re.search(r"(?m)^Status:\s*(.+)$", check_output)
+    planned_target = re.search(r"(?m)^To:\s*(\d+\.\d+\.\d+)\s*$", plan_output)
+    chain_reaches_toolkit = bool(
+        planned_target and parse_version(planned_target.group(1), "planned target") == toolkit
+    )
+    has_review_needed = review_needed_count(plan_output) > 0
+    policy_constraint_met = not (args.yes and has_review_needed and args.review_needed_policy is None)
 
-    print_detection(target, installed, toolkit, "upgrade-sync")
+    print_detection(
+        requested, installed, toolkit, "upgrade-sync", topology,
+        current_write_scope=derived_current_write_scope(
+            args, "upgrade task scope", chain_reaches_toolkit and policy_constraint_met,
+        ),
+    )
     show_current_docs_integrity(toolkit_root, target)
     print(msg(lang, "check_result", status=check_status.group(1).strip() if check_status else "unknown"))
     print(msg(lang, "plan_summary"))
@@ -357,12 +616,10 @@ def upgrade_project(args, toolkit_root, target, installed, toolkit, lang):
     print(msg(lang, "safe_count", count=safe_count))
     print(msg(lang, "manual_count", count=manual_count))
 
-    planned_target = re.search(r"(?m)^To:\s*(\d+\.\d+\.\d+)\s*$", plan_output)
-    if not planned_target or parse_version(planned_target.group(1), "planned target") != toolkit:
+    if not chain_reaches_toolkit:
         print("[stop] The available migration chain does not reach the toolkit version. Manual review is required.")
         print("No files were changed.")
         return 2
-    has_review_needed = review_needed_count(plan_output) > 0
     if has_review_needed and args.review_needed_policy is None and (args.yes or not sys.stdin.isatty()):
         print_project_review_policy_help(target, lang)
         print(msg(lang, "no_files_changed"))
@@ -385,6 +642,7 @@ def upgrade_project(args, toolkit_root, target, installed, toolkit, lang):
 def main():
     parser = argparse.ArgumentParser(description="Install or upgrade a ForgeKit-managed project")
     parser.add_argument("--target", required=True, help="Project root to inspect")
+    parser.add_argument("--layout", choices=["in-place", "legacy-nested"], help="Fresh init layout; existing topology is never moved")
     parser.add_argument("--yes", action="store_true", help="Confirm initialization or safe migration apply")
     parser.add_argument("--dry-run", action="store_true", help="Detect and show the plan without writing")
     parser.add_argument("--force-init", action="store_true", help="Allow initialization only when ForgeKit is not installed")
@@ -398,16 +656,34 @@ def main():
 
     toolkit_root = Path(__file__).resolve().parents[1]
     toolkit = toolkit_version(toolkit_root)
-    target = Path(args.target).expanduser().resolve()
-    if target.exists() and not target.is_dir():
-        fail(f"Target must be a directory path: {target}")
+    requested = Path(args.target).expanduser().resolve()
+    if requested.exists() and not requested.is_dir():
+        fail(f"Target must be a directory path: {requested}")
+    discovery = discover_existing_topology(requested)
+    if discovery["status"] == "AMBIGUOUS":
+        print("ForgeKit Unified Project Entry")
+        print(f"RequestedTarget: {requested}")
+        for name in ["GovernanceRoot", "WorkspaceRoot", "ProjectRoot", "RepoRoot", "ForgeKitRoot", "CurrentWriteScope"]:
+            print(f"{name}: AMBIGUOUS")
+        for candidate in discovery["candidates"]:
+            print(f"CandidateGovernanceRoot: {candidate['governance_root']}")
+        print("[blocking] C4: multiple exact boundary candidates make the write target ambiguous.")
+        print("BlockedScope: init, adoption, upgrade, or write through this unified entry")
+        print("No files were changed.")
+        return 2
+    if discovery["status"] == "INVALID":
+        print(f"[stop] Existing ForgeKit markers are invalid: {discovery['reason']}")
+        print("No files were changed.")
+        return 2
+    topology = discovery.get("topology")
+    target = topology["governance_root"] if topology else requested
     status, installed, _ = detect_project(target)
     if args.force_init and status != "init":
         fail("--force-init is only valid when ForgeKit is not installed")
     if status == "init":
         return init_project(args, toolkit_root, target, toolkit, lang)
     if status == "legacy-adoption":
-        print_detection(target, installed, toolkit, "legacy-adoption")
+        print_detection(requested, installed, toolkit, "legacy-adoption", topology, current_write_scope="UNKNOWN")
         print("Check result: adoption-required")
         print("Plan summary: treat this as an existing project; inventory facts and confirm adoption before creating new state.")
         print("Safe actions count: 0")
@@ -415,18 +691,18 @@ def main():
         print("No automatic upgrade or initialization was performed.")
         return 0
     if installed > toolkit:
-        print_detection(target, installed, toolkit, "stop-toolkit-too-old")
+        print_detection(requested, installed, toolkit, "stop-toolkit-too-old", topology)
         print("[stop] Project ForgeKit version is newer than this toolkit. Update ForgeKitRoot before continuing.")
         return 2
     if installed == toolkit:
-        print_detection(target, installed, toolkit, "up-to-date")
+        print_detection(requested, installed, toolkit, "up-to-date", topology)
         print(msg(lang, "check_result", status="current"))
         print(msg(lang, "up_to_date_plan"))
         print(msg(lang, "safe_count", count=0))
         print(msg(lang, "manual_count", count=0))
         print(msg(lang, "no_files_changed"))
         return 0
-    return upgrade_project(args, toolkit_root, target, installed, toolkit, lang)
+    return upgrade_project(args, toolkit_root, target, installed, toolkit, lang, topology, requested)
 
 
 if __name__ == "__main__":

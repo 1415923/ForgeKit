@@ -40,6 +40,7 @@ function Get-MappedTemplatePath {
 function Test-SkipTemplatePath {
     param([string]$RelativePath)
     $normalized = $RelativePath.Replace('\', '/')
+    if ($normalized -eq "README.md") { return $true }
     if ($normalized -eq ".forgekit/template-manifest.json") { return $true }
     if ($normalized -eq ".forgekit/template-lock.json") { return $true }
     if ($normalized -eq ".forgekit/state.json") { return $true }

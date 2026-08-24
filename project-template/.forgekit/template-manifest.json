@@ -20,14 +20,6 @@
       "checksum": "sha256:b9873ee5cbc0b85a3d2f62851981f114b90ff9822c98367c4facdc6a53f5c503"
     },
     {
-      "source_path": "README.md",
-      "target_path": "README.md",
-      "role": "readme",
-      "update_policy": "ask",
-      "render_mode": "copy",
-      "checksum": "sha256:dddba2f01779873ee34810150569c1421dd009358ff27c51ef0c649764bb5340"
-    },
-    {
       "source_path": ".forgekit/project-boundary.yml",
       "target_path": ".forgekit/project-boundary.yml",
       "role": "boundary_config",
@@ -897,7 +889,7 @@
       "role": "script",
       "update_policy": "replace",
       "render_mode": "copy",
-      "checksum": "sha256:8538f34a83fa60dd998f25137179cd09404e36a881d3de8d02372209499cdc41"
+      "checksum": "sha256:d7d339616cb9bf5f7f9c13367eba9c6fb9408b59f6a321e593fed463340f5b39"
     },
     {
       "source_path": "migrations/0.40.2/migration.json",
@@ -1009,7 +1001,7 @@
       "role": "script",
       "update_policy": "replace",
       "render_mode": "copy",
-      "checksum": "sha256:714624539e7a4c54775c5498d1bf0492cc6eccdb84673062b0e2aacd25f8a268"
+      "checksum": "sha256:7ec50c6b5ca7e7c92c1c3aa10b1faf25bd2a8bc764edb5060a990e6c91a6bf3f"
     },
     {
       "source_path": "scripts/bootstrap-project-capsule.py",

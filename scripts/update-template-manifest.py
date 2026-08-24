@@ -399,6 +399,16 @@ def write_lock(args):
     print("[copy] .forgekit/template-lock.json")
 
 
+def legacy_readme_lock_entry(lock):
+    return next(
+        (
+            item for item in lock.get("files", [])
+            if normalize_posix(item.get("target_path", "")) == "README.md"
+        ),
+        None,
+    )
+
+
 def classify_entry(item, lock_by_target, target_file, current_checksum):
     target_path = item["target_path_expanded"]
     if item["update_policy"] == "readonly":
@@ -470,6 +480,7 @@ def upgrade_report(args):
         return
 
     lock = load_json(lock_path)
+    legacy_readme = legacy_readme_lock_entry(lock)
     lock_by_target = {normalize_posix(item.get("target_path", "")): item for item in lock.get("files", [])}
     rows = []
     summary = {
@@ -520,6 +531,9 @@ def upgrade_report(args):
         "- No project files were overwritten.",
         "- No lock file was updated.",
         "- No business docs were modified.",
+        "- A legacy README lock entry is advisory/manual only; stock or custom README content is never deleted, overwritten, or restored automatically."
+        if legacy_readme else
+        "- Business README is user-owned and is not part of the current ForgeKit manifest.",
         "- `can_replace` means theoretically replaceable; it was not applied.",
         f"- Candidate templates were exported under `.forgekit/upgrade-export/{version}/`.",
         "",
@@ -545,6 +559,7 @@ def upgrade_report(args):
         "",
         "- `current_checksum` and `local_modified` are computed for this report only and are not written back to the lock file.",
         "- `.forgekit/upgrade-export/**` is comparison material, not current-state documentation or an active change.",
+        "- Legacy README ownership: advisory/manual only." if legacy_readme else "- README ownership: user-owned.",
     ])
     report_path.write_text("\n".join(lines) + "\n", encoding="utf-8")
     print("[copy] .forgekit/upgrade-report.md")

@@ -653,6 +653,9 @@ function Test-TemplateManifest {
             Add-Error "template-manifest version ($($manifest.template_version)) does not match VERSION ($forgekitVersion)"
         }
         $sources = @($manifest.files | ForEach-Object { $_.source_path })
+        if ($sources -contains "README.md") {
+            Add-Error "Business README must not be listed in the fresh template manifest"
+        }
         if ($sources -contains ".forgekit/template-manifest.json") {
             Add-Error "template-manifest.json must not list itself"
         }
@@ -1358,9 +1361,8 @@ function Test-ProjectMaintenanceOperations {
         Test-RequiredPattern "project-template\docs\current-docs-integrity.md" $marker "Current docs integrity $marker"
     }
     Test-RequiredPattern "scripts\check-current-docs-integrity.py" "missing-source-record" "Integrity Source backlink check"
-    Test-RequiredPattern "scripts\check-current-docs-integrity.py" 'f"placeholder-only-{name}"' "Integrity placeholder check"
-    Test-RequiredPattern "scripts\check-current-docs-integrity.py" '"risk-register"' "Integrity risk register check"
-    Test-RequiredPattern "scripts\check-current-docs-integrity.py" "missing-testing-baseline" "Integrity testing baseline check"
+    Test-RequiredPattern "scripts\check-current-docs-integrity.py" "closure-current-docs-sync-missing" "Integrity closure writeback check"
+    Test-NoPattern "scripts\check-current-docs-integrity.py" "missing-testing-baseline" "Active task must not force testing population"
     Test-RequiredPattern "scripts\archive-capsule.py" "Current State Restoration Pass" "Archive integrity blocking guidance"
     Test-RequiredPattern "project-template\docs\workflow-router.md" "MaintenanceIntent: upgrade-sync" "Workflow router upgrade sync intent"
     Test-RequiredPattern "project-template\docs\workflow-router.md" "MaintenanceIntent: archive-capsule" "Workflow router archive capsule intent"
@@ -1369,6 +1371,8 @@ function Test-ProjectMaintenanceOperations {
     Test-RequiredPattern "scripts\forgekit-project.py" '"apply", "--safe"' "Unified entry delegates safe apply"
     Test-RequiredPattern "scripts\forgekit-project.py" "Non-interactive session detected" "Unified non-interactive plan-only rule"
     Test-RequiredPattern "scripts\forgekit-project.py" "legacy-adoption" "Unified legacy adoption route"
+    Test-RequiredPattern "scripts\forgekit-project.py" 'choices=["in-place", "legacy-nested"]' "Unified fresh layout choices"
+    Test-RequiredPattern "scripts\forgekit-project.py" "multiple exact boundary candidates" "Unified ambiguous root stop"
     Test-RequiredPattern "scripts\forgekit-project.py" "stop-toolkit-too-old" "Unified newer-project stop"
     Test-RequiredPattern "README.md" 'python .\scripts\forgekit-project.py' "Windows unified entry command"
     Test-RequiredPattern "README.md" 'python3 ./scripts/forgekit-project.py' "macOS/Linux unified entry command"
@@ -1471,6 +1475,8 @@ function Test-MultiProjectScopedDocs {
     Test-RequiredPattern "scripts\check-workspace-integrity.py" "--require-enabled" "Workspace checker require-enabled option"
     Test-RequiredPattern "scripts\check-workspace-integrity.py" "args.strict" "Workspace checker strict semantics"
     Test-RequiredPattern "scripts\check-workspace-integrity.py" "workspace_root_not_git" "Workspace root Git warning"
+    Test-RequiredPattern "scripts\check-workspace-integrity.py" '"impact_severity"' "Workspace canonical impact severity"
+    Test-RequiredPattern "scripts\check-workspace-integrity.py" '"blocking": canonical_blocking' "Workspace canonical blocking"
     Test-RequiredPattern "scripts\check-workspace-integrity.py" '"workspace-only"' "Workspace-only project profile"
     Test-RequiredPattern "project-template\.forgekit\docs\scoped-docs.md" "workspace-only" "Workspace-only profile guidance"
     Test-RequiredPattern "migrations\0.41.0\migration.json" '"from": "0.40.2"' "v0.41 migration source"

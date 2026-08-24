@@ -43,12 +43,53 @@ FIELD_PATTERNS = {
     "repo": re.compile(r"Repo ID:\s*`?([A-Za-z0-9._-]+)", re.IGNORECASE),
     "workspace_task": re.compile(r"Workspace Task ID:\s*`?([A-Za-z0-9._-]+)", re.IGNORECASE),
 }
+VALIDATION_RELEVANCE = {
+    "RELEVANT_REGRESSION", "KNOWN_UNRELATED_FAILURE",
+    "TEST_INFRASTRUCTURE_FAILURE", "CLAIM_CRITICAL_VALIDATION_FAILURE",
+}
+IMPACT_SEVERITIES = {"CRITICAL", "MAJOR", "MINOR", "NOTE"}
+PRIMARY_CONSEQUENCES = {"C1", "C2", "C3", "C4"}
 
 
-def finding(severity, code, message, path=None):
-    item = {"severity": severity, "code": code, "message": message}
+def finding(
+    severity,
+    code,
+    message,
+    path=None,
+    *,
+    impact_severity=None,
+    blocking=None,
+    primary_consequence=None,
+    failure_path=None,
+    blocked_scope=None,
+    evidence=None,
+    validation_relevance=None,
+):
+    canonical_blocking = severity == "blocking" if blocking is None else blocking
+    canonical_impact = impact_severity or ("MINOR" if canonical_blocking else "NOTE")
+    canonical_consequence = primary_consequence or "C4"
+    if canonical_impact not in IMPACT_SEVERITIES:
+        raise RuntimeError(f"invalid impact severity for {code}: {canonical_impact}")
+    if canonical_blocking and canonical_consequence not in PRIMARY_CONSEQUENCES:
+        raise RuntimeError(f"invalid primary consequence for {code}: {canonical_consequence}")
+    item = {
+        "severity": "blocking" if canonical_blocking else "warning",
+        "impact_severity": canonical_impact,
+        "blocking": canonical_blocking,
+        "code": code,
+        "message": message,
+    }
     if path:
         item["path"] = str(path).replace("\\", "/")
+    if validation_relevance:
+        if validation_relevance not in VALIDATION_RELEVANCE:
+            raise RuntimeError(f"invalid validation relevance for {code}: {validation_relevance}")
+        item["validation_relevance"] = validation_relevance
+    if canonical_blocking:
+        item["primary_consequence"] = canonical_consequence
+        item["failure_path"] = failure_path or f"{message} This makes the configured target unsafe or non-executable for the dependent scoped operation."
+        item["blocked_scope"] = blocked_scope or "workspace operation that depends on this configured target"
+        item["evidence"] = evidence or (str(path).replace("\\", "/") if path else message)
     return item
 
 
@@ -102,7 +143,7 @@ def activation_status(root):
     map_data, map_error = load_json(root / MAP_PATH, "workspace-map.json")
     if enabled:
         if map_error:
-            return "blocking", state, None, map_error
+            return "runtime-error", state, None, map_error
         if not map_data.get("enabled"):
             return "blocking", state, map_data, "state enables scoped docs but workspace map is disabled"
         return "enabled", state, map_data, None
@@ -146,7 +187,7 @@ def validate_profile_and_scope(item, label, findings):
 
 def git_warning(repo_path, repo_id, findings, *, workspace_root=False):
     if not repo_path.exists():
-        findings.append(finding("warning", "repo_missing", f"Repo {repo_id} is not checked out", repo_path))
+        findings.append(finding("warning", "repo_missing", f"Repo {repo_id} is not checked out", repo_path, impact_severity="MAJOR"))
         return
     try:
         result = subprocess.run(
@@ -156,7 +197,10 @@ def git_warning(repo_path, repo_id, findings, *, workspace_root=False):
             check=False,
         )
     except OSError:
-        findings.append(finding("warning", "git_unavailable", "Git status could not be checked"))
+        findings.append(finding(
+            "warning", "git_unavailable", "Git status could not be checked",
+            impact_severity="MAJOR", validation_relevance="TEST_INFRASTRUCTURE_FAILURE",
+        ))
         return
     if result.returncode != 0:
         if workspace_root:
@@ -255,10 +299,22 @@ def validate_references(root, workspace, projects, repos, findings):
         local_sources = real_source_ids(source_text)
         standalone = str(project.get("scope", "")).strip().lower() == "standalone"
         if not standalone and re.search(r"^#{1,6}\s+Original Text\b|^Original Text:", source_text, re.IGNORECASE | re.MULTILINE):
-            findings.append(finding("blocking", "duplicated_source_text", f"Project {project_id} is not standalone but source-links stores Original Text", project_path / "source-links.md"))
+            findings.append(finding(
+                "blocking", "duplicated_source_text",
+                f"Project {project_id} is not standalone but source-links stores Original Text",
+                project_path / "source-links.md", primary_consequence="C3",
+                failure_path="The scoped project duplicates authoritative source text, so later edits can silently diverge from the workspace Source Record.",
+                blocked_scope=f"claim or task closure for project {project_id}",
+            ))
         for source_id in real_source_ids(task_text):
             if source_id not in workspace_sources and not (standalone and source_id in local_sources):
-                findings.append(finding("blocking", "unresolved_source", f"Project {project_id} task references unresolved Source ID: {source_id}", project_path / "task-board.md"))
+                findings.append(finding(
+                    "blocking", "unresolved_source",
+                    f"Project {project_id} task references unresolved Source ID: {source_id}",
+                    project_path / "task-board.md", primary_consequence="C3",
+                    failure_path="The scoped task cites a Source ID that cannot be resolved to workspace authority or an allowed standalone source.",
+                    blocked_scope=f"claim or task closure for project {project_id}",
+                ))
         for workspace_task_id in FIELD_PATTERNS["workspace_task"].findall(task_text):
             if workspace_task_id.upper() not in {"TODO_REVIEW", "EXAMPLE"} and workspace_task_id not in workspace_task:
                 findings.append(finding("blocking", "unknown_workspace_task", f"Project {project_id} references unknown Workspace Task ID: {workspace_task_id}", project_path / "task-board.md"))
@@ -275,6 +331,8 @@ def run_check(root):
             "workspace_root": str(root),
             "summary": reason,
             "adoption_guidance": "Keep the legacy single-project flow, or configure workspace-map.json and explicitly enable scoped docs.",
+            "blocking_count": 0,
+            "warning_count": 0,
             "findings": [],
         }
     if activation == "blocking":
@@ -282,6 +340,8 @@ def run_check(root):
             "status": "blocking",
             "workspace_root": str(root),
             "summary": reason,
+            "blocking_count": 1,
+            "warning_count": 0,
             "findings": [finding("blocking", "activation_mismatch", reason)],
         }
     if activation == "runtime-error":
@@ -289,6 +349,8 @@ def run_check(root):
             "status": "runtime-error",
             "workspace_root": str(root),
             "summary": reason,
+            "blocking_count": 0,
+            "warning_count": 0,
             "findings": [],
         }
 
@@ -365,17 +427,23 @@ def run_check(root):
     archive_path = safe_relative(root, workspace.get("archive_root", ".forgekit/archive"), "workspace.archive_root", findings)
     for artifact_id, artifact_path in artifact_paths.items():
         if archive_path and is_within(artifact_path, archive_path):
-            findings.append(finding("blocking", "artifact_in_archive", f"Artifact {artifact_id} cannot be located under ArchiveRoot"))
+            findings.append(finding(
+                "warning", "artifact_in_archive",
+                f"Artifact {artifact_id} is historical material under ArchiveRoot; no active write-target ambiguity is established",
+                artifact_path, impact_severity="MINOR",
+            ))
 
     validate_references(root, workspace, projects, repos, findings)
 
-    blocking = sum(item["severity"] == "blocking" for item in findings)
-    warnings = sum(item["severity"] == "warning" for item in findings)
+    blocking = sum(item["blocking"] for item in findings)
+    warnings = sum(not item["blocking"] for item in findings)
     status = "blocking" if blocking else "warning" if warnings else "passed"
     return {
         "status": status,
         "workspace_root": str(root),
         "summary": {"blocking": blocking, "warnings": warnings},
+        "blocking_count": blocking,
+        "warning_count": warnings,
         "findings": findings,
     }
 
@@ -389,11 +457,18 @@ def print_text(report):
         print(f"Adoption: {report['adoption_guidance']}")
         return
     summary = report.get("summary", {})
-    print(f"Blocking: {summary.get('blocking', 0)}")
-    print(f"Warnings: {summary.get('warnings', 0)}")
+    if report["status"] == "runtime-error":
+        print(f"Reason: {summary}")
+        print("Report-only: no project files were modified.")
+        return
+    blocking = summary.get("blocking", 0) if isinstance(summary, dict) else report.get("blocking_count", 0)
+    warnings = summary.get("warnings", 0) if isinstance(summary, dict) else report.get("warning_count", 0)
+    print(f"Blocking: {blocking}")
+    print(f"Warnings: {warnings}")
     for item in report.get("findings", []):
         location = f" [{item['path']}]" if item.get("path") else ""
-        print(f"[{item['severity']}] {item['code']}: {item['message']}{location}")
+        blocking = "YES" if item["blocking"] else "NO"
+        print(f"[{item['severity']}] {item['code']}: {item['message']}{location} (Impact: {item['impact_severity']}; Blocking: {blocking})")
     print("Report-only: no project files were modified.")
 
 

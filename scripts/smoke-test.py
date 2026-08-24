@@ -433,6 +433,8 @@ def assert_manifest_checksum_stability(repo):
         (repo / "project-template/.forgekit/template-manifest.json").read_text(encoding="utf-8")
     )
     entries = {item["source_path"]: item for item in manifest["files"]}
+    if "README.md" in entries:
+        fail("fresh template manifest must not claim the business README")
     checked = ("AGENTS.md", "CLAUDE.md", ".codex/rules.md")
 
     with tempfile.TemporaryDirectory(prefix="forgekit-checksum-") as temp_dir:
@@ -1038,6 +1040,79 @@ def assert_workspace_integrity(target, temp_parent):
     required = run([sys.executable, str(checker), "--repo-root", str(target), "--require-enabled"], cwd=target, check=False)
     if required.returncode != 1:
         fail("--require-enabled must fail when scoped docs are disabled")
+    disabled_json = json.loads(run([
+        sys.executable, str(checker), "--repo-root", str(target), "--json",
+    ], cwd=target).stdout)
+    if disabled_json["status"] != "not-enabled" or not isinstance(disabled_json["summary"], str) or disabled_json["findings"]:
+        fail("workspace not-enabled JSON compatibility branch changed")
+
+    runtime_case = temp_parent / "workspace-runtime-error"
+    shutil.copytree(target, runtime_case)
+    (runtime_case / ".forgekit/state.json").write_text("{ invalid", encoding="utf-8")
+    runtime_result = run([
+        sys.executable, str(runtime_case / "scripts/check-workspace-integrity.py"),
+        "--repo-root", str(runtime_case), "--json",
+    ], cwd=runtime_case, check=False)
+    runtime_report = json.loads(runtime_result.stdout)
+    if runtime_result.returncode != 2 or runtime_report["status"] != "runtime-error" or runtime_report["findings"]:
+        fail("workspace runtime-error must remain a command failure without a project Blocking finding")
+    runtime_human = run([
+        sys.executable, str(runtime_case / "scripts/check-workspace-integrity.py"),
+        "--repo-root", str(runtime_case),
+    ], cwd=runtime_case, check=False)
+    if runtime_human.returncode != 2 or "Status: runtime-error" not in runtime_human.stdout:
+        fail("workspace runtime-error human stdout marker changed")
+
+    malformed_map_case = temp_parent / "workspace-malformed-map-runtime-error"
+    shutil.copytree(target, malformed_map_case)
+    malformed_state_path = malformed_map_case / ".forgekit/state.json"
+    malformed_state = json.loads(malformed_state_path.read_text(encoding="utf-8-sig"))
+    malformed_state["features"]["multi_project_scoped_docs_available"] = True
+    malformed_state["features"]["multi_project_scoped_docs_enabled"] = True
+    malformed_state_path.write_text(json.dumps(malformed_state, indent=2) + "\n", encoding="utf-8")
+    (malformed_map_case / ".forgekit/workspace-map.json").write_text("{ invalid", encoding="utf-8")
+    malformed_map_result = run([
+        sys.executable, str(malformed_map_case / "scripts/check-workspace-integrity.py"),
+        "--repo-root", str(malformed_map_case), "--json",
+    ], cwd=malformed_map_case, check=False)
+    malformed_map_report = json.loads(malformed_map_result.stdout)
+    if (
+        malformed_map_result.returncode != 2
+        or malformed_map_report["status"] != "runtime-error"
+        or malformed_map_report["blocking_count"] != 0
+        or malformed_map_report["findings"]
+    ):
+        fail("malformed enabled workspace map must be a command runtime-error without project Blocking")
+
+    contradiction_case = temp_parent / "workspace-valid-activation-contradiction"
+    shutil.copytree(target, contradiction_case)
+    contradiction_state_path = contradiction_case / ".forgekit/state.json"
+    contradiction_state = json.loads(contradiction_state_path.read_text(encoding="utf-8-sig"))
+    contradiction_state["features"]["multi_project_scoped_docs_available"] = True
+    contradiction_state["features"]["multi_project_scoped_docs_enabled"] = True
+    contradiction_state_path.write_text(json.dumps(contradiction_state, indent=2) + "\n", encoding="utf-8")
+    contradiction_map = {
+        "schema_version": 1, "enabled": False, "workspace": {},
+        "projects": [], "repos": [], "artifacts": [],
+    }
+    (contradiction_case / ".forgekit/workspace-map.json").write_text(
+        json.dumps(contradiction_map, indent=2) + "\n", encoding="utf-8",
+    )
+    contradiction_result = run([
+        sys.executable, str(contradiction_case / "scripts/check-workspace-integrity.py"),
+        "--repo-root", str(contradiction_case), "--json",
+    ], cwd=contradiction_case, check=False)
+    contradiction_report = json.loads(contradiction_result.stdout)
+    contradiction_finding = contradiction_report["findings"][0]
+    if (
+        contradiction_result.returncode != 1
+        or contradiction_report["status"] != "blocking"
+        or contradiction_report["blocking_count"] != 1
+        or contradiction_finding["blocking"] is not True
+        or contradiction_finding["primary_consequence"] != "C4"
+        or not contradiction_finding.get("failure_path")
+    ):
+        fail("a parsed state/map activation contradiction must remain a scoped C4 Blocking")
 
     workspace = temp_parent / "workspace-integrity"
     shutil.copytree(target, workspace)
@@ -1081,6 +1156,18 @@ def assert_workspace_integrity(target, temp_parent):
     strict_root = run([sys.executable, str(checker), "--repo-root", str(workspace), "--strict"], cwd=workspace, check=False)
     if strict_root.returncode != 1 or "workspace_root_not_git" not in strict_root.stdout:
         fail("--strict must promote the non-Git WorkspaceRoot warning to exit code 1")
+    strict_root_json = run([
+        sys.executable, str(checker), "--repo-root", str(workspace), "--strict", "--json",
+    ], cwd=workspace, check=False)
+    strict_report = json.loads(strict_root_json.stdout)
+    root_finding = next(item for item in strict_report["findings"] if item["code"] == "workspace_root_not_git")
+    if (
+        strict_root_json.returncode != 1
+        or root_finding["blocking"] is not False
+        or root_finding["severity"] != "warning"
+        or strict_report["blocking_count"] != 0
+    ):
+        fail("workspace strict warning exit must remain separate from canonical Blocking")
 
     run(["git", "init"], cwd=workspace)
     workspace_only = run([sys.executable, str(checker), "--repo-root", str(workspace)], cwd=workspace)
@@ -1092,6 +1179,17 @@ def assert_workspace_integrity(target, temp_parent):
     missing_capsule = run([sys.executable, str(checker), "--repo-root", str(workspace)], cwd=workspace, check=False)
     if missing_capsule.returncode != 1 or "capsule_missing" not in missing_capsule.stdout:
         fail("project-capsule project without docs_path must be blocking")
+    missing_capsule_json = json.loads(run([
+        sys.executable, str(checker), "--repo-root", str(workspace), "--json",
+    ], cwd=workspace, check=False).stdout)
+    capsule_finding = next(item for item in missing_capsule_json["findings"] if item["code"] == "capsule_missing")
+    if (
+        capsule_finding["impact_severity"] != "MINOR"
+        or capsule_finding["blocking"] is not True
+        or capsule_finding["severity"] != "blocking"
+        or not all(capsule_finding.get(name) for name in ["primary_consequence", "failure_path", "blocked_scope", "evidence"])
+    ):
+        fail("workspace blocking finding is missing canonical fields or legacy disposition")
     shutil.copytree(workspace / ".forgekit/projects/_template", project_path)
     passed = run([sys.executable, str(checker), "--repo-root", str(workspace)], cwd=workspace)
     if "Status: passed" not in passed.stdout:
@@ -1145,6 +1243,17 @@ def assert_workspace_integrity(target, temp_parent):
         fail("artifact configured as a repo path must be blocking")
     workspace_map["artifacts"] = []
 
+    workspace_map["artifacts"] = [{
+        "id": "historical-report", "project_id": "backend", "path": ".forgekit/archive/reports/old",
+    }]
+    map_path.write_text(json.dumps(workspace_map, indent=2) + "\n", encoding="utf-8")
+    historical = run([sys.executable, str(checker), "--repo-root", str(workspace), "--json"], cwd=workspace)
+    historical_report = json.loads(historical.stdout)
+    historical_finding = next(item for item in historical_report["findings"] if item["code"] == "artifact_in_archive")
+    if historical_finding["blocking"] is not False or historical_report["blocking_count"] != 0:
+        fail("historical artifact under ArchiveRoot must stay non-blocking without write-target ambiguity")
+    workspace_map["artifacts"] = []
+
     workspace_map["repos"][0]["repo_path"] = ".forgekit/archive/backend-repo"
     map_path.write_text(json.dumps(workspace_map, indent=2) + "\n", encoding="utf-8")
     archived_repo = run([sys.executable, str(checker), "--repo-root", str(workspace)], cwd=workspace, check=False)
@@ -1173,9 +1282,17 @@ def assert_workspace_integrity(target, temp_parent):
         fail("enabled workspace must reject placeholder workspace.id")
 
     map_path.unlink()
-    missing = run([sys.executable, str(checker), "--repo-root", str(workspace)], cwd=workspace, check=False)
-    if missing.returncode != 1 or "Status: blocking" not in missing.stdout:
-        fail("enabled state without workspace map must be blocking")
+    missing = run([
+        sys.executable, str(checker), "--repo-root", str(workspace), "--json",
+    ], cwd=workspace, check=False)
+    missing_report = json.loads(missing.stdout)
+    if (
+        missing.returncode != 2
+        or missing_report["status"] != "runtime-error"
+        or missing_report["blocking_count"] != 0
+        or missing_report["findings"]
+    ):
+        fail("enabled state without workspace map must be a command runtime-error without project Blocking")
 
 
 def assert_project_capsule_bootstrap(target, temp_parent):
@@ -1595,8 +1712,48 @@ def assert_manifest_lock(target):
         fail("template-lock must not store current_checksum or local_modified")
     for item in lock.get("files", []):
         target_path = item.get("target_path", "")
+        if target_path == "README.md":
+            fail("fresh template-lock must not claim the business README")
         if target_path.startswith("docs/") or target_path.startswith("changes/"):
             fail(f"template-lock contains unmanaged root target: {target_path}")
+
+
+def assert_readme_ownership(repo, target, temp_parent):
+    tool = repo / "scripts/update-template-manifest.py"
+    namespace = {"__name__": "forgekit_template_manifest_stage_c", "__file__": str(tool)}
+    exec(compile(tool.read_text(encoding="utf-8"), str(tool), "exec"), namespace)
+    namespace["load_manifest"] = lambda _repo_root: {"template_version": FORGEKIT_VERSION, "files": []}
+    for label, content in [
+        ("stock", (repo / "project-template/README.md").read_bytes()),
+        ("custom", b"# User-owned custom README\n"),
+    ]:
+        case = temp_parent / f"readme-legacy-{label}"
+        (case / ".forgekit").mkdir(parents=True)
+        shutil.copyfile(target / ".forgekit/project-boundary.yml", case / ".forgekit/project-boundary.yml")
+        readme = case / "README.md"
+        readme.write_bytes(content)
+        before = readme.read_bytes()
+        lock_path = case / ".forgekit/template-lock.json"
+        lock = {
+            "schema_version": 1,
+            "installed_version": FORGEKIT_VERSION,
+            "managed_docs_root": ".forgekit/docs",
+            "change_root": ".forgekit/changes",
+            "files": [{
+            "source_path": "README.md",
+            "target_path": "README.md",
+            "role": "readme",
+            "update_policy": "ask",
+            "render_mode": "copy",
+            "source_checksum": "sha256:legacy-readme-baseline",
+            "installed_checksum": sha256_file(readme),
+            }],
+        }
+        lock_path.write_text(json.dumps(lock, indent=2) + "\n", encoding="utf-8")
+        namespace["upgrade_report"](types.SimpleNamespace(repo_root=repo, project_root=case))
+        report = (case / ".forgekit/upgrade-report.md").read_text(encoding="utf-8")
+        if readme.read_bytes() != before or "Legacy README ownership: advisory/manual only" not in report:
+            fail(f"legacy {label} README must remain byte-preserved and advisory/manual only")
 
 
 def assert_versioned_migration_upgrade(repo, target, temp_parent):
@@ -2138,11 +2295,87 @@ def assert_unified_project_entry(repo, current_target, temp_parent):
         [sys.executable, str(script), "--target", str(uninstalled), "--dry-run"],
         cwd=repo,
     )
-    for marker in ["Detected action: init", "Check result: uninstalled", "No files were changed"]:
+    for marker in [
+        "Detected action: init", "Check result: uninstalled", "No files were changed",
+        "Layout: in-place", f"GovernanceRoot: {uninstalled}", f"WorkspaceRoot: {uninstalled}",
+        f"ProjectRoot: {uninstalled}", "RepoRoot:", f"ForgeKitRoot: {repo}",
+        "CurrentWriteScope: read-only (dry-run/no-apply; no write authorization)",
+    ]:
         if marker not in dry_run.stdout:
             fail(f"unified uninstalled dry-run missing marker: {marker}")
     if uninstalled.exists():
         fail("unified init dry-run must not create the target directory")
+
+    no_layout = temp_parent / "unified-no-layout"
+    refused_layout = run([
+        sys.executable, str(script), "--target", str(no_layout), "--yes",
+    ], cwd=repo, check=False)
+    if (
+        refused_layout.returncode != 2
+        or "requires an explicit --layout" not in refused_layout.stdout
+        or "--layout in-place" not in refused_layout.stdout
+        or "--layout legacy-nested" not in refused_layout.stdout
+        or no_layout.exists()
+    ):
+        fail("fresh --yes without explicit layout must stop without writing")
+
+    fresh_in_place = temp_parent / "unified-fresh-in-place"
+    in_place = run([
+        sys.executable, str(script), "--target", str(fresh_in_place), "--yes", "--layout", "in-place",
+    ], cwd=repo)
+    if not (fresh_in_place / ".forgekit/state.json").is_file() or (fresh_in_place / "README.md").exists():
+        fail("fresh in-place init must create state at target and leave absent README absent")
+    if (
+        f"ProjectRoot: {fresh_in_place}" not in in_place.stdout
+        or "Layout: in-place" not in in_place.stdout
+        or "CurrentWriteScope: boundary policy intersection fresh initialization task scope intersection apply authorization granted by --yes" not in in_place.stdout
+    ):
+        fail("fresh in-place output must report selected topology")
+    assert_manifest_lock(fresh_in_place)
+
+    interactive = temp_parent / "unified-interactive-default"
+    interactive_driver = (
+        "import io,runpy,sys\n"
+        "class InteractiveInput(io.StringIO):\n"
+        "    def isatty(self): return True\n"
+        "sys.stdin=InteractiveInput('2\\ny\\n')\n"
+        f"sys.argv=[{str(script)!r},'--target',{str(interactive)!r}]\n"
+        f"runpy.run_path({str(script)!r},run_name='__main__')\n"
+    )
+    interactive_result = run([sys.executable, "-c", interactive_driver], cwd=repo)
+    if (
+        "Layout: in-place" not in interactive_result.stdout
+        or "CurrentWriteScope: boundary policy intersection fresh initialization task scope intersection user authorization pending confirmation" not in interactive_result.stdout
+        or "apply authorization granted" in interactive_result.stdout
+        or not (interactive / ".forgekit/state.json").is_file()
+    ):
+        fail("interactive fresh init must default to in-place after showing the root plan")
+
+    declined = temp_parent / "unified-interactive-decline"
+    decline_driver = (
+        "import io,runpy,sys\n"
+        "class InteractiveInput(io.StringIO):\n"
+        "    def isatty(self): return True\n"
+        "sys.stdin=InteractiveInput('2\\nn\\n')\n"
+        f"sys.argv=[{str(script)!r},'--target',{str(declined)!r}]\n"
+        f"runpy.run_path({str(script)!r},run_name='__main__')\n"
+    )
+    decline_result = run([sys.executable, "-c", decline_driver], cwd=repo)
+    if (
+        "user authorization pending confirmation" not in decline_result.stdout
+        or "apply authorization granted" in decline_result.stdout
+        or "Initialization was not applied" not in decline_result.stdout
+        or declined.exists()
+    ):
+        fail("interactive decline must remain pending before confirmation and must not write")
+
+    legacy_outer = temp_parent / "unified-legacy-workspace"
+    legacy_result = run([
+        sys.executable, str(script), "--target", str(legacy_outer), "--yes", "--layout", "legacy-nested",
+    ], cwd=repo)
+    legacy_inner = legacy_outer / "unified-legacy"
+    if not legacy_inner.is_dir() or f"ProjectRoot: {legacy_inner}" not in legacy_result.stdout:
+        fail("explicit legacy-nested layout must preserve the derived inner ProjectName behavior")
 
     preserved_init = temp_parent / "unified-existing-workspace"
     preserved_init.mkdir()
@@ -2150,7 +2383,7 @@ def assert_unified_project_entry(repo, current_target, temp_parent):
     existing_readme.write_text("existing project file\n", encoding="utf-8")
     existing_before = existing_readme.read_bytes()
     initialized = run([
-        sys.executable, str(script), "--target", str(preserved_init), "--force-init", "--yes",
+        sys.executable, str(script), "--target", str(preserved_init), "--force-init", "--yes", "--layout", "in-place",
     ], cwd=repo)
     if "ForgeKit initialization completed through the existing init entry point" not in initialized.stdout:
         fail("unified --force-init --yes did not delegate to the existing init script")
@@ -2158,8 +2391,72 @@ def assert_unified_project_entry(repo, current_target, temp_parent):
         fail("unified --force-init must preserve existing target files")
     if not (preserved_init / ".forgekit/state.json").is_file():
         fail("unified initialization did not create state.json")
-    if not (preserved_init / "unified-existing").is_dir():
-        fail("unified initialization did not create the derived inner project directory")
+    if (preserved_init / "unified-existing").exists():
+        fail("explicit in-place layout must not create the legacy derived inner directory")
+    assert_manifest_lock(preserved_init)
+
+    force_again = run([
+        sys.executable, str(script), "--target", str(preserved_init), "--force-init", "--yes", "--layout", "in-place",
+    ], cwd=repo, check=False)
+    if force_again.returncode == 0 or existing_readme.read_bytes() != existing_before:
+        fail("existing topology must not be force-reinitialized or overwrite a user README")
+
+    outer_state_before = (legacy_outer / ".forgekit/state.json").read_bytes()
+    outer_entry = run([sys.executable, str(script), "--target", str(legacy_outer), "--lang", "en-US"], cwd=repo)
+    inner_entry = run([sys.executable, str(script), "--target", str(legacy_inner), "--lang", "en-US"], cwd=repo)
+    for output in [outer_entry.stdout, inner_entry.stdout]:
+        if f"GovernanceRoot: {legacy_outer}" not in output or f"ProjectRoot: {legacy_inner}" not in output:
+            fail("legacy outer and inner entries must resolve to the same existing topology")
+    if (legacy_inner / ".forgekit").exists() or (legacy_outer / ".forgekit/state.json").read_bytes() != outer_state_before:
+        fail("legacy inner entry must not create a second GovernanceRoot or rewrite existing state")
+
+    unrelated_outer = temp_parent / "unified-unrelated-ancestor"
+    unrelated_project = unrelated_outer / "actual-project"
+    unrelated_project.mkdir(parents=True)
+    shutil.copytree(legacy_outer / ".forgekit", unrelated_outer / ".forgekit")
+    boundary_path = unrelated_outer / ".forgekit/project-boundary.yml"
+    boundary_path.write_text(
+        "roots:\n  forgekit_root: \".\"\n  project_root: \"./actual-project\"\n",
+        encoding="utf-8",
+    )
+    unrelated_request = unrelated_outer / "different-project"
+    unrelated = run([
+        sys.executable, str(script), "--target", str(unrelated_request), "--dry-run",
+    ], cwd=repo)
+    if "Detected action: init" not in unrelated.stdout or f"GovernanceRoot: {unrelated_request}" not in unrelated.stdout:
+        fail("zero exact candidates must ignore an unrelated ForgeKit ancestor and enter only the fresh-init plan")
+
+    adoption_zero = temp_parent / "unified-adoption-zero"
+    adoption_zero.mkdir()
+    (adoption_zero / "AGENTS.md").write_text("legacy\n", encoding="utf-8")
+    (adoption_zero / "CLAUDE.md").write_text("legacy\n", encoding="utf-8")
+    adoption = run([sys.executable, str(script), "--target", str(adoption_zero), "--lang", "en-US"], cwd=repo)
+    if "Detected action: legacy-adoption" not in adoption.stdout or "GovernanceRoot: UNKNOWN" not in adoption.stdout:
+        fail("zero-candidate existing-project adoption must report UNKNOWN and must not guess a root")
+
+    ambiguous_outer = temp_parent / "unified-ambiguous"
+    ambiguous_middle = ambiguous_outer / "middle"
+    ambiguous_project = ambiguous_middle / "project"
+    ambiguous_project.mkdir(parents=True)
+
+    def write_current_governance(root, project_relative):
+        state_path = root / ".forgekit/state.json"
+        state_path.parent.mkdir(parents=True, exist_ok=True)
+        shutil.copyfile(repo / "project-template/.forgekit/state.json", state_path)
+        (root / ".forgekit/project-boundary.yml").write_text(
+            f"roots:\n  forgekit_root: \".\"\n  project_root: \"{project_relative}\"\n",
+            encoding="utf-8",
+        )
+
+    write_current_governance(ambiguous_outer, "./middle/project")
+    write_current_governance(ambiguous_middle, "./project")
+    ambiguous = run([
+        sys.executable, str(script), "--target", str(ambiguous_project), "--dry-run",
+    ], cwd=repo, check=False)
+    if ambiguous.returncode != 2 or "GovernanceRoot: AMBIGUOUS" not in ambiguous.stdout or "multiple exact boundary candidates" not in ambiguous.stdout:
+        fail("multiple exact candidates must report AMBIGUOUS without nearest-wins fallback")
+    if (ambiguous_project / ".forgekit").exists():
+        fail("ambiguous discovery must not write a new GovernanceRoot")
 
     current_state = current_target / ".forgekit/state.json"
     current_before = current_state.read_bytes()
@@ -2194,6 +2491,10 @@ def assert_unified_project_entry(repo, current_target, temp_parent):
         state = json.loads((repo / "project-template/.forgekit/state.json").read_text(encoding="utf-8"))
         state["forgekit_version"] = version
         state_path.write_text(json.dumps(state, indent=2) + "\n", encoding="utf-8")
+        (root / ".forgekit/project-boundary.yml").write_text(
+            f"roots:\n  forgekit_root: \"{repo.as_posix()}\"\n  project_root: \".\"\n",
+            encoding="utf-8",
+        )
         return state_path
 
     same_target = temp_parent / "upgrade-same-existing"
@@ -2224,6 +2525,12 @@ def assert_unified_project_entry(repo, current_target, temp_parent):
     business.write_text("business truth\n", encoding="utf-8")
     old_state_before = old_state.read_bytes()
     business_before = business.read_bytes()
+    old_dry_run = run([sys.executable, str(script), "--target", str(old), "--dry-run"], cwd=repo)
+    if (
+        "CurrentWriteScope: read-only (dry-run/no-apply; no write authorization)" not in old_dry_run.stdout
+        or "apply authorization granted" in old_dry_run.stdout
+    ):
+        fail("upgrade --dry-run must report read-only CurrentWriteScope without apply authorization")
     old_plan = run([sys.executable, str(script), "--target", str(old)], cwd=repo, input_text="\n")
     for marker in [
         "Detected action: upgrade-sync", "Check result: update-available",
@@ -2307,6 +2614,8 @@ def assert_unified_project_entry(repo, current_target, temp_parent):
     no_policy = run([sys.executable, str(script), "--target", str(apply_target), "--yes"], cwd=repo, check=False)
     if no_policy.returncode == 0 or "Review-needed item requires a policy in non-interactive mode" not in no_policy.stdout:
         fail("unified --yes without review-needed policy must stop before writing")
+    if "apply authorization granted" in no_policy.stdout or "write constraints are not satisfied" not in no_policy.stdout:
+        fail("unified --yes without required policy must not claim apply authorization")
     for marker in ["--review-needed-policy manual-merge", "--review-needed-policy replace-template"]:
         if marker not in no_policy.stdout:
             fail(f"unified no-policy stop missing one-line command marker: {marker}")
@@ -2320,6 +2629,8 @@ def assert_unified_project_entry(repo, current_target, temp_parent):
     ], cwd=repo)
     if "Safe migration apply completed through forgekit-upgrade.py" not in applied.stdout:
         fail("unified --yes with manual-merge policy must delegate to forgekit-upgrade.py apply --safe")
+    if "CurrentWriteScope: boundary policy intersection upgrade task scope intersection apply authorization granted by --yes" not in applied.stdout:
+        fail("unified writable --yes upgrade must report granted apply authorization")
     applied_state = json.loads(apply_state.read_text(encoding="utf-8"))
     if applied_state.get("forgekit_version") != FORGEKIT_VERSION:
         fail("unified --yes did not advance state through safe migrations")
@@ -3117,6 +3428,32 @@ def assert_current_docs_integrity(repo, target, temp_parent):
     if "Status: passed" not in passed.stdout:
         fail("complete current docs fixture must pass integrity check")
 
+    lean = make_case("integrity-fact-triggered-lean", "Review")
+    for name in ["risk-register.md", "traceability.md", "testing.md"]:
+        shutil.copyfile(repo / "project-template/docs" / name, lean / ".forgekit/docs" / name)
+    lean_result = run([sys.executable, str(checker), "--repo-root", str(lean), "--json"], cwd=repo)
+    lean_report = json.loads(lean_result.stdout)
+    forbidden_population_codes = {
+        "placeholder-only-risk-register", "placeholder-only-traceability",
+        "placeholder-only-testing", "missing-testing-baseline", "missing-task-trace",
+    }
+    if lean_report["blocking_count"] != 0 or forbidden_population_codes & {item["code"] for item in lean_report["findings"]}:
+        fail("active task alone must not force risk, testing, traceability, or plan population")
+
+    strict_warning = run([
+        sys.executable, str(checker), "--repo-root", str(lean), "--strict", "--json",
+    ], cwd=repo, check=False)
+    strict_report = json.loads(strict_warning.stdout)
+    non_git = next(item for item in strict_report["findings"] if item["code"] == "non-git-project-root")
+    if (
+        strict_warning.returncode != 1
+        or strict_report["blocking_count"] != 0
+        or non_git["impact_severity"] != "MAJOR"
+        or non_git["blocking"] is not False
+        or non_git["severity"] != "warning"
+    ):
+        fail("current-doc strict warning exit must remain non-blocking with legacy warning disposition")
+
     source_broken = make_case("integrity-source-broken")
     (source_broken / ".forgekit/docs/task-intake.md").write_text(
         "# 工作来源台账\n\nSource ID: SRC-EXAMPLE-001\nOriginal Text: 待补充\n",
@@ -3126,23 +3463,25 @@ def assert_current_docs_integrity(repo, target, temp_parent):
     if broken.returncode != 1 or "missing-source-record" not in broken.stdout:
         fail("missing Source Record must be a blocking integrity failure")
 
-    risk_broken = make_case("integrity-risk-placeholder")
-    shutil.copyfile(repo / "project-template/docs/risk-register.md", risk_broken / ".forgekit/docs/risk-register.md")
-    risk = run([sys.executable, str(checker), "--repo-root", str(risk_broken)], cwd=repo, check=False)
-    if risk.returncode != 1 or "placeholder-only-risk-register" not in risk.stdout:
-        fail("placeholder-only risk-register must block active work integrity")
-
-    trace_broken = make_case("integrity-trace-placeholder")
-    shutil.copyfile(repo / "project-template/docs/traceability.md", trace_broken / ".forgekit/docs/traceability.md")
-    trace = run([sys.executable, str(checker), "--repo-root", str(trace_broken)], cwd=repo, check=False)
-    if trace.returncode != 1 or "placeholder-only-traceability" not in trace.stdout:
-        fail("placeholder-only traceability must block active work integrity")
-
-    testing_broken = make_case("integrity-testing-placeholder", "Backend Ready")
-    shutil.copyfile(repo / "project-template/docs/testing.md", testing_broken / ".forgekit/docs/testing.md")
-    testing = run([sys.executable, str(checker), "--repo-root", str(testing_broken)], cwd=repo, check=False)
-    if testing.returncode != 1 or "missing-testing-baseline" not in testing.stdout:
-        fail("review-ready task without testing baseline must block integrity")
+    closure = make_case("integrity-closure-stale-owner")
+    closure_change = closure / ".forgekit/changes/closure-stale-owner"
+    closure_change.mkdir(parents=True)
+    (closure_change / "proposal.md").write_text("Status: done\n", encoding="utf-8")
+    (closure_change / "review.md").write_text("CurrentDocsSync: missing\n", encoding="utf-8")
+    closure_result = run([
+        sys.executable, str(checker), "--repo-root", str(closure), "--json",
+    ], cwd=repo, check=False)
+    closure_report = json.loads(closure_result.stdout)
+    closure_finding = next(item for item in closure_report["findings"] if item["code"] == "closure-current-docs-sync-missing")
+    if (
+        closure_result.returncode != 1
+        or closure_finding["impact_severity"] != "MINOR"
+        or closure_finding["blocking"] is not True
+        or closure_finding["severity"] != "blocking"
+        or closure_report["blocking_count"] != sum(item["blocking"] for item in closure_report["findings"])
+        or not all(closure_finding.get(name) for name in ["primary_consequence", "failure_path", "blocked_scope", "evidence"])
+    ):
+        fail("explicit closure plus missing current-doc sync must produce a scoped canonical Blocking finding")
 
     examples = temp_parent / "integrity-examples"
     shutil.copytree(target, examples)
@@ -3430,6 +3769,11 @@ def main():
     try:
         init_project(repo, target)
         assert_paths(target, REQUIRED_GENERATED_PATHS)
+        if not (target / "forgekit-smoke").is_dir():
+            fail("low-level explicit ProjectName must continue creating TargetPath/ProjectName")
+        if (target / "README.md").exists():
+            fail("fresh low-level init must leave an absent business README absent")
+        (target / "README.md").write_text("# User-owned smoke project\n", encoding="utf-8")
         assert_generated_entry_checksums(repo, target)
         assert_absent_paths(target, [
             "docs/codebase-map.md",
@@ -3512,6 +3856,7 @@ def main():
             ".codex/agents/worktree-runner.md",
         ])
         assert_manifest_lock(target)
+        assert_readme_ownership(repo, target, temp_parent)
         assert_versioned_migration_upgrade(repo, target, temp_parent)
         assert_0440_review_convergence_migration(repo, target, temp_parent)
         assert_unified_project_entry(repo, target, temp_parent)

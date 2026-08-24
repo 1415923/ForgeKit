@@ -18,6 +18,12 @@ PLACEHOLDER_MARKERS = {
 }
 SOURCE_RE = re.compile(r"\bSRC-[A-Za-z0-9][A-Za-z0-9_-]*\b", re.IGNORECASE)
 TASK_RE = re.compile(r"\b(?:TASK|BUG)-[A-Za-z0-9][A-Za-z0-9_-]*\b", re.IGNORECASE)
+VALIDATION_RELEVANCE = {
+    "RELEVANT_REGRESSION", "KNOWN_UNRELATED_FAILURE",
+    "TEST_INFRASTRUCTURE_FAILURE", "CLAIM_CRITICAL_VALIDATION_FAILURE",
+}
+IMPACT_SEVERITIES = {"CRITICAL", "MAJOR", "MINOR", "NOTE"}
+PRIMARY_CONSEQUENCES = {"C1", "C2", "C3", "C4"}
 
 
 def read_text(path):
@@ -101,10 +107,41 @@ def placeholder_only(text, kind):
     return all(marker in lowered for marker in [])
 
 
-def finding(severity, code, message, evidence=None):
-    result = {"severity": severity, "code": code, "message": message}
+def finding(
+    impact_severity,
+    blocking,
+    code,
+    message,
+    evidence=None,
+    *,
+    primary_consequence=None,
+    failure_path=None,
+    blocked_scope=None,
+    validation_relevance=None,
+):
+    if impact_severity not in IMPACT_SEVERITIES:
+        raise RuntimeError(f"invalid impact severity for {code}: {impact_severity}")
+    result = {
+        "severity": "blocking" if blocking else "warning",
+        "impact_severity": impact_severity,
+        "blocking": blocking,
+        "code": code,
+        "message": message,
+    }
     if evidence:
         result["evidence"] = evidence
+    if validation_relevance:
+        if validation_relevance not in VALIDATION_RELEVANCE:
+            raise RuntimeError(f"invalid validation relevance for {code}: {validation_relevance}")
+        result["validation_relevance"] = validation_relevance
+    if blocking:
+        if not all([primary_consequence, failure_path, blocked_scope, evidence]):
+            raise RuntimeError(f"blocking finding {code} is missing its canonical consequence evidence")
+        if primary_consequence not in PRIMARY_CONSEQUENCES:
+            raise RuntimeError(f"invalid primary consequence for {code}: {primary_consequence}")
+        result["primary_consequence"] = primary_consequence
+        result["failure_path"] = failure_path
+        result["blocked_scope"] = blocked_scope
     return result
 
 
@@ -127,10 +164,42 @@ def archive_semantics(root, active, explicit_summary=None):
             text = read_text(resolved)
             if completed.search(text) and not allowed.search(text):
                 failures.append(finding(
-                    "blocking", "active-work-completed-archive",
+                    "MAJOR", True, "active-work-completed-archive",
                     "Active tasks exist, so this archive cannot be described as a completed phase archive.",
                     str(resolved),
+                    primary_consequence="C4",
+                    failure_path="The archive summary declares phase completion while current task records still contain active work.",
+                    blocked_scope="completion of this archive capsule",
                 ))
+    return failures
+
+
+def closure_writeback_findings(root):
+    """Use only explicit existing change markers; do not infer facts from prose."""
+    changes = root / ".forgekit/changes"
+    if not changes.is_dir():
+        return []
+    failures = []
+    closed = re.compile(r"(?mi)^Status:\s*(?:done|closed|shipped|handed-off)\s*$")
+    missing_sync = re.compile(r"(?mi)^CurrentDocsSync:\s*missing(?:\s|$)")
+    for change in sorted(path for path in changes.iterdir() if path.is_dir() and path.name != "_template"):
+        proposal = change / "proposal.md"
+        review = change / "review.md"
+        if not proposal.is_file() or not review.is_file():
+            continue
+        proposal_text = read_text(proposal)
+        review_text = read_text(review)
+        if not closed.search(proposal_text) or not missing_sync.search(review_text):
+            continue
+        evidence = f"{proposal.relative_to(root).as_posix()}; {review.relative_to(root).as_posix()}"
+        failures.append(finding(
+            "MINOR", True, "closure-current-docs-sync-missing",
+            f"Change {change.name} declares closure while CurrentDocsSync explicitly remains missing.",
+            evidence,
+            primary_consequence="C3",
+            failure_path="The structured closure marker and explicit missing-sync marker show that confirmed change facts are not traceable from their current owner.",
+            blocked_scope=f"closure, handover, or ship declaration for change {change.name}",
+        ))
     return failures
 
 
@@ -155,41 +224,23 @@ def run_checks(root, strict=False, archive_summary=None):
     for task in active:
         if not task["sources"]:
             findings.append(finding(
-                "blocking", "missing-task-source-link",
+                "MAJOR", True, "missing-task-source-link",
                 f"Active task {task['id']} has no real Source ID backlink.",
                 ".forgekit/docs/task-board.md",
+                primary_consequence="C3",
+                failure_path="The active task has no source backlink, so its assignment authority cannot be recovered from current docs.",
+                blocked_scope=f"closure or archive of active task {task['id']}",
             ))
         for source_id in task["sources"]:
             if source_id not in sources:
                 findings.append(finding(
-                    "blocking", "missing-source-record",
+                    "MAJOR", True, "missing-source-record",
                     f"{task['id']} references {source_id}, but task-intake.md has no real Source Record.",
                     ".forgekit/docs/task-board.md",
+                    primary_consequence="C3",
+                    failure_path="The active task points to a Source ID whose authoritative assignment record is absent.",
+                    blocked_scope=f"closure or archive of active task {task['id']}",
                 ))
-        if task["id"].upper() not in texts["traceability"].upper():
-            findings.append(finding(
-                "blocking", "missing-task-trace",
-                f"Active task {task['id']} has no minimum traceability entry.",
-                ".forgekit/docs/traceability.md",
-            ))
-
-    if active:
-        for name in ["task-intake", "risk-register", "traceability", "testing"]:
-            if placeholder_only(texts[name], name):
-                findings.append(finding(
-                    "blocking", f"placeholder-only-{name}",
-                    f"Active tasks exist, but {name}.md contains only template placeholders.",
-                    f".forgekit/docs/{name}.md",
-                ))
-
-        review_states = {"review", "backend ready", "submitted", "needs fix"}
-        if any(task["status"] in review_states for task in active) and placeholder_only(texts["testing"], "testing"):
-            # Keep a dedicated code for callers even when the generic placeholder finding also exists.
-            findings.append(finding(
-                "blocking", "missing-testing-baseline",
-                "A review/submission task exists, but testing.md has no current validation baseline or TODO_REVIEW.",
-                ".forgekit/docs/testing.md",
-            ))
 
     work_log = docs / "work-log.md"
     if work_log.is_file():
@@ -197,37 +248,44 @@ def run_checks(root, strict=False, archive_summary=None):
         handed_off = re.search(r"Status:\s*handed-off", log, re.IGNORECASE)
         corrected = re.search(r"superseded|corrected|已更正|已覆盖|恢复当前状态", log, re.IGNORECASE)
         if handed_off and active and not corrected:
-            severity = "blocking" if re.search(r"TASK-[A-Za-z0-9_-]+", log, re.IGNORECASE) else "warning"
-            findings.append(finding(
-                severity, "stale-handed-off-status",
-                "work-log.md contains Status: handed-off while active tasks remain, without a superseded/corrected note.",
-                ".forgekit/docs/work-log.md",
-            ))
+            supported = bool(re.search(r"TASK-[A-Za-z0-9_-]+", log, re.IGNORECASE))
+            if supported:
+                findings.append(finding(
+                    "MINOR", True, "stale-handed-off-status",
+                    "work-log.md contains Status: handed-off while active tasks remain, without a superseded/corrected note.",
+                    ".forgekit/docs/work-log.md",
+                    primary_consequence="C4",
+                    failure_path="The explicit handoff marker conflicts with an identified active task and can direct the next writer from stale current state.",
+                    blocked_scope="handover declaration for the identified active task",
+                ))
+            else:
+                findings.append(finding(
+                    "MINOR", False, "stale-handed-off-status",
+                    "work-log.md contains Status: handed-off while active tasks remain, but no task-specific failure path is established.",
+                    ".forgekit/docs/work-log.md",
+                ))
 
     findings.extend(archive_semantics(root, active, archive_summary))
+    findings.extend(closure_writeback_findings(root))
     if active:
         plan = root / ".forgekit/archive-capsule-plan.md"
         if plan.is_file() and "TODO_REVIEW" in read_text(plan):
             risk_text = texts["risk-register"].lower()
             if "archive" not in risk_text and "migration" not in risk_text and "归档" not in risk_text and "迁移" not in risk_text:
                 findings.append(finding(
-                    "warning", "archive-todo-not-in-current-risk",
+                    "NOTE", False, "archive-todo-not-in-current-risk",
                     "Archive or migration TODO_REVIEW exists, but current risk-register has no corresponding open/accepted risk.",
                     ".forgekit/archive-capsule-plan.md",
                 ))
     if not (root / ".git").exists():
         findings.append(finding(
-            "warning", "non-git-project-root",
+            "MAJOR", False, "non-git-project-root",
             "Project root is not a Git repository; integrity checks continue without Git diff evidence.",
             str(root),
+            validation_relevance="TEST_INFRASTRUCTURE_FAILURE",
         ))
-    if strict:
-        findings = [
-            {**item, "severity": "blocking"} if item["severity"] == "warning" else item
-            for item in findings
-        ]
-    blocking = sum(item["severity"] == "blocking" for item in findings)
-    warnings = sum(item["severity"] == "warning" for item in findings)
+    blocking = sum(item["blocking"] for item in findings)
+    warnings = sum(not item["blocking"] for item in findings)
     return {
         "status": "failed" if blocking else "passed",
         "mode": "read-only",
@@ -252,7 +310,8 @@ def print_human(report):
     print(f"Blocking: {report['blocking_count']}")
     print(f"Warnings: {report['warning_count']}")
     for item in report["findings"]:
-        print(f"[{item['severity']}] {item['code']}: {item['message']}")
+        blocking = "YES" if item["blocking"] else "NO"
+        print(f"[{item['severity']}] {item['code']}: {item['message']} (Impact: {item['impact_severity']}; Blocking: {blocking})")
     if report["blocking_count"]:
         print("Current State Restoration Pass required before archive apply.")
         print(report["restoration_guidance"])
@@ -261,7 +320,7 @@ def print_human(report):
 def main():
     parser = argparse.ArgumentParser(description="Read-only ForgeKit current docs integrity guard")
     parser.add_argument("--repo-root", default=".")
-    parser.add_argument("--strict", action="store_true", help="Treat warnings as blocking")
+    parser.add_argument("--strict", action="store_true", help="Return 1 when non-blocking findings are present")
     parser.add_argument("--json", action="store_true", help="Emit JSON only")
     parser.add_argument("--archive-summary", help=argparse.SUPPRESS)
     args = parser.parse_args()
@@ -278,7 +337,7 @@ def main():
         print(json.dumps(report, ensure_ascii=False, indent=2))
     else:
         print_human(report)
-    return 1 if report["blocking_count"] else 0
+    return 1 if report["blocking_count"] or (args.strict and report["warning_count"]) else 0
 
 
 if __name__ == "__main__":
