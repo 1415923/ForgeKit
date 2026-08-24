@@ -100,7 +100,7 @@ def projection_manifest_item(source_path, template_root):
     }
 
 
-def current_formal_migration_targets(repo_root, template_root, version):
+def current_formal_migration_targets(repo_root, template_root, version, allow_historical_extras=False):
     migration_root = template_root / "migrations" / version
     descriptor_path = migration_root / "migration.json"
     if not descriptor_path.is_file():
@@ -114,6 +114,8 @@ def current_formal_migration_targets(repo_root, template_root, version):
     expected = {"migration.json"}
     for index, action in enumerate(descriptor.get("actions", [])):
         for field in ("baseline", "source"):
+            if not action.get(field):
+                continue
             relative = normalize_posix(action.get(field, ""))
             if not is_relative_safe(relative):
                 fail(f"Formal template migration action {index} has unsafe {field}: {relative}")
@@ -124,11 +126,24 @@ def current_formal_migration_targets(repo_root, template_root, version):
         path.relative_to(migration_root).as_posix()
         for path in migration_root.rglob("*") if path.is_file()
     }
-    if actual != expected:
+    if actual != expected and not (allow_historical_extras and expected <= actual):
         missing = sorted(expected - actual)
         extra = sorted(actual - expected)
         fail(f"Formal template migration inventory mismatch: missing={missing}, extra={extra}")
-    return [f"migrations/{version}/{relative}" for relative in sorted(expected)]
+    inventory = actual if allow_historical_extras else expected
+    return [f"migrations/{version}/{relative}" for relative in sorted(inventory)]
+
+
+def formal_migration_targets_for_manifest(manifest, repo_root, template_root):
+    targets = []
+    template_version = str(manifest.get("template_version", "")).strip()
+    current = parse_version(template_version)
+    targets.extend(current_formal_migration_targets(repo_root, template_root, template_version))
+    for descriptor in sorted((template_root / "migrations").glob("*/migration.json")):
+        version = descriptor.parent.name
+        if parse_version(version) > current:
+            targets.extend(current_formal_migration_targets(repo_root, template_root, version))
+    return targets
 
 
 def migration_manifest_item(source_path, template_root):
@@ -155,8 +170,7 @@ def require_projection_coverage(manifest, repo_root):
 
 
 def require_formal_migration_coverage(manifest, repo_root, template_root):
-    version = str(manifest.get("template_version", "")).strip()
-    expected = current_formal_migration_targets(repo_root, template_root, version)
+    expected = formal_migration_targets_for_manifest(manifest, repo_root, template_root)
     counts = {}
     for item in manifest["files"]:
         source = normalize_posix(item.get("source_path", ""))
@@ -164,8 +178,17 @@ def require_formal_migration_coverage(manifest, repo_root, template_root):
     for target in expected:
         if counts.get(target, 0) != 1:
             fail(f"Formal template migration file must appear exactly once in template manifest: {target}")
-    prefix = f"migrations/{version}/"
-    extras = sorted(source for source in counts if source.startswith(prefix) and source not in expected)
+    managed_prefixes = {
+        source.split("/", 2)[1]
+        for source in expected
+        if source.startswith("migrations/")
+    }
+    extras = sorted(
+        source for source in counts
+        if source.startswith("migrations/")
+        and source.split("/", 2)[1] in managed_prefixes
+        and source not in expected
+    )
     if extras:
         fail("Unexpected formal template migration manifest path(s): " + ", ".join(extras))
     return expected
@@ -178,6 +201,16 @@ def require_lf_bytes(path, label):
 
 def normalize_posix(path):
     return str(PurePosixPath(str(path).replace("\\", "/")))
+
+
+def parse_version(value):
+    try:
+        parts = tuple(int(part) for part in str(value).split("."))
+    except ValueError:
+        fail(f"Invalid migration version: {value}")
+    if len(parts) != 3:
+        fail(f"Migration version must use major.minor.patch: {value}")
+    return parts
 
 
 def is_relative_safe(path):
@@ -295,9 +328,7 @@ def update_manifest(args):
     validate_manifest(manifest, template_root, check_checksums=False)
 
     expected_targets = projection_targets(repo_root)
-    expected_migrations = current_formal_migration_targets(
-        repo_root, template_root, str(manifest.get("template_version", "")).strip()
-    )
+    expected_migrations = formal_migration_targets_for_manifest(manifest, repo_root, template_root)
     existing = {
         normalize_posix(item["source_path"]): item
         for item in manifest["files"]

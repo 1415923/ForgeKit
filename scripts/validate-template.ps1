@@ -1581,6 +1581,44 @@ Test-RequiredPattern "project-template\.codex\rules.md" "Goal-Driven Execution" 
 Test-RequiredPath "project-template\.claude\skills\forgekit-project-workflow\SKILL.md"
 Test-RequiredPath "project-template\governance\project-bootstrap-fill.md"
 
+function Test-V046StageDMigration {
+    foreach ($path in @(
+        "migrations\0.46.0\migration.json",
+        "project-template\migrations\0.46.0\migration.json",
+        "tests\test_stage_d_migration.py"
+    )) { Test-RequiredPath $path }
+    foreach ($path in @("migrations\0.46.0\migration.json", "project-template\migrations\0.46.0\migration.json")) {
+        Test-RequiredPattern $path '"from": "0.45.0"' "v0.46 exact predecessor"
+        Test-RequiredPattern $path '"to": "0.46.0"' "v0.46 migration target"
+        Test-RequiredPattern $path '"remove_file_if_baseline_matches"' "v0.46 baseline-safe deprecation"
+        Test-RequiredPattern $path '"retire_targets"' "v0.46 install-lock retirement"
+        Test-NoPattern $path '"target":\s*"README.md"' "v0.46 must not target business README"
+    }
+    $rootPackage = Join-Path $repoRoot "migrations\0.46.0"
+    $templatePackage = Join-Path $repoRoot "project-template\migrations\0.46.0"
+    $rootFiles = Get-ChildItem -LiteralPath $rootPackage -File -Recurse | ForEach-Object {
+        $_.FullName.Substring($rootPackage.Length).TrimStart('\').Replace('\', '/')
+    }
+    $templateFiles = Get-ChildItem -LiteralPath $templatePackage -File -Recurse | ForEach-Object {
+        $_.FullName.Substring($templatePackage.Length).TrimStart('\').Replace('\', '/')
+    }
+    if ((Compare-Object $rootFiles $templateFiles)) {
+        Add-Error "Root and project-template v0.46 migration inventories differ"
+    } else {
+        foreach ($relative in $rootFiles) {
+            $rootHash = (Get-FileHash -Algorithm SHA256 -LiteralPath (Join-Path $rootPackage $relative)).Hash
+            $templateHash = (Get-FileHash -Algorithm SHA256 -LiteralPath (Join-Path $templatePackage $relative)).Hash
+            if ($rootHash -ne $templateHash) { Add-Error "v0.46 migration mirror mismatch: $relative" }
+        }
+    }
+    $rootUpgrade = Get-Content -LiteralPath (Join-Path $repoRoot "scripts\forgekit-upgrade.py") -Raw
+    $templateUpgrade = Get-Content -LiteralPath (Join-Path $repoRoot "project-template\scripts\forgekit-upgrade.py") -Raw
+    if ($rootUpgrade -ne $templateUpgrade) { Add-Error "Root and project-template forgekit-upgrade.py must stay identical" }
+    if ((Get-Content -LiteralPath (Join-Path $repoRoot "VERSION") -Raw).Trim() -ne "0.45.0") {
+        Add-Error "Stage D must leave root VERSION at 0.45.0"
+    }
+}
+
 $rootArchiveScript = Join-Path $repoRoot "scripts\archive-changes.py"
 $templateArchiveScript = Join-Path $repoRoot "project-template\scripts\archive-changes.py"
 if ((Test-Path -LiteralPath $rootArchiveScript) -and (Test-Path -LiteralPath $templateArchiveScript)) {
@@ -1592,6 +1630,7 @@ if ((Test-Path -LiteralPath $rootArchiveScript) -and (Test-Path -LiteralPath $te
 }
 
 Test-StageERuntimeContract
+Test-V046StageDMigration
 Test-GovernanceFiles
 Test-AIEngineeringLoop
 Test-TemplateManifest

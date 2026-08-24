@@ -1,0 +1,63 @@
+{
+  "id": "0.46.0-governance-contract-convergence",
+  "title": "Governance Contract Convergence and Safe Deprecation",
+  "from": "0.45.0",
+  "to": "0.46.0",
+  "baseline_commit": "fb69601da2de6b1fb85f8a6f2efb63781aeab728",
+  "risk": "high",
+  "template_lock": {
+    "retire_targets": ["README.md", ".forgekit/docs/loop-readiness.md", ".forgekit/docs/loop-blueprint.md", ".forgekit/docs/loop-operations.md"]
+  },
+  "actions": [
+    {"id":"update-code-review","type":"replace_file_if_baseline_matches","safety":"safe","source":"files/.agents/skills/code-review/SKILL.md","baseline":"baseline/.agents/skills/code-review/SKILL.md","target":".agents/skills/code-review/SKILL.md"},
+    {"id":"update-document-backfill","type":"replace_file_if_baseline_matches","safety":"safe","source":"files/.agents/skills/document-backfill/SKILL.md","baseline":"baseline/.agents/skills/document-backfill/SKILL.md","target":".agents/skills/document-backfill/SKILL.md"},
+    {"id":"update-handover-review","type":"replace_file_if_baseline_matches","safety":"safe","source":"files/.agents/skills/handover-review/SKILL.md","baseline":"baseline/.agents/skills/handover-review/SKILL.md","target":".agents/skills/handover-review/SKILL.md"},
+    {"id":"update-large-change-planning","type":"replace_file_if_baseline_matches","safety":"safe","source":"files/.agents/skills/large-change-planning/SKILL.md","baseline":"baseline/.agents/skills/large-change-planning/SKILL.md","target":".agents/skills/large-change-planning/SKILL.md"},
+    {"id":"update-project-init","type":"replace_file_if_baseline_matches","safety":"safe","source":"files/.agents/skills/project-init/SKILL.md","baseline":"baseline/.agents/skills/project-init/SKILL.md","target":".agents/skills/project-init/SKILL.md"},
+    {"id":"update-project-suitability","type":"replace_file_if_baseline_matches","safety":"safe","source":"files/.agents/skills/project-suitability/SKILL.md","baseline":"baseline/.agents/skills/project-suitability/SKILL.md","target":".agents/skills/project-suitability/SKILL.md"},
+    {"id":"update-release-check","type":"replace_file_if_baseline_matches","safety":"safe","source":"files/.agents/skills/release-check/SKILL.md","baseline":"baseline/.agents/skills/release-check/SKILL.md","target":".agents/skills/release-check/SKILL.md"},
+    {"id":"update-security-review","type":"replace_file_if_baseline_matches","safety":"safe","source":"files/.agents/skills/security-review/SKILL.md","baseline":"baseline/.agents/skills/security-review/SKILL.md","target":".agents/skills/security-review/SKILL.md"},
+    {"id":"update-security-review-package","type":"replace_file_if_baseline_matches","safety":"safe","source":"files/.agents/skills/security-review/agents/openai.yaml","baseline":"baseline/.agents/skills/security-review/agents/openai.yaml","target":".agents/skills/security-review/agents/openai.yaml"},
+    {"id":"update-claude-code-reviewer","type":"replace_file_if_baseline_matches","safety":"safe","source":"files/.claude/agents/forgekit-code-reviewer.md","baseline":"baseline/.claude/agents/forgekit-code-reviewer.md","target":".claude/agents/forgekit-code-reviewer.md"},
+    {"id":"update-claude-adversarial-review","type":"replace_file_if_baseline_matches","safety":"safe","source":"files/.claude/skills/forgekit-adversarial-review/SKILL.md","baseline":"baseline/.claude/skills/forgekit-adversarial-review/SKILL.md","target":".claude/skills/forgekit-adversarial-review/SKILL.md"},
+    {"id":"update-claude-code-review","type":"replace_file_if_baseline_matches","safety":"safe","source":"files/.claude/skills/forgekit-code-review/SKILL.md","baseline":"baseline/.claude/skills/forgekit-code-review/SKILL.md","target":".claude/skills/forgekit-code-review/SKILL.md"},
+    {"id":"update-claude-testing-review","type":"replace_file_if_baseline_matches","safety":"safe","source":"files/.claude/skills/forgekit-code-review/references/testing-review.md","baseline":"baseline/.claude/skills/forgekit-code-review/references/testing-review.md","target":".claude/skills/forgekit-code-review/references/testing-review.md"},
+    {"id":"update-claude-universal-review","type":"replace_file_if_baseline_matches","safety":"safe","source":"files/.claude/skills/forgekit-code-review/references/universal-review.md","baseline":"baseline/.claude/skills/forgekit-code-review/references/universal-review.md","target":".claude/skills/forgekit-code-review/references/universal-review.md"},
+    {"id":"update-claude-request-review","type":"replace_file_if_baseline_matches","safety":"safe","source":"files/.claude/skills/forgekit-request-code-review/SKILL.md","baseline":"baseline/.claude/skills/forgekit-request-code-review/SKILL.md","target":".claude/skills/forgekit-request-code-review/SKILL.md"},
+    {"id":"update-codex-code-reviewer","type":"replace_file_if_baseline_matches","safety":"safe","source":"files/.codex/agents/forgekit-code-reviewer.toml","baseline":"baseline/.codex/agents/forgekit-code-reviewer.toml","target":".codex/agents/forgekit-code-reviewer.toml"},
+    {"id":"update-codex-reviewer","type":"replace_file_if_baseline_matches","safety":"safe","source":"files/.codex/agents/forgekit-reviewer.toml","baseline":"baseline/.codex/agents/forgekit-reviewer.toml","target":".codex/agents/forgekit-reviewer.toml"},
+    {"id":"update-codex-rules","type":"replace_file_if_baseline_matches","safety":"safe","source":"files/.codex/rules.md","baseline":"baseline/.codex/rules.md","target":".codex/rules.md"},
+    {"id":"update-document-responsibility","type":"replace_file_if_baseline_matches","safety":"safe","source":"files/.forgekit/docs/document-responsibility.md","baseline":"baseline/.forgekit/docs/document-responsibility.md","target":".forgekit/docs/document-responsibility.md"},
+    {"id":"update-work-session-checkpoint","type":"replace_file_if_baseline_matches","safety":"safe","source":"files/.forgekit/docs/work-session-checkpoint.md","baseline":"baseline/.forgekit/docs/work-session-checkpoint.md","target":".forgekit/docs/work-session-checkpoint.md"},
+    {"id":"update-change-review-template","type":"replace_file_if_baseline_matches","safety":"safe","source":"files/.forgekit/changes/_template/review.md","baseline":"baseline/.forgekit/changes/_template/review.md","target":".forgekit/changes/_template/review.md"},
+    {"id":"update-archive-capsule","type":"replace_file_if_baseline_matches","safety":"safe","source":"files/.forgekit/docs/archive-capsule.md","baseline":"baseline/.forgekit/docs/archive-capsule.md","target":".forgekit/docs/archive-capsule.md"},
+    {"id":"update-bounded-loop-policy","type":"replace_file_if_baseline_matches","safety":"safe","source":"files/.forgekit/docs/bounded-auto-loop-policy.md","baseline":"baseline/.forgekit/docs/bounded-auto-loop-policy.md","target":".forgekit/docs/bounded-auto-loop-policy.md"},
+    {"id":"update-context-continuity","type":"replace_file_if_baseline_matches","safety":"safe","source":"files/.forgekit/docs/context-continuity.md","baseline":"baseline/.forgekit/docs/context-continuity.md","target":".forgekit/docs/context-continuity.md"},
+    {"id":"update-current-docs-integrity-guide","type":"replace_file_if_baseline_matches","safety":"safe","source":"files/.forgekit/docs/current-docs-integrity.md","baseline":"baseline/.forgekit/docs/current-docs-integrity.md","target":".forgekit/docs/current-docs-integrity.md"},
+    {"id":"update-maker-checker-protocol","type":"replace_file_if_baseline_matches","safety":"safe","source":"files/.forgekit/docs/maker-checker-protocol.md","baseline":"baseline/.forgekit/docs/maker-checker-protocol.md","target":".forgekit/docs/maker-checker-protocol.md"},
+    {"id":"update-native-agent-adapter","type":"replace_file_if_baseline_matches","safety":"safe","source":"files/.forgekit/docs/native-agent-adapter.md","baseline":"baseline/.forgekit/docs/native-agent-adapter.md","target":".forgekit/docs/native-agent-adapter.md"},
+    {"id":"update-project-maintenance","type":"replace_file_if_baseline_matches","safety":"safe","source":"files/.forgekit/docs/project-maintenance.md","baseline":"baseline/.forgekit/docs/project-maintenance.md","target":".forgekit/docs/project-maintenance.md"},
+    {"id":"update-reasoning-review","type":"replace_file_if_baseline_matches","safety":"safe","source":"files/.forgekit/docs/reasoning-review.md","baseline":"baseline/.forgekit/docs/reasoning-review.md","target":".forgekit/docs/reasoning-review.md"},
+    {"id":"update-workflow-router","type":"replace_file_if_baseline_matches","safety":"safe","source":"files/.forgekit/docs/workflow-router.md","baseline":"baseline/.forgekit/docs/workflow-router.md","target":".forgekit/docs/workflow-router.md"},
+    {"id":"update-agent-entry-contract","type":"replace_file_if_baseline_matches","safety":"safe","source":"files/governance/agent-entry-contract.md","baseline":"baseline/governance/agent-entry-contract.md","target":"governance/agent-entry-contract.md"},
+    {"id":"update-ai-engineering-loop","type":"replace_file_if_baseline_matches","safety":"safe","source":"files/governance/ai-engineering-loop.md","baseline":"baseline/governance/ai-engineering-loop.md","target":"governance/ai-engineering-loop.md"},
+    {"id":"update-current-docs-checker","type":"replace_file_if_baseline_matches","safety":"safe","source":"files/scripts/check-current-docs-integrity.py","baseline":"baseline/scripts/check-current-docs-integrity.py","target":"scripts/check-current-docs-integrity.py"},
+    {"id":"update-workspace-checker","type":"replace_file_if_baseline_matches","safety":"safe","source":"files/scripts/check-workspace-integrity.py","baseline":"baseline/scripts/check-workspace-integrity.py","target":"scripts/check-workspace-integrity.py"},
+    {"id":"update-upgrade-runtime","type":"replace_file_if_baseline_matches","safety":"safe","source":"files/scripts/forgekit-upgrade.py","baseline":"baseline/scripts/forgekit-upgrade.py","target":"scripts/forgekit-upgrade.py"},
+    {"id":"retire-loop-readiness","type":"remove_file_if_baseline_matches","safety":"safe","baseline":"baseline/.forgekit/docs/loop-readiness.md","target":".forgekit/docs/loop-readiness.md","deprecation_notice":"loop-readiness.md is retired from the v0.46 active managed surface. Customized copies remain user-owned and require manual review."},
+    {"id":"retire-loop-blueprint","type":"remove_file_if_baseline_matches","safety":"safe","baseline":"baseline/.forgekit/docs/loop-blueprint.md","target":".forgekit/docs/loop-blueprint.md","deprecation_notice":"loop-blueprint.md is retired from the v0.46 active managed surface. Customized copies remain user-owned and require manual review."},
+    {"id":"retire-loop-operations","type":"remove_file_if_baseline_matches","safety":"safe","baseline":"baseline/.forgekit/docs/loop-operations.md","target":".forgekit/docs/loop-operations.md","deprecation_notice":"loop-operations.md is retired from the v0.46 active managed surface. Customized copies remain user-owned and require manual review."}
+  ],
+  "manual_review": [
+    "Customized and unknown-baseline managed files are preserved and exported for manual merge.",
+    "Customized removed-loop documents are preserved; replacement policy cannot delete them.",
+    "Legacy README ownership is retired from template-lock metadata only; README bytes are never changed.",
+    "Migration does not infer or backfill project risk, testing, authority, task, or plan facts."
+  ],
+  "non_goals": [
+    "No layout move, root inference, workspace cleanup, archive cleanup, or historical evidence reinterpretation",
+    "No business README create, overwrite, restore, or delete",
+    "No current-truth backfill",
+    "No release, VERSION update, tag, publish, or real-project migration"
+  ]
+}

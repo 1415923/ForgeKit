@@ -22,6 +22,8 @@ from upgrade_review_packets import (
 
 MIN_SUPPORTED_VERSION = (0, 36, 0)
 STATE_RELATIVE_PATH = Path(".forgekit/state.json")
+TEMPLATE_LOCK_RELATIVE_PATH = Path(".forgekit/template-lock.json")
+REPORTS_RELATIVE_PATH = Path(".forgekit/reports")
 SAFE_ROOTS = {".forgekit", ".codex", ".agents", ".claude", "governance", "scripts", "migrations"}
 SAFE_ROOT_FILES = {"AGENTS.md", "CLAUDE.md"}
 REVIEW_REPORT_MD = Path(".forgekit/reports/upgrade-review-needed.md")
@@ -29,6 +31,8 @@ REVIEW_REPORT_JSON = Path(".forgekit/reports/upgrade-review-needed.json")
 REVIEW_EXPORT_ROOT = Path(".forgekit/reports/review-needed")
 REVIEW_POLICIES = {"ask", "keep-local", "manual-merge", "replace-template", "abort"}
 LANGUAGES = {"en-US", "zh-CN"}
+FILE_ACTIONS = {"copy_file_if_missing", "replace_file_if_baseline_matches"}
+REMOVAL_ACTION = "remove_file_if_baseline_matches"
 
 MESSAGES = {
     "en-US": {
@@ -283,6 +287,18 @@ def action_status(project_root, migration, action, state):
         if sha256(target) == sha256(baseline):
             return "safe", "target matches the known previous-version baseline and will be replaced"
         return "review-needed", "checksum does not match the known baseline; preserve and skip"
+    if action_type == REMOVAL_ACTION:
+        baseline = migration_source_optional(migration, action["baseline"])
+        target = safe_target(project_root, action["target"])
+        if not target.exists():
+            return "already-present", "deprecated managed file is already absent"
+        if not target.is_file():
+            return "review-needed", "target exists and is not a file; preserve and skip"
+        if baseline is None:
+            return "review-needed", "unknown baseline; preserve and skip"
+        if sha256(target) == sha256(baseline):
+            return "safe", "target matches the known previous-version baseline and will be removed"
+        return "review-needed", "checksum does not match the known baseline; preserve and skip"
     if action_type == "set_state_feature":
         if not action.get("name"):
             fail(f"Migration {migration['id']} has a state feature without a name")
@@ -407,6 +423,22 @@ def checksum_or_none(path):
     return sha256(path) if path.is_file() else None
 
 
+def removal_notice(action):
+    text = action.get(
+        "deprecation_notice",
+        "This managed file is deprecated in the incoming ForgeKit version. Preserve customized content and review it manually.",
+    )
+    return (text.rstrip() + "\n").encode("utf-8")
+
+
+def incoming_bytes(migration, action):
+    if action.get("type") in FILE_ACTIONS:
+        return migration_source(migration, action).read_bytes()
+    if action.get("type") == REMOVAL_ACTION:
+        return removal_notice(action)
+    fail(f"Action has no incoming review material: {action_id(action)}")
+
+
 def reason_text(lang, reason):
     if "not a directory" in reason:
         return msg(lang, "reason_not_directory")
@@ -439,9 +471,9 @@ def review_recommendation(action, lang):
 def review_item(project_root, migration, action, reason, lang="en-US"):
     source = None
     baseline = None
-    if action.get("type") in {"copy_file_if_missing", "replace_file_if_baseline_matches"}:
+    if action.get("type") in FILE_ACTIONS:
         source = migration_source(migration, action)
-    if action.get("type") == "replace_file_if_baseline_matches":
+    if action.get("type") in {"replace_file_if_baseline_matches", REMOVAL_ACTION}:
         baseline = migration_source_optional(migration, action["baseline"])
     target = safe_target(project_root, action["target"])
     item = {
@@ -456,10 +488,17 @@ def review_item(project_root, migration, action, reason, lang="en-US"):
         "raw_reason": reason,
         "expected_baseline_checksum": checksum_or_none(baseline) if baseline else None,
         "actual_checksum": checksum_or_none(target),
-        "incoming_template_checksum": checksum_or_none(source) if source else None,
+        "incoming_template_checksum": (
+            checksum_or_none(source)
+            if source
+            else hashlib.sha256(removal_notice(action)).hexdigest()
+            if action.get("type") == REMOVAL_ACTION
+            else None
+        ),
         "impact": review_impact(action, lang),
         "recommended_action": review_recommendation(action, lang),
         "status": "pending",
+        "preserve_only": action.get("type") == REMOVAL_ACTION,
     }
     item["key"] = review_key(item)
     return item
@@ -713,7 +752,7 @@ def capture_origin_snapshots(project_root, migrations, source_version):
     snapshots = {}
     for migration in migrations:
         for action in migration["actions"]:
-            if action.get("type") not in {"copy_file_if_missing", "replace_file_if_baseline_matches"}:
+            if action.get("type") not in FILE_ACTIONS | {REMOVAL_ACTION}:
                 continue
             managed_path = normalize_managed_path(action["target"])
             ensure_portable_path(project_root, managed_path)
@@ -765,11 +804,10 @@ def export_manual_merge(
     packet_fault_injector=None,
     summary_fault_injector=None,
 ):
-    if action.get("type") not in {"copy_file_if_missing", "replace_file_if_baseline_matches"}:
+    if action.get("type") not in FILE_ACTIONS | {REMOVAL_ACTION}:
         fail(f"Cannot export manual merge files for action without a source file: {action_id(action)}")
     managed_path = normalize_managed_path(action["target"])
     target = safe_target(project_root, managed_path)
-    source = migration_source(migration, action)
     local_bytes = target.read_bytes() if target.is_file() else None
     origin = origin_snapshots.get(managed_path) if origin_snapshots is not None else None
     source_version = origin["source_version"] if origin is not None else migration.get("_source_version")
@@ -791,7 +829,7 @@ def export_manual_merge(
         classification=classification or item.get("classification", "custom"),
         baseline_sha256=item.get("expected_baseline_checksum"),
         local_bytes=local_bytes,
-        incoming_bytes=source.read_bytes(),
+        incoming_bytes=incoming_bytes(migration, action),
         resolution_status=resolution_status,
         user_action=user_action,
         origin_snapshot=origin,
@@ -864,6 +902,24 @@ def collect_review_needed(project_root, migrations, state, lang):
                     continue
                 elif baseline_checksum is not None and (entry["checksum"] == baseline_checksum or entry["migration_owned"]):
                     entry.update({"exists": True, "file": True, "checksum": source_checksum, "migration_owned": True})
+                    continue
+                else:
+                    reason = (
+                        "unknown baseline; preserve and skip"
+                        if baseline_checksum is None
+                        else "checksum does not match the known baseline; preserve and skip"
+                    )
+                    item = review_item(project_root, migration, action, reason, lang)
+            elif action_type == REMOVAL_ACTION:
+                baseline_path = migration_source_optional(migration, action["baseline"])
+                baseline_checksum = sha256(baseline_path) if baseline_path else None
+                key, entry = virtual_entry(action["target"])
+                if not entry["exists"]:
+                    continue
+                if not entry["file"]:
+                    item = review_item(project_root, migration, action, "target exists and is not a file; preserve and skip", lang)
+                elif baseline_checksum is not None and entry["checksum"] == baseline_checksum:
+                    entry.update({"exists": False, "file": False, "checksum": None, "migration_owned": True})
                     continue
                 else:
                     reason = (
@@ -957,7 +1013,7 @@ def resolve_review_needed(project_root, pending, decisions, target_version, poli
         now = utc_now()
         used_names = set()
         for migration, action, item in pending:
-            decision = policy
+            decision = "manual-merge" if item.get("preserve_only") else policy
             item["status"] = "resolved_manual_merge" if decision == "manual-merge" else "resolved_replace_template"
             item["resolved_at"] = now
             if decision == "manual-merge":
@@ -1011,6 +1067,9 @@ def resolve_review_needed(project_root, pending, decisions, target_version, poli
             if choice == "a":
                 fail(msg(lang, "abort_interactive"))
             if choice in {"r", "m"}:
+                if choice == "r" and item.get("preserve_only"):
+                    print("This deprecated file is customized or unknown; ForgeKit will preserve it for manual review.")
+                    choice = "m"
                 decision = "replace-template" if choice == "r" else "manual-merge"
                 item["status"] = "resolved_replace_template" if decision == "replace-template" else "resolved_manual_merge"
                 item["resolved_at"] = now
@@ -1049,7 +1108,7 @@ def resolve_review_needed(project_root, pending, decisions, target_version, poli
 
 
 def replace_with_template(project_root, migration, action):
-    if action.get("type") not in {"copy_file_if_missing", "replace_file_if_baseline_matches"}:
+    if action.get("type") not in FILE_ACTIONS:
         fail(f"Cannot replace template for action without a source file: {action_id(action)}")
     source = migration_source(migration, action)
     target = safe_target(project_root, action["target"])
@@ -1089,6 +1148,8 @@ def apply_action(project_root, migration, action, state, review_decisions, targe
     if status == "review-needed":
         item = review_item(project_root, migration, action, reason)
         decision = review_decisions.get(item["key"])
+        if action_type == REMOVAL_ACTION and decision in {"replace-template", "auto-replace-template"}:
+            decision = "manual-merge"
         if decision == "manual-merge":
             return "resolved-manual-merge"
         if decision in {"replace-template", "auto-replace-template"}:
@@ -1134,6 +1195,16 @@ def apply_action(project_root, migration, action, state, review_decisions, targe
         target.parent.mkdir(parents=True, exist_ok=True)
         shutil.copyfile(source, target)
         return "applied"
+    if action_type == REMOVAL_ACTION:
+        baseline = migration_source_optional(migration, action["baseline"])
+        target = safe_target(project_root, action["target"])
+        if not target.exists():
+            return "already-present"
+        if not target.is_file() or baseline is None or sha256(target) != sha256(baseline):
+            return "skipped-existing-review-needed"
+        prepare_safe_write_packet(project_root, migration, action, target_version, "stock", origin_snapshots)
+        target.unlink()
+        return "applied"
     if action_type == "set_state_feature":
         state.setdefault("features", {})[action["name"]] = action["value"]
         return "applied"
@@ -1154,8 +1225,9 @@ def preflight_action(project_root, migration, action):
         migration_source(migration, action)
         safe_target(project_root, action["target"])
         return
-    if action_type == "replace_file_if_baseline_matches":
-        migration_source(migration, action)
+    if action_type in {"replace_file_if_baseline_matches", REMOVAL_ACTION}:
+        if action_type == "replace_file_if_baseline_matches":
+            migration_source(migration, action)
         migration_source_optional(migration, action["baseline"])
         safe_target(project_root, action["target"])
         return
@@ -1172,7 +1244,172 @@ def write_state(path, state):
     temporary.replace(path)
 
 
-def command_apply(project_root, migration_root, safe, review_needed_policy, lang):
+def _snapshot_path(project_root, relative):
+    target = safe_target(project_root, relative)
+    missing_parents = []
+    parent = target.parent
+    while parent != project_root and not parent.exists():
+        missing_parents.append(parent.relative_to(project_root).as_posix())
+        parent = parent.parent
+    if target.is_symlink():
+        fail(f"Migration rollback snapshot refuses a symlink target: {relative}")
+    if not target.exists():
+        return {"relative": Path(relative).as_posix(), "kind": "missing", "missing_parents": missing_parents}
+    if target.is_file():
+        return {
+            "relative": Path(relative).as_posix(),
+            "kind": "file",
+            "bytes": target.read_bytes(),
+            "missing_parents": missing_parents,
+        }
+    if not target.is_dir():
+        fail(f"Migration rollback snapshot refuses an unsupported target type: {relative}")
+    directories = [""]
+    files = {}
+    for path in sorted(target.rglob("*"), key=lambda item: item.as_posix()):
+        if path.is_symlink():
+            fail(f"Migration rollback snapshot refuses a symlink inside: {relative}")
+        nested = path.relative_to(target).as_posix()
+        if path.is_dir():
+            directories.append(nested)
+        elif path.is_file():
+            files[nested] = path.read_bytes()
+        else:
+            fail(f"Migration rollback snapshot refuses an unsupported path inside: {relative}/{nested}")
+    return {
+        "relative": Path(relative).as_posix(),
+        "kind": "directory",
+        "directories": directories,
+        "files": files,
+        "missing_parents": missing_parents,
+    }
+
+
+def capture_upgrade_start_state(project_root, migrations):
+    relatives = {
+        STATE_RELATIVE_PATH.as_posix(),
+        TEMPLATE_LOCK_RELATIVE_PATH.as_posix(),
+        REPORTS_RELATIVE_PATH.as_posix(),
+    }
+    for migration in migrations:
+        for action in migration["actions"]:
+            if action.get("target"):
+                relatives.add(normalize_managed_path(action["target"]))
+    return [_snapshot_path(project_root, relative) for relative in sorted(relatives)]
+
+
+def _remove_snapshot_target(project_root, snapshot):
+    target = safe_target(project_root, snapshot["relative"])
+    if target.is_symlink():
+        raise OSError(f"rollback refuses symlink target: {snapshot['relative']}")
+    if target.is_dir():
+        shutil.rmtree(target)
+    elif target.exists():
+        target.unlink()
+
+
+def restore_upgrade_start_state(project_root, snapshots):
+    for snapshot in sorted(snapshots, key=lambda item: len(Path(item["relative"]).parts), reverse=True):
+        _remove_snapshot_target(project_root, snapshot)
+    for snapshot in sorted(snapshots, key=lambda item: len(Path(item["relative"]).parts)):
+        target = safe_target(project_root, snapshot["relative"])
+        if snapshot["kind"] == "file":
+            target.parent.mkdir(parents=True, exist_ok=True)
+            target.write_bytes(snapshot["bytes"])
+        elif snapshot["kind"] == "directory":
+            for directory in sorted(snapshot["directories"], key=lambda value: len(Path(value).parts)):
+                (target / Path(directory)).mkdir(parents=True, exist_ok=True)
+            for relative, content in snapshot["files"].items():
+                destination = target / Path(relative)
+                destination.parent.mkdir(parents=True, exist_ok=True)
+                destination.write_bytes(content)
+    missing_parents = {
+        relative
+        for snapshot in snapshots
+        for relative in snapshot.get("missing_parents", [])
+    }
+    for relative in sorted(missing_parents, key=lambda value: len(Path(value).parts), reverse=True):
+        path = project_root / Path(relative)
+        if path.is_dir() and not any(path.iterdir()):
+            path.rmdir()
+    for temporary in (
+        project_root / STATE_RELATIVE_PATH.with_suffix(".json.tmp"),
+        project_root / TEMPLATE_LOCK_RELATIVE_PATH.with_suffix(".json.tmp"),
+    ):
+        temporary.unlink(missing_ok=True)
+
+
+def _template_lock_policy(migrations):
+    retire_targets = set()
+    managed_actions = {}
+    for migration in migrations:
+        policy = migration.get("template_lock") or {}
+        for raw in policy.get("retire_targets", []):
+            retire_targets.add(normalize_managed_path(raw))
+        for action in migration["actions"]:
+            if action.get("type") in FILE_ACTIONS | {REMOVAL_ACTION}:
+                managed_actions[normalize_managed_path(action["target"])] = (migration, action)
+    return retire_targets, managed_actions
+
+
+def preflight_template_lock(project_root, migrations):
+    path = project_root / TEMPLATE_LOCK_RELATIVE_PATH
+    if not path.exists():
+        return
+    lock = load_json(path, "template lock")
+    if lock.get("schema_version") != 1 or not isinstance(lock.get("files"), list):
+        fail(f"Unsupported template lock; no migration writes were applied: {path}")
+    retire_targets, _ = _template_lock_policy(migrations)
+    for target in retire_targets:
+        normalize_managed_path(target)
+
+
+def reconcile_template_lock(project_root, migrations, target_version):
+    path = project_root / TEMPLATE_LOCK_RELATIVE_PATH
+    if not path.exists():
+        return "absent"
+    lock = load_json(path, "template lock")
+    retire_targets, managed_actions = _template_lock_policy(migrations)
+    files = []
+    by_target = {}
+    for item in lock["files"]:
+        target = normalize_managed_path(item.get("target_path", ""))
+        if target in retire_targets:
+            continue
+        copy = dict(item)
+        files.append(copy)
+        by_target[target] = copy
+    for target, (migration, action) in managed_actions.items():
+        if action.get("type") == REMOVAL_ACTION or target in retire_targets:
+            continue
+        local = safe_target(project_root, target)
+        source = migration_source(migration, action)
+        if not local.is_file() or sha256(local) != sha256(source):
+            continue
+        entry = by_target.get(target)
+        metadata = action.get("lock_entry") or {}
+        if entry is None:
+            if not metadata:
+                continue
+            entry = dict(metadata)
+            entry["target_path"] = target
+            files.append(entry)
+            by_target[target] = entry
+        else:
+            for key in ("source_path", "role", "update_policy", "render_mode"):
+                if metadata.get(key):
+                    entry[key] = metadata[key]
+        incoming = "sha256:" + sha256(source)
+        entry["source_checksum"] = incoming
+        entry["installed_checksum"] = "sha256:" + sha256(local)
+    lock["files"] = files
+    lock["installed_version"] = target_version
+    lock["installed_at"] = utc_now()
+    write_state(path, lock)
+    return "updated"
+
+
+def command_apply(project_root, migration_root, safe, review_needed_policy, lang, fault_injector=None):
     if not safe:
         fail("apply requires --safe")
     state, status = state_status(project_root)
@@ -1189,52 +1426,69 @@ def command_apply(project_root, migration_root, safe, review_needed_policy, lang
     for migration in pending:
         for action in migration["actions"]:
             preflight_action(project_root, migration, action)
+    preflight_template_lock(project_root, pending)
+    upgrade_start = capture_upgrade_start_state(project_root, pending)
     origin_snapshots = capture_origin_snapshots(project_root, pending, start)
-    review_pending, review_decisions, review_items = collect_review_needed(project_root, pending, state, lang)
-    if review_pending:
-        review_decisions, resolved_items = resolve_review_needed(
-            project_root,
-            review_pending,
-            review_decisions,
-            version_text(target),
-            review_needed_policy,
-            lang,
-            origin_snapshots,
-        )
-    elif review_items:
-        merge_review_items(project_root, version_text(target), review_items)
-    applied_ids = []
-    unresolved_review_needed = []
-    for migration in pending:
-        for action in migration["actions"]:
-            result = apply_action(
+    fault = fault_injector or (lambda _stage: None)
+    try:
+        review_pending, review_decisions, review_items = collect_review_needed(project_root, pending, state, lang)
+        if review_pending:
+            review_decisions, resolved_items = resolve_review_needed(
                 project_root,
-                migration,
-                action,
-                state,
+                review_pending,
                 review_decisions,
                 version_text(target),
+                review_needed_policy,
+                lang,
                 origin_snapshots,
             )
-            print(f"[{result}] {action_id(action)}")
-            if result == "skipped-existing-review-needed":
-                unresolved_review_needed.append(action)
-                if action.get("skip_warning"):
-                    print(f"[warning] {action['skip_warning']}")
-        state["forgekit_version"] = migration["to"]
-        applied_ids.append(migration["id"])
-    state["last_upgrade"] = {
-        "from": start,
-        "to": state["forgekit_version"],
-        "applied_at": utc_now(),
-        "migrations": applied_ids,
-        "mode": "safe",
-        "review_needed_actions": [action_id(action) for action in unresolved_review_needed],
-        "manual_merge_items": len({
-            key.split("::", 2)[2] for key, decision in review_decisions.items() if decision == "manual-merge"
-        }),
-    }
-    write_state(project_root / STATE_RELATIVE_PATH, state)
+        elif review_items:
+            merge_review_items(project_root, version_text(target), review_items)
+        applied_ids = []
+        unresolved_review_needed = []
+        for migration in pending:
+            for action in migration["actions"]:
+                result = apply_action(
+                    project_root,
+                    migration,
+                    action,
+                    state,
+                    review_decisions,
+                    version_text(target),
+                    origin_snapshots,
+                )
+                print(f"[{result}] {action_id(action)}")
+                if result == "skipped-existing-review-needed":
+                    unresolved_review_needed.append(action)
+                    if action.get("skip_warning"):
+                        print(f"[warning] {action['skip_warning']}")
+                fault(f"after_action:{action_id(action)}")
+            state["forgekit_version"] = migration["to"]
+            applied_ids.append(migration["id"])
+        lock_result = reconcile_template_lock(project_root, pending, version_text(target))
+        print(f"[{lock_result}] template-lock")
+        fault("after_template_lock")
+        state["last_upgrade"] = {
+            "from": start,
+            "to": state["forgekit_version"],
+            "applied_at": utc_now(),
+            "migrations": applied_ids,
+            "mode": "safe",
+            "review_needed_actions": [action_id(action) for action in unresolved_review_needed],
+            "manual_merge_items": len({
+                key.split("::", 2)[2] for key, decision in review_decisions.items() if decision == "manual-merge"
+            }),
+        }
+        fault("before_state_write")
+        write_state(project_root / STATE_RELATIVE_PATH, state)
+        fault("after_state_write")
+    except BaseException:
+        try:
+            restore_upgrade_start_state(project_root, upgrade_start)
+            print("[rollback] Restored the complete upgrade-start state.", file=sys.stderr)
+        except Exception as rollback_error:
+            print(f"[fail] Upgrade failed and rollback also failed: {rollback_error}", file=sys.stderr)
+        raise
     if unresolved_review_needed:
         print(f"[warning] {len(unresolved_review_needed)} action(s) were skipped-existing-review-needed; the project requires manual review and is not fully updated.")
         return

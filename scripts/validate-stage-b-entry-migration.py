@@ -345,15 +345,21 @@ def validate_production_discovery(repo_root, temp_parent=None):
             if ":" in line:
                 key, value = line.split(":", 1)
                 fields[key.strip()] = value.strip()
-        current_version = (repo_root / "VERSION").read_text(encoding="utf-8").strip()
         draft_descriptor = json.loads((repo_root / DRAFT_RELATIVE / "migration.json").read_text(encoding="utf-8"))
-        released = version_tuple(current_version) >= version_tuple(draft_descriptor["to"])
-        expected_latest = current_version if released else draft_descriptor["from"]
+        cursor = "0.44.1"
+        pending_count = 0
+        for descriptor_path in sorted((repo_root / "migrations").glob("*/migration.json")):
+            descriptor = json.loads(descriptor_path.read_text(encoding="utf-8"))
+            sources = descriptor.get("from") if isinstance(descriptor.get("from"), list) else [descriptor.get("from")]
+            if cursor in sources and version_tuple(descriptor.get("to")) > version_tuple(cursor):
+                cursor = descriptor["to"]
+                pending_count += 1
+        expected_latest = cursor
         expected = {
             "Current version": "0.44.1",
             "Latest available": expected_latest,
             "Planned target": expected_latest,
-            "Pending migrations": "1" if released else "0",
+            "Pending migrations": str(pending_count),
         }
         evidence["fields"] = fields
         for key, value in expected.items():
@@ -362,10 +368,6 @@ def validate_production_discovery(repo_root, temp_parent=None):
         lowered = (result.stdout + result.stderr).casefold()
         if "stage-b-migration-draft" in lowered or str(DRAFT_RELATIVE.parent).casefold() in lowered:
             errors.append("production discovery exposed the change-local Stage B draft path")
-        if not released and "0.45.0" in lowered:
-            errors.append("production discovery incorrectly exposed Stage B target 0.45.0")
-        if released and draft_descriptor["to"] not in lowered:
-            errors.append(f"production discovery did not expose formal target {draft_descriptor['to']}")
         if before != after:
             errors.append("production check modified project state, files, or reports")
         if (project / ".forgekit/reports").exists():
