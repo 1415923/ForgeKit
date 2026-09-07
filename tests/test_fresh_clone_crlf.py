@@ -72,7 +72,7 @@ class FreshCloneCrlfTests(unittest.TestCase):
         self.assertIn("byte-exact checkout mismatch", verify_body)
         self.assertIn("git\", \"check-attr", verify_body)
         self.assertIn('evidence["working_tree_snapshot"]', source)
-        self.assertIn("HEAD materialized; user deletion excluded", source)
+        self.assertIn("retired paths materialized from the current release contract", source)
 
 
 if __name__ == "__main__":

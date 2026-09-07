@@ -1,4 +1,6 @@
 interface:
-  display_name: "Project Init"
-  short_description: "Minimally initialize a genuinely new project"
-  default_prompt: "$project-init\n\nInitialize only this uninitialized project from existing evidence. Ask only for critical gaps that change the result, leave other unknowns as TODO_REVIEW or UNKNOWN, create the minimum ForgeKit structure, and do not begin business implementation."
+  display_name: "project-init"
+  short_description: "project init"
+  default_prompt: "$project-init\n\nInitialize ForgeKit through its unified project entry when the user requests installation or initialization."
+policy:
+  allow_implicit_invocation: true

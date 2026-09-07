@@ -102,7 +102,7 @@ class SkillBehaviorRunnerTests(unittest.TestCase):
         return behavior.load_cases(root, "cases.json")
 
     def test_real_manifest_schema(self):
-        self.assertEqual(31, len(self.cases))
+        self.assertEqual(37, len(self.cases))
 
     def test_duplicate_id_invalid_authorization_and_path_fail(self):
         manifest = json.loads((REPO / "tests/skill-behavior/cases.json").read_text(encoding="utf-8"))

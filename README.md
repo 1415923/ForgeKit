@@ -2,343 +2,108 @@
 
 English documentation: [README.en.md](README.en.md)
 
-ForgeKit 是面向 Codex、Claude Code 等 AI 编程工具的**本地项目治理脚手架**。当前版本为 **v0.46.0**。
+ForgeKit **v0.47.0** 是面向 Codex、Claude Code 的本地项目治理脚手架，提供任务来源、当前事实、按需 Skills、检查和版本迁移。
 
-它不会替你生成业务框架、部署系统或自动操作 Git。它做的是另一件更基础的事：把项目边界、任务来源、当前状态、验证证据、风险和交接方式放进仓库，让 AI 在一个**可审查、可验证、可恢复**的流程里工作。
+本版针对 GPT-6 Astra 清理重复指令和过早停止，并将正常的文档定制纳入自动升级。双平台共用规则，不修改用户的模型配置。Astra 实际效果仍需目标客户端验证。
 
-```text
-ForgeKit = 项目入口 + 按需 Skills + 当前事实文档 + 安全检查与迁移
-```
-
-## 它解决什么问题
-
-AI 编程真正容易失控的地方，通常不是“不会写代码”，而是：
-
-- 不清楚哪些目录可以改，误伤其他项目或历史材料；
-- 忘记任务来源、已有结论和未完成事项；
-- 实现完成了，却没有可靠验证或可复查证据；
-- 会话压缩、换工具或换人后，无法接着做；
-- review、修复、commit、push、release 的授权边界混在一起；
-- 项目升级时，模板文件和用户定制文件互相覆盖。
-
-ForgeKit 用项目内文件和检查脚本把这些事实固定下来。它是 AI 工作流脚手架，不是 Agent 运行时，也不是后台自动化平台。
-
-## 快速开始
-
-### 1. 初始化或同步目标项目
+## 初始化或更新
 
 在 ForgeKit 仓库中运行：
 
-Windows PowerShell：
-
 ```powershell
 python .\scripts\forgekit-project.py --target "D:\path\to\project"
-powershell -ExecutionPolicy Bypass -File .\scripts\forgekit-project.ps1 --target "D:\path\to\project"
 ```
 
 macOS / Linux：
 
 ```bash
 python3 ./scripts/forgekit-project.py --target "/path/to/project"
-bash ./scripts/forgekit-project.sh --target "/path/to/project"
 ```
 
-统一入口会先判断目标状态，再决定下一步：
+统一入口识别 init、current、upgrade、toolkit-too-old 和 legacy adoption。先展示计划；交互确认或显式 `--yes` 后写入。
 
-| 目标状态 | 处理方式 |
-| --- | --- |
-| 尚未安装 ForgeKit | 展示初始化计划 |
-| 已是当前版本 | 显示 `up-to-date` |
-| 可安全升级的旧版本 | 先展示检查结果和升级计划，确认后再应用 |
-| 外层 ForgeKit 太旧 | 停止，并提示先更新 ForgeKit |
-| 很早期或无法安全迁移的项目 | 按“接手已有项目”处理，不强行升级 |
-
-默认先计划、后写入。安全写入需要交互确认或显式 `--yes`。
-
-对全新项目，`--target` 表示实际的 `ProjectRoot`：交互式或 dry-run 未指定 layout 时默认原地初始化。无人值守写入必须显式选择 layout，避免历史 nested 行为发生静默变化：
+全新项目默认 in-place。无人值守初始化必须明确 layout：
 
 ```powershell
 python .\scripts\forgekit-project.py --target "D:\path\to\project" --yes --layout in-place
-python .\scripts\forgekit-project.py --target "D:\path\to\outer" --yes --layout legacy-nested
 ```
 
-已有项目不移动 layout。历史 legacy-nested 项目从外层 GovernanceRoot 或内层 ProjectRoot 进入时，统一入口会识别同一 topology。
+保留 `--layout legacy-nested`；已有项目布局不移动。业务根 README 由用户拥有，不创建、覆盖或删除。
+v0.36.0 起具有有效 state 的项目沿精确版本链迁移；更早或缺失 state 的项目先只读接手，不强行初始化。
+预检会显示完整迁移链。各步先在内存中依次转换，整条链无冲突后才整体应用；不是逐版安装旧工具，也不会跳过必要迁移直接覆盖最新版。
+只查看计划可加 `--dry-run`；升级完成后再次运行会显示 `up-to-date`、零迁移动作。当前安装版本以 `.forgekit/state.json` 为准，boundary 文件中的版本表示其创建时的模板版本。
 
-只有 v0.36.0 及以后初始化、并具有 `.forgekit/state.json` 的项目支持正式安全迁移。v0.35.x 及更早项目应先做只读接手检查。
+## 0.47.0 的主要变化
 
-### 2. 从项目根目录启动 AI 工具
+- 七个主要 Skill，合并填充／回填和适用性／接手；三个旧名称作为显式兼容入口保留。
+- 入口只保留边界与按需导航，已定位的小任务无需重新扫描治理文档。
+- 已授权的实现包含相关验证与必要修复；通过后不无故扩大测试或再次请求同义授权。
+- 合并重复的 checkpoint、工具链和路由文档；保留任务来源、看板、日志的独立职责。
+- 用户继续编辑 Markdown。隐藏标记区分模板章节与用户区，升级自动搬迁能够明确定位的定制内容。
+- 退休 usage.html；日常示例统一见生成项目的 `.forgekit/docs/usage-playbook.md`。
 
-Codex：
-
-```powershell
-cd D:\path\to\project
-codex
-```
-
-Claude Code：
-
-```powershell
-cd D:\path\to\project
-claude
-```
-
-### 3. 让 AI 先恢复项目上下文
-
-Codex：
-
-```text
-请读取 AGENTS.md，并按项目内 ForgeKit 规则理解当前项目。先告诉我项目边界、当前任务、已有证据、风险和建议下一步，不要直接改文件。
-```
-
-Claude Code：
-
-```text
-请读取 CLAUDE.md，并按项目内 ForgeKit 规则理解当前项目。先告诉我项目边界、当前任务、已有证据、风险和建议下一步，不要直接改文件。
-```
-
-## 核心能力
-
-ForgeKit v0.46.0 的核心能力是按需项目治理、安全迁移、current-truth writeback、上下文连续性和独立代码审查；它们按任务真实影响使用，不组成强制流水线。
-
-## v0.46.0 的工作方式
-
-v0.46.0 延续“轻量入口 + 按需 Skills”，并让治理检查保存进展而不是制造循环：
-
-- `AGENTS.md` / `CLAUDE.md`：只保留始终有效的边界、授权和路由规则；
-- 根级 `skills/`：九个共享 Skill 的语义权威源；
-- 生成项目中的 `.agents/skills/`：由投影工具确定性同步；
-- `.claude/skills/`：Claude 平台适配层，不是机械副本。
-- 执行目的明确区分 `DIAGNOSTIC`、`SMOKE`、`FORMAL`；真实调用本身不自动变成 Formal 或 release evidence；
-- finding 分开表达影响大小与当前动作是否必须停止：`Impact Severity != Blocking`；
-- checker 的 nonzero 或 `--strict` 失败是命令级结果，不自动等于整个项目被 blocker；
-- 文档 owner 不意味着必须填满；只有 confirmed fact 发生变化时才写回对应 current owner；
-- fresh init 默认 in-place，保留显式 `--layout legacy-nested` 兼容路径；
-- fresh generated project 不创建、覆盖或接管用户的业务根 `README.md`。
-
-完整 finding 字段见 `.forgekit/docs/maker-checker-protocol.md`，执行边界见 `governance/ai-engineering-loop.md`。例如 `MAJOR + Blocking=NO` 和 `MINOR + Blocking=YES` 都可能成立，是否停止必须由当前 scope 的真实 failure path 决定。
-
-### 九个按需 Skill
+## 七个按需 Skill
 
 | Skill | 什么时候用 |
 | --- | --- |
-| `project-init` | 初始化一个尚未使用 ForgeKit 的新项目 |
-| `project-bootstrap-fill` | 补全已经初始化但仍有占位内容的项目 |
-| `handover-review` | 只读接手已有项目，先盘点再决定是否改造 |
-| `document-backfill` | 根据现有实现和证据回填事实文档 |
-| `large-change-planning` | 为高影响变更冻结范围、授权、验收和回滚 |
-| `code-review` | 只读审查已有实现、diff、测试和证据 |
-| `security-review` | 审查真实安全边界，不把普通代码改动都升级为安全审查 |
-| `release-check` | 检查明确的发布候选，不把普通 commit 当成 release |
-| `project-suitability` | 只读评估项目是否适合采用 ForgeKit |
+| project-init | 初始化或安装 |
+| document-backfill | 显式要求初始化占位填充或既有事实回填 |
+| project-assessment | 采用适用性评估或接手审计 |
+| large-change-planning | 高影响变更的范围、验收与回滚规划 |
+| code-review | 只读代码审查及定向复查 |
+| security-review | 真实安全边界审查 |
+| release-check | 明确发布候选的就绪检查 |
 
-这些 Skill 不组成固定流水线。按任务意图和实际影响调用需要的 Skill 即可。
+`project-bootstrap-fill` → document-backfill/bootstrap；`handover-review` → project-assessment/takeover；`project-suitability` → project-assessment/adoption。0.47.x 保留显式调用，不再作为主要自动路由。
+根级 `skills/` 是语义来源，`.agents/skills/` 由白名单确定性投影，`.claude/skills/` 保留平台适配。Skills 不组成强制流水线。
 
-### 可选原生 agent 配置
+## 保留定制的升级
 
-Codex / Claude Code 的 native agent adapter 是按需配置模板；生成配置不等于 runtime 已加载或调用。细节见生成项目中的 `.forgekit/docs/native-agent-adapter.md`。
+0.46.0 → 0.47.0 使用旧模板、本地内容和新模板的三方迁移。普通填写、追加记录和 AGENTS 新增规则自动保留；文档合并按显式章节映射搬运，不调用模型猜测事实。
 
-低层 PowerShell init 仍支持显式 `-NativeAgentAdapter all`；新项目的 project-local 启动 Skill 位于 `.agents/skills/project-init/SKILL.md`。这些低层选项不改变高层 `--target` / `--layout` 合同。
+已写成项目事实的 API、需求、任务、测试和地图等文档可以使用自己的章节结构，升级完整保留成稿，仅修正需要搬迁的旧链接。该规则采用明确的事实 owner 白名单，不适用于治理协议、Skill 或入口规则。历史来源同时覆盖发布标签、已发布迁移素材和 LF／CRLF／BOM 等价形式。
 
-review、assessment 和 planning 默认只读。发现问题不等于自动获得修复权限；本地写入、commit、push、tag、publish、release、deploy 分别需要明确授权。
-
-风险按实际影响判断，而不是按文件数或行数机械升级。重点看：
-
-- 信任边界是否变化；
-- 是否涉及外部或不可逆动作；
-- 是否影响数据、权限或公共接口；
-- 回滚是否困难；
-- 证据是否不足。
-
-## 常用提示词
-
-更完整的日常用法见生成项目中的：
-
-```text
-.forgekit/docs/usage-playbook.md
-```
-
-常用短提示词：
-
-| 目标 | 可直接复制 |
+| 情况 | 处理 |
 | --- | --- |
-| 开始今天的工作 | `请读取当前任务、最近进展、风险和验证入口，告诉我今天最合理的下一步，不要先改文件。` |
-| 接手已有项目 | `请使用 $handover-review 只读盘点 <project-root>，给出边界、现状、风险和接手建议，不要自动初始化或修复。` |
-| 补全已初始化项目 | `请显式调用 $project-bootstrap-fill，只补现有证据支持的占位内容，保留用户定制。` |
-| 回填事实文档 | `请显式调用 $document-backfill，只根据已有实现和验证证据做最小回填。` |
-| 规划高影响变更 | `请显式调用 $large-change-planning，冻结范围、授权、验收、非目标和回滚。` |
-| 审查代码 | `请使用 $code-review 只读审查现有 diff、测试和证据，不要自动修复。` |
-| 审查安全边界 | `请使用 $security-review 审查明确的安全影响，只报告证据、风险和修复责任。` |
-| 检查发布候选 | `请使用 $release-check 核对版本、migration、制品和门禁，不要执行发布。` |
-| 评估是否适用 | `请使用 $project-suitability 只读评估当前项目是否适合 ForgeKit，不要自动初始化。` |
-| 保存当前进展 | `只把本轮已确认的状态、验证、风险和下一步最小写回负责文档。` |
-| 上下文压缩或换会话前 | `请做一次进展保存，并列出新会话应先读取的文件。` |
-| 提交前检查 | `请检查 diff、验证、独立审查、风险和必要文档写回，不要自动 commit。` |
+| stock 或只有模板变化 | 自动更新 |
+| 用户区、填充字段、非重叠编辑 | 保留或搬迁 |
+| 同一规则冲突、未知基线、重复标识 | 集中展示冲突，整个应用停止，项目版本不变 |
+| 规划后文件变化 | 重新规划，不能执行过期计划 |
+| 写入失败 | 尝试恢复所有已变更文件；无法恢复时报告路径并保留回滚备份 |
 
-## 更新已有项目
+迁移结果保存实际动作和回滚材料。不能用旧 `manual-merge` 策略绕过结构化冲突或把部分升级报告为成功。
+低层 `forgekit-upgrade.py check/plan/apply --safe` 继续可用，新格式支持 `--json` 与应用时的 `--plan-hash`。
+AGENTS 和 CLAUDE 入口随迁移自动更新，正常升级无需手工粘贴规则。升级后启动新会话，旧会话只做最小 checkpoint 和收口。
 
-普通用户继续使用统一入口即可：
+## 模板规则、项目约束与当前事实
 
-Windows：
+| 内容 | 放在哪里 | 升级时如何处理 |
+| --- | --- | --- |
+| ForgeKit 通用规则 | 入口模板区、治理协议、Skills | 按版本链更新 |
+| 项目额外约束与路由 | 入口的现有用户区；细节引用地图和内层项目文档 | 保留用户区，不用整份项目入口替换模板区 |
+| 当前版本、运行状态和验收结论 | 对应事实来源及其负责文档 | 按证据核实，模板升级不猜测或自动刷新业务状态 |
+
+编辑 AGENTS / CLAUDE 时，将项目补充放入已有的 `<!-- forgekit:user begin -->` 与 `<!-- forgekit:user end -->` 之间，不创建嵌套或重复用户区。易变的 release、commit、Scheduler/source 状态应引用对应清单或状态来源；磁盘清单、运行健康与用户验收分别需要证据。历史验收记录保留日期和证据，不能继续冒充当前状态。
+
+如果旧 AGENTS / CLAUDE 已整份重写，报错行号只是首个基线差异。维护者应先对照准确的已安装版本模板，复核项目约束和过时事实；经授权把入口整理成模板区＋项目用户区，再运行普通升级命令。模板升级只处理受管文件，不会顺带重写业务仓库的内层 AGENTS。
+
+另有 `--entry-resolutions <resolution.json>`，用于复核后明确选择完整保留旧入口的情况。材料绑定项目、版本和内容哈希，必须显式传入；完整保留不等于事实已更新，不能替代入口整理与语义审查。格式见 [入口合并说明](project-template/docs/project-maintenance.md#整份定制入口的显式合并)。普通升级无需此参数。
+
+## 使用与边界
+
+从项目根启动 Codex 或 Claude Code，读取对应 AGENTS.md 或 CLAUDE.md。告诉工具目标、范围和完成标准；必要命令见 `.forgekit/docs/testing.md`，定位不明时使用 codebase-map。
+审查、诊断和规划默认只读。commit、push、tag、发布、部署、生产数据或权限变更仍需要对应授权。高风险独立审查不能由 self-review 代替。
+Severity 与 Blocking 独立；DIAGNOSTIC、SMOKE、FORMAL 描述证据用途，真实调用不自动成为 Formal。详见 maker-checker-protocol 与 ai-engineering-loop。
+仅在确认事实变化时最小写回；task-intake 保存来源，task-board 保存执行状态，work-log 保存推进记录。owner 存在不要求填满模板。
+
+多项目为 opt-in，机器入口是 workspace-map；仅长期独立子项目启用 project capsule。不会自动拆分文档或创建第二套事实源。
+维护和归档继续 plan、确认、apply、summary/index，操作前后检查 current docs；Archive 不是删除。
+
+## 检查与资料
 
 ```powershell
-python .\scripts\forgekit-project.py --target "D:\path\to\project"
-```
-
-macOS / Linux：
-
-```bash
-python3 ./scripts/forgekit-project.py --target "/path/to/project"
-```
-
-需要排查迁移细节时，可以使用低层入口：
-
-```bash
-python scripts/forgekit-upgrade.py check --repo-root <project>
-python scripts/forgekit-upgrade.py plan --repo-root <project>
-python scripts/forgekit-upgrade.py apply --safe --repo-root <project>
-```
-
-| 命令 | 作用 |
-| --- | --- |
-| `check` | 检查版本和迁移资格，不写文件 |
-| `plan` | 输出迁移计划，不写文件 |
-| `apply --safe` | 只执行 migration 中标记为安全的动作 |
-
-### 从 v0.45.0 升级到 v0.46.0
-
-正式 migration 会逐项区分目标文件状态：
-
-| 状态 | 处理方式 |
-| --- | --- |
-| `stock` | 与旧版基线一致，可安全更新 |
-| `custom` | 用户已经修改，不覆盖，进入 manual merge |
-| `unknown` | 无法可靠识别，不覆盖 |
-| `missing` | 按 action 合同安全处理 |
-| rollback | 恢复本次升级开始前的状态 |
-
-v0.46 migration 继续使用精确版本链（例如 `0.44.1 -> 0.45.0 -> 0.46.0`），不会创建任意历史版本直达当前版的 shortcut。现有项目 layout 不移动；business README 的旧 ownership 只从 stock metadata 中退休，README 字节始终保留。
-
-fresh surface 不再安装 `loop-readiness.md`、`loop-blueprint.md`、`loop-operations.md`。它们仍然有效的边界已收敛到 `bounded-auto-loop-policy.md`、`agent-entry-contract.md`、`work-session-checkpoint.md`、`maker-checker-protocol.md` 和 `ai-engineering-loop.md`。升级时仅删除 exact-stock 旧副本；custom/unknown 副本保留并进入 manual review。
-
-升级后，建议新开 AI 会话；或者先让当前会话重新读取项目入口和当前任务文档，避免继续沿用旧规则。
-
-## 多项目工作区
-
-ForgeKit 支持可选的多项目工作区，但默认不会自动启用或拆分文档。
-
-| 层级 | 作用 |
-| --- | --- |
-| Workspace Docs | 管理跨项目任务、联调状态和整体风险 |
-| Project Capsule | 管理某个长期独立子项目的局部任务、测试和风险 |
-| Repo | 保存代码，不成为第三套任务事实源 |
-| Artifact | 保存报告、日志、构建物和测试证据 |
-| Archive | 保存历史材料，不参与当前事实 |
-
-常见做法：
-
-```text
-先把项目登记为 workspace-only；
-只有长期独立推进的项目，再切换为 project-capsule。
-```
-
-创建最小 Project Capsule：
-
-```powershell
-python .\scripts\bootstrap-project-capsule.py plan --repo-root "D:\path\to\workspace" --project backend
-python .\scripts\bootstrap-project-capsule.py apply --repo-root "D:\path\to\workspace" --project backend --confirm
-```
-
-它不会自动拆分总文档、迁移任务或移动业务仓库。
-
-## 生成内容
-
-| 路径 | 用途 |
-| --- | --- |
-| `AGENTS.md` | Codex 项目入口 |
-| `CLAUDE.md` | Claude Code 项目入口 |
-| `.agents/skills/` | 项目内按需 Skills |
-| `.codex/` | Codex 规则、命令和可选配置 |
-| `.forgekit/state.json` | 当前 ForgeKit 版本和功能状态 |
-| `.forgekit/project-boundary.yml` | 项目边界和写入策略 |
-| `.forgekit/workspace-map.json` | 可选的多项目边界地图 |
-| `.forgekit/docs/` | 当前任务、来源、验证、风险、交接和工具链事实 |
-| `.forgekit/projects/` | 可选的 Project Capsule |
-| `.forgekit/changes/` | 中高风险变更的方案、任务、验证和审查记录 |
-| `.forgekit/archive/` | 可检索的历史证据 |
-| `scripts/` | 初始化、升级、检查和归档脚本 |
-
-已有业务 `docs/` 默认作为只读证据使用。ForgeKit 不会默认把治理模板写进业务文档目录。
-
-业务根 `README.md` 不属于 fresh v0.46 生成内容：不存在时保持不存在，已有内容和 `--force` 场景也保持用户拥有。
-
-## 什么时候写回文档
-
-文档写回按事件触发，不按“每改一次就写”。
-
-| 场景 | 建议 |
-| --- | --- |
-| typo、临时试错、未确认探索 | 不写 ForgeKit 治理文档 |
-| 任务状态变化、根因确认、新风险、有效验证 | 做最小 checkpoint |
-| commit、交接、归档、发布准备 | 做收口写回 |
-| 可预见的上下文压缩或换会话 | 先保存当前目标、结论、风险、验证和下一步 |
-
-“小改动不写治理文档”不代表禁止修改任务范围内的业务代码、README、注释、测试或配置。
-
-Document ownership does not imply mandatory population。没有真实风险或测试事实时，`risk-register.md`、`testing.md` 可以保持 lean/template；不要为了通过 checker 编造内容。active work 可先把 confirmed fact 留在 checkpoint，但在相关 closure、handover 或 ship 前，真实 changed fact 应写回负责它的 current owner。
-
-### 上下文连续性
-
-在 compact、换会话或升级规则后，只保存可恢复工作的 confirmed conclusion、evidence path、blocker 和 next step；不要复制完整聊天。新会话从项目入口和 current owners 恢复事实。
-
-## 安全边界
-
-ForgeKit 默认不会：
-
-- 生成 Spring、React、FastAPI 等业务项目模板；
-- 安装依赖、启动服务或部署业务系统；
-- 在后台持续运行 Agent、守护进程或定时任务；
-- 自动 commit、push、tag、创建 PR 或发布 release；
-- 自动启用多项目模式或拆分现有文档；
-- 自动覆盖用户定制的受管文件；
-- 把一次 review 结果自动转化为修复授权。
-
-AI 工具是否正确加载平台 Skill、如何选择 Skill，以及实际上下文收益，仍受具体客户端和版本影响。这些真实运行项继续标记为 `NEEDS_TEST`；首次在目标环境中使用时应做一次轻量验证。
-
-## 常用检查
-
-检查当前文档是否还能支撑未完成任务：
-
-```powershell
+powershell -ExecutionPolicy Bypass -File .\scripts\validate-template.ps1
 python .\scripts\check-current-docs-integrity.py --repo-root "D:\path\to\project"
 ```
 
-检查多项目边界：
-
-```powershell
-python .\scripts\check-workspace-integrity.py --repo-root "D:\path\to\workspace"
-```
-
-macOS / Linux 检查 current docs：
-
-```bash
-python3 ./scripts/check-current-docs-integrity.py --repo-root "/path/to/project"
-```
-
-## 文档地图
-
-| 你想看 | 文件 |
-| --- | --- |
-| 日常怎么问 AI | `.forgekit/docs/usage-playbook.md` |
-| 什么时候写回文档 | `.forgekit/docs/work-session-checkpoint.md` |
-| 哪个文档负责哪个事实 | `.forgekit/docs/document-responsibility.md` |
-| 当前任务 | `.forgekit/docs/task-board.md` |
-| 任务来源 | `.forgekit/docs/task-intake.md` |
-| 验证方式和结论 | `.forgekit/docs/testing.md` |
-| 风险和阻塞 | `.forgekit/docs/risk-register.md` |
-| 项目边界 | `.forgekit/project-boundary.yml` |
-| 多项目边界 | `.forgekit/workspace-map.json` |
-| 版本变化 | `CHANGELOG.md` |
-
-## 版本历史
-
-完整版本历史和升级注意事项见 [CHANGELOG.md](CHANGELOG.md)。
+版本记录见 [CHANGELOG.md](CHANGELOG.md)。运行时加载、真实 Astra 行为及模型收益必须有实际证据；静态通过不等于客户端实测。

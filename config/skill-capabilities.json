@@ -1,0 +1,26 @@
+{
+  "schema_version": 1,
+  "canonical": [
+    "project-init",
+    "document-backfill",
+    "project-assessment",
+    "large-change-planning",
+    "code-review",
+    "security-review",
+    "release-check"
+  ],
+  "aliases": {
+    "project-bootstrap-fill": {
+      "skill": "document-backfill",
+      "branch": "bootstrap"
+    },
+    "handover-review": {
+      "skill": "project-assessment",
+      "branch": "takeover"
+    },
+    "project-suitability": {
+      "skill": "project-assessment",
+      "branch": "adoption"
+    }
+  }
+}

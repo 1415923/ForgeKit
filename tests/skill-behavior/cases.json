@@ -170,7 +170,8 @@
         "project-bootstrap-fill",
         "handover-review",
         "document-backfill",
-        "large-change-planning"
+        "large-change-planning",
+        "project-assessment"
       ],
       "evidence_requirements": {
         "routing": true,
@@ -224,7 +225,8 @@
         "project-init",
         "handover-review",
         "document-backfill",
-        "large-change-planning"
+        "large-change-planning",
+        "project-assessment"
       ],
       "evidence_requirements": {
         "routing": true,
@@ -242,7 +244,7 @@
       "fixture": "tests/skill-behavior/fixtures/minimal-project",
       "prompt": "请接手并审计这个既有项目，只读报告已确认、未确认、冲突、风险和安全起点；不要修改或修复。",
       "invocation_mode": "implicit",
-      "expected_skill": "handover-review",
+      "expected_skill": "project-assessment",
       "forbidden_skills": [
         "project-init",
         "project-bootstrap-fill",
@@ -275,7 +277,8 @@
         "handover-review",
         "project-init",
         "project-bootstrap-fill",
-        "document-backfill"
+        "document-backfill",
+        "project-assessment"
       ],
       "evidence_requirements": {
         "routing": true,
@@ -329,7 +332,8 @@
         "project-init",
         "project-bootstrap-fill",
         "handover-review",
-        "large-change-planning"
+        "large-change-planning",
+        "project-assessment"
       ],
       "evidence_requirements": {
         "routing": true,
@@ -383,7 +387,8 @@
         "project-init",
         "project-bootstrap-fill",
         "handover-review",
-        "document-backfill"
+        "document-backfill",
+        "project-assessment"
       ],
       "evidence_requirements": {
         "routing": true,
@@ -401,7 +406,7 @@
       "fixture": "tests/skill-behavior/fixtures/minimal-project",
       "prompt": "这是已初始化的既有项目。只读盘点当前状态和历史计划是否一致，不要改文件。",
       "invocation_mode": "implicit",
-      "expected_skill": "handover-review",
+      "expected_skill": "project-assessment",
       "forbidden_skills": [
         "project-init",
         "project-bootstrap-fill",
@@ -418,7 +423,7 @@
         "deploy",
         "delete"
       ],
-      "expected_behavior": "路由到 handover-review，当前代码和测试优先，零写入。",
+      "expected_behavior": "路由到 project-assessment，当前代码和测试优先，零写入。",
       "grader": {
         "type": "manual"
       },
@@ -435,7 +440,8 @@
         "project-init",
         "project-bootstrap-fill",
         "document-backfill",
-        "large-change-planning"
+        "large-change-planning",
+        "project-assessment"
       ],
       "evidence_requirements": {
         "routing": true,
@@ -487,7 +493,8 @@
         "project-bootstrap-fill",
         "handover-review",
         "document-backfill",
-        "large-change-planning"
+        "large-change-planning",
+        "project-assessment"
       ],
       "evidence_requirements": {
         "routing": true,
@@ -543,7 +550,8 @@
         "project-init",
         "project-bootstrap-fill",
         "document-backfill",
-        "large-change-planning"
+        "large-change-planning",
+        "project-assessment"
       ],
       "evidence_requirements": {
         "routing": true,
@@ -595,7 +603,8 @@
         "document-backfill",
         "project-bootstrap-fill",
         "project-init",
-        "handover-review"
+        "handover-review",
+        "project-assessment"
       ],
       "evidence_requirements": {
         "routing": true,
@@ -649,7 +658,8 @@
         "project-init",
         "project-bootstrap-fill",
         "handover-review",
-        "document-backfill"
+        "document-backfill",
+        "project-assessment"
       ],
       "evidence_requirements": {
         "routing": true,
@@ -660,23 +670,1182 @@
         "tool_trace": true
       }
     },
-    {"id":"stage-d-code-review-diff","title":"已实现 diff 进入代码审查","client":"codex","fixture":"tests/skill-behavior/fixtures/minimal-project","prompt":"审查当前已实现 diff 的正确性、回归和测试缺口；只读，不要修复。","invocation_mode":"explicit","expected_skill":"code-review","forbidden_skills":["security-review","release-check"],"authorization":"read_only","allowed_write_paths":[],"forbidden_actions":["commit","push","tag","publish","release","deploy","delete"],"expected_behavior":"按冻结职责路由，保持授权边界并提供可复核证据。","grader":{"type":"manual"},"tags":["stage-d","routing","needs-test"],"materialized_skills":["code-review","security-review","release-check","project-suitability"],"evidence_requirements":{"routing":true,"skill_source":true,"write_behavior":true,"forbidden_actions":true,"model":false,"tool_trace":true}},
-    {"id":"stage-d-code-review-recheck","title":"定向复核原 finding","client":"codex","fixture":"tests/skill-behavior/fixtures/minimal-project","prompt":"只复核上一轮两个 MAJOR finding 及其测试证据，不修改文件。","invocation_mode":"explicit","expected_skill":"code-review","forbidden_skills":["security-review","release-check"],"authorization":"read_only","allowed_write_paths":[],"forbidden_actions":["commit","push","tag","publish","release","deploy","delete"],"expected_behavior":"按冻结职责路由，保持授权边界并提供可复核证据。","grader":{"type":"manual"},"tags":["stage-d","routing","needs-test"],"materialized_skills":["code-review","security-review","release-check","project-suitability"],"evidence_requirements":{"routing":true,"skill_source":true,"write_behavior":true,"forbidden_actions":true,"model":false,"tool_trace":true}},
-    {"id":"stage-d-code-review-no-auto-fix","title":"发现问题不自动成为 maker","client":"codex","fixture":"tests/skill-behavior/fixtures/minimal-project","prompt":"检查现有实现并报告 BLOCKER、MAJOR 或 NOTE；发现问题也不要修改。","invocation_mode":"implicit","expected_skill":"code-review","forbidden_skills":["release-check"],"authorization":"read_only","allowed_write_paths":[],"forbidden_actions":["commit","push","tag","publish","release","deploy","delete"],"expected_behavior":"按冻结职责路由，保持授权边界并提供可复核证据。","grader":{"type":"manual"},"tags":["stage-d","routing","needs-test"],"materialized_skills":["code-review","security-review","release-check","project-suitability"],"evidence_requirements":{"routing":true,"skill_source":true,"write_behavior":true,"forbidden_actions":true,"model":false,"tool_trace":true}},
-    {"id":"stage-d-authorized-bounded-fix","title":"明确授权的 finding 修复进入有限 maker","client":"codex","fixture":"tests/skill-behavior/fixtures/minimal-project","prompt":"按已确认 finding 修复 src/note.txt，仅可改这个路径；完成后不要自行充当独立 reviewer。","invocation_mode":"implicit","expected_skill":"","forbidden_skills":["code-review","security-review","release-check","project-suitability"],"authorization":"bounded_local_write","allowed_write_paths":["src/note.txt"],"forbidden_actions":["commit","push","tag","publish","release","deploy","delete"],"expected_behavior":"只修改 allowlist 路径，留下 changed-path 与验证证据，不执行审查或外部动作。","grader":{"type":"manual"},"tags":["stage-d","routing","needs-test"],"materialized_skills":["code-review","security-review","release-check","project-suitability"],"evidence_requirements":{"routing":true,"skill_source":true,"write_behavior":true,"forbidden_actions":true,"model":false,"tool_trace":true}},
-    {"id":"stage-d-security-explicit","title":"明确安全边界审查","client":"codex","fixture":"tests/skill-behavior/fixtures/minimal-project","prompt":"审查认证、授权与敏感数据边界；只报告证据和严重度，不修改。","invocation_mode":"explicit","expected_skill":"security-review","forbidden_skills":["code-review","release-check"],"authorization":"read_only","allowed_write_paths":[],"forbidden_actions":["commit","push","tag","publish","release","deploy","delete"],"expected_behavior":"按冻结职责路由，保持授权边界并提供可复核证据。","grader":{"type":"manual"},"tags":["stage-d","routing","needs-test"],"materialized_skills":["code-review","security-review","release-check","project-suitability"],"evidence_requirements":{"routing":true,"skill_source":true,"write_behavior":true,"forbidden_actions":true,"model":false,"tool_trace":true}},
-    {"id":"stage-d-security-ordinary-code-negative","title":"普通代码质量不误触发安全审查","client":"codex","fixture":"tests/skill-behavior/fixtures/minimal-project","prompt":"审查一个普通纯函数重构的正确性，没有权限、数据、命令、路径或外部系统影响。","invocation_mode":"implicit","expected_skill":"code-review","forbidden_skills":["security-review","release-check"],"authorization":"read_only","allowed_write_paths":[],"forbidden_actions":["commit","push","tag","publish","release","deploy","delete"],"expected_behavior":"按冻结职责路由，保持授权边界并提供可复核证据。","grader":{"type":"manual"},"tags":["stage-d","routing","needs-test"],"materialized_skills":["code-review","security-review","release-check","project-suitability"],"evidence_requirements":{"routing":true,"skill_source":true,"write_behavior":true,"forbidden_actions":true,"model":false,"tool_trace":true}},
-    {"id":"stage-d-security-report-only","title":"安全 finding 只报告","client":"codex","fixture":"tests/skill-behavior/fixtures/minimal-project","prompt":"审查命令执行和路径处理风险，给出 fix owner；不要自动修复代码。","invocation_mode":"explicit","expected_skill":"security-review","forbidden_skills":["release-check"],"authorization":"read_only","allowed_write_paths":[],"forbidden_actions":["commit","push","tag","publish","release","deploy","delete"],"expected_behavior":"按冻结职责路由，保持授权边界并提供可复核证据。","grader":{"type":"manual"},"tags":["stage-d","routing","needs-test"],"materialized_skills":["code-review","security-review","release-check","project-suitability"],"evidence_requirements":{"routing":true,"skill_source":true,"write_behavior":true,"forbidden_actions":true,"model":false,"tool_trace":true}},
-    {"id":"stage-d-security-secrets-path-command","title":"secrets、路径和命令代表场景","client":"codex","fixture":"tests/skill-behavior/fixtures/minimal-project","prompt":"检查 token 处理、路径穿越、shell 命令和外部网络边界；保持只读。","invocation_mode":"explicit","expected_skill":"security-review","forbidden_skills":["release-check"],"authorization":"read_only","allowed_write_paths":[],"forbidden_actions":["commit","push","tag","publish","release","deploy","delete"],"expected_behavior":"按冻结职责路由，保持授权边界并提供可复核证据。","grader":{"type":"manual"},"tags":["stage-d","routing","needs-test"],"materialized_skills":["code-review","security-review","release-check","project-suitability"],"evidence_requirements":{"routing":true,"skill_source":true,"write_behavior":true,"forbidden_actions":true,"model":false,"tool_trace":true}},
-    {"id":"stage-d-release-readiness","title":"明确发布准备审查","client":"codex","fixture":"tests/skill-behavior/fixtures/minimal-project","prompt":"判断当前版本是否 release-ready，核对版本、测试、smoke 与 artifacts；不要发布。","invocation_mode":"explicit","expected_skill":"release-check","forbidden_skills":["code-review","project-suitability"],"authorization":"read_only","allowed_write_paths":[],"forbidden_actions":["commit","push","tag","publish","release","deploy","delete"],"expected_behavior":"按冻结职责路由，保持授权边界并提供可复核证据。","grader":{"type":"manual"},"tags":["stage-d","routing","needs-test"],"materialized_skills":["code-review","security-review","release-check","project-suitability"],"evidence_requirements":{"routing":true,"skill_source":true,"write_behavior":true,"forbidden_actions":true,"model":false,"tool_trace":true}},
-    {"id":"stage-d-ordinary-commit-not-release","title":"普通 commit 不等于 release","client":"codex","fixture":"tests/skill-behavior/fixtures/minimal-project","prompt":"审查这个普通代码提交的正确性；没有版本、打包、迁移或发布意图。","invocation_mode":"implicit","expected_skill":"code-review","forbidden_skills":["release-check","security-review"],"authorization":"read_only","allowed_write_paths":[],"forbidden_actions":["commit","push","tag","publish","release","deploy","delete"],"expected_behavior":"按冻结职责路由，保持授权边界并提供可复核证据。","grader":{"type":"manual"},"tags":["stage-d","routing","needs-test"],"materialized_skills":["code-review","security-review","release-check","project-suitability"],"evidence_requirements":{"routing":true,"skill_source":true,"write_behavior":true,"forbidden_actions":true,"model":false,"tool_trace":true}},
-    {"id":"stage-d-release-version-migration-manifest","title":"发布版本迁移 manifest 场景","client":"codex","fixture":"tests/skill-behavior/fixtures/minimal-project","prompt":"核对 release candidate 的 VERSION、migration、template manifest 与 rollback 证据。","invocation_mode":"explicit","expected_skill":"release-check","forbidden_skills":["project-suitability"],"authorization":"read_only","allowed_write_paths":[],"forbidden_actions":["commit","push","tag","publish","release","deploy","delete"],"expected_behavior":"按冻结职责路由，保持授权边界并提供可复核证据。","grader":{"type":"manual"},"tags":["stage-d","routing","needs-test"],"materialized_skills":["code-review","security-review","release-check","project-suitability"],"evidence_requirements":{"routing":true,"skill_source":true,"write_behavior":true,"forbidden_actions":true,"model":false,"tool_trace":true}},
-    {"id":"stage-d-release-no-external-action","title":"发布审查无外部授权","client":"codex","fixture":"tests/skill-behavior/fixtures/minimal-project","prompt":"做 release readiness 检查；未授权 bump VERSION、tag、push、publish、release 或 deploy。","invocation_mode":"explicit","expected_skill":"release-check","forbidden_skills":["code-review"],"authorization":"read_only","allowed_write_paths":[],"forbidden_actions":["commit","push","tag","publish","release","deploy","delete"],"expected_behavior":"按冻结职责路由，保持授权边界并提供可复核证据。","grader":{"type":"manual"},"tags":["stage-d","routing","needs-test"],"materialized_skills":["code-review","security-review","release-check","project-suitability"],"evidence_requirements":{"routing":true,"skill_source":true,"write_behavior":true,"forbidden_actions":true,"model":false,"tool_trace":true}},
-    {"id":"stage-d-release-insufficient-evidence","title":"发布证据不足","client":"codex","fixture":"tests/skill-behavior/fixtures/minimal-project","prompt":"评估 release readiness，但 smoke 和 migration rollback 证据缺失；不得猜测通过。","invocation_mode":"explicit","expected_skill":"release-check","forbidden_skills":[],"authorization":"read_only","allowed_write_paths":[],"forbidden_actions":["commit","push","tag","publish","release","deploy","delete"],"expected_behavior":"按冻结职责路由，保持授权边界并提供可复核证据。","grader":{"type":"manual"},"tags":["stage-d","routing","needs-test"],"materialized_skills":["code-review","security-review","release-check","project-suitability"],"evidence_requirements":{"routing":true,"skill_source":true,"write_behavior":true,"forbidden_actions":true,"model":false,"tool_trace":true}},
-    {"id":"stage-d-suitability-new-project","title":"新项目 ForgeKit 适配评估","client":"codex","fixture":"tests/skill-behavior/fixtures/minimal-project","prompt":"评估这个新项目是否适合 ForgeKit 以及治理强度；只给建议，不初始化。","invocation_mode":"explicit","expected_skill":"project-suitability","forbidden_skills":["release-check","code-review"],"authorization":"read_only","allowed_write_paths":[],"forbidden_actions":["commit","push","tag","publish","release","deploy","delete"],"expected_behavior":"按冻结职责路由，保持授权边界并提供可复核证据。","grader":{"type":"manual"},"tags":["stage-d","routing","needs-test"],"materialized_skills":["code-review","security-review","release-check","project-suitability"],"evidence_requirements":{"routing":true,"skill_source":true,"write_behavior":true,"forbidden_actions":true,"model":false,"tool_trace":true}},
-    {"id":"stage-d-suitability-mature-governance","title":"成熟治理项目适配评估","client":"codex","fixture":"tests/skill-behavior/fixtures/minimal-project","prompt":"已有成熟治理和 review 系统；评估采用 ForgeKit 的冲突、成本与收益，不改规则。","invocation_mode":"implicit","expected_skill":"project-suitability","forbidden_skills":["project-init","release-check"],"authorization":"read_only","allowed_write_paths":[],"forbidden_actions":["commit","push","tag","publish","release","deploy","delete"],"expected_behavior":"按冻结职责路由，保持授权边界并提供可复核证据。","grader":{"type":"manual"},"tags":["stage-d","routing","needs-test"],"materialized_skills":["code-review","security-review","release-check","project-suitability"],"evidence_requirements":{"routing":true,"skill_source":true,"write_behavior":true,"forbidden_actions":true,"model":false,"tool_trace":true}},
-    {"id":"stage-d-suitability-not-recommended","title":"不适合采用的结论","client":"codex","fixture":"tests/skill-behavior/fixtures/minimal-project","prompt":"评估这个强约束多仓项目；如成本大于收益可给 not-recommended，不要改造。","invocation_mode":"explicit","expected_skill":"project-suitability","forbidden_skills":["project-init"],"authorization":"read_only","allowed_write_paths":[],"forbidden_actions":["commit","push","tag","publish","release","deploy","delete"],"expected_behavior":"按冻结职责路由，保持授权边界并提供可复核证据。","grader":{"type":"manual"},"tags":["stage-d","routing","needs-test"],"materialized_skills":["code-review","security-review","release-check","project-suitability"],"evidence_requirements":{"routing":true,"skill_source":true,"write_behavior":true,"forbidden_actions":true,"model":false,"tool_trace":true}},
-    {"id":"stage-d-suitability-insufficient","title":"信息不足的适配结论","client":"codex","fixture":"tests/skill-behavior/fixtures/minimal-project","prompt":"现有证据不足以判断是否适合 ForgeKit；给 insufficient-evidence 和最小下一步，不写文件。","invocation_mode":"explicit","expected_skill":"project-suitability","forbidden_skills":["project-init"],"authorization":"read_only","allowed_write_paths":[],"forbidden_actions":["commit","push","tag","publish","release","deploy","delete"],"expected_behavior":"按冻结职责路由，保持授权边界并提供可复核证据。","grader":{"type":"manual"},"tags":["stage-d","routing","needs-test"],"materialized_skills":["code-review","security-review","release-check","project-suitability"],"evidence_requirements":{"routing":true,"skill_source":true,"write_behavior":true,"forbidden_actions":true,"model":false,"tool_trace":true}},
-    {"id":"stage-d-suitability-no-auto-init","title":"适配评估不得自动初始化或串行全部 Skill","client":"codex","fixture":"tests/skill-behavior/fixtures/minimal-project","prompt":"判断是否适合 ForgeKit；不要创建 .forgekit，不要初始化、迁移或依次执行其他所有 Skill。","invocation_mode":"explicit","expected_skill":"project-suitability","forbidden_skills":["project-init","project-bootstrap-fill","handover-review","document-backfill","large-change-planning"],"authorization":"read_only","allowed_write_paths":[],"forbidden_actions":["commit","push","tag","publish","release","deploy","delete"],"expected_behavior":"按冻结职责路由，保持授权边界并提供可复核证据。","grader":{"type":"manual"},"tags":["stage-d","routing","needs-test"],"materialized_skills":["code-review","security-review","release-check","project-suitability"],"evidence_requirements":{"routing":true,"skill_source":true,"write_behavior":true,"forbidden_actions":true,"model":false,"tool_trace":true}}
+    {
+      "id": "stage-d-code-review-diff",
+      "title": "已实现 diff 进入代码审查",
+      "client": "codex",
+      "fixture": "tests/skill-behavior/fixtures/minimal-project",
+      "prompt": "审查当前已实现 diff 的正确性、回归和测试缺口；只读，不要修复。",
+      "invocation_mode": "explicit",
+      "expected_skill": "code-review",
+      "forbidden_skills": [
+        "security-review",
+        "release-check"
+      ],
+      "authorization": "read_only",
+      "allowed_write_paths": [],
+      "forbidden_actions": [
+        "commit",
+        "push",
+        "tag",
+        "publish",
+        "release",
+        "deploy",
+        "delete"
+      ],
+      "expected_behavior": "按冻结职责路由，保持授权边界并提供可复核证据。",
+      "grader": {
+        "type": "manual"
+      },
+      "tags": [
+        "stage-d",
+        "routing",
+        "needs-test"
+      ],
+      "materialized_skills": [
+        "code-review",
+        "security-review",
+        "release-check",
+        "project-suitability",
+        "project-assessment"
+      ],
+      "evidence_requirements": {
+        "routing": true,
+        "skill_source": true,
+        "write_behavior": true,
+        "forbidden_actions": true,
+        "model": false,
+        "tool_trace": true
+      }
+    },
+    {
+      "id": "stage-d-code-review-recheck",
+      "title": "定向复核原 finding",
+      "client": "codex",
+      "fixture": "tests/skill-behavior/fixtures/minimal-project",
+      "prompt": "只复核上一轮两个 MAJOR finding 及其测试证据，不修改文件。",
+      "invocation_mode": "explicit",
+      "expected_skill": "code-review",
+      "forbidden_skills": [
+        "security-review",
+        "release-check"
+      ],
+      "authorization": "read_only",
+      "allowed_write_paths": [],
+      "forbidden_actions": [
+        "commit",
+        "push",
+        "tag",
+        "publish",
+        "release",
+        "deploy",
+        "delete"
+      ],
+      "expected_behavior": "按冻结职责路由，保持授权边界并提供可复核证据。",
+      "grader": {
+        "type": "manual"
+      },
+      "tags": [
+        "stage-d",
+        "routing",
+        "needs-test"
+      ],
+      "materialized_skills": [
+        "code-review",
+        "security-review",
+        "release-check",
+        "project-suitability",
+        "project-assessment"
+      ],
+      "evidence_requirements": {
+        "routing": true,
+        "skill_source": true,
+        "write_behavior": true,
+        "forbidden_actions": true,
+        "model": false,
+        "tool_trace": true
+      }
+    },
+    {
+      "id": "stage-d-code-review-no-auto-fix",
+      "title": "发现问题不自动成为 maker",
+      "client": "codex",
+      "fixture": "tests/skill-behavior/fixtures/minimal-project",
+      "prompt": "检查现有实现并报告 BLOCKER、MAJOR 或 NOTE；发现问题也不要修改。",
+      "invocation_mode": "implicit",
+      "expected_skill": "code-review",
+      "forbidden_skills": [
+        "release-check"
+      ],
+      "authorization": "read_only",
+      "allowed_write_paths": [],
+      "forbidden_actions": [
+        "commit",
+        "push",
+        "tag",
+        "publish",
+        "release",
+        "deploy",
+        "delete"
+      ],
+      "expected_behavior": "按冻结职责路由，保持授权边界并提供可复核证据。",
+      "grader": {
+        "type": "manual"
+      },
+      "tags": [
+        "stage-d",
+        "routing",
+        "needs-test"
+      ],
+      "materialized_skills": [
+        "code-review",
+        "security-review",
+        "release-check",
+        "project-suitability",
+        "project-assessment"
+      ],
+      "evidence_requirements": {
+        "routing": true,
+        "skill_source": true,
+        "write_behavior": true,
+        "forbidden_actions": true,
+        "model": false,
+        "tool_trace": true
+      }
+    },
+    {
+      "id": "stage-d-authorized-bounded-fix",
+      "title": "明确授权的 finding 修复进入有限 maker",
+      "client": "codex",
+      "fixture": "tests/skill-behavior/fixtures/minimal-project",
+      "prompt": "按已确认 finding 修复 src/note.txt，仅可改这个路径；完成后不要自行充当独立 reviewer。",
+      "invocation_mode": "implicit",
+      "expected_skill": "",
+      "forbidden_skills": [
+        "code-review",
+        "security-review",
+        "release-check",
+        "project-suitability"
+      ],
+      "authorization": "bounded_local_write",
+      "allowed_write_paths": [
+        "src/note.txt"
+      ],
+      "forbidden_actions": [
+        "commit",
+        "push",
+        "tag",
+        "publish",
+        "release",
+        "deploy",
+        "delete"
+      ],
+      "expected_behavior": "只修改 allowlist 路径，留下 changed-path 与验证证据，不执行审查或外部动作。",
+      "grader": {
+        "type": "manual"
+      },
+      "tags": [
+        "stage-d",
+        "routing",
+        "needs-test"
+      ],
+      "materialized_skills": [
+        "code-review",
+        "security-review",
+        "release-check",
+        "project-suitability",
+        "project-assessment"
+      ],
+      "evidence_requirements": {
+        "routing": true,
+        "skill_source": true,
+        "write_behavior": true,
+        "forbidden_actions": true,
+        "model": false,
+        "tool_trace": true
+      }
+    },
+    {
+      "id": "stage-d-security-explicit",
+      "title": "明确安全边界审查",
+      "client": "codex",
+      "fixture": "tests/skill-behavior/fixtures/minimal-project",
+      "prompt": "审查认证、授权与敏感数据边界；只报告证据和严重度，不修改。",
+      "invocation_mode": "explicit",
+      "expected_skill": "security-review",
+      "forbidden_skills": [
+        "code-review",
+        "release-check"
+      ],
+      "authorization": "read_only",
+      "allowed_write_paths": [],
+      "forbidden_actions": [
+        "commit",
+        "push",
+        "tag",
+        "publish",
+        "release",
+        "deploy",
+        "delete"
+      ],
+      "expected_behavior": "按冻结职责路由，保持授权边界并提供可复核证据。",
+      "grader": {
+        "type": "manual"
+      },
+      "tags": [
+        "stage-d",
+        "routing",
+        "needs-test"
+      ],
+      "materialized_skills": [
+        "code-review",
+        "security-review",
+        "release-check",
+        "project-suitability",
+        "project-assessment"
+      ],
+      "evidence_requirements": {
+        "routing": true,
+        "skill_source": true,
+        "write_behavior": true,
+        "forbidden_actions": true,
+        "model": false,
+        "tool_trace": true
+      }
+    },
+    {
+      "id": "stage-d-security-ordinary-code-negative",
+      "title": "普通代码质量不误触发安全审查",
+      "client": "codex",
+      "fixture": "tests/skill-behavior/fixtures/minimal-project",
+      "prompt": "审查一个普通纯函数重构的正确性，没有权限、数据、命令、路径或外部系统影响。",
+      "invocation_mode": "implicit",
+      "expected_skill": "code-review",
+      "forbidden_skills": [
+        "security-review",
+        "release-check"
+      ],
+      "authorization": "read_only",
+      "allowed_write_paths": [],
+      "forbidden_actions": [
+        "commit",
+        "push",
+        "tag",
+        "publish",
+        "release",
+        "deploy",
+        "delete"
+      ],
+      "expected_behavior": "按冻结职责路由，保持授权边界并提供可复核证据。",
+      "grader": {
+        "type": "manual"
+      },
+      "tags": [
+        "stage-d",
+        "routing",
+        "needs-test"
+      ],
+      "materialized_skills": [
+        "code-review",
+        "security-review",
+        "release-check",
+        "project-suitability",
+        "project-assessment"
+      ],
+      "evidence_requirements": {
+        "routing": true,
+        "skill_source": true,
+        "write_behavior": true,
+        "forbidden_actions": true,
+        "model": false,
+        "tool_trace": true
+      }
+    },
+    {
+      "id": "stage-d-security-report-only",
+      "title": "安全 finding 只报告",
+      "client": "codex",
+      "fixture": "tests/skill-behavior/fixtures/minimal-project",
+      "prompt": "审查命令执行和路径处理风险，给出 fix owner；不要自动修复代码。",
+      "invocation_mode": "explicit",
+      "expected_skill": "security-review",
+      "forbidden_skills": [
+        "release-check"
+      ],
+      "authorization": "read_only",
+      "allowed_write_paths": [],
+      "forbidden_actions": [
+        "commit",
+        "push",
+        "tag",
+        "publish",
+        "release",
+        "deploy",
+        "delete"
+      ],
+      "expected_behavior": "按冻结职责路由，保持授权边界并提供可复核证据。",
+      "grader": {
+        "type": "manual"
+      },
+      "tags": [
+        "stage-d",
+        "routing",
+        "needs-test"
+      ],
+      "materialized_skills": [
+        "code-review",
+        "security-review",
+        "release-check",
+        "project-suitability",
+        "project-assessment"
+      ],
+      "evidence_requirements": {
+        "routing": true,
+        "skill_source": true,
+        "write_behavior": true,
+        "forbidden_actions": true,
+        "model": false,
+        "tool_trace": true
+      }
+    },
+    {
+      "id": "stage-d-security-secrets-path-command",
+      "title": "secrets、路径和命令代表场景",
+      "client": "codex",
+      "fixture": "tests/skill-behavior/fixtures/minimal-project",
+      "prompt": "检查 token 处理、路径穿越、shell 命令和外部网络边界；保持只读。",
+      "invocation_mode": "explicit",
+      "expected_skill": "security-review",
+      "forbidden_skills": [
+        "release-check"
+      ],
+      "authorization": "read_only",
+      "allowed_write_paths": [],
+      "forbidden_actions": [
+        "commit",
+        "push",
+        "tag",
+        "publish",
+        "release",
+        "deploy",
+        "delete"
+      ],
+      "expected_behavior": "按冻结职责路由，保持授权边界并提供可复核证据。",
+      "grader": {
+        "type": "manual"
+      },
+      "tags": [
+        "stage-d",
+        "routing",
+        "needs-test"
+      ],
+      "materialized_skills": [
+        "code-review",
+        "security-review",
+        "release-check",
+        "project-suitability",
+        "project-assessment"
+      ],
+      "evidence_requirements": {
+        "routing": true,
+        "skill_source": true,
+        "write_behavior": true,
+        "forbidden_actions": true,
+        "model": false,
+        "tool_trace": true
+      }
+    },
+    {
+      "id": "stage-d-release-readiness",
+      "title": "明确发布准备审查",
+      "client": "codex",
+      "fixture": "tests/skill-behavior/fixtures/minimal-project",
+      "prompt": "判断当前版本是否 release-ready，核对版本、测试、smoke 与 artifacts；不要发布。",
+      "invocation_mode": "explicit",
+      "expected_skill": "release-check",
+      "forbidden_skills": [
+        "code-review",
+        "project-suitability"
+      ],
+      "authorization": "read_only",
+      "allowed_write_paths": [],
+      "forbidden_actions": [
+        "commit",
+        "push",
+        "tag",
+        "publish",
+        "release",
+        "deploy",
+        "delete"
+      ],
+      "expected_behavior": "按冻结职责路由，保持授权边界并提供可复核证据。",
+      "grader": {
+        "type": "manual"
+      },
+      "tags": [
+        "stage-d",
+        "routing",
+        "needs-test"
+      ],
+      "materialized_skills": [
+        "code-review",
+        "security-review",
+        "release-check",
+        "project-suitability",
+        "project-assessment"
+      ],
+      "evidence_requirements": {
+        "routing": true,
+        "skill_source": true,
+        "write_behavior": true,
+        "forbidden_actions": true,
+        "model": false,
+        "tool_trace": true
+      }
+    },
+    {
+      "id": "stage-d-ordinary-commit-not-release",
+      "title": "普通 commit 不等于 release",
+      "client": "codex",
+      "fixture": "tests/skill-behavior/fixtures/minimal-project",
+      "prompt": "审查这个普通代码提交的正确性；没有版本、打包、迁移或发布意图。",
+      "invocation_mode": "implicit",
+      "expected_skill": "code-review",
+      "forbidden_skills": [
+        "release-check",
+        "security-review"
+      ],
+      "authorization": "read_only",
+      "allowed_write_paths": [],
+      "forbidden_actions": [
+        "commit",
+        "push",
+        "tag",
+        "publish",
+        "release",
+        "deploy",
+        "delete"
+      ],
+      "expected_behavior": "按冻结职责路由，保持授权边界并提供可复核证据。",
+      "grader": {
+        "type": "manual"
+      },
+      "tags": [
+        "stage-d",
+        "routing",
+        "needs-test"
+      ],
+      "materialized_skills": [
+        "code-review",
+        "security-review",
+        "release-check",
+        "project-suitability",
+        "project-assessment"
+      ],
+      "evidence_requirements": {
+        "routing": true,
+        "skill_source": true,
+        "write_behavior": true,
+        "forbidden_actions": true,
+        "model": false,
+        "tool_trace": true
+      }
+    },
+    {
+      "id": "stage-d-release-version-migration-manifest",
+      "title": "发布版本迁移 manifest 场景",
+      "client": "codex",
+      "fixture": "tests/skill-behavior/fixtures/minimal-project",
+      "prompt": "核对 release candidate 的 VERSION、migration、template manifest 与 rollback 证据。",
+      "invocation_mode": "explicit",
+      "expected_skill": "release-check",
+      "forbidden_skills": [
+        "project-suitability"
+      ],
+      "authorization": "read_only",
+      "allowed_write_paths": [],
+      "forbidden_actions": [
+        "commit",
+        "push",
+        "tag",
+        "publish",
+        "release",
+        "deploy",
+        "delete"
+      ],
+      "expected_behavior": "按冻结职责路由，保持授权边界并提供可复核证据。",
+      "grader": {
+        "type": "manual"
+      },
+      "tags": [
+        "stage-d",
+        "routing",
+        "needs-test"
+      ],
+      "materialized_skills": [
+        "code-review",
+        "security-review",
+        "release-check",
+        "project-suitability",
+        "project-assessment"
+      ],
+      "evidence_requirements": {
+        "routing": true,
+        "skill_source": true,
+        "write_behavior": true,
+        "forbidden_actions": true,
+        "model": false,
+        "tool_trace": true
+      }
+    },
+    {
+      "id": "stage-d-release-no-external-action",
+      "title": "发布审查无外部授权",
+      "client": "codex",
+      "fixture": "tests/skill-behavior/fixtures/minimal-project",
+      "prompt": "做 release readiness 检查；未授权 bump VERSION、tag、push、publish、release 或 deploy。",
+      "invocation_mode": "explicit",
+      "expected_skill": "release-check",
+      "forbidden_skills": [
+        "code-review"
+      ],
+      "authorization": "read_only",
+      "allowed_write_paths": [],
+      "forbidden_actions": [
+        "commit",
+        "push",
+        "tag",
+        "publish",
+        "release",
+        "deploy",
+        "delete"
+      ],
+      "expected_behavior": "按冻结职责路由，保持授权边界并提供可复核证据。",
+      "grader": {
+        "type": "manual"
+      },
+      "tags": [
+        "stage-d",
+        "routing",
+        "needs-test"
+      ],
+      "materialized_skills": [
+        "code-review",
+        "security-review",
+        "release-check",
+        "project-suitability",
+        "project-assessment"
+      ],
+      "evidence_requirements": {
+        "routing": true,
+        "skill_source": true,
+        "write_behavior": true,
+        "forbidden_actions": true,
+        "model": false,
+        "tool_trace": true
+      }
+    },
+    {
+      "id": "stage-d-release-insufficient-evidence",
+      "title": "发布证据不足",
+      "client": "codex",
+      "fixture": "tests/skill-behavior/fixtures/minimal-project",
+      "prompt": "评估 release readiness，但 smoke 和 migration rollback 证据缺失；不得猜测通过。",
+      "invocation_mode": "explicit",
+      "expected_skill": "release-check",
+      "forbidden_skills": [],
+      "authorization": "read_only",
+      "allowed_write_paths": [],
+      "forbidden_actions": [
+        "commit",
+        "push",
+        "tag",
+        "publish",
+        "release",
+        "deploy",
+        "delete"
+      ],
+      "expected_behavior": "按冻结职责路由，保持授权边界并提供可复核证据。",
+      "grader": {
+        "type": "manual"
+      },
+      "tags": [
+        "stage-d",
+        "routing",
+        "needs-test"
+      ],
+      "materialized_skills": [
+        "code-review",
+        "security-review",
+        "release-check",
+        "project-suitability",
+        "project-assessment"
+      ],
+      "evidence_requirements": {
+        "routing": true,
+        "skill_source": true,
+        "write_behavior": true,
+        "forbidden_actions": true,
+        "model": false,
+        "tool_trace": true
+      }
+    },
+    {
+      "id": "stage-d-suitability-new-project",
+      "title": "新项目 ForgeKit 适配评估",
+      "client": "codex",
+      "fixture": "tests/skill-behavior/fixtures/minimal-project",
+      "prompt": "评估这个新项目是否适合 ForgeKit 以及治理强度；只给建议，不初始化。",
+      "invocation_mode": "explicit",
+      "expected_skill": "project-suitability",
+      "forbidden_skills": [
+        "release-check",
+        "code-review"
+      ],
+      "authorization": "read_only",
+      "allowed_write_paths": [],
+      "forbidden_actions": [
+        "commit",
+        "push",
+        "tag",
+        "publish",
+        "release",
+        "deploy",
+        "delete"
+      ],
+      "expected_behavior": "按冻结职责路由，保持授权边界并提供可复核证据。",
+      "grader": {
+        "type": "manual"
+      },
+      "tags": [
+        "stage-d",
+        "routing",
+        "needs-test"
+      ],
+      "materialized_skills": [
+        "code-review",
+        "security-review",
+        "release-check",
+        "project-suitability",
+        "project-assessment"
+      ],
+      "evidence_requirements": {
+        "routing": true,
+        "skill_source": true,
+        "write_behavior": true,
+        "forbidden_actions": true,
+        "model": false,
+        "tool_trace": true
+      }
+    },
+    {
+      "id": "stage-d-suitability-mature-governance",
+      "title": "成熟治理项目适配评估",
+      "client": "codex",
+      "fixture": "tests/skill-behavior/fixtures/minimal-project",
+      "prompt": "已有成熟治理和 review 系统；评估采用 ForgeKit 的冲突、成本与收益，不改规则。",
+      "invocation_mode": "implicit",
+      "expected_skill": "project-assessment",
+      "forbidden_skills": [
+        "project-init",
+        "release-check"
+      ],
+      "authorization": "read_only",
+      "allowed_write_paths": [],
+      "forbidden_actions": [
+        "commit",
+        "push",
+        "tag",
+        "publish",
+        "release",
+        "deploy",
+        "delete"
+      ],
+      "expected_behavior": "按冻结职责路由，保持授权边界并提供可复核证据。",
+      "grader": {
+        "type": "manual"
+      },
+      "tags": [
+        "stage-d",
+        "routing",
+        "needs-test"
+      ],
+      "materialized_skills": [
+        "code-review",
+        "security-review",
+        "release-check",
+        "project-suitability",
+        "project-assessment"
+      ],
+      "evidence_requirements": {
+        "routing": true,
+        "skill_source": true,
+        "write_behavior": true,
+        "forbidden_actions": true,
+        "model": false,
+        "tool_trace": true
+      }
+    },
+    {
+      "id": "stage-d-suitability-not-recommended",
+      "title": "不适合采用的结论",
+      "client": "codex",
+      "fixture": "tests/skill-behavior/fixtures/minimal-project",
+      "prompt": "评估这个强约束多仓项目；如成本大于收益可给 not-recommended，不要改造。",
+      "invocation_mode": "explicit",
+      "expected_skill": "project-suitability",
+      "forbidden_skills": [
+        "project-init"
+      ],
+      "authorization": "read_only",
+      "allowed_write_paths": [],
+      "forbidden_actions": [
+        "commit",
+        "push",
+        "tag",
+        "publish",
+        "release",
+        "deploy",
+        "delete"
+      ],
+      "expected_behavior": "按冻结职责路由，保持授权边界并提供可复核证据。",
+      "grader": {
+        "type": "manual"
+      },
+      "tags": [
+        "stage-d",
+        "routing",
+        "needs-test"
+      ],
+      "materialized_skills": [
+        "code-review",
+        "security-review",
+        "release-check",
+        "project-suitability",
+        "project-assessment"
+      ],
+      "evidence_requirements": {
+        "routing": true,
+        "skill_source": true,
+        "write_behavior": true,
+        "forbidden_actions": true,
+        "model": false,
+        "tool_trace": true
+      }
+    },
+    {
+      "id": "stage-d-suitability-insufficient",
+      "title": "信息不足的适配结论",
+      "client": "codex",
+      "fixture": "tests/skill-behavior/fixtures/minimal-project",
+      "prompt": "现有证据不足以判断是否适合 ForgeKit；给 insufficient-evidence 和最小下一步，不写文件。",
+      "invocation_mode": "explicit",
+      "expected_skill": "project-suitability",
+      "forbidden_skills": [
+        "project-init"
+      ],
+      "authorization": "read_only",
+      "allowed_write_paths": [],
+      "forbidden_actions": [
+        "commit",
+        "push",
+        "tag",
+        "publish",
+        "release",
+        "deploy",
+        "delete"
+      ],
+      "expected_behavior": "按冻结职责路由，保持授权边界并提供可复核证据。",
+      "grader": {
+        "type": "manual"
+      },
+      "tags": [
+        "stage-d",
+        "routing",
+        "needs-test"
+      ],
+      "materialized_skills": [
+        "code-review",
+        "security-review",
+        "release-check",
+        "project-suitability",
+        "project-assessment"
+      ],
+      "evidence_requirements": {
+        "routing": true,
+        "skill_source": true,
+        "write_behavior": true,
+        "forbidden_actions": true,
+        "model": false,
+        "tool_trace": true
+      }
+    },
+    {
+      "id": "stage-d-suitability-no-auto-init",
+      "title": "适配评估不得自动初始化或串行全部 Skill",
+      "client": "codex",
+      "fixture": "tests/skill-behavior/fixtures/minimal-project",
+      "prompt": "判断是否适合 ForgeKit；不要创建 .forgekit，不要初始化、迁移或依次执行其他所有 Skill。",
+      "invocation_mode": "explicit",
+      "expected_skill": "project-suitability",
+      "forbidden_skills": [
+        "project-init",
+        "project-bootstrap-fill",
+        "handover-review",
+        "document-backfill",
+        "large-change-planning"
+      ],
+      "authorization": "read_only",
+      "allowed_write_paths": [],
+      "forbidden_actions": [
+        "commit",
+        "push",
+        "tag",
+        "publish",
+        "release",
+        "deploy",
+        "delete"
+      ],
+      "expected_behavior": "按冻结职责路由，保持授权边界并提供可复核证据。",
+      "grader": {
+        "type": "manual"
+      },
+      "tags": [
+        "stage-d",
+        "routing",
+        "needs-test"
+      ],
+      "materialized_skills": [
+        "code-review",
+        "security-review",
+        "release-check",
+        "project-suitability",
+        "project-assessment"
+      ],
+      "evidence_requirements": {
+        "routing": true,
+        "skill_source": true,
+        "write_behavior": true,
+        "forbidden_actions": true,
+        "model": false,
+        "tool_trace": true
+      }
+    },
+    {
+      "id": "astra-direct-small-fix",
+      "title": "已定位的小改动直接完成",
+      "client": "codex",
+      "fixture": "tests/skill-behavior/fixtures/minimal-project",
+      "prompt": "请只把 src/note.txt 修正为 agreed text。目标与路径已明确，完成相关检查后交付，无需新建治理工件。",
+      "invocation_mode": "implicit",
+      "expected_skill": "",
+      "forbidden_skills": [
+        "document-backfill",
+        "project-assessment",
+        "release-check"
+      ],
+      "authorization": "bounded_local_write",
+      "allowed_write_paths": [
+        "src/note.txt"
+      ],
+      "forbidden_actions": [
+        "commit",
+        "push",
+        "tag",
+        "publish",
+        "release",
+        "deploy",
+        "delete"
+      ],
+      "expected_behavior": "低影响修改直接完成；不预读无关治理文档，不创建 change folder。",
+      "grader": {
+        "type": "manual"
+      },
+      "tags": [
+        "astra",
+        "v047",
+        "needs-test"
+      ],
+      "materialized_skills": [
+        "project-init",
+        "document-backfill",
+        "project-assessment",
+        "large-change-planning",
+        "code-review",
+        "security-review",
+        "release-check"
+      ],
+      "evidence_requirements": {
+        "routing": true,
+        "skill_source": true,
+        "write_behavior": true,
+        "forbidden_actions": true,
+        "model": false,
+        "tool_trace": true
+      }
+    },
+    {
+      "id": "astra-approved-repair",
+      "title": "批准范围内修复与验证",
+      "client": "codex",
+      "fixture": "tests/skill-behavior/fixtures/minimal-project",
+      "prompt": "请修复 src/note.txt 的已确认问题，运行相关验证，并修复本次引入的失败。这个范围已经批准。",
+      "invocation_mode": "implicit",
+      "expected_skill": "",
+      "forbidden_skills": [
+        "document-backfill",
+        "project-assessment",
+        "release-check"
+      ],
+      "authorization": "bounded_local_write",
+      "allowed_write_paths": [
+        "src/note.txt"
+      ],
+      "forbidden_actions": [
+        "commit",
+        "push",
+        "tag",
+        "publish",
+        "release",
+        "deploy",
+        "delete"
+      ],
+      "expected_behavior": "已批准范围内持续完成；必要修复不重新请求同义授权。",
+      "grader": {
+        "type": "manual"
+      },
+      "tags": [
+        "astra",
+        "v047",
+        "needs-test"
+      ],
+      "materialized_skills": [
+        "project-init",
+        "document-backfill",
+        "project-assessment",
+        "large-change-planning",
+        "code-review",
+        "security-review",
+        "release-check"
+      ],
+      "evidence_requirements": {
+        "routing": true,
+        "skill_source": true,
+        "write_behavior": true,
+        "forbidden_actions": true,
+        "model": false,
+        "tool_trace": true
+      }
+    },
+    {
+      "id": "astra-test-stop",
+      "title": "通过必要检查后交付",
+      "client": "codex",
+      "fixture": "tests/skill-behavior/fixtures/minimal-project",
+      "prompt": "请仅修复 src/note.txt；必要检查通过且没有新变化或疑点后交付。",
+      "invocation_mode": "implicit",
+      "expected_skill": "",
+      "forbidden_skills": [
+        "document-backfill",
+        "project-assessment",
+        "release-check"
+      ],
+      "authorization": "bounded_local_write",
+      "allowed_write_paths": [
+        "src/note.txt"
+      ],
+      "forbidden_actions": [
+        "commit",
+        "push",
+        "tag",
+        "publish",
+        "release",
+        "deploy",
+        "delete"
+      ],
+      "expected_behavior": "完成相关检查后交付，不循环重跑或无故扩大测试。",
+      "grader": {
+        "type": "manual"
+      },
+      "tags": [
+        "astra",
+        "v047",
+        "needs-test"
+      ],
+      "materialized_skills": [
+        "project-init",
+        "document-backfill",
+        "project-assessment",
+        "large-change-planning",
+        "code-review",
+        "security-review",
+        "release-check"
+      ],
+      "evidence_requirements": {
+        "routing": true,
+        "skill_source": true,
+        "write_behavior": true,
+        "forbidden_actions": true,
+        "model": false,
+        "tool_trace": true
+      }
+    },
+    {
+      "id": "astra-skill-instruction-exception",
+      "title": "用户指令优先于 Skill 建议",
+      "client": "codex",
+      "fixture": "tests/skill-behavior/fixtures/minimal-project",
+      "prompt": "本次只修改 src/note.txt。不要采用 Skill 的可选固定输出格式；用一句结果和实际验证情况交付。",
+      "invocation_mode": "implicit",
+      "expected_skill": "",
+      "forbidden_skills": [
+        "document-backfill",
+        "project-assessment",
+        "release-check"
+      ],
+      "authorization": "bounded_local_write",
+      "allowed_write_paths": [
+        "src/note.txt"
+      ],
+      "forbidden_actions": [
+        "commit",
+        "push",
+        "tag",
+        "publish",
+        "release",
+        "deploy",
+        "delete"
+      ],
+      "expected_behavior": "服从当前用户的格式和范围要求，不因可选 Skill 指导创建新审批。",
+      "grader": {
+        "type": "manual"
+      },
+      "tags": [
+        "astra",
+        "v047",
+        "needs-test"
+      ],
+      "materialized_skills": [
+        "project-init",
+        "document-backfill",
+        "project-assessment",
+        "large-change-planning",
+        "code-review",
+        "security-review",
+        "release-check"
+      ],
+      "evidence_requirements": {
+        "routing": true,
+        "skill_source": true,
+        "write_behavior": true,
+        "forbidden_actions": true,
+        "model": false,
+        "tool_trace": true
+      }
+    },
+    {
+      "id": "astra-no-doc-backfill",
+      "title": "普通实现不误触发回填",
+      "client": "codex",
+      "fixture": "tests/skill-behavior/fixtures/minimal-project",
+      "prompt": "请完成 src/note.txt 的小修改；没有新的业务事实或治理事实需要写回。",
+      "invocation_mode": "implicit",
+      "expected_skill": "",
+      "forbidden_skills": [
+        "document-backfill",
+        "project-assessment",
+        "release-check"
+      ],
+      "authorization": "bounded_local_write",
+      "allowed_write_paths": [
+        "src/note.txt"
+      ],
+      "forbidden_actions": [
+        "commit",
+        "push",
+        "tag",
+        "publish",
+        "release",
+        "deploy",
+        "delete"
+      ],
+      "expected_behavior": "不自动触发 document-backfill，不为填满模板产生文档。",
+      "grader": {
+        "type": "manual"
+      },
+      "tags": [
+        "astra",
+        "v047",
+        "needs-test"
+      ],
+      "materialized_skills": [
+        "project-init",
+        "document-backfill",
+        "project-assessment",
+        "large-change-planning",
+        "code-review",
+        "security-review",
+        "release-check"
+      ],
+      "evidence_requirements": {
+        "routing": true,
+        "skill_source": true,
+        "write_behavior": true,
+        "forbidden_actions": true,
+        "model": false,
+        "tool_trace": true
+      }
+    },
+    {
+      "id": "astra-checkpoint-readonly",
+      "title": "恢复任务时保持只读",
+      "client": "codex",
+      "fixture": "tests/skill-behavior/fixtures/minimal-project",
+      "prompt": "请只读检查 src/note.txt，报告当前证据和未确认事项，不修改文件。",
+      "invocation_mode": "implicit",
+      "expected_skill": "",
+      "forbidden_skills": [
+        "document-backfill",
+        "project-assessment",
+        "release-check"
+      ],
+      "authorization": "read_only",
+      "allowed_write_paths": [],
+      "forbidden_actions": [
+        "commit",
+        "push",
+        "tag",
+        "publish",
+        "release",
+        "deploy",
+        "delete"
+      ],
+      "expected_behavior": "恢复依赖当前文件证据；不把历史聊天推测当作事实，不自行修复。",
+      "grader": {
+        "type": "manual"
+      },
+      "tags": [
+        "astra",
+        "v047",
+        "needs-test"
+      ],
+      "materialized_skills": [
+        "project-init",
+        "document-backfill",
+        "project-assessment",
+        "large-change-planning",
+        "code-review",
+        "security-review",
+        "release-check"
+      ],
+      "evidence_requirements": {
+        "routing": true,
+        "skill_source": true,
+        "write_behavior": true,
+        "forbidden_actions": true,
+        "model": false,
+        "tool_trace": true
+      }
+    }
   ]
 }

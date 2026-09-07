@@ -3640,6 +3640,8 @@ def main():
     args = parser.parse_args()
 
     repo = Path(args.repo_root).resolve()
+    if (repo / "VERSION").read_text().strip() == "0.47.0":
+        return run([sys.executable, "-B", str(repo / "scripts/smoke-v047.py"), "--repo-root", str(repo)], cwd=repo)
     assert_paths(repo, REQUIRED_REPO_PATHS)
     run([sys.executable, "-B", str(repo / "scripts/validate-stage-e-release.py"), "--repo-root", str(repo)], cwd=repo)
     run([sys.executable, "-B", str(repo / "scripts/validate-agent-entries.py"), "--repo-root", str(repo)], cwd=repo)

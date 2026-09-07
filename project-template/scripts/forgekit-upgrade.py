@@ -1419,6 +1419,11 @@ def command_apply(project_root, migration_root, safe, review_needed_policy, lang
     migrations = load_migrations(migration_root)
     current = parse_version(state["forgekit_version"])
     pending, target = pending_migrations(current, migrations)
+    if any(m.get('schema_version') == 2 for m in pending):
+        from structured_upgrade import build_plan, apply_plan
+        result = apply_plan(project_root, build_plan(project_root, state, pending), fault=fault_injector)
+        print(json.dumps(result, ensure_ascii=False))
+        return result
     if not pending:
         print(msg(lang, "no_migration"))
         return
@@ -1515,18 +1520,58 @@ def main():
         command = subparsers.add_parser(name)
         command.add_argument("--repo-root", default=".", help="Target project root")
         command.add_argument("--migration-root", help="Migration package directory")
+        command.add_argument("--json", action="store_true", help="Machine-readable upgrade plan")
+        command.add_argument("--entry-resolutions", help="Explicit reviewed full-entry preservation packet")
     apply_parser = subparsers.add_parser("apply")
     apply_parser.add_argument("--repo-root", default=".", help="Target project root")
     apply_parser.add_argument("--migration-root", help="Migration package directory")
     apply_parser.add_argument("--safe", action="store_true", help="Apply safe actions only")
     apply_parser.add_argument("--review-needed-policy", choices=sorted(REVIEW_POLICIES), default="ask", help="How to resolve review-needed safe migration items")
     apply_parser.add_argument("--lang", choices=sorted(LANGUAGES), default="en-US", help="Display language for user-facing output")
+    apply_parser.add_argument("--json", action="store_true", help="Machine-readable result")
+    apply_parser.add_argument("--plan-hash", help="Require the previously reviewed plan hash")
+    apply_parser.add_argument("--entry-resolutions", help="Explicit reviewed full-entry preservation packet")
     args = parser.parse_args()
 
     project_root = Path(args.repo_root).resolve()
     if not project_root.is_dir():
         fail(f"Project root does not exist: {project_root}")
     migration_root = Path(args.migration_root).resolve() if args.migration_root else Path(__file__).resolve().parents[1] / "migrations"
+    state, status = state_status(project_root)
+    if status == 'supported':
+        pending, target = pending_migrations(parse_version(state['forgekit_version']), load_migrations(migration_root))
+        if not pending and args.json and not args.entry_resolutions:
+            print(json.dumps({'schema_version': 2, 'status': 'current', 'from': state['forgekit_version'],
+                              'to': state['forgekit_version'], 'actions': [], 'conflicts': []}))
+            return
+        if any(m.get('schema_version') == 2 for m in pending):
+            from structured_upgrade import build_plan, apply_plan, Conflict
+            try:
+                plan = build_plan(project_root, state, pending, args.entry_resolutions)
+                result = plan['public']
+                if args.command == 'apply':
+                    if not args.safe:
+                        raise Conflict('apply requires --safe')
+                    result = apply_plan(project_root, plan, getattr(args, 'plan_hash', None))
+                if args.json or args.command == 'apply':
+                    print(json.dumps(result, ensure_ascii=False))
+                else:
+                    print(f"Status: {result['status']}\nFrom: {result['from']}\nTo: {result['to']}")
+                    print(f"Safe actions: {len(result['actions'])}\nManual actions: {len(result['conflicts'])}")
+                    for conflict in result['conflicts']:
+                        print(f"CONFLICT: {conflict['target']}: {conflict['reason']}")
+                if result['conflicts']:
+                    raise SystemExit(2)
+            except Conflict as exc:
+                print(json.dumps({'status': 'conflict', 'reason': str(exc)}, ensure_ascii=False))
+                raise SystemExit(2)
+            except (OSError, ValueError) as exc:
+                print(json.dumps({'status': 'error', 'reason': str(exc)}, ensure_ascii=False))
+                raise SystemExit(2)
+            return
+    if args.entry_resolutions:
+        print(json.dumps({'status': 'conflict', 'reason': 'Entry resolutions require a pending structured upgrade'}))
+        raise SystemExit(2)
     if args.command == "check":
         command_check(project_root, migration_root)
     elif args.command == "plan":

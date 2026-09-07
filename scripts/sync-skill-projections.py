@@ -119,15 +119,15 @@ def load_plan(repo_root: Path, manifest_relative: str) -> list[Projection]:
         raise ProjectionError(f"invalid manifest JSON: {exc}") from exc
     if not isinstance(data, dict) or set(data) != {"schema_version", "source_root", "target_root", "entries"}:
         raise ProjectionError("manifest must contain only schema_version, source_root, target_root, and entries")
-    if data["schema_version"] != 1:
-        raise ProjectionError("manifest schema_version must be 1")
+    if data["schema_version"] not in (1, 2):
+        raise ProjectionError("manifest schema_version must be 1 or 2")
     if data["source_root"] != EXPECTED_SOURCE_ROOT or data["target_root"] != EXPECTED_TARGET_ROOT:
         raise ProjectionError(
             f"manifest roots must be {EXPECTED_SOURCE_ROOT!r} and {EXPECTED_TARGET_ROOT!r}"
         )
     entries = data["entries"]
-    if not isinstance(entries, list) or len(entries) != 9:
-        raise ProjectionError("manifest entries must contain exactly nine Skills")
+    if not isinstance(entries, list) or not entries:
+        raise ProjectionError("manifest entries must contain explicit Skills")
     plan: list[Projection] = []
     skills: set[str] = set()
     targets: set[str] = set()
@@ -139,7 +139,9 @@ def load_plan(repo_root: Path, manifest_relative: str) -> list[Projection]:
             raise ProjectionError(f"duplicate Skill entry: {skill}")
         skills.add(skill)
         managed_files = entry["managed_files"]
-        if managed_files != EXPECTED_MANAGED_FILES:
+        if (not isinstance(managed_files, list) or len(set(managed_files)) != len(managed_files)
+                or not set(EXPECTED_MANAGED_FILES).issubset(managed_files)
+                or any(name not in EXPECTED_MANAGED_FILES and not (name.startswith('references/') and name.endswith('.md')) for name in managed_files)):
             raise ProjectionError(
                 f"Skill {skill} must manage exactly {EXPECTED_MANAGED_FILES!r}, actual {managed_files!r}"
             )

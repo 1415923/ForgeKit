@@ -150,15 +150,15 @@ def check_duplicates(findings, docs):
 
 
 def check_router_boundaries(findings, docs, docs_root):
-    router_path = docs_root / "workflow-router.md"
+    router_path = docs_root / "usage-playbook.md"
     if not router_path.is_file():
-        add_finding(findings, "warning", "workflow-router.md", "missing-router", "workflow-router.md is missing.", "Install or merge the v0.32+ workflow-router.md template.")
+        add_finding(findings, "warning", "usage-playbook.md", "missing-router", "usage-playbook.md is missing.", "Install or merge the v0.32+ usage-playbook.md template.")
         return
     router = read_text(router_path)
-    required = ["Read Targets", "Write Targets", "Do Not Write", "Required Output"]
+    required = ["document-responsibility", "TODO_REVIEW", "project-maintenance"]
     missing = [item for item in required if item not in router]
     if missing:
-        add_finding(findings, "warning", "workflow-router.md", "router-incomplete", "workflow-router.md is missing required sections: " + ", ".join(missing), "Merge the latest workflow-router.md template.")
+        add_finding(findings, "warning", "usage-playbook.md", "router-incomplete", "usage-playbook.md is missing required sections: " + ", ".join(missing), "Merge the latest usage-playbook.md template.")
 
     if "Original Text" in docs.get("requirements", ""):
         add_finding(findings, "warning", "requirements.md", "router-boundary", "requirements.md appears to contain Original Text.", "workflow-router says source text belongs in task-intake.md; keep requirements to stable facts.")
@@ -253,7 +253,7 @@ def write_report(project_root, report_path, docs_root_rel, findings):
         "- Keep `testing.md` as a verification manual; move one-off run output to `work-log.md` or `changes/<id>/verification.md`.",
         "- Keep `changelog.md` to user/version-visible changes, not daily work history.",
         "- Replace duplicate long facts with `Source ID`, `Task ID`, or links.",
-        "- Review `workflow-router.md` before editing managed docs.",
+        "- Review `usage-playbook.md` before editing managed docs.",
         "",
         "## Non-Goals",
         "",

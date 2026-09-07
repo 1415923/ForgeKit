@@ -1,6 +1,6 @@
 interface:
-  display_name: "Security Review"
-  short_description: "Audit real security boundaries read-only"
-  default_prompt: |-
-    $security-review
-    Review the specified security boundary and report canonical impact severity and Blocking independently, with evidence, scoped failure paths, and verification gaps, without modifying files.
+  display_name: "security-review"
+  short_description: "security review"
+  default_prompt: "$security-review\n\nReview concrete security boundaries, sensitive data or untrusted inputs. Not a generic quality review."
+policy:
+  allow_implicit_invocation: true

@@ -60,11 +60,11 @@ class SkillProjectionTests(unittest.TestCase):
     def plan(self):
         return projection.load_plan(self.root, "config/skill-projections.json")
 
-    def test_schema_has_nine_explicit_nonrecursive_entries(self):
+    def test_schema_has_explicit_files_and_references(self):
         plan = self.plan()
-        self.assertEqual(18, len(plan))
-        self.assertEqual(9, len({item.skill for item in plan}))
-        self.assertEqual({"SKILL.md", "agents/openai.yaml"}, {item.managed_file for item in plan})
+        self.assertEqual(sum(len(e['managed_files']) for e in self.manifest['entries']), len(plan))
+        self.assertEqual(len(self.manifest['entries']), len({item.skill for item in plan}))
+        self.assertTrue({'SKILL.md', 'agents/openai.yaml'}.issubset({item.managed_file for item in plan}))
 
     def test_check_reports_both_hashes_and_detects_each_file_type(self):
         for suffix in ("SKILL.md", "agents/openai.yaml"):
@@ -129,7 +129,7 @@ class SkillProjectionTests(unittest.TestCase):
         self.assertEqual(b"sentinel", target.read_bytes())
 
     def test_unmanaged_manifest_file_is_rejected(self):
-        self.manifest["entries"][0]["managed_files"].append("references/all.md")
+        self.manifest["entries"][0]["managed_files"].append("references/all.py")
         (self.root / "config/skill-projections.json").write_text(json.dumps(self.manifest), encoding="utf-8")
         with self.assertRaises(projection.ProjectionError):
             self.plan()

@@ -23,7 +23,7 @@ FORBIDDEN_FILES = {
     "AGENTS.md",
     "CLAUDE.md",
     "archive-capsule.md",
-    "workflow-router.md",
+    "usage-playbook.md",
     "document-responsibility.md",
     "scoped-docs.md",
     "project-maintenance.md",

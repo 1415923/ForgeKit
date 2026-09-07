@@ -1,6 +1,6 @@
 ---
 name: large-change-planning
-description: Plan a high-impact or genuinely multi-stage change whose trust boundary, public contract, migration, security, rollback, external coordination, or evidence uncertainty requires frozen scope and staged authorization. Do not trigger from file or module count alone.
+description: Plan changes with material trust, compatibility, migration or recovery impact. Do not trigger from file count.
 ---
 
 # Large Change Planning

@@ -1,6 +1,6 @@
 ---
 name: code-review
-description: Review an existing implementation, diff, tests, or prior review findings for correctness, regressions, boundary conditions, and evidence gaps. Use for initial code review, independent checker work, or targeted findings recheck. Do not use to implement a feature, perform a full security audit, or decide release readiness.
+description: Review implemented code, diffs or named findings for correctness and regressions. Read-only; no automatic repair.
 ---
 
 # Code Review
@@ -9,7 +9,7 @@ description: Review an existing implementation, diff, tests, or prior review fin
 
 Use this Skill when the user asks to review code or an existing diff, validate implementation evidence, perform an independent checker pass, or recheck named findings.
 
-Do not use it as the maker for a requested implementation. Route a primary security audit to `security-review`, release readiness to `release-check`, project takeover to `handover-review`, and ForgeKit adoption fit to `project-suitability`. Select only the Skill or Skills justified by the actual intent; these review Skills are not a mandatory pipeline.
+Do not use it as the maker for a requested implementation. Route a primary security audit to `security-review`, release readiness to `release-check`, project takeover to `project-assessment`, and ForgeKit adoption fit to `project-assessment`. Select only the Skill or Skills justified by the actual intent; these review Skills are not a mandatory pipeline.
 
 ## Default Mode: Read-Only
 

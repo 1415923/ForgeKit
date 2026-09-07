@@ -1,0 +1,6 @@
+interface:
+  display_name: "project-assessment"
+  short_description: "project assessment"
+  default_prompt: "$project-assessment\n\nAssess ForgeKit adoption fit or audit an existing project for takeover. Read-only; no automatic adoption or repair."
+policy:
+  allow_implicit_invocation: true

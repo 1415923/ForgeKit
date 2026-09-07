@@ -1,0 +1,17 @@
+{
+  "schema_version": 1,
+  "enabled": false,
+  "workspace": {
+    "id": "TODO_REVIEW",
+    "name": "TODO_REVIEW",
+    "docs_path": ".forgekit/docs",
+    "projects_path": ".forgekit/projects",
+    "artifact_root": "artifacts",
+    "archive_root": ".forgekit/archive",
+    "docs_profile": "workspace-full",
+    "default_read_scope": "workspace"
+  },
+  "projects": [],
+  "repos": [],
+  "artifacts": []
+}

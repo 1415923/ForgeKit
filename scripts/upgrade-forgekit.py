@@ -21,7 +21,7 @@ versioning = _load_versioning_module()
 CORE_REVIEW_TARGETS = {
     "AGENTS.md",
     "CLAUDE.md",
-    ".codex/rules.md",
+    "governance/agent-entry-contract.md",
     ".forgekit/docs/document-responsibility.md",
     ".forgekit/docs/codebase-map.md",
     ".forgekit/docs/task-intake.md",
@@ -269,7 +269,7 @@ def render_legacy_inventory(project_root, boundary, entries):
     paths = [
         "AGENTS.md",
         "CLAUDE.md",
-        ".codex/rules.md",
+        "governance/agent-entry-contract.md",
         ".forgekit/project-boundary.yml",
         ".forgekit/docs/document-responsibility.md",
         ".forgekit/docs/codebase-map.md",

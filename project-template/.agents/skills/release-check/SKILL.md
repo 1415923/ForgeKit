@@ -1,6 +1,6 @@
 ---
 name: release-check
-description: Assess release readiness for an explicit release, version bump, migration, packaging, tag, release-candidate, or publication task. Use to verify version and artifact consistency, migrations, manifests, tests, smoke evidence, rollback, and release gates. Do not trigger for an ordinary commit or daily implementation task.
+description: Assess an explicit release candidate and its evidence. Does not publish or treat ordinary commits as releases.
 ---
 
 # Release Check
@@ -9,7 +9,7 @@ description: Assess release readiness for an explicit release, version bump, mig
 
 Use this Skill only when the user intends a release, version bump, migration, package, tag, release candidate, publication, or release-readiness decision.
 
-An ordinary commit, code change, or code review is not a release. Route implementation correctness to `code-review`, an actual security boundary to `security-review`, and ForgeKit adoption fit to `project-suitability`. Do not run all Stage D Skills for every release or project task.
+An ordinary commit, code change, or code review is not a release. Route implementation correctness to `code-review`, an actual security boundary to `security-review`, and ForgeKit adoption fit to `project-assessment`. Do not run all review Skills for every release or project task.
 
 ## Default Mode: Read-Only
 

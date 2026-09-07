@@ -1,4 +1,6 @@
 interface:
-  display_name: "Handover Review"
-  short_description: "Audit and stabilize inherited projects"
-  default_prompt: "$handover-review\n\nAudit this inherited project read-only, distinguish confirmed, unknown, conflicting, and risky evidence, and identify whether work can safely continue without modifying implementation."
+  display_name: "handover-review"
+  short_description: "handover review"
+  default_prompt: "$handover-review\n\nUse the takeover branch of project-assessment."
+policy:
+  allow_implicit_invocation: false

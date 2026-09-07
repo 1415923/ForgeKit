@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 import argparse
+import base64
 import datetime as _dt
 import hashlib
 import json
@@ -84,8 +85,8 @@ def projection_targets(repo_root):
                 fail(f"Duplicate skill projection target: {target}")
             seen.add(target)
             targets.append(target.removeprefix("project-template/"))
-    if len(targets) != 18:
-        fail(f"skill projection manifest must declare exactly 18 target files, actual {len(targets)}")
+    if not targets:
+        fail("skill projection manifest must declare explicit target files")
     return targets
 
 
@@ -112,6 +113,10 @@ def current_formal_migration_targets(repo_root, template_root, version, allow_hi
             f"descriptor={descriptor.get('to')}"
         )
     expected = {"migration.json"}
+    for extra in descriptor.get('inventory', []):
+        if not is_relative_safe(extra):
+            fail(f'Unsafe migration inventory path: {extra}')
+        expected.add(extra)
     for index, action in enumerate(descriptor.get("actions", [])):
         for field in ("baseline", "source"):
             if not action.get(field):
@@ -274,8 +279,8 @@ def validate_target_path(target_path, boundary):
 
 
 def validate_manifest(manifest, template_root, check_checksums=False):
-    if manifest.get("schema_version") != 1:
-        fail("template-manifest schema_version must be 1")
+    if manifest.get("schema_version") not in (1, 2):
+        fail("template-manifest schema_version must be 1 or 2")
     if not manifest.get("template_version"):
         fail("template-manifest requires template_version")
     files = manifest.get("files")
@@ -417,9 +422,13 @@ def write_lock(args):
             "source_checksum": item["checksum"],
             "installed_checksum": sha256_file(target_file),
         })
+        if manifest.get('schema_version') == 2:
+            template_bytes = (repo_root / 'project-template' / item['source_path']).read_bytes()
+            files[-1].update(document_id=item.get('document_id', target_path),
+                             baseline_b64=base64.b64encode(template_bytes).decode('ascii'))
 
     lock = {
-        "schema_version": 1,
+        "schema_version": manifest.get('schema_version', 1),
         "installed_version": manifest["template_version"],
         "installed_at": _dt.datetime.now(_dt.timezone.utc).replace(microsecond=0).isoformat().replace("+00:00", "Z"),
         "managed_docs_root": boundary["managed_docs_root"],

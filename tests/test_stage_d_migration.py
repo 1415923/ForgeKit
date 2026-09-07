@@ -10,7 +10,9 @@ import uuid
 from pathlib import Path
 
 
-REPO = Path(__file__).resolve().parents[1]
+# Exact v0.46 release assertions; current contracts are exercised by test_v047_* .
+from version_fixture import v046_repo
+REPO = v046_repo()
 MIGRATION_ROOT = REPO / "migrations"
 PACKAGE = MIGRATION_ROOT / "0.46.0"
 TEMPLATE_PACKAGE = REPO / "project-template/migrations/0.46.0"

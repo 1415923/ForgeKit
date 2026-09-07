@@ -1,0 +1,2106 @@
+{
+  "schema_version": 2,
+  "id": "forgekit-0.47.0",
+  "title": "Astra convergence and structured customization migration",
+  "from": "0.46.0",
+  "to": "0.47.0",
+  "risk": "high",
+  "actions": [
+    {
+      "id": "update-.agents-skills-README.md",
+      "type": "merge_markdown",
+      "safety": "safe",
+      "source": "files/.agents/skills/README.md",
+      "target": ".agents/skills/README.md",
+      "lock_entry": {
+        "source_path": ".agents/skills/README.md",
+        "target_path": ".agents/skills/README.md",
+        "role": "skill",
+        "update_policy": "merge",
+        "render_mode": "copy",
+        "document_id": ".agents/skills/README.md",
+        "checksum": "sha256:9a439be166a1f4f777ae53b83102cc07fda3ecb709315d582cf550e415459a6d"
+      },
+      "baseline": "baseline/.agents/skills/README.md"
+    },
+    {
+      "id": "update-.agents-skills-code-review-SKILL.md",
+      "type": "merge_markdown",
+      "safety": "safe",
+      "source": "files/.agents/skills/code-review/SKILL.md",
+      "target": ".agents/skills/code-review/SKILL.md",
+      "lock_entry": {
+        "source_path": ".agents/skills/code-review/SKILL.md",
+        "target_path": ".agents/skills/code-review/SKILL.md",
+        "role": "skill",
+        "update_policy": "replace",
+        "render_mode": "copy",
+        "checksum": "sha256:3735539f000169c9fc0564b615830f49296515abe59a20654e753d2150bf3cc7",
+        "document_id": ".agents/skills/code-review/SKILL.md"
+      },
+      "baseline": "baseline/.agents/skills/code-review/SKILL.md"
+    },
+    {
+      "id": "update-.agents-skills-code-review-agents-openai.yaml",
+      "type": "replace_file_if_baseline_matches",
+      "safety": "safe",
+      "source": "files/.agents/skills/code-review/agents/openai.yaml",
+      "target": ".agents/skills/code-review/agents/openai.yaml",
+      "lock_entry": {
+        "source_path": ".agents/skills/code-review/agents/openai.yaml",
+        "target_path": ".agents/skills/code-review/agents/openai.yaml",
+        "role": "skill",
+        "update_policy": "replace",
+        "render_mode": "copy",
+        "checksum": "sha256:4183fff33533c9913924e905d0ad43bb5a749225e9880900e0d81242884d409a"
+      },
+      "baseline": "baseline/.agents/skills/code-review/agents/openai.yaml"
+    },
+    {
+      "id": "update-.agents-skills-document-backfill-SKILL.md",
+      "type": "merge_markdown",
+      "safety": "safe",
+      "source": "files/.agents/skills/document-backfill/SKILL.md",
+      "target": ".agents/skills/document-backfill/SKILL.md",
+      "lock_entry": {
+        "source_path": ".agents/skills/document-backfill/SKILL.md",
+        "target_path": ".agents/skills/document-backfill/SKILL.md",
+        "role": "skill",
+        "update_policy": "replace",
+        "render_mode": "copy",
+        "checksum": "sha256:99e4da477690263f2e2e0887174d24d80b1506d6d5310fecd8e546d9d266aa06",
+        "document_id": ".agents/skills/document-backfill/SKILL.md"
+      },
+      "baseline": "baseline/.agents/skills/document-backfill/SKILL.md"
+    },
+    {
+      "id": "update-.agents-skills-document-backfill-agents-openai.yaml",
+      "type": "replace_file_if_baseline_matches",
+      "safety": "safe",
+      "source": "files/.agents/skills/document-backfill/agents/openai.yaml",
+      "target": ".agents/skills/document-backfill/agents/openai.yaml",
+      "lock_entry": {
+        "source_path": ".agents/skills/document-backfill/agents/openai.yaml",
+        "target_path": ".agents/skills/document-backfill/agents/openai.yaml",
+        "role": "skill",
+        "update_policy": "replace",
+        "render_mode": "copy",
+        "checksum": "sha256:eff52c8f1ff854588c85af3e232cf93ce065591eec8ca9647a21e26a87243d87"
+      },
+      "baseline": "baseline/.agents/skills/document-backfill/agents/openai.yaml"
+    },
+    {
+      "id": "update-.agents-skills-document-backfill-references-bootstrap.md",
+      "type": "copy_file_if_missing",
+      "safety": "safe",
+      "source": "files/.agents/skills/document-backfill/references/bootstrap.md",
+      "target": ".agents/skills/document-backfill/references/bootstrap.md",
+      "lock_entry": {
+        "source_path": ".agents/skills/document-backfill/references/bootstrap.md",
+        "target_path": ".agents/skills/document-backfill/references/bootstrap.md",
+        "role": "skill",
+        "update_policy": "merge",
+        "render_mode": "copy",
+        "document_id": ".agents/skills/document-backfill/references/bootstrap.md",
+        "checksum": "sha256:e1fbb2440ce5793aef6a9531d59f76136bf320c7464cef9da946af0b11b6544e"
+      }
+    },
+    {
+      "id": "update-.agents-skills-document-backfill-references-facts.md",
+      "type": "copy_file_if_missing",
+      "safety": "safe",
+      "source": "files/.agents/skills/document-backfill/references/facts.md",
+      "target": ".agents/skills/document-backfill/references/facts.md",
+      "lock_entry": {
+        "source_path": ".agents/skills/document-backfill/references/facts.md",
+        "target_path": ".agents/skills/document-backfill/references/facts.md",
+        "role": "skill",
+        "update_policy": "merge",
+        "render_mode": "copy",
+        "document_id": ".agents/skills/document-backfill/references/facts.md",
+        "checksum": "sha256:2f6082ac31aebb863c522c16cae2898f01ae8921ffb8440a7ea3a059ae64785f"
+      }
+    },
+    {
+      "id": "update-.agents-skills-handover-review-SKILL.md",
+      "type": "merge_markdown",
+      "safety": "safe",
+      "source": "files/.agents/skills/handover-review/SKILL.md",
+      "target": ".agents/skills/handover-review/SKILL.md",
+      "lock_entry": {
+        "source_path": ".agents/skills/handover-review/SKILL.md",
+        "target_path": ".agents/skills/handover-review/SKILL.md",
+        "role": "skill",
+        "update_policy": "replace",
+        "render_mode": "copy",
+        "checksum": "sha256:5f2ecc811e5508b2b13f22a5e6768dae32db665affd9a297b570bea4f3f3faff",
+        "document_id": ".agents/skills/handover-review/SKILL.md"
+      },
+      "baseline": "baseline/.agents/skills/handover-review/SKILL.md"
+    },
+    {
+      "id": "update-.agents-skills-handover-review-agents-openai.yaml",
+      "type": "replace_file_if_baseline_matches",
+      "safety": "safe",
+      "source": "files/.agents/skills/handover-review/agents/openai.yaml",
+      "target": ".agents/skills/handover-review/agents/openai.yaml",
+      "lock_entry": {
+        "source_path": ".agents/skills/handover-review/agents/openai.yaml",
+        "target_path": ".agents/skills/handover-review/agents/openai.yaml",
+        "role": "skill",
+        "update_policy": "replace",
+        "render_mode": "copy",
+        "checksum": "sha256:51eb38fcf59eeb468709d32c15d0543dbc30bc6a53223805b97124d9faed2ef2"
+      },
+      "baseline": "baseline/.agents/skills/handover-review/agents/openai.yaml"
+    },
+    {
+      "id": "update-.agents-skills-large-change-planning-SKILL.md",
+      "type": "merge_markdown",
+      "safety": "safe",
+      "source": "files/.agents/skills/large-change-planning/SKILL.md",
+      "target": ".agents/skills/large-change-planning/SKILL.md",
+      "lock_entry": {
+        "source_path": ".agents/skills/large-change-planning/SKILL.md",
+        "target_path": ".agents/skills/large-change-planning/SKILL.md",
+        "role": "skill",
+        "update_policy": "replace",
+        "render_mode": "copy",
+        "checksum": "sha256:77b4230892233618b238227852520d53bf76de77f0c0edaac6fb8426afbab90e",
+        "document_id": ".agents/skills/large-change-planning/SKILL.md"
+      },
+      "baseline": "baseline/.agents/skills/large-change-planning/SKILL.md"
+    },
+    {
+      "id": "update-.agents-skills-large-change-planning-agents-openai.yaml",
+      "type": "replace_file_if_baseline_matches",
+      "safety": "safe",
+      "source": "files/.agents/skills/large-change-planning/agents/openai.yaml",
+      "target": ".agents/skills/large-change-planning/agents/openai.yaml",
+      "lock_entry": {
+        "source_path": ".agents/skills/large-change-planning/agents/openai.yaml",
+        "target_path": ".agents/skills/large-change-planning/agents/openai.yaml",
+        "role": "skill",
+        "update_policy": "replace",
+        "render_mode": "copy",
+        "checksum": "sha256:54a514d526796bda87803da0cd084f9103799b0efa0177bbbbdd74a1ebdc63f5"
+      },
+      "baseline": "baseline/.agents/skills/large-change-planning/agents/openai.yaml"
+    },
+    {
+      "id": "update-.agents-skills-project-assessment-SKILL.md",
+      "type": "copy_file_if_missing",
+      "safety": "safe",
+      "source": "files/.agents/skills/project-assessment/SKILL.md",
+      "target": ".agents/skills/project-assessment/SKILL.md",
+      "lock_entry": {
+        "source_path": ".agents/skills/project-assessment/SKILL.md",
+        "target_path": ".agents/skills/project-assessment/SKILL.md",
+        "role": "skill",
+        "update_policy": "merge",
+        "render_mode": "copy",
+        "document_id": ".agents/skills/project-assessment/SKILL.md",
+        "checksum": "sha256:5f053478bec5a4642bb9cb90abd0ff4a510ea23f297f5ead94658a65be51e760"
+      }
+    },
+    {
+      "id": "update-.agents-skills-project-assessment-agents-openai.yaml",
+      "type": "copy_file_if_missing",
+      "safety": "safe",
+      "source": "files/.agents/skills/project-assessment/agents/openai.yaml",
+      "target": ".agents/skills/project-assessment/agents/openai.yaml",
+      "lock_entry": {
+        "source_path": ".agents/skills/project-assessment/agents/openai.yaml",
+        "target_path": ".agents/skills/project-assessment/agents/openai.yaml",
+        "role": "skill",
+        "update_policy": "replace",
+        "render_mode": "copy",
+        "checksum": "sha256:72208c31f190728d3937c21ad849275ccb62f173d6cf768cdd147aa481321d09"
+      }
+    },
+    {
+      "id": "update-.agents-skills-project-assessment-references-adoption.md",
+      "type": "copy_file_if_missing",
+      "safety": "safe",
+      "source": "files/.agents/skills/project-assessment/references/adoption.md",
+      "target": ".agents/skills/project-assessment/references/adoption.md",
+      "lock_entry": {
+        "source_path": ".agents/skills/project-assessment/references/adoption.md",
+        "target_path": ".agents/skills/project-assessment/references/adoption.md",
+        "role": "skill",
+        "update_policy": "merge",
+        "render_mode": "copy",
+        "document_id": ".agents/skills/project-assessment/references/adoption.md",
+        "checksum": "sha256:8cd8d1c0c0b5f7c3a6091d56e098ca267c97b716d53f1812c4f68bb8e5f106af"
+      }
+    },
+    {
+      "id": "update-.agents-skills-project-assessment-references-takeover.md",
+      "type": "copy_file_if_missing",
+      "safety": "safe",
+      "source": "files/.agents/skills/project-assessment/references/takeover.md",
+      "target": ".agents/skills/project-assessment/references/takeover.md",
+      "lock_entry": {
+        "source_path": ".agents/skills/project-assessment/references/takeover.md",
+        "target_path": ".agents/skills/project-assessment/references/takeover.md",
+        "role": "skill",
+        "update_policy": "merge",
+        "render_mode": "copy",
+        "document_id": ".agents/skills/project-assessment/references/takeover.md",
+        "checksum": "sha256:4320e28f40e8b664ea6d8d5de32e37ee0631fff703190d27fe76ab213ed429f3"
+      }
+    },
+    {
+      "id": "update-.agents-skills-project-bootstrap-fill-SKILL.md",
+      "type": "merge_markdown",
+      "safety": "safe",
+      "source": "files/.agents/skills/project-bootstrap-fill/SKILL.md",
+      "target": ".agents/skills/project-bootstrap-fill/SKILL.md",
+      "lock_entry": {
+        "source_path": ".agents/skills/project-bootstrap-fill/SKILL.md",
+        "target_path": ".agents/skills/project-bootstrap-fill/SKILL.md",
+        "role": "skill",
+        "update_policy": "replace",
+        "render_mode": "copy",
+        "checksum": "sha256:112216be94f02b4b4bdaea0f52ed6a5ab0ee6d3db204e2366103afa4cb9e4222",
+        "document_id": ".agents/skills/project-bootstrap-fill/SKILL.md"
+      },
+      "baseline": "baseline/.agents/skills/project-bootstrap-fill/SKILL.md"
+    },
+    {
+      "id": "update-.agents-skills-project-bootstrap-fill-agents-openai.yaml",
+      "type": "replace_file_if_baseline_matches",
+      "safety": "safe",
+      "source": "files/.agents/skills/project-bootstrap-fill/agents/openai.yaml",
+      "target": ".agents/skills/project-bootstrap-fill/agents/openai.yaml",
+      "lock_entry": {
+        "source_path": ".agents/skills/project-bootstrap-fill/agents/openai.yaml",
+        "target_path": ".agents/skills/project-bootstrap-fill/agents/openai.yaml",
+        "role": "skill",
+        "update_policy": "replace",
+        "render_mode": "copy",
+        "checksum": "sha256:2e637527d1962c53a9fee4b50ba73e67fecad2f8d7a30d9b690f7dd9c26a73f5"
+      },
+      "baseline": "baseline/.agents/skills/project-bootstrap-fill/agents/openai.yaml"
+    },
+    {
+      "id": "update-.agents-skills-project-init-SKILL.md",
+      "type": "merge_markdown",
+      "safety": "safe",
+      "source": "files/.agents/skills/project-init/SKILL.md",
+      "target": ".agents/skills/project-init/SKILL.md",
+      "lock_entry": {
+        "source_path": ".agents/skills/project-init/SKILL.md",
+        "target_path": ".agents/skills/project-init/SKILL.md",
+        "role": "skill",
+        "update_policy": "replace",
+        "render_mode": "copy",
+        "checksum": "sha256:03c89d59c0f82a8ab359466f3814990ebebb1d7b96ce4e9500d4b18ecf0de0b8",
+        "document_id": ".agents/skills/project-init/SKILL.md"
+      },
+      "baseline": "baseline/.agents/skills/project-init/SKILL.md"
+    },
+    {
+      "id": "update-.agents-skills-project-init-agents-openai.yaml",
+      "type": "replace_file_if_baseline_matches",
+      "safety": "safe",
+      "source": "files/.agents/skills/project-init/agents/openai.yaml",
+      "target": ".agents/skills/project-init/agents/openai.yaml",
+      "lock_entry": {
+        "source_path": ".agents/skills/project-init/agents/openai.yaml",
+        "target_path": ".agents/skills/project-init/agents/openai.yaml",
+        "role": "skill",
+        "update_policy": "replace",
+        "render_mode": "copy",
+        "checksum": "sha256:e42a88836bd5df91bda89225d2eabf002ad61b5c6fe1815f4e273f7bc7af38dd"
+      },
+      "baseline": "baseline/.agents/skills/project-init/agents/openai.yaml"
+    },
+    {
+      "id": "update-.agents-skills-project-suitability-SKILL.md",
+      "type": "merge_markdown",
+      "safety": "safe",
+      "source": "files/.agents/skills/project-suitability/SKILL.md",
+      "target": ".agents/skills/project-suitability/SKILL.md",
+      "lock_entry": {
+        "source_path": ".agents/skills/project-suitability/SKILL.md",
+        "target_path": ".agents/skills/project-suitability/SKILL.md",
+        "role": "skill",
+        "update_policy": "replace",
+        "render_mode": "copy",
+        "checksum": "sha256:5704a3e75a06afef3cebf774af64a96aa10c9dd30c67605acf403fbeebfc079d",
+        "document_id": ".agents/skills/project-suitability/SKILL.md"
+      },
+      "baseline": "baseline/.agents/skills/project-suitability/SKILL.md"
+    },
+    {
+      "id": "update-.agents-skills-project-suitability-agents-openai.yaml",
+      "type": "replace_file_if_baseline_matches",
+      "safety": "safe",
+      "source": "files/.agents/skills/project-suitability/agents/openai.yaml",
+      "target": ".agents/skills/project-suitability/agents/openai.yaml",
+      "lock_entry": {
+        "source_path": ".agents/skills/project-suitability/agents/openai.yaml",
+        "target_path": ".agents/skills/project-suitability/agents/openai.yaml",
+        "role": "skill",
+        "update_policy": "replace",
+        "render_mode": "copy",
+        "checksum": "sha256:a4908bcd43936700c36e6b368ebec1bb7abec3d957e12dbd3fb13452b0a11453"
+      },
+      "baseline": "baseline/.agents/skills/project-suitability/agents/openai.yaml"
+    },
+    {
+      "id": "update-.agents-skills-release-check-SKILL.md",
+      "type": "merge_markdown",
+      "safety": "safe",
+      "source": "files/.agents/skills/release-check/SKILL.md",
+      "target": ".agents/skills/release-check/SKILL.md",
+      "lock_entry": {
+        "source_path": ".agents/skills/release-check/SKILL.md",
+        "target_path": ".agents/skills/release-check/SKILL.md",
+        "role": "skill",
+        "update_policy": "replace",
+        "render_mode": "copy",
+        "checksum": "sha256:a44b7b239516aa8563cbbedf9d8327b293f3741e16c0e214d4e121443bb4932f",
+        "document_id": ".agents/skills/release-check/SKILL.md"
+      },
+      "baseline": "baseline/.agents/skills/release-check/SKILL.md"
+    },
+    {
+      "id": "update-.agents-skills-release-check-agents-openai.yaml",
+      "type": "replace_file_if_baseline_matches",
+      "safety": "safe",
+      "source": "files/.agents/skills/release-check/agents/openai.yaml",
+      "target": ".agents/skills/release-check/agents/openai.yaml",
+      "lock_entry": {
+        "source_path": ".agents/skills/release-check/agents/openai.yaml",
+        "target_path": ".agents/skills/release-check/agents/openai.yaml",
+        "role": "skill",
+        "update_policy": "replace",
+        "render_mode": "copy",
+        "checksum": "sha256:c0e9440098cad9fc9fe8a71d2b8a5ac687cb250d68634807a47715eae41faea7"
+      },
+      "baseline": "baseline/.agents/skills/release-check/agents/openai.yaml"
+    },
+    {
+      "id": "update-.agents-skills-security-review-SKILL.md",
+      "type": "merge_markdown",
+      "safety": "safe",
+      "source": "files/.agents/skills/security-review/SKILL.md",
+      "target": ".agents/skills/security-review/SKILL.md",
+      "lock_entry": {
+        "source_path": ".agents/skills/security-review/SKILL.md",
+        "target_path": ".agents/skills/security-review/SKILL.md",
+        "role": "skill",
+        "update_policy": "replace",
+        "render_mode": "copy",
+        "checksum": "sha256:2f222127db3a0b29af9dc397772db4c20ae511de3332be5f19eb576b25303dea",
+        "document_id": ".agents/skills/security-review/SKILL.md"
+      },
+      "baseline": "baseline/.agents/skills/security-review/SKILL.md"
+    },
+    {
+      "id": "update-.agents-skills-security-review-agents-openai.yaml",
+      "type": "replace_file_if_baseline_matches",
+      "safety": "safe",
+      "source": "files/.agents/skills/security-review/agents/openai.yaml",
+      "target": ".agents/skills/security-review/agents/openai.yaml",
+      "lock_entry": {
+        "source_path": ".agents/skills/security-review/agents/openai.yaml",
+        "target_path": ".agents/skills/security-review/agents/openai.yaml",
+        "role": "skill",
+        "update_policy": "replace",
+        "render_mode": "copy",
+        "checksum": "sha256:6f5b0cb727769077fba2790f905ac296bd74d3d757fa8bdf0fd1d2ac562c35f3"
+      },
+      "baseline": "baseline/.agents/skills/security-review/agents/openai.yaml"
+    },
+    {
+      "id": "update-.claude-skills-forgekit-project-workflow-SKILL.md",
+      "type": "merge_markdown",
+      "safety": "safe",
+      "source": "files/.claude/skills/forgekit-project-workflow/SKILL.md",
+      "target": ".claude/skills/forgekit-project-workflow/SKILL.md",
+      "lock_entry": {
+        "source_path": ".claude/skills/forgekit-project-workflow/SKILL.md",
+        "target_path": ".claude/skills/forgekit-project-workflow/SKILL.md",
+        "role": "metadata",
+        "update_policy": "merge",
+        "render_mode": "copy",
+        "document_id": ".claude/skills/forgekit-project-workflow/SKILL.md",
+        "checksum": "sha256:6f1301a7b0f9bd39127c851b636a9a7a30804360ff5ba08ebe567778649575ed"
+      },
+      "baseline": "baseline/.claude/skills/forgekit-project-workflow/SKILL.md"
+    },
+    {
+      "id": "update-.codex-skills.md",
+      "type": "merge_markdown",
+      "safety": "safe",
+      "source": "files/.codex/skills.md",
+      "target": ".codex/skills.md",
+      "lock_entry": {
+        "source_path": ".codex/skills.md",
+        "target_path": ".codex/skills.md",
+        "role": "metadata",
+        "update_policy": "merge",
+        "render_mode": "copy",
+        "document_id": ".codex/skills.md",
+        "checksum": "sha256:9a439be166a1f4f777ae53b83102cc07fda3ecb709315d582cf550e415459a6d"
+      },
+      "baseline": "baseline/.codex/skills.md"
+    },
+    {
+      "id": "update-.forgekit-docs-document-lifecycle.md",
+      "type": "merge_markdown",
+      "safety": "safe",
+      "source": "files/.forgekit/docs/document-lifecycle.md",
+      "target": ".forgekit/docs/document-lifecycle.md",
+      "lock_entry": {
+        "source_path": ".forgekit/docs/document-lifecycle.md",
+        "target_path": "${managed_docs_root}/document-lifecycle.md",
+        "role": "managed_doc",
+        "update_policy": "merge",
+        "render_mode": "copy",
+        "checksum": "sha256:53e241388721ccf0c761ef01eece37b6b5dc0e5fc7d8cb075d2a13e91d12ef03",
+        "document_id": ".forgekit/docs/document-lifecycle.md"
+      },
+      "baseline": "baseline/.forgekit/docs/document-lifecycle.md"
+    },
+    {
+      "id": "update-.forgekit-docs-document-responsibility.md",
+      "type": "merge_markdown",
+      "safety": "safe",
+      "source": "files/.forgekit/docs/document-responsibility.md",
+      "target": ".forgekit/docs/document-responsibility.md",
+      "lock_entry": {
+        "source_path": ".forgekit/docs/document-responsibility.md",
+        "target_path": "${managed_docs_root}/document-responsibility.md",
+        "role": "managed_doc",
+        "update_policy": "merge",
+        "render_mode": "copy",
+        "checksum": "sha256:0be903bb5aa3bebac6a9a787991f150d886804c6935beeab1f2e9af695a49cb6",
+        "document_id": ".forgekit/docs/document-responsibility.md"
+      },
+      "baseline": "baseline/.forgekit/docs/document-responsibility.md"
+    },
+    {
+      "id": "update-.forgekit-docs-scoped-docs.md",
+      "type": "merge_markdown",
+      "safety": "safe",
+      "source": "files/.forgekit/docs/scoped-docs.md",
+      "target": ".forgekit/docs/scoped-docs.md",
+      "lock_entry": {
+        "source_path": ".forgekit/docs/scoped-docs.md",
+        "target_path": "${managed_docs_root}/scoped-docs.md",
+        "role": "managed_doc",
+        "update_policy": "merge",
+        "render_mode": "copy",
+        "checksum": "sha256:cb800f918331acaec3b15bc8bd7f498aa15c30c6f055704d027a91cf751f2fe1",
+        "document_id": ".forgekit/docs/scoped-docs.md"
+      },
+      "baseline": "baseline/.forgekit/docs/scoped-docs.md"
+    },
+    {
+      "id": "update-.forgekit-docs-usage-playbook.md",
+      "type": "merge_markdown",
+      "safety": "safe",
+      "source": "files/.forgekit/docs/usage-playbook.md",
+      "target": ".forgekit/docs/usage-playbook.md",
+      "lock_entry": {
+        "source_path": ".forgekit/docs/usage-playbook.md",
+        "target_path": "${managed_docs_root}/usage-playbook.md",
+        "role": "managed_doc",
+        "update_policy": "merge",
+        "render_mode": "copy",
+        "checksum": "sha256:aca5a98b3dd21f24ce6044f8c898b7f84a25e7bb23ae34c83586d6fa4a74f25e",
+        "document_id": ".forgekit/docs/usage-playbook.md"
+      },
+      "baseline": "baseline/.forgekit/docs/usage-playbook.md"
+    },
+    {
+      "id": "update-.forgekit-docs-work-session-checkpoint.md",
+      "type": "merge_markdown",
+      "safety": "safe",
+      "source": "files/.forgekit/docs/work-session-checkpoint.md",
+      "target": ".forgekit/docs/work-session-checkpoint.md",
+      "lock_entry": {
+        "source_path": ".forgekit/docs/work-session-checkpoint.md",
+        "target_path": "${managed_docs_root}/work-session-checkpoint.md",
+        "role": "managed_doc",
+        "update_policy": "merge",
+        "render_mode": "copy",
+        "checksum": "sha256:b93befbec78cd03c798b1a4225b31f675c005754c8ce76b3ca04020aa00361db",
+        "document_id": ".forgekit/docs/work-session-checkpoint.md"
+      },
+      "baseline": "baseline/.forgekit/docs/work-session-checkpoint.md"
+    },
+    {
+      "id": "update-AGENTS.md",
+      "type": "merge_entry",
+      "safety": "safe",
+      "source": "files/AGENTS.md",
+      "target": "AGENTS.md",
+      "lock_entry": {
+        "source_path": "AGENTS.md",
+        "target_path": "AGENTS.md",
+        "role": "agent_entry",
+        "update_policy": "ask",
+        "render_mode": "copy",
+        "checksum": "sha256:dcbac925ad7c9985b7ad9badfb50ee98349631d173c93758bd106031ed97902d",
+        "document_id": "AGENTS.md"
+      },
+      "baseline": "baseline/AGENTS.md"
+    },
+    {
+      "id": "update-CLAUDE.md",
+      "type": "merge_entry",
+      "safety": "safe",
+      "source": "files/CLAUDE.md",
+      "target": "CLAUDE.md",
+      "lock_entry": {
+        "source_path": "CLAUDE.md",
+        "target_path": "CLAUDE.md",
+        "role": "agent_entry",
+        "update_policy": "ask",
+        "render_mode": "copy",
+        "checksum": "sha256:d085ced198d7940c52c1977920bddb78213a9bfa7f4913daf5e99a16cc9ac585",
+        "document_id": "CLAUDE.md"
+      },
+      "baseline": "baseline/CLAUDE.md"
+    },
+    {
+      "id": "update-.forgekit-docs-api.md",
+      "type": "merge_markdown",
+      "safety": "safe",
+      "source": "files/.forgekit/docs/api.md",
+      "target": ".forgekit/docs/api.md",
+      "lock_entry": {
+        "source_path": "docs/api.md",
+        "target_path": "${managed_docs_root}/api.md",
+        "role": "metadata",
+        "update_policy": "merge",
+        "render_mode": "copy",
+        "document_id": ".forgekit/docs/api.md",
+        "checksum": "sha256:7b0e6e3baf07037bda84515fbde4ef7b59c01e0abc77ca4dbd0c3f34a65821e0"
+      },
+      "content_policy": "project_facts",
+      "baseline": "baseline/.forgekit/docs/api.md"
+    },
+    {
+      "id": "update-.forgekit-docs-architecture.md",
+      "type": "merge_markdown",
+      "safety": "safe",
+      "source": "files/.forgekit/docs/architecture.md",
+      "target": ".forgekit/docs/architecture.md",
+      "lock_entry": {
+        "source_path": "docs/architecture.md",
+        "target_path": "${managed_docs_root}/architecture.md",
+        "role": "managed_doc",
+        "update_policy": "merge",
+        "render_mode": "copy",
+        "checksum": "sha256:6e099327f2ee2bbab54904238920069672cfee8eae493e1ec2159da7125b381b",
+        "document_id": ".forgekit/docs/architecture.md"
+      },
+      "content_policy": "project_facts",
+      "baseline": "baseline/.forgekit/docs/architecture.md"
+    },
+    {
+      "id": "update-.forgekit-docs-archive-capsule.md",
+      "type": "merge_markdown",
+      "safety": "safe",
+      "source": "files/.forgekit/docs/archive-capsule.md",
+      "target": ".forgekit/docs/archive-capsule.md",
+      "lock_entry": {
+        "source_path": "docs/archive-capsule.md",
+        "target_path": "${managed_docs_root}/archive-capsule.md",
+        "role": "managed_doc",
+        "update_policy": "merge",
+        "render_mode": "copy",
+        "checksum": "sha256:ff75454fe51ea1970f40c83f8d84e5ac12a2fa07020afae75050573d1dee17b2",
+        "document_id": ".forgekit/docs/archive-capsule.md"
+      },
+      "baseline": "baseline/.forgekit/docs/archive-capsule.md"
+    },
+    {
+      "id": "update-.forgekit-docs-bounded-auto-loop-policy.md",
+      "type": "merge_markdown",
+      "safety": "safe",
+      "source": "files/.forgekit/docs/bounded-auto-loop-policy.md",
+      "target": ".forgekit/docs/bounded-auto-loop-policy.md",
+      "lock_entry": {
+        "source_path": "docs/bounded-auto-loop-policy.md",
+        "target_path": "${managed_docs_root}/bounded-auto-loop-policy.md",
+        "role": "managed_doc",
+        "update_policy": "merge",
+        "render_mode": "copy",
+        "checksum": "sha256:6349e6e82e583c8818aae3bf1edaf983b343b8108a4951abc63db2be88df5461",
+        "document_id": ".forgekit/docs/bounded-auto-loop-policy.md"
+      },
+      "baseline": "baseline/.forgekit/docs/bounded-auto-loop-policy.md"
+    },
+    {
+      "id": "update-.forgekit-docs-change-impact.md",
+      "type": "merge_markdown",
+      "safety": "safe",
+      "source": "files/.forgekit/docs/change-impact.md",
+      "target": ".forgekit/docs/change-impact.md",
+      "lock_entry": {
+        "source_path": "docs/change-impact.md",
+        "target_path": "${managed_docs_root}/change-impact.md",
+        "role": "metadata",
+        "update_policy": "merge",
+        "render_mode": "copy",
+        "document_id": ".forgekit/docs/change-impact.md",
+        "checksum": "sha256:78c31c9796a6e8004d49a467a1c590734d41c6f88d37592ea60801ad408925b4"
+      },
+      "content_policy": "project_facts",
+      "baseline": "baseline/.forgekit/docs/change-impact.md"
+    },
+    {
+      "id": "update-.forgekit-docs-changelog.md",
+      "type": "merge_markdown",
+      "safety": "safe",
+      "source": "files/.forgekit/docs/changelog.md",
+      "target": ".forgekit/docs/changelog.md",
+      "lock_entry": {
+        "source_path": "docs/changelog.md",
+        "target_path": "${managed_docs_root}/changelog.md",
+        "role": "managed_doc",
+        "update_policy": "merge",
+        "render_mode": "copy",
+        "checksum": "sha256:248306cde2997b89ba19f059028c922a1eb3774dc046a41f85b1eab75a87d8e3",
+        "document_id": ".forgekit/docs/changelog.md"
+      },
+      "content_policy": "project_facts",
+      "baseline": "baseline/.forgekit/docs/changelog.md"
+    },
+    {
+      "id": "update-.forgekit-docs-code-ownership.md",
+      "type": "merge_markdown",
+      "safety": "safe",
+      "source": "files/.forgekit/docs/code-ownership.md",
+      "target": ".forgekit/docs/code-ownership.md",
+      "lock_entry": {
+        "source_path": "docs/code-ownership.md",
+        "target_path": "${managed_docs_root}/code-ownership.md",
+        "role": "metadata",
+        "update_policy": "merge",
+        "render_mode": "copy",
+        "document_id": ".forgekit/docs/code-ownership.md",
+        "checksum": "sha256:366e2a25024fffa8cf74de42cd6649bd5516d4519cd2475528ed4ee4afdd1947"
+      },
+      "content_policy": "project_facts",
+      "baseline": "baseline/.forgekit/docs/code-ownership.md"
+    },
+    {
+      "id": "update-.forgekit-docs-codebase-map.md",
+      "type": "merge_markdown",
+      "safety": "safe",
+      "source": "files/.forgekit/docs/codebase-map.md",
+      "target": ".forgekit/docs/codebase-map.md",
+      "lock_entry": {
+        "source_path": "docs/codebase-map.md",
+        "target_path": "${managed_docs_root}/codebase-map.md",
+        "role": "managed_doc",
+        "update_policy": "merge",
+        "render_mode": "copy",
+        "checksum": "sha256:4cf1bac6156735137caa9f91742ebb624d0fe7bcd5730196093bbcc91aea7396",
+        "document_id": ".forgekit/docs/codebase-map.md"
+      },
+      "content_policy": "project_facts",
+      "baseline": "baseline/.forgekit/docs/codebase-map.md"
+    },
+    {
+      "id": "update-.forgekit-docs-codex-next-work-order.md",
+      "type": "merge_markdown",
+      "safety": "safe",
+      "source": "files/.forgekit/docs/codex-next-work-order.md",
+      "target": ".forgekit/docs/codex-next-work-order.md",
+      "lock_entry": {
+        "source_path": "docs/codex-next-work-order.md",
+        "target_path": "${managed_docs_root}/codex-next-work-order.md",
+        "role": "metadata",
+        "update_policy": "merge",
+        "render_mode": "copy",
+        "document_id": ".forgekit/docs/codex-next-work-order.md",
+        "checksum": "sha256:1cd55136805cc2b73928bca4cf52606f07cd1ea75b42e0215fdc7dbb91b65eb7"
+      },
+      "content_policy": "project_facts",
+      "baseline": "baseline/.forgekit/docs/codex-next-work-order.md"
+    },
+    {
+      "id": "update-.forgekit-docs-current-docs-integrity.md",
+      "type": "merge_markdown",
+      "safety": "safe",
+      "source": "files/.forgekit/docs/current-docs-integrity.md",
+      "target": ".forgekit/docs/current-docs-integrity.md",
+      "lock_entry": {
+        "source_path": "docs/current-docs-integrity.md",
+        "target_path": "${managed_docs_root}/current-docs-integrity.md",
+        "role": "managed_doc",
+        "update_policy": "merge",
+        "render_mode": "copy",
+        "checksum": "sha256:b5c9b47c670012310c0c90f3121f565db2ad5213415bbbc237197f6a1ca33274",
+        "document_id": ".forgekit/docs/current-docs-integrity.md"
+      },
+      "baseline": "baseline/.forgekit/docs/current-docs-integrity.md"
+    },
+    {
+      "id": "update-.forgekit-docs-database-design.md",
+      "type": "merge_markdown",
+      "safety": "safe",
+      "source": "files/.forgekit/docs/database-design.md",
+      "target": ".forgekit/docs/database-design.md",
+      "lock_entry": {
+        "source_path": "docs/database-design.md",
+        "target_path": "${managed_docs_root}/database-design.md",
+        "role": "metadata",
+        "update_policy": "merge",
+        "render_mode": "copy",
+        "document_id": ".forgekit/docs/database-design.md",
+        "checksum": "sha256:e4490175102e7d5aaafd6bdaa06811d31203b6673b0639899133cbf145c2fbf9"
+      },
+      "content_policy": "project_facts",
+      "baseline": "baseline/.forgekit/docs/database-design.md"
+    },
+    {
+      "id": "update-.forgekit-docs-defect-fix-plan.md",
+      "type": "merge_markdown",
+      "safety": "safe",
+      "source": "files/.forgekit/docs/defect-fix-plan.md",
+      "target": ".forgekit/docs/defect-fix-plan.md",
+      "lock_entry": {
+        "source_path": "docs/defect-fix-plan.md",
+        "target_path": "${managed_docs_root}/defect-fix-plan.md",
+        "role": "metadata",
+        "update_policy": "merge",
+        "render_mode": "copy",
+        "document_id": ".forgekit/docs/defect-fix-plan.md",
+        "checksum": "sha256:ea481da5056abb9a1b14f0b6e9f0b3e2d87c8568c76e975ab7fe4b5b9418f2e0"
+      },
+      "content_policy": "project_facts",
+      "baseline": "baseline/.forgekit/docs/defect-fix-plan.md"
+    },
+    {
+      "id": "update-.forgekit-docs-defect-review.md",
+      "type": "merge_markdown",
+      "safety": "safe",
+      "source": "files/.forgekit/docs/defect-review.md",
+      "target": ".forgekit/docs/defect-review.md",
+      "lock_entry": {
+        "source_path": "docs/defect-review.md",
+        "target_path": "${managed_docs_root}/defect-review.md",
+        "role": "metadata",
+        "update_policy": "merge",
+        "render_mode": "copy",
+        "document_id": ".forgekit/docs/defect-review.md",
+        "checksum": "sha256:5a142afa00beeb8ca9313a5fc37686ac09658cfaa813972abcd7ef0cef450feb"
+      },
+      "content_policy": "project_facts",
+      "baseline": "baseline/.forgekit/docs/defect-review.md"
+    },
+    {
+      "id": "update-.forgekit-docs-dependency-review.md",
+      "type": "merge_markdown",
+      "safety": "safe",
+      "source": "files/.forgekit/docs/dependency-review.md",
+      "target": ".forgekit/docs/dependency-review.md",
+      "lock_entry": {
+        "source_path": "docs/dependency-review.md",
+        "target_path": "${managed_docs_root}/dependency-review.md",
+        "role": "metadata",
+        "update_policy": "merge",
+        "render_mode": "copy",
+        "document_id": ".forgekit/docs/dependency-review.md",
+        "checksum": "sha256:9355fac79bbc7e49d65a569a365c45faa8efd81bed4a91743d5710e256d67e1a"
+      },
+      "content_policy": "project_facts",
+      "baseline": "baseline/.forgekit/docs/dependency-review.md"
+    },
+    {
+      "id": "update-.forgekit-docs-deployment.md",
+      "type": "merge_markdown",
+      "safety": "safe",
+      "source": "files/.forgekit/docs/deployment.md",
+      "target": ".forgekit/docs/deployment.md",
+      "lock_entry": {
+        "source_path": "docs/deployment.md",
+        "target_path": "${managed_docs_root}/deployment.md",
+        "role": "metadata",
+        "update_policy": "merge",
+        "render_mode": "copy",
+        "document_id": ".forgekit/docs/deployment.md",
+        "checksum": "sha256:b40cea65bad146bac5da83908be623ab3a76aa8902d346404d68ae53c8508929"
+      },
+      "content_policy": "project_facts",
+      "baseline": "baseline/.forgekit/docs/deployment.md"
+    },
+    {
+      "id": "update-.forgekit-docs-environment-matrix.md",
+      "type": "merge_markdown",
+      "safety": "safe",
+      "source": "files/.forgekit/docs/environment-matrix.md",
+      "target": ".forgekit/docs/environment-matrix.md",
+      "lock_entry": {
+        "source_path": "docs/environment-matrix.md",
+        "target_path": "${managed_docs_root}/environment-matrix.md",
+        "role": "metadata",
+        "update_policy": "merge",
+        "render_mode": "copy",
+        "document_id": ".forgekit/docs/environment-matrix.md",
+        "checksum": "sha256:1c5be50934c3b009a69892b4d1ab493a6ee1265524682d0cf88119c5caed97f3"
+      },
+      "content_policy": "project_facts",
+      "baseline": "baseline/.forgekit/docs/environment-matrix.md"
+    },
+    {
+      "id": "update-.forgekit-docs-exploration-report.md",
+      "type": "merge_markdown",
+      "safety": "safe",
+      "source": "files/.forgekit/docs/exploration-report.md",
+      "target": ".forgekit/docs/exploration-report.md",
+      "lock_entry": {
+        "source_path": "docs/exploration-report.md",
+        "target_path": "${managed_docs_root}/exploration-report.md",
+        "role": "metadata",
+        "update_policy": "merge",
+        "render_mode": "copy",
+        "document_id": ".forgekit/docs/exploration-report.md",
+        "checksum": "sha256:6b9793c316f469fc8bdb752f9dbe2894ba7432c03dfda473186fc8fa2bfd19da"
+      },
+      "content_policy": "project_facts",
+      "baseline": "baseline/.forgekit/docs/exploration-report.md"
+    },
+    {
+      "id": "update-.forgekit-docs-handover-audit.md",
+      "type": "merge_markdown",
+      "safety": "safe",
+      "source": "files/.forgekit/docs/handover-audit.md",
+      "target": ".forgekit/docs/handover-audit.md",
+      "lock_entry": {
+        "source_path": "docs/handover-audit.md",
+        "target_path": "${managed_docs_root}/handover-audit.md",
+        "role": "metadata",
+        "update_policy": "merge",
+        "render_mode": "copy",
+        "document_id": ".forgekit/docs/handover-audit.md",
+        "checksum": "sha256:a8e6bd7696f7696bcf2ae604b05d2f948464b75fc01d3c3819c8c0bb4b462459"
+      },
+      "content_policy": "project_facts",
+      "baseline": "baseline/.forgekit/docs/handover-audit.md"
+    },
+    {
+      "id": "update-.forgekit-docs-implementation-plan.md",
+      "type": "merge_markdown",
+      "safety": "safe",
+      "source": "files/.forgekit/docs/implementation-plan.md",
+      "target": ".forgekit/docs/implementation-plan.md",
+      "lock_entry": {
+        "source_path": "docs/implementation-plan.md",
+        "target_path": "${managed_docs_root}/implementation-plan.md",
+        "role": "metadata",
+        "update_policy": "merge",
+        "render_mode": "copy",
+        "document_id": ".forgekit/docs/implementation-plan.md",
+        "checksum": "sha256:592bbfbe67e1329921c0a7d0879c3916838a269a38f96e6b9b40530be3e04b75"
+      },
+      "content_policy": "project_facts",
+      "baseline": "baseline/.forgekit/docs/implementation-plan.md"
+    },
+    {
+      "id": "update-.forgekit-docs-incident-review.md",
+      "type": "merge_markdown",
+      "safety": "safe",
+      "source": "files/.forgekit/docs/incident-review.md",
+      "target": ".forgekit/docs/incident-review.md",
+      "lock_entry": {
+        "source_path": "docs/incident-review.md",
+        "target_path": "${managed_docs_root}/incident-review.md",
+        "role": "metadata",
+        "update_policy": "merge",
+        "render_mode": "copy",
+        "document_id": ".forgekit/docs/incident-review.md",
+        "checksum": "sha256:957d3e7d15e54c38ca277daf2b8558ec7aa90df29ec22ded21b754f5a27ed26f"
+      },
+      "content_policy": "project_facts",
+      "baseline": "baseline/.forgekit/docs/incident-review.md"
+    },
+    {
+      "id": "update-.forgekit-docs-maker-checker-protocol.md",
+      "type": "merge_markdown",
+      "safety": "safe",
+      "source": "files/.forgekit/docs/maker-checker-protocol.md",
+      "target": ".forgekit/docs/maker-checker-protocol.md",
+      "lock_entry": {
+        "source_path": "docs/maker-checker-protocol.md",
+        "target_path": "${managed_docs_root}/maker-checker-protocol.md",
+        "role": "managed_doc",
+        "update_policy": "merge",
+        "render_mode": "copy",
+        "checksum": "sha256:cf82ab2f2d418deeae50b71992abd71825ccea47fb2d25730dbbc757aaf0c845",
+        "document_id": ".forgekit/docs/maker-checker-protocol.md"
+      },
+      "baseline": "baseline/.forgekit/docs/maker-checker-protocol.md"
+    },
+    {
+      "id": "update-.forgekit-docs-native-agent-adapter.md",
+      "type": "merge_markdown",
+      "safety": "safe",
+      "source": "files/.forgekit/docs/native-agent-adapter.md",
+      "target": ".forgekit/docs/native-agent-adapter.md",
+      "lock_entry": {
+        "source_path": "docs/native-agent-adapter.md",
+        "target_path": "${managed_docs_root}/native-agent-adapter.md",
+        "role": "managed_doc",
+        "update_policy": "merge",
+        "render_mode": "copy",
+        "checksum": "sha256:3ecdd1a278ff6dc7292733c64f6e2b216d59eac48ede67971b8e600d6ca8d07e",
+        "document_id": ".forgekit/docs/native-agent-adapter.md"
+      },
+      "baseline": "baseline/.forgekit/docs/native-agent-adapter.md"
+    },
+    {
+      "id": "update-.forgekit-docs-project-maintenance.md",
+      "type": "merge_markdown",
+      "safety": "safe",
+      "source": "files/.forgekit/docs/project-maintenance.md",
+      "target": ".forgekit/docs/project-maintenance.md",
+      "lock_entry": {
+        "source_path": "docs/project-maintenance.md",
+        "target_path": "${managed_docs_root}/project-maintenance.md",
+        "role": "managed_doc",
+        "update_policy": "merge",
+        "render_mode": "copy",
+        "checksum": "sha256:e11eb4b3a55f8011836bb73761f2740b4374c0e1945437e1efb6bf0ca0bb08e7",
+        "document_id": ".forgekit/docs/project-maintenance.md"
+      },
+      "baseline": "baseline/.forgekit/docs/project-maintenance.md"
+    },
+    {
+      "id": "update-.forgekit-docs-project-plan.md",
+      "type": "merge_markdown",
+      "safety": "safe",
+      "source": "files/.forgekit/docs/project-plan.md",
+      "target": ".forgekit/docs/project-plan.md",
+      "lock_entry": {
+        "source_path": "docs/project-plan.md",
+        "target_path": "${managed_docs_root}/project-plan.md",
+        "role": "managed_doc",
+        "update_policy": "merge",
+        "render_mode": "copy",
+        "checksum": "sha256:4c0cf42f4140ff3d4aac13dc8ee99d18f06596514159dab3ee5ccb13b6539371",
+        "document_id": ".forgekit/docs/project-plan.md"
+      },
+      "content_policy": "project_facts",
+      "baseline": "baseline/.forgekit/docs/project-plan.md"
+    },
+    {
+      "id": "update-.forgekit-docs-project-suitability.md",
+      "type": "merge_markdown",
+      "safety": "safe",
+      "source": "files/.forgekit/docs/project-suitability.md",
+      "target": ".forgekit/docs/project-suitability.md",
+      "lock_entry": {
+        "source_path": "docs/project-suitability.md",
+        "target_path": "${managed_docs_root}/project-suitability.md",
+        "role": "metadata",
+        "update_policy": "merge",
+        "render_mode": "copy",
+        "document_id": ".forgekit/docs/project-suitability.md",
+        "checksum": "sha256:031e0fc7253881e5cdb4e9e9a468dd59402c3dbb41ef8910530b4642e4dd1175"
+      },
+      "content_policy": "project_facts",
+      "baseline": "baseline/.forgekit/docs/project-suitability.md"
+    },
+    {
+      "id": "update-.forgekit-docs-project-trial-record.md",
+      "type": "merge_markdown",
+      "safety": "safe",
+      "source": "files/.forgekit/docs/project-trial-record.md",
+      "target": ".forgekit/docs/project-trial-record.md",
+      "lock_entry": {
+        "source_path": "docs/project-trial-record.md",
+        "target_path": "${managed_docs_root}/project-trial-record.md",
+        "role": "metadata",
+        "update_policy": "merge",
+        "render_mode": "copy",
+        "document_id": ".forgekit/docs/project-trial-record.md",
+        "checksum": "sha256:60984f436c1848bf137583acc91f664f589d98b626de407e6692073bd08d74c6"
+      },
+      "content_policy": "project_facts",
+      "baseline": "baseline/.forgekit/docs/project-trial-record.md"
+    },
+    {
+      "id": "update-.forgekit-docs-quality-metrics.md",
+      "type": "merge_markdown",
+      "safety": "safe",
+      "source": "files/.forgekit/docs/quality-metrics.md",
+      "target": ".forgekit/docs/quality-metrics.md",
+      "lock_entry": {
+        "source_path": "docs/quality-metrics.md",
+        "target_path": "${managed_docs_root}/quality-metrics.md",
+        "role": "metadata",
+        "update_policy": "merge",
+        "render_mode": "copy",
+        "document_id": ".forgekit/docs/quality-metrics.md",
+        "checksum": "sha256:101b34799216580cdf584212e073b5a590ae24c98b1e3ccf7138f94f88060e2f"
+      },
+      "content_policy": "project_facts",
+      "baseline": "baseline/.forgekit/docs/quality-metrics.md"
+    },
+    {
+      "id": "update-.forgekit-docs-reasoning-review.md",
+      "type": "merge_markdown",
+      "safety": "safe",
+      "source": "files/.forgekit/docs/reasoning-review.md",
+      "target": ".forgekit/docs/reasoning-review.md",
+      "lock_entry": {
+        "source_path": "docs/reasoning-review.md",
+        "target_path": "${managed_docs_root}/reasoning-review.md",
+        "role": "managed_doc",
+        "update_policy": "merge",
+        "render_mode": "copy",
+        "checksum": "sha256:1bc84192900fbe17a726e038dc141b68a0f1fee8daaa020c04e7a177e5630d85",
+        "document_id": ".forgekit/docs/reasoning-review.md"
+      },
+      "baseline": "baseline/.forgekit/docs/reasoning-review.md"
+    },
+    {
+      "id": "update-.forgekit-docs-release-pipeline.md",
+      "type": "merge_markdown",
+      "safety": "safe",
+      "source": "files/.forgekit/docs/release-pipeline.md",
+      "target": ".forgekit/docs/release-pipeline.md",
+      "lock_entry": {
+        "source_path": "docs/release-pipeline.md",
+        "target_path": "${managed_docs_root}/release-pipeline.md",
+        "role": "metadata",
+        "update_policy": "merge",
+        "render_mode": "copy",
+        "document_id": ".forgekit/docs/release-pipeline.md",
+        "checksum": "sha256:ea942b79352c554f6d2d56458b66964ca8dd6d2e4bf08a7404824f322aa4dde7"
+      },
+      "content_policy": "project_facts",
+      "baseline": "baseline/.forgekit/docs/release-pipeline.md"
+    },
+    {
+      "id": "update-.forgekit-docs-requirements.md",
+      "type": "merge_markdown",
+      "safety": "safe",
+      "source": "files/.forgekit/docs/requirements.md",
+      "target": ".forgekit/docs/requirements.md",
+      "lock_entry": {
+        "source_path": "docs/requirements.md",
+        "target_path": "${managed_docs_root}/requirements.md",
+        "role": "managed_doc",
+        "update_policy": "merge",
+        "render_mode": "copy",
+        "checksum": "sha256:bd8dd6a59f7d3a9fb7f0076690c32557873ffc96f463211200f9eaa99c2a8e22",
+        "document_id": ".forgekit/docs/requirements.md"
+      },
+      "content_policy": "project_facts",
+      "baseline": "baseline/.forgekit/docs/requirements.md"
+    },
+    {
+      "id": "update-.forgekit-docs-risk-register.md",
+      "type": "merge_markdown",
+      "safety": "safe",
+      "source": "files/.forgekit/docs/risk-register.md",
+      "target": ".forgekit/docs/risk-register.md",
+      "lock_entry": {
+        "source_path": "docs/risk-register.md",
+        "target_path": "${managed_docs_root}/risk-register.md",
+        "role": "metadata",
+        "update_policy": "merge",
+        "render_mode": "copy",
+        "document_id": ".forgekit/docs/risk-register.md",
+        "checksum": "sha256:40c1024c08ad767f31128fff705edfb9f85fde10f727fb536aec5d45aa8e4fc5"
+      },
+      "content_policy": "project_facts",
+      "baseline": "baseline/.forgekit/docs/risk-register.md"
+    },
+    {
+      "id": "update-.forgekit-docs-task-board.md",
+      "type": "merge_markdown",
+      "safety": "safe",
+      "source": "files/.forgekit/docs/task-board.md",
+      "target": ".forgekit/docs/task-board.md",
+      "lock_entry": {
+        "source_path": "docs/task-board.md",
+        "target_path": "${managed_docs_root}/task-board.md",
+        "role": "managed_doc",
+        "update_policy": "merge",
+        "render_mode": "copy",
+        "checksum": "sha256:1aaed80ff8941c0a8fd4ffed2f2e4a7751b4c7de61e50df3720e81e755f06b09",
+        "document_id": ".forgekit/docs/task-board.md"
+      },
+      "content_policy": "project_facts",
+      "baseline": "baseline/.forgekit/docs/task-board.md"
+    },
+    {
+      "id": "update-.forgekit-docs-task-intake.md",
+      "type": "merge_markdown",
+      "safety": "safe",
+      "source": "files/.forgekit/docs/task-intake.md",
+      "target": ".forgekit/docs/task-intake.md",
+      "lock_entry": {
+        "source_path": "docs/task-intake.md",
+        "target_path": "${managed_docs_root}/task-intake.md",
+        "role": "managed_doc",
+        "update_policy": "merge",
+        "render_mode": "copy",
+        "checksum": "sha256:8ba384f782035cd4197d712e0260a463f57e28ed3b7a634bc7ee57a10e7e5f0a",
+        "document_id": ".forgekit/docs/task-intake.md"
+      },
+      "content_policy": "project_facts",
+      "baseline": "baseline/.forgekit/docs/task-intake.md"
+    },
+    {
+      "id": "update-.forgekit-docs-tech-decisions.md",
+      "type": "merge_markdown",
+      "safety": "safe",
+      "source": "files/.forgekit/docs/tech-decisions.md",
+      "target": ".forgekit/docs/tech-decisions.md",
+      "lock_entry": {
+        "source_path": "docs/tech-decisions.md",
+        "target_path": "${managed_docs_root}/tech-decisions.md",
+        "role": "metadata",
+        "update_policy": "merge",
+        "render_mode": "copy",
+        "document_id": ".forgekit/docs/tech-decisions.md",
+        "checksum": "sha256:2a37a6229fe5f3c9176f3a3d0fab7f7fbd8193d5a775c7155341e13df70c4438"
+      },
+      "content_policy": "project_facts",
+      "baseline": "baseline/.forgekit/docs/tech-decisions.md"
+    },
+    {
+      "id": "update-.forgekit-docs-technical-debt.md",
+      "type": "merge_markdown",
+      "safety": "safe",
+      "source": "files/.forgekit/docs/technical-debt.md",
+      "target": ".forgekit/docs/technical-debt.md",
+      "lock_entry": {
+        "source_path": "docs/technical-debt.md",
+        "target_path": "${managed_docs_root}/technical-debt.md",
+        "role": "metadata",
+        "update_policy": "merge",
+        "render_mode": "copy",
+        "document_id": ".forgekit/docs/technical-debt.md",
+        "checksum": "sha256:1a169d6078902b6bc5f8597ba426432893ff073c480737b23502c08639547131"
+      },
+      "content_policy": "project_facts",
+      "baseline": "baseline/.forgekit/docs/technical-debt.md"
+    },
+    {
+      "id": "update-.forgekit-docs-testing.md",
+      "type": "merge_markdown",
+      "safety": "safe",
+      "source": "files/.forgekit/docs/testing.md",
+      "target": ".forgekit/docs/testing.md",
+      "lock_entry": {
+        "source_path": "docs/testing.md",
+        "target_path": "${managed_docs_root}/testing.md",
+        "role": "managed_doc",
+        "update_policy": "merge",
+        "render_mode": "copy",
+        "checksum": "sha256:1f93849d14faffd2604cde1dd322d94382bb5de17bbaf9292cced335bd67c210",
+        "document_id": ".forgekit/docs/testing.md"
+      },
+      "content_policy": "project_facts",
+      "baseline": "baseline/.forgekit/docs/testing.md"
+    },
+    {
+      "id": "update-.forgekit-docs-threat-model.md",
+      "type": "merge_markdown",
+      "safety": "safe",
+      "source": "files/.forgekit/docs/threat-model.md",
+      "target": ".forgekit/docs/threat-model.md",
+      "lock_entry": {
+        "source_path": "docs/threat-model.md",
+        "target_path": "${managed_docs_root}/threat-model.md",
+        "role": "metadata",
+        "update_policy": "merge",
+        "render_mode": "copy",
+        "document_id": ".forgekit/docs/threat-model.md",
+        "checksum": "sha256:4d8fac506dc66d0bfcb7cea1cf0c0ec00cba51737fe2be4868c17a35ded73ccf"
+      },
+      "content_policy": "project_facts",
+      "baseline": "baseline/.forgekit/docs/threat-model.md"
+    },
+    {
+      "id": "update-.forgekit-docs-traceability.md",
+      "type": "merge_markdown",
+      "safety": "safe",
+      "source": "files/.forgekit/docs/traceability.md",
+      "target": ".forgekit/docs/traceability.md",
+      "lock_entry": {
+        "source_path": "docs/traceability.md",
+        "target_path": "${managed_docs_root}/traceability.md",
+        "role": "metadata",
+        "update_policy": "merge",
+        "render_mode": "copy",
+        "document_id": ".forgekit/docs/traceability.md",
+        "checksum": "sha256:e6786f41b9faf5fe7b2d95d693c473d9d5acbd1c2f11a907c77f7bb440177e4e"
+      },
+      "content_policy": "project_facts",
+      "baseline": "baseline/.forgekit/docs/traceability.md"
+    },
+    {
+      "id": "update-.forgekit-docs-version-roadmap.md",
+      "type": "merge_markdown",
+      "safety": "safe",
+      "source": "files/.forgekit/docs/version-roadmap.md",
+      "target": ".forgekit/docs/version-roadmap.md",
+      "lock_entry": {
+        "source_path": "docs/version-roadmap.md",
+        "target_path": "${managed_docs_root}/version-roadmap.md",
+        "role": "managed_doc",
+        "update_policy": "merge",
+        "render_mode": "copy",
+        "checksum": "sha256:2ccb4cfd982069da76d0a5d29063ab215d0347577023f8da26fbb33e88e14330",
+        "document_id": ".forgekit/docs/version-roadmap.md"
+      },
+      "content_policy": "project_facts",
+      "baseline": "baseline/.forgekit/docs/version-roadmap.md"
+    },
+    {
+      "id": "update-.forgekit-docs-work-log.md",
+      "type": "merge_markdown",
+      "safety": "safe",
+      "source": "files/.forgekit/docs/work-log.md",
+      "target": ".forgekit/docs/work-log.md",
+      "lock_entry": {
+        "source_path": "docs/work-log.md",
+        "target_path": "${managed_docs_root}/work-log.md",
+        "role": "managed_doc",
+        "update_policy": "merge",
+        "render_mode": "copy",
+        "checksum": "sha256:a0ab76cded5c7f44e7d6ec418e25ee69e7dd428b0ea7346c392e17485b08d54c",
+        "document_id": ".forgekit/docs/work-log.md"
+      },
+      "content_policy": "project_facts",
+      "baseline": "baseline/.forgekit/docs/work-log.md"
+    },
+    {
+      "id": "update-.forgekit-docs-worktree-playbook.md",
+      "type": "merge_markdown",
+      "safety": "safe",
+      "source": "files/.forgekit/docs/worktree-playbook.md",
+      "target": ".forgekit/docs/worktree-playbook.md",
+      "lock_entry": {
+        "source_path": "docs/worktree-playbook.md",
+        "target_path": "${managed_docs_root}/worktree-playbook.md",
+        "role": "managed_doc",
+        "update_policy": "merge",
+        "render_mode": "copy",
+        "checksum": "sha256:a149ce1197c59da6013323758c9f01d90abb514cd3b20f5b41a5cde8d4911fe0",
+        "document_id": ".forgekit/docs/worktree-playbook.md"
+      },
+      "baseline": "baseline/.forgekit/docs/worktree-playbook.md"
+    },
+    {
+      "id": "update-governance-adr-process.md",
+      "type": "merge_markdown",
+      "safety": "safe",
+      "source": "files/governance/adr-process.md",
+      "target": "governance/adr-process.md",
+      "lock_entry": {
+        "source_path": "governance/adr-process.md",
+        "target_path": "governance/adr-process.md",
+        "role": "metadata",
+        "update_policy": "merge",
+        "render_mode": "copy",
+        "document_id": "governance/adr-process.md",
+        "checksum": "sha256:03f292f2cf74498189795501a49f3d55f3ed7f72e0e8b791cfcc6ede8cef3754"
+      },
+      "baseline": "baseline/governance/adr-process.md"
+    },
+    {
+      "id": "update-governance-agent-entry-contract.md",
+      "type": "merge_markdown",
+      "safety": "safe",
+      "source": "files/governance/agent-entry-contract.md",
+      "target": "governance/agent-entry-contract.md",
+      "lock_entry": {
+        "source_path": "governance/agent-entry-contract.md",
+        "target_path": "governance/agent-entry-contract.md",
+        "role": "governance",
+        "update_policy": "replace",
+        "render_mode": "copy",
+        "checksum": "sha256:cbe57b519d39f1831d0e0b65d379a6a940acc0f93550318bfe9d4117540fd396",
+        "document_id": "governance/agent-entry-contract.md"
+      },
+      "baseline": "baseline/governance/agent-entry-contract.md"
+    },
+    {
+      "id": "update-governance-agent-harness.md",
+      "type": "merge_markdown",
+      "safety": "safe",
+      "source": "files/governance/agent-harness.md",
+      "target": "governance/agent-harness.md",
+      "lock_entry": {
+        "source_path": "governance/agent-harness.md",
+        "target_path": "governance/agent-harness.md",
+        "role": "governance",
+        "update_policy": "replace",
+        "render_mode": "copy",
+        "checksum": "sha256:526f1419cdf94542d1705eb0d85d46ca1e363a26bc22f57e70b00c1fad665801",
+        "document_id": "governance/agent-harness.md"
+      },
+      "baseline": "baseline/governance/agent-harness.md"
+    },
+    {
+      "id": "update-governance-agent-suitability.md",
+      "type": "merge_markdown",
+      "safety": "safe",
+      "source": "files/governance/agent-suitability.md",
+      "target": "governance/agent-suitability.md",
+      "lock_entry": {
+        "source_path": "governance/agent-suitability.md",
+        "target_path": "governance/agent-suitability.md",
+        "role": "metadata",
+        "update_policy": "merge",
+        "render_mode": "copy",
+        "document_id": "governance/agent-suitability.md",
+        "checksum": "sha256:2a7919eba71a6232f8ac4c1398129a14c2df38ee9cf63f4c79e5643a1f0d64a9"
+      },
+      "baseline": "baseline/governance/agent-suitability.md"
+    },
+    {
+      "id": "update-governance-ai-engineering-loop.md",
+      "type": "merge_markdown",
+      "safety": "safe",
+      "source": "files/governance/ai-engineering-loop.md",
+      "target": "governance/ai-engineering-loop.md",
+      "lock_entry": {
+        "source_path": "governance/ai-engineering-loop.md",
+        "target_path": "governance/ai-engineering-loop.md",
+        "role": "governance",
+        "update_policy": "replace",
+        "render_mode": "copy",
+        "checksum": "sha256:4b2cb49e27a57fa926da4d4fb02c589493db951a09bd78a37a10f3142b90dfab",
+        "document_id": "governance/ai-engineering-loop.md"
+      },
+      "baseline": "baseline/governance/ai-engineering-loop.md"
+    },
+    {
+      "id": "update-governance-architecture-governance.md",
+      "type": "merge_markdown",
+      "safety": "safe",
+      "source": "files/governance/architecture-governance.md",
+      "target": "governance/architecture-governance.md",
+      "lock_entry": {
+        "source_path": "governance/architecture-governance.md",
+        "target_path": "governance/architecture-governance.md",
+        "role": "metadata",
+        "update_policy": "merge",
+        "render_mode": "copy",
+        "document_id": "governance/architecture-governance.md",
+        "checksum": "sha256:733d01a35e264a7fda3c953cc621f1b739704d20713247aea66751cf75176d35"
+      },
+      "baseline": "baseline/governance/architecture-governance.md"
+    },
+    {
+      "id": "update-governance-change-management.md",
+      "type": "merge_markdown",
+      "safety": "safe",
+      "source": "files/governance/change-management.md",
+      "target": "governance/change-management.md",
+      "lock_entry": {
+        "source_path": "governance/change-management.md",
+        "target_path": "governance/change-management.md",
+        "role": "metadata",
+        "update_policy": "merge",
+        "render_mode": "copy",
+        "document_id": "governance/change-management.md",
+        "checksum": "sha256:8da603c8deeaabd8a59cfdd4ec8efbd8c7dbb40c572add472b39ac9880b6daab"
+      },
+      "baseline": "baseline/governance/change-management.md"
+    },
+    {
+      "id": "update-governance-cicd-environment-governance.md",
+      "type": "merge_markdown",
+      "safety": "safe",
+      "source": "files/governance/cicd-environment-governance.md",
+      "target": "governance/cicd-environment-governance.md",
+      "lock_entry": {
+        "source_path": "governance/cicd-environment-governance.md",
+        "target_path": "governance/cicd-environment-governance.md",
+        "role": "metadata",
+        "update_policy": "merge",
+        "render_mode": "copy",
+        "document_id": "governance/cicd-environment-governance.md",
+        "checksum": "sha256:4d15d2942bebb84b8ecb48f69cc9c3f6e32299479b33fd2f3f453b8543f07e30"
+      },
+      "baseline": "baseline/governance/cicd-environment-governance.md"
+    },
+    {
+      "id": "update-governance-code-ownership-review-governance.md",
+      "type": "merge_markdown",
+      "safety": "safe",
+      "source": "files/governance/code-ownership-review-governance.md",
+      "target": "governance/code-ownership-review-governance.md",
+      "lock_entry": {
+        "source_path": "governance/code-ownership-review-governance.md",
+        "target_path": "governance/code-ownership-review-governance.md",
+        "role": "metadata",
+        "update_policy": "merge",
+        "render_mode": "copy",
+        "document_id": "governance/code-ownership-review-governance.md",
+        "checksum": "sha256:bd229164616f8e6a330aadbbcc629e20dd30474c63dc3e5caee3b3d1e84b3052"
+      },
+      "baseline": "baseline/governance/code-ownership-review-governance.md"
+    },
+    {
+      "id": "update-governance-definition-of-done.md",
+      "type": "merge_markdown",
+      "safety": "safe",
+      "source": "files/governance/definition-of-done.md",
+      "target": "governance/definition-of-done.md",
+      "lock_entry": {
+        "source_path": "governance/definition-of-done.md",
+        "target_path": "governance/definition-of-done.md",
+        "role": "metadata",
+        "update_policy": "merge",
+        "render_mode": "copy",
+        "document_id": "governance/definition-of-done.md",
+        "checksum": "sha256:c9984e3eaf8b3ee5bf6b56bb9a925e67db4d0a608f137fd894757491d673643d"
+      },
+      "baseline": "baseline/governance/definition-of-done.md"
+    },
+    {
+      "id": "update-governance-definition-of-ready.md",
+      "type": "merge_markdown",
+      "safety": "safe",
+      "source": "files/governance/definition-of-ready.md",
+      "target": "governance/definition-of-ready.md",
+      "lock_entry": {
+        "source_path": "governance/definition-of-ready.md",
+        "target_path": "governance/definition-of-ready.md",
+        "role": "metadata",
+        "update_policy": "merge",
+        "render_mode": "copy",
+        "document_id": "governance/definition-of-ready.md",
+        "checksum": "sha256:d5ab707ff1ec05412878648d73cff2be8afa494dc746c6b19641df662909c6fc"
+      },
+      "baseline": "baseline/governance/definition-of-ready.md"
+    },
+    {
+      "id": "update-governance-incident-process.md",
+      "type": "merge_markdown",
+      "safety": "safe",
+      "source": "files/governance/incident-process.md",
+      "target": "governance/incident-process.md",
+      "lock_entry": {
+        "source_path": "governance/incident-process.md",
+        "target_path": "governance/incident-process.md",
+        "role": "metadata",
+        "update_policy": "merge",
+        "render_mode": "copy",
+        "document_id": "governance/incident-process.md",
+        "checksum": "sha256:ecafdb4bdb284bc90546bade0f6e58bf9bf1b33698b792da8d9a82f57c90724f"
+      },
+      "baseline": "baseline/governance/incident-process.md"
+    },
+    {
+      "id": "update-governance-large-change-execution.md",
+      "type": "merge_markdown",
+      "safety": "safe",
+      "source": "files/governance/large-change-execution.md",
+      "target": "governance/large-change-execution.md",
+      "lock_entry": {
+        "source_path": "governance/large-change-execution.md",
+        "target_path": "governance/large-change-execution.md",
+        "role": "metadata",
+        "update_policy": "merge",
+        "render_mode": "copy",
+        "document_id": "governance/large-change-execution.md",
+        "checksum": "sha256:9646d17147a804ab7a95ee4f908af146ea65711b53f0d0f91c9452df2fa5b506"
+      },
+      "baseline": "baseline/governance/large-change-execution.md"
+    },
+    {
+      "id": "update-governance-overview.md",
+      "type": "merge_markdown",
+      "safety": "safe",
+      "source": "files/governance/overview.md",
+      "target": "governance/overview.md",
+      "lock_entry": {
+        "source_path": "governance/overview.md",
+        "target_path": "governance/overview.md",
+        "role": "metadata",
+        "update_policy": "merge",
+        "render_mode": "copy",
+        "document_id": "governance/overview.md",
+        "checksum": "sha256:bdbfc0c7060d351f3e6386691340547b0a7eda6ee6e539f90930434e6d5f53e4"
+      },
+      "baseline": "baseline/governance/overview.md"
+    },
+    {
+      "id": "update-governance-project-bootstrap-fill.md",
+      "type": "merge_markdown",
+      "safety": "safe",
+      "source": "files/governance/project-bootstrap-fill.md",
+      "target": "governance/project-bootstrap-fill.md",
+      "lock_entry": {
+        "source_path": "governance/project-bootstrap-fill.md",
+        "target_path": "governance/project-bootstrap-fill.md",
+        "role": "governance",
+        "update_policy": "replace",
+        "render_mode": "copy",
+        "checksum": "sha256:ed36b0e168d547d7ef1347d36ef9f4832176a2a5c750cf1638036b1b978b4ce9",
+        "document_id": "governance/project-bootstrap-fill.md"
+      },
+      "baseline": "baseline/governance/project-bootstrap-fill.md"
+    },
+    {
+      "id": "update-governance-project-management-task-model.md",
+      "type": "merge_markdown",
+      "safety": "safe",
+      "source": "files/governance/project-management-task-model.md",
+      "target": "governance/project-management-task-model.md",
+      "lock_entry": {
+        "source_path": "governance/project-management-task-model.md",
+        "target_path": "governance/project-management-task-model.md",
+        "role": "metadata",
+        "update_policy": "merge",
+        "render_mode": "copy",
+        "document_id": "governance/project-management-task-model.md",
+        "checksum": "sha256:aef035b9b234fd280cc880c7a094ceefc2e0cc3cbd2eab8a966fb4c92dce3824"
+      },
+      "baseline": "baseline/governance/project-management-task-model.md"
+    },
+    {
+      "id": "update-governance-quality-metrics.md",
+      "type": "merge_markdown",
+      "safety": "safe",
+      "source": "files/governance/quality-metrics.md",
+      "target": "governance/quality-metrics.md",
+      "lock_entry": {
+        "source_path": "governance/quality-metrics.md",
+        "target_path": "governance/quality-metrics.md",
+        "role": "metadata",
+        "update_policy": "merge",
+        "render_mode": "copy",
+        "document_id": "governance/quality-metrics.md",
+        "checksum": "sha256:5e841e0de282468b2f8957745fbff027271ed943ce974960634fc5c37333d457"
+      },
+      "baseline": "baseline/governance/quality-metrics.md"
+    },
+    {
+      "id": "update-governance-rfc-process.md",
+      "type": "merge_markdown",
+      "safety": "safe",
+      "source": "files/governance/rfc-process.md",
+      "target": "governance/rfc-process.md",
+      "lock_entry": {
+        "source_path": "governance/rfc-process.md",
+        "target_path": "governance/rfc-process.md",
+        "role": "metadata",
+        "update_policy": "merge",
+        "render_mode": "copy",
+        "document_id": "governance/rfc-process.md",
+        "checksum": "sha256:e6580bc07cedb5842e560618ee114a8bed433f3e263e791d7045ed52dfb0b5bb"
+      },
+      "baseline": "baseline/governance/rfc-process.md"
+    },
+    {
+      "id": "update-governance-risk-management.md",
+      "type": "merge_markdown",
+      "safety": "safe",
+      "source": "files/governance/risk-management.md",
+      "target": "governance/risk-management.md",
+      "lock_entry": {
+        "source_path": "governance/risk-management.md",
+        "target_path": "governance/risk-management.md",
+        "role": "metadata",
+        "update_policy": "merge",
+        "render_mode": "copy",
+        "document_id": "governance/risk-management.md",
+        "checksum": "sha256:84205890d36fe9e9595e1303294b6e0710864284635ff85fedebfafb5efbf09c"
+      },
+      "baseline": "baseline/governance/risk-management.md"
+    },
+    {
+      "id": "update-governance-sdlc.md",
+      "type": "merge_markdown",
+      "safety": "safe",
+      "source": "files/governance/sdlc.md",
+      "target": "governance/sdlc.md",
+      "lock_entry": {
+        "source_path": "governance/sdlc.md",
+        "target_path": "governance/sdlc.md",
+        "role": "metadata",
+        "update_policy": "merge",
+        "render_mode": "copy",
+        "document_id": "governance/sdlc.md",
+        "checksum": "sha256:0f3df9fb7ed295b80d92f5a5dfc1619d8bb1de66fccb34d7c2e98278ccf257bb"
+      },
+      "baseline": "baseline/governance/sdlc.md"
+    },
+    {
+      "id": "update-governance-security-governance.md",
+      "type": "merge_markdown",
+      "safety": "safe",
+      "source": "files/governance/security-governance.md",
+      "target": "governance/security-governance.md",
+      "lock_entry": {
+        "source_path": "governance/security-governance.md",
+        "target_path": "governance/security-governance.md",
+        "role": "metadata",
+        "update_policy": "merge",
+        "render_mode": "copy",
+        "document_id": "governance/security-governance.md",
+        "checksum": "sha256:15ace7c724cf46a73ca9ea376ed65a993d44dad1db7d27360ab5e8e3670f17aa"
+      },
+      "baseline": "baseline/governance/security-governance.md"
+    },
+    {
+      "id": "update-governance-team-agent-rollout.md",
+      "type": "merge_markdown",
+      "safety": "safe",
+      "source": "files/governance/team-agent-rollout.md",
+      "target": "governance/team-agent-rollout.md",
+      "lock_entry": {
+        "source_path": "governance/team-agent-rollout.md",
+        "target_path": "governance/team-agent-rollout.md",
+        "role": "metadata",
+        "update_policy": "merge",
+        "render_mode": "copy",
+        "document_id": "governance/team-agent-rollout.md",
+        "checksum": "sha256:38b025468ada9ab8eb7216cccc29a761edae82e70d52a595b77a7e869ad56043"
+      },
+      "baseline": "baseline/governance/team-agent-rollout.md"
+    },
+    {
+      "id": "update-governance-technical-debt-management.md",
+      "type": "merge_markdown",
+      "safety": "safe",
+      "source": "files/governance/technical-debt-management.md",
+      "target": "governance/technical-debt-management.md",
+      "lock_entry": {
+        "source_path": "governance/technical-debt-management.md",
+        "target_path": "governance/technical-debt-management.md",
+        "role": "metadata",
+        "update_policy": "merge",
+        "render_mode": "copy",
+        "document_id": "governance/technical-debt-management.md",
+        "checksum": "sha256:570b3db46bb87628e7897b006dcf4e35b9523e83929ebe7bd0208aeac0dd8142"
+      },
+      "baseline": "baseline/governance/technical-debt-management.md"
+    },
+    {
+      "id": "update-governance-traceability.md",
+      "type": "merge_markdown",
+      "safety": "safe",
+      "source": "files/governance/traceability.md",
+      "target": "governance/traceability.md",
+      "lock_entry": {
+        "source_path": "governance/traceability.md",
+        "target_path": "governance/traceability.md",
+        "role": "metadata",
+        "update_policy": "merge",
+        "render_mode": "copy",
+        "document_id": "governance/traceability.md",
+        "checksum": "sha256:84c3b23824a7a1814679e5ac4512d19bc353aeac3729f1e3cfa266bbe17358ab"
+      },
+      "baseline": "baseline/governance/traceability.md"
+    },
+    {
+      "id": "update-governance-version-governance.md",
+      "type": "merge_markdown",
+      "safety": "safe",
+      "source": "files/governance/version-governance.md",
+      "target": "governance/version-governance.md",
+      "lock_entry": {
+        "source_path": "governance/version-governance.md",
+        "target_path": "governance/version-governance.md",
+        "role": "metadata",
+        "update_policy": "merge",
+        "render_mode": "copy",
+        "document_id": "governance/version-governance.md",
+        "checksum": "sha256:b72e738e0f5e82bdc020462ab8a140a5f02cc4c90e26ce6cccbb188a050ece39"
+      },
+      "baseline": "baseline/governance/version-governance.md"
+    },
+    {
+      "id": "update-scripts-bootstrap-project-capsule.py",
+      "type": "replace_file_if_baseline_matches",
+      "safety": "safe",
+      "source": "files/scripts/bootstrap-project-capsule.py",
+      "target": "scripts/bootstrap-project-capsule.py",
+      "lock_entry": {
+        "source_path": "scripts/bootstrap-project-capsule.py",
+        "target_path": "scripts/bootstrap-project-capsule.py",
+        "role": "script",
+        "update_policy": "replace",
+        "render_mode": "copy",
+        "checksum": "sha256:9fd195f8076cefcb921d82fa796d9be91796bb58790c66959a13e199f7754b58"
+      },
+      "baseline": "baseline/scripts/bootstrap-project-capsule.py"
+    },
+    {
+      "id": "update-scripts-check-workspace-integrity.py",
+      "type": "replace_file_if_baseline_matches",
+      "safety": "safe",
+      "source": "files/scripts/check-workspace-integrity.py",
+      "target": "scripts/check-workspace-integrity.py",
+      "lock_entry": {
+        "source_path": "scripts/check-workspace-integrity.py",
+        "target_path": "scripts/check-workspace-integrity.py",
+        "role": "script",
+        "update_policy": "replace",
+        "render_mode": "copy",
+        "checksum": "sha256:7ce043eb6c1cd1d3ff66959c65b300a2edd6f8bfb9ef988aa97a29232a851840"
+      },
+      "baseline": "baseline/scripts/check-workspace-integrity.py"
+    },
+    {
+      "id": "update-scripts-doc-health-report.py",
+      "type": "replace_file_if_baseline_matches",
+      "safety": "safe",
+      "source": "files/scripts/doc-health-report.py",
+      "target": "scripts/doc-health-report.py",
+      "lock_entry": {
+        "source_path": "scripts/doc-health-report.py",
+        "target_path": "scripts/doc-health-report.py",
+        "role": "script",
+        "update_policy": "replace",
+        "render_mode": "copy",
+        "checksum": "sha256:e1c36babee937457da9ee6b7b19c47be2269cf4805c2e96e626f4a1cec18c1e4"
+      },
+      "baseline": "baseline/scripts/doc-health-report.py"
+    },
+    {
+      "id": "update-scripts-forgekit-upgrade.py",
+      "type": "replace_file_if_baseline_matches",
+      "safety": "safe",
+      "source": "files/scripts/forgekit-upgrade.py",
+      "target": "scripts/forgekit-upgrade.py",
+      "lock_entry": {
+        "source_path": "scripts/forgekit-upgrade.py",
+        "target_path": "scripts/forgekit-upgrade.py",
+        "role": "script",
+        "update_policy": "replace",
+        "render_mode": "copy",
+        "checksum": "sha256:ed9d03a5555bc426084644f7c5db56b6c36d06496a69ee88c7cbf364b1f4c1be"
+      },
+      "baseline": "baseline/scripts/forgekit-upgrade.py"
+    },
+    {
+      "id": "update-scripts-run-harness-check.ps1",
+      "type": "replace_file_if_baseline_matches",
+      "safety": "safe",
+      "source": "files/scripts/run-harness-check.ps1",
+      "target": "scripts/run-harness-check.ps1",
+      "lock_entry": {
+        "source_path": "scripts/run-harness-check.ps1",
+        "target_path": "scripts/run-harness-check.ps1",
+        "role": "script",
+        "update_policy": "replace",
+        "render_mode": "copy",
+        "checksum": "sha256:b409ffa968dede5112e78055eac469e99607c28f74e93f96ee6f3127ef282eb2"
+      },
+      "baseline": "baseline/scripts/run-harness-check.ps1"
+    },
+    {
+      "id": "update-scripts-structured_upgrade.py",
+      "type": "copy_file_if_missing",
+      "safety": "safe",
+      "source": "files/scripts/structured_upgrade.py",
+      "target": "scripts/structured_upgrade.py",
+      "lock_entry": {
+        "source_path": "scripts/structured_upgrade.py",
+        "target_path": "scripts/structured_upgrade.py",
+        "role": "script",
+        "update_policy": "replace",
+        "render_mode": "copy",
+        "checksum": "sha256:a3c2fa155e3be41c031070da23f7154216651e73a3a33ac68716969d197add3e"
+      }
+    },
+    {
+      "id": "relocate-docs-context-continuity.md",
+      "type": "relocate_markdown",
+      "safety": "safe",
+      "target": ".forgekit/docs/context-continuity.md",
+      "baseline": "baseline/.forgekit/docs/context-continuity.md",
+      "destinations": {
+        "*": ".forgekit/docs/work-session-checkpoint.md"
+      },
+      "rules_only": true
+    },
+    {
+      "id": "relocate-docs-local-toolchain.md",
+      "type": "relocate_markdown",
+      "safety": "safe",
+      "target": ".forgekit/docs/local-toolchain.md",
+      "baseline": "baseline/.forgekit/docs/local-toolchain.md",
+      "destinations": {
+        "*": ".forgekit/docs/testing.md"
+      }
+    },
+    {
+      "id": "relocate-docs-workflow-router.md",
+      "type": "relocate_markdown",
+      "safety": "safe",
+      "target": ".forgekit/docs/workflow-router.md",
+      "baseline": "baseline/.forgekit/docs/workflow-router.md",
+      "destinations": {
+        "*": ".forgekit/docs/usage-playbook.md"
+      },
+      "rules_only": true
+    },
+    {
+      "id": "relocate-.codex-project.md",
+      "type": "relocate_markdown",
+      "safety": "safe",
+      "target": ".codex/project.md",
+      "baseline": "baseline/.codex/project.md",
+      "destinations": {
+        "*": ".forgekit/docs/project-plan.md"
+      }
+    },
+    {
+      "id": "relocate-.codex-scope.md",
+      "type": "relocate_markdown",
+      "safety": "safe",
+      "target": ".codex/scope.md",
+      "baseline": "baseline/.codex/scope.md",
+      "destinations": {
+        "*": ".forgekit/docs/project-plan.md",
+        "验收标准": ".forgekit/docs/requirements.md",
+        "风险与依赖": ".forgekit/docs/risk-register.md"
+      }
+    },
+    {
+      "id": "relocate-.codex-rules.md",
+      "type": "relocate_markdown",
+      "safety": "safe",
+      "target": ".codex/rules.md",
+      "baseline": "baseline/.codex/rules.md",
+      "destinations": {
+        "*": "AGENTS.md"
+      },
+      "rules_only": true
+    }
+  ],
+  "manual_review": [
+    "Only unresolved overlapping edits, unknown baselines, or ambiguous structures stop apply."
+  ],
+  "non_goals": [
+    "No business README, root-layout move, model API call, task invention, publish or deploy."
+  ],
+  "inventory": [
+    "baseline-index.json",
+    "baseline/.claude/agents/forgekit-code-reviewer.md",
+    "baseline/.claude/skills/forgekit-adversarial-review/SKILL.md",
+    "baseline/.claude/skills/forgekit-code-review/SKILL.md",
+    "baseline/.claude/skills/forgekit-code-review/references/security-review.md",
+    "baseline/.claude/skills/forgekit-code-review/references/testing-review.md",
+    "baseline/.claude/skills/forgekit-code-review/references/universal-review.md",
+    "baseline/.claude/skills/forgekit-first-principles/SKILL.md",
+    "baseline/.claude/skills/forgekit-maintenance/SKILL.md",
+    "baseline/.claude/skills/forgekit-request-code-review/SKILL.md",
+    "baseline/.codex/agents/README.md",
+    "baseline/.codex/agents/forgekit-code-reviewer.toml",
+    "baseline/.codex/agents/forgekit-planner.toml",
+    "baseline/.codex/agents/forgekit-reviewer.toml",
+    "baseline/.codex/agents/forgekit-verifier.toml",
+    "baseline/.codex/automation-decision.md",
+    "baseline/.codex/commands-catalog.md",
+    "baseline/.codex/commands.md",
+    "baseline/.codex/config.example.toml",
+    "baseline/.codex/config.toml",
+    "baseline/.codex/git.md",
+    "baseline/.codex/handover.md",
+    "baseline/.codex/hooks.md",
+    "baseline/.codex/security.md",
+    "baseline/.codex/stacks/README.md",
+    "baseline/.codex/style.md",
+    "baseline/.codex/testing.md",
+    "baseline/.codex/version-gates.md",
+    "baseline/.forgekit/archive/README.md",
+    "baseline/.forgekit/archive/changes/README.md",
+    "baseline/.forgekit/archive/releases/README.md",
+    "baseline/.forgekit/changes/README.md",
+    "baseline/.forgekit/changes/_template/design.md",
+    "baseline/.forgekit/changes/_template/proposal.md",
+    "baseline/.forgekit/changes/_template/retro.md",
+    "baseline/.forgekit/changes/_template/review.md",
+    "baseline/.forgekit/changes/_template/ship.md",
+    "baseline/.forgekit/changes/_template/tasks.md",
+    "baseline/.forgekit/changes/_template/verification.md",
+    "baseline/.forgekit/docs/adr/0000-template.md",
+    "baseline/.forgekit/docs/adr/0001-example.md",
+    "baseline/.forgekit/docs/adr/README.md",
+    "baseline/.forgekit/docs/rfc/0000-template.md",
+    "baseline/.forgekit/docs/rfc/README.md",
+    "baseline/.forgekit/project-boundary.yml",
+    "baseline/.forgekit/projects/_template/decisions/0001-example.md",
+    "baseline/.forgekit/projects/_template/project-card.md",
+    "baseline/.forgekit/projects/_template/risk-register.md",
+    "baseline/.forgekit/projects/_template/source-links.md",
+    "baseline/.forgekit/projects/_template/task-board.md",
+    "baseline/.forgekit/projects/_template/testing.md",
+    "baseline/.forgekit/workspace-map.json",
+    "baseline/.gitattributes",
+    "baseline/scripts/archive-capsule.py",
+    "baseline/scripts/archive-changes.py",
+    "baseline/scripts/check-codex-native-agents.py",
+    "baseline/scripts/check-current-docs-integrity.py",
+    "baseline/scripts/check-doc-sync.ps1",
+    "baseline/scripts/check-doc-sync.sh",
+    "baseline/scripts/detect-local-toolchain.ps1",
+    "baseline/scripts/handoff-package.py",
+    "baseline/scripts/install-hooks.ps1",
+    "baseline/scripts/install-hooks.sh",
+    "baseline/scripts/source-trace-report.py",
+    "baseline/scripts/upgrade_review_packets.py",
+    "legacy-baselines.json"
+  ],
+  "check_current_docs": true,
+  "features": {
+    "structured_migration": true
+  },
+  "template_lock": {
+    "retire_targets": [
+      "README.md"
+    ]
+  },
+  "legacy_baselines": "legacy-baselines.json",
+  "reference_paths": [
+    ".agents/skills/README.md",
+    ".agents/skills/code-review/SKILL.md",
+    ".agents/skills/document-backfill/SKILL.md",
+    ".agents/skills/document-backfill/references/bootstrap.md",
+    ".agents/skills/document-backfill/references/facts.md",
+    ".agents/skills/handover-review/SKILL.md",
+    ".agents/skills/large-change-planning/SKILL.md",
+    ".agents/skills/project-assessment/SKILL.md",
+    ".agents/skills/project-assessment/references/adoption.md",
+    ".agents/skills/project-assessment/references/takeover.md",
+    ".agents/skills/project-bootstrap-fill/SKILL.md",
+    ".agents/skills/project-init/SKILL.md",
+    ".agents/skills/project-suitability/SKILL.md",
+    ".agents/skills/release-check/SKILL.md",
+    ".agents/skills/security-review/SKILL.md",
+    ".claude/agents/forgekit-code-reviewer.md",
+    ".claude/skills/forgekit-adversarial-review/SKILL.md",
+    ".claude/skills/forgekit-code-review/SKILL.md",
+    ".claude/skills/forgekit-code-review/references/security-review.md",
+    ".claude/skills/forgekit-code-review/references/testing-review.md",
+    ".claude/skills/forgekit-code-review/references/universal-review.md",
+    ".claude/skills/forgekit-first-principles/SKILL.md",
+    ".claude/skills/forgekit-maintenance/SKILL.md",
+    ".claude/skills/forgekit-project-workflow/SKILL.md",
+    ".claude/skills/forgekit-request-code-review/SKILL.md",
+    ".codex/agents/README.md",
+    ".codex/automation-decision.md",
+    ".codex/commands-catalog.md",
+    ".codex/commands.md",
+    ".codex/git.md",
+    ".codex/handover.md",
+    ".codex/hooks.md",
+    ".codex/security.md",
+    ".codex/skills.md",
+    ".codex/stacks/README.md",
+    ".codex/style.md",
+    ".codex/testing.md",
+    ".codex/version-gates.md",
+    ".forgekit/archive/README.md",
+    ".forgekit/archive/changes/README.md",
+    ".forgekit/archive/releases/README.md",
+    ".forgekit/changes/README.md",
+    ".forgekit/changes/_template/design.md",
+    ".forgekit/changes/_template/proposal.md",
+    ".forgekit/changes/_template/retro.md",
+    ".forgekit/changes/_template/review.md",
+    ".forgekit/changes/_template/ship.md",
+    ".forgekit/changes/_template/tasks.md",
+    ".forgekit/changes/_template/verification.md",
+    ".forgekit/docs/adr/0000-template.md",
+    ".forgekit/docs/adr/0001-example.md",
+    ".forgekit/docs/adr/README.md",
+    ".forgekit/docs/api.md",
+    ".forgekit/docs/architecture.md",
+    ".forgekit/docs/archive-capsule.md",
+    ".forgekit/docs/bounded-auto-loop-policy.md",
+    ".forgekit/docs/change-impact.md",
+    ".forgekit/docs/changelog.md",
+    ".forgekit/docs/code-ownership.md",
+    ".forgekit/docs/codebase-map.md",
+    ".forgekit/docs/codex-next-work-order.md",
+    ".forgekit/docs/current-docs-integrity.md",
+    ".forgekit/docs/database-design.md",
+    ".forgekit/docs/defect-fix-plan.md",
+    ".forgekit/docs/defect-review.md",
+    ".forgekit/docs/dependency-review.md",
+    ".forgekit/docs/deployment.md",
+    ".forgekit/docs/document-lifecycle.md",
+    ".forgekit/docs/document-responsibility.md",
+    ".forgekit/docs/environment-matrix.md",
+    ".forgekit/docs/exploration-report.md",
+    ".forgekit/docs/handover-audit.md",
+    ".forgekit/docs/implementation-plan.md",
+    ".forgekit/docs/incident-review.md",
+    ".forgekit/docs/maker-checker-protocol.md",
+    ".forgekit/docs/native-agent-adapter.md",
+    ".forgekit/docs/project-maintenance.md",
+    ".forgekit/docs/project-plan.md",
+    ".forgekit/docs/project-suitability.md",
+    ".forgekit/docs/project-trial-record.md",
+    ".forgekit/docs/quality-metrics.md",
+    ".forgekit/docs/reasoning-review.md",
+    ".forgekit/docs/release-pipeline.md",
+    ".forgekit/docs/requirements.md",
+    ".forgekit/docs/rfc/0000-template.md",
+    ".forgekit/docs/rfc/README.md",
+    ".forgekit/docs/risk-register.md",
+    ".forgekit/docs/scoped-docs.md",
+    ".forgekit/docs/task-board.md",
+    ".forgekit/docs/task-intake.md",
+    ".forgekit/docs/tech-decisions.md",
+    ".forgekit/docs/technical-debt.md",
+    ".forgekit/docs/testing.md",
+    ".forgekit/docs/threat-model.md",
+    ".forgekit/docs/traceability.md",
+    ".forgekit/docs/usage-playbook.md",
+    ".forgekit/docs/version-roadmap.md",
+    ".forgekit/docs/work-log.md",
+    ".forgekit/docs/work-session-checkpoint.md",
+    ".forgekit/docs/worktree-playbook.md",
+    ".forgekit/projects/_template/decisions/0001-example.md",
+    ".forgekit/projects/_template/project-card.md",
+    ".forgekit/projects/_template/risk-register.md",
+    ".forgekit/projects/_template/source-links.md",
+    ".forgekit/projects/_template/task-board.md",
+    ".forgekit/projects/_template/testing.md",
+    "AGENTS.md",
+    "CLAUDE.md",
+    "governance/adr-process.md",
+    "governance/agent-entry-contract.md",
+    "governance/agent-harness.md",
+    "governance/agent-suitability.md",
+    "governance/ai-engineering-loop.md",
+    "governance/architecture-governance.md",
+    "governance/change-management.md",
+    "governance/cicd-environment-governance.md",
+    "governance/code-ownership-review-governance.md",
+    "governance/definition-of-done.md",
+    "governance/definition-of-ready.md",
+    "governance/incident-process.md",
+    "governance/large-change-execution.md",
+    "governance/overview.md",
+    "governance/project-bootstrap-fill.md",
+    "governance/project-management-task-model.md",
+    "governance/quality-metrics.md",
+    "governance/rfc-process.md",
+    "governance/risk-management.md",
+    "governance/sdlc.md",
+    "governance/security-governance.md",
+    "governance/team-agent-rollout.md",
+    "governance/technical-debt-management.md",
+    "governance/traceability.md",
+    "governance/version-governance.md"
+  ]
+}

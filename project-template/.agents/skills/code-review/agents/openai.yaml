@@ -1,6 +1,6 @@
 interface:
-  display_name: "Code Review"
-  short_description: "Review implementation evidence without editing"
-  default_prompt: |-
-    $code-review
-    Review the existing implementation or diff for correctness, regressions, boundary failures, and test gaps without modifying files.
+  display_name: "code-review"
+  short_description: "code review"
+  default_prompt: "$code-review\n\nReview implemented code, diffs or named findings for correctness and regressions. Read-only; no automatic repair."
+policy:
+  allow_implicit_invocation: true

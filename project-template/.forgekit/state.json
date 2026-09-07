@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "forgekit_version": "0.46.0",
+  "forgekit_version": "0.47.0",
   "managed_docs_root": ".forgekit/docs",
   "change_root": ".forgekit/changes",
   "mode": "Standard",
@@ -20,7 +20,8 @@
     "minimal_project_capsule_bootstrap": true,
     "version_metadata_repair": true,
     "maker_checker_review_convergence": true,
-    "native_agent_adapter": "none"
+    "native_agent_adapter": "none",
+    "structured_migration": true
   },
   "last_upgrade": null
 }

@@ -7,6 +7,13 @@ $ErrorActionPreference = "Stop"
 $scriptRoot = Split-Path -Parent $MyInvocation.MyCommand.Path
 $repoRoot = Split-Path -Parent $scriptRoot
 $forgekitVersion = (Get-Content (Join-Path $repoRoot "VERSION") -Raw).Trim()
+
+# v0.47 validates capabilities and behavior; historical gates are version-pinned.
+if ($forgekitVersion -eq "0.47.0") {
+    & python -B (Join-Path $repoRoot "scripts/gate-v047.py") --repo-root $repoRoot
+    exit $LASTEXITCODE
+}
+
 $projectTemplate = Join-Path $repoRoot "project-template"
 $errors = New-Object System.Collections.Generic.List[string]
 

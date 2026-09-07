@@ -1,43 +1,81 @@
 {
-  "schema_version": 1,
+  "schema_version": 2,
   "source_root": "skills",
   "target_root": "project-template/.agents/skills",
   "entries": [
     {
       "skill": "project-init",
-      "managed_files": ["SKILL.md", "agents/openai.yaml"]
-    },
-    {
-      "skill": "project-bootstrap-fill",
-      "managed_files": ["SKILL.md", "agents/openai.yaml"]
-    },
-    {
-      "skill": "handover-review",
-      "managed_files": ["SKILL.md", "agents/openai.yaml"]
+      "managed_files": [
+        "SKILL.md",
+        "agents/openai.yaml"
+      ]
     },
     {
       "skill": "document-backfill",
-      "managed_files": ["SKILL.md", "agents/openai.yaml"]
+      "managed_files": [
+        "SKILL.md",
+        "agents/openai.yaml",
+        "references/bootstrap.md",
+        "references/facts.md"
+      ]
+    },
+    {
+      "skill": "project-assessment",
+      "managed_files": [
+        "SKILL.md",
+        "agents/openai.yaml",
+        "references/adoption.md",
+        "references/takeover.md"
+      ]
     },
     {
       "skill": "large-change-planning",
-      "managed_files": ["SKILL.md", "agents/openai.yaml"]
-    },
-    {
-      "skill": "release-check",
-      "managed_files": ["SKILL.md", "agents/openai.yaml"]
+      "managed_files": [
+        "SKILL.md",
+        "agents/openai.yaml"
+      ]
     },
     {
       "skill": "code-review",
-      "managed_files": ["SKILL.md", "agents/openai.yaml"]
-    },
-    {
-      "skill": "project-suitability",
-      "managed_files": ["SKILL.md", "agents/openai.yaml"]
+      "managed_files": [
+        "SKILL.md",
+        "agents/openai.yaml"
+      ]
     },
     {
       "skill": "security-review",
-      "managed_files": ["SKILL.md", "agents/openai.yaml"]
+      "managed_files": [
+        "SKILL.md",
+        "agents/openai.yaml"
+      ]
+    },
+    {
+      "skill": "release-check",
+      "managed_files": [
+        "SKILL.md",
+        "agents/openai.yaml"
+      ]
+    },
+    {
+      "skill": "project-bootstrap-fill",
+      "managed_files": [
+        "SKILL.md",
+        "agents/openai.yaml"
+      ]
+    },
+    {
+      "skill": "handover-review",
+      "managed_files": [
+        "SKILL.md",
+        "agents/openai.yaml"
+      ]
+    },
+    {
+      "skill": "project-suitability",
+      "managed_files": [
+        "SKILL.md",
+        "agents/openai.yaml"
+      ]
     }
   ]
 }

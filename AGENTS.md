@@ -19,7 +19,6 @@ This repository maintains a reusable Codex CLI workflow template.
 - Do not put machine-specific local paths into `project-template/`; keep them in `user-rules/`.
 - When adding a new template capability, update all relevant entry points:
   - `README.md`
-  - `usage.html`
   - `project-template/README.md`
   - `project-template/AGENTS.md`
   - `project-template/.codex/skills.md`
@@ -30,7 +29,7 @@ This repository maintains a reusable Codex CLI workflow template.
 ## Harness Rules
 
 - Keep root and generated `AGENTS.md` short; details belong in skills, stack templates, docs, or governance files.
-- Do not duplicate the same long instruction in HTML, prompts, skills, and AGENTS.
+- Do not duplicate the same long instruction in prompts, skills, and AGENTS.
 - When adding startup behavior, make sure Codex can answer: first file to read, search starting point, stack-specific files, and validation command.
 - When adding managed docs, update `project-template/.forgekit/docs/document-responsibility.md`, `project-template/docs/codebase-map.md`, manifest checks, and smoke tests.
 - Source-first task intake belongs in `project-template/docs/task-intake.md`; do not let `requirements.md`, `task-board.md`, or `changelog.md` replace the original assignment ledger.
@@ -53,3 +52,5 @@ powershell -ExecutionPolicy Bypass -File .\scripts\validate-template.ps1
 ```
 
 For generated project smoke tests, run `scripts/init-project-template.ps1` into `D:\tmp`.
+
+For v0.47 changes, validate the seven canonical Skills, three explicit compatibility aliases, structured migration, and retirement mappings. HTML usage is retired; README and usage-playbook own user guidance.

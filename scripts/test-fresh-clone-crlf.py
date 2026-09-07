@@ -63,13 +63,23 @@ def remove_tree(path):
 def construct_commit(repo, staging):
     run(["git", "-c", "core.autocrlf=false", "clone", "--no-local", str(repo), str(staging)], repo)
     deleted = nul_paths(["git", "diff", "--name-only", "--diff-filter=D", "-z"], repo)
-    unexpected = [path for path in deleted if path.as_posix() != "usage.html"]
+    current = (repo / 'VERSION').read_text().strip() == '0.47.0'
+    retired = {'usage.html'}
+    if current:
+        retired.update('project-template/' + path for path in json.loads((repo / 'config/v047-document-moves.json').read_text()))
+    unexpected = [path for path in deleted if path.as_posix() not in retired]
     if unexpected:
         raise FreshCloneError(f"fresh-clone fixture has unexpected tracked deletions: {unexpected}")
     changed = nul_paths(["git", "diff", "--name-only", "--diff-filter=ACMRTUXB", "-z"], repo)
     staged = nul_paths(["git", "diff", "--cached", "--name-only", "--diff-filter=ACMRTUXB", "-z"], repo)
     untracked = nul_paths(["git", "ls-files", "--others", "--exclude-standard", "-z"], repo)
     paths = sorted(set(changed + staged + untracked), key=lambda path: path.as_posix())
+    if current:
+        for relative in deleted:
+            target = staging / relative
+            if not target.resolve().is_relative_to(staging.resolve()):
+                raise FreshCloneError('Deletion escapes temporary fixture')
+            target.unlink(missing_ok=True)
     for relative in paths:
         if relative.as_posix() == "usage.html":
             continue
@@ -81,7 +91,10 @@ def construct_commit(repo, staging):
         shutil.copyfile(source, target)
     add_paths = [path.as_posix() for path in paths if path.as_posix() != "usage.html"]
     if add_paths:
-        run(["git", "add", "--", *add_paths], staging)
+        for offset in range(0, len(add_paths), 75):
+            run(["git", "add", "--", *add_paths[offset:offset + 75]], staging)
+    if current and deleted:
+        run(['git', 'add', '-u', '--', *[p.as_posix() for p in deleted]], staging)
     run([
         "git", "-c", "user.name=ForgeKit Fresh Clone Gate",
         "-c", "user.email=forgekit-fresh-clone@example.invalid",
@@ -91,7 +104,7 @@ def construct_commit(repo, staging):
     if status:
         raise FreshCloneError(f"temporary commit is not clean: {status}")
     usage_status = run(["git", "show", "--format=", "--name-status", "HEAD"], staging).stdout
-    if "D\tusage.html" in usage_status:
+    if not current and "D\tusage.html" in usage_status:
         raise FreshCloneError("temporary commit included the user-owned usage.html deletion")
     return run(["git", "rev-parse", "HEAD"], staging).stdout.strip()
 
@@ -104,9 +117,16 @@ def stage_c_byte_paths(repo):
     module = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(module)
     paths = {Path(".gitattributes"), Path("project-template/.gitattributes")}
-    for source, target, _ in module.projection_managed_paths(repo):
-        paths.add(source)
-        paths.add(target)
+    if (repo / 'VERSION').read_text().strip() == '0.47.0':
+        config = json.loads((repo / 'config/skill-projections.json').read_text())
+        for entry in config['entries']:
+            for relative in entry['managed_files']:
+                paths.add(Path('skills') / entry['skill'] / relative)
+                paths.add(Path(config['target_root']) / entry['skill'] / relative)
+    else:
+        for source, target, _ in module.projection_managed_paths(repo):
+            paths.add(source)
+            paths.add(target)
     manifest = json.loads(
         (repo / "project-template/.forgekit/template-manifest.json").read_text(encoding="utf-8")
     )
@@ -165,6 +185,8 @@ def verify_clone(clone, mode, full, temp_root):
         ("projection", [sys.executable, "-B", "scripts/sync-skill-projections.py", "check"]),
         ("template", [shutil.which("pwsh") or "powershell", "-NoProfile", "-ExecutionPolicy", "Bypass", "-File", ".\\scripts\\validate-template.ps1"]),
     ]
+    if (clone / 'VERSION').read_text().strip() == '0.47.0':
+        commands = [('v047', [sys.executable, '-B', 'scripts/gate-v047.py', '--static-only'])]
     if full:
         commands.append(("smoke", [sys.executable, "-B", "scripts/smoke-test.py", "--repo-root", str(clone)]))
     for label, command in commands:
@@ -189,7 +211,7 @@ def verify_missing_attribute_mutation(staging, temp):
     clone = temp / "bad"
     run(["git", "-c", "core.autocrlf=true", "clone", "--no-local", str(staging), str(clone)], temp)
     result = subprocess.run(
-        [sys.executable, "-B", "scripts/validate-stage-c-skills.py"], cwd=clone,
+        [sys.executable, "-B", "scripts/validate-v047.py" if (clone / 'VERSION').read_text().strip() == '0.47.0' else "scripts/validate-stage-c-skills.py"], cwd=clone,
         stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, encoding="utf-8",
         errors="replace", check=False, timeout=60,
     )
@@ -241,7 +263,7 @@ def main(argv=None):
             evidence["working_tree_snapshot"] = {
                 "smoke": "PASS",
                 "git_directory": ".git",
-                "usage_html": "HEAD materialized; user deletion excluded",
+                "usage_html": "retired paths materialized from the current release contract",
             }
         for mode in ("false", "true"):
             clone = temp / ("lf" if mode == "false" else "cr")

@@ -1,0 +1,42 @@
+# Version used when this project boundary file was created.
+# Current ForgeKit version is tracked in .forgekit/state.json.
+forgekit:
+  version: "0.44.0"
+  mode: "Standard"
+
+roots:
+  forgekit_root: "<path-to-forgekit>"
+  project_root: "."
+  managed_docs_root: ".forgekit/docs"
+  change_root: ".forgekit/changes"
+  business_docs_roots:
+    - "docs"
+
+write_policy:
+  allow:
+    - ".codex/**"
+    - ".agents/**"
+    - ".claude/**"
+    - ".forgekit/docs/**"
+    - ".forgekit/changes/**"
+  task_scoped:
+    - "src/**"
+    - "tests/**"
+    - "scripts/**"
+  read_mostly:
+    - "docs/**"
+  ask:
+    - "README.md"
+    - "AGENTS.md"
+    - "CLAUDE.md"
+    - ".github/**"
+    - "package.json"
+    - "pom.xml"
+    - "build.gradle"
+  readonly:
+    - "<path-to-forgekit>/**"
+    - ".git/**"
+    - "node_modules/**"
+    - "target/**"
+    - "dist/**"
+    - "build/**"

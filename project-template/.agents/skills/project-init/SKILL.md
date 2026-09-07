@@ -1,6 +1,6 @@
 ---
 name: project-init
-description: Initialize the minimum ForgeKit boundary and governance entry for a new or not-yet-initialized project. Use only when the user asks to initialize the current project; route existing-project audits, bootstrap gap filling, implementation, review, and suitability assessment elsewhere.
+description: Initialize ForgeKit through its unified project entry when the user requests installation or initialization.
 ---
 
 # Project Init
@@ -13,7 +13,7 @@ Use only when all of these are true:
 - The directory has not completed ForgeKit project initialization.
 - The task is to establish the minimum project boundary and governance entry.
 
-Do not use for an existing-project takeover audit, partial bootstrap placeholders, an implementation or bug fix, a read-only review, or a ForgeKit suitability assessment. Route those intents to `handover-review`, `project-bootstrap-fill`, the specific implementation or review Skill, or `project-suitability`. Do not run all of these Skills in sequence.
+Do not use for an existing-project takeover audit, partial bootstrap placeholders, an implementation or bug fix, a read-only review, or a ForgeKit suitability assessment. Route those intents to `project-assessment`, `document-backfill`, the specific implementation or review Skill, or `project-assessment`. Do not run all of these Skills in sequence.
 
 ## Default Mode and Authorization
 

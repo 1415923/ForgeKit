@@ -9,7 +9,9 @@ from pathlib import Path
 from types import SimpleNamespace
 
 
-REPO = Path(__file__).resolve().parents[1]
+# Exact v0.46 release assertions; current contracts are exercised by test_v047_* .
+from version_fixture import v046_repo
+REPO = v046_repo()
 
 
 def load_module(name, path):

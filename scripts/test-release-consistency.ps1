@@ -1,4 +1,4 @@
-param()
+﻿param()
 
 $ErrorActionPreference = "Stop"
 
@@ -6,6 +6,15 @@ $scriptRoot = Split-Path -Parent $MyInvocation.MyCommand.Path
 $repoRoot = Split-Path -Parent $scriptRoot
 $validator = Join-Path $scriptRoot "validate-plugin-assets.ps1"
 $expectedVersion = (Get-Content -LiteralPath (Join-Path $repoRoot "VERSION") -Raw).Trim()
+
+# v0.47 validates capabilities and behavior; historical gates are version-pinned.
+if ($expectedVersion -eq "0.47.0") {
+    & python -B (Join-Path $repoRoot "scripts/gate-v047.py") --repo-root $repoRoot --static-only
+    if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+    & python -B -m unittest discover -s (Join-Path $repoRoot "tests") -p test_v047_contract.py
+    exit $LASTEXITCODE
+}
+
 $utf8NoBom = New-Object System.Text.UTF8Encoding($false)
 
 function Invoke-ReleaseValidator {

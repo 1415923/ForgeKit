@@ -1,4 +1,6 @@
 interface:
-  display_name: "Large Change Planning"
-  short_description: "Plan broad or risky changes before coding"
-  default_prompt: "$large-change-planning\n\nPlan this change only when impact warrants staged planning. Freeze scope, trust boundaries, non-goals, stage authorization, acceptance IDs, rollback, evidence, dependencies, and checker conditions; do not use file, module, or line counts as risk thresholds."
+  display_name: "large-change-planning"
+  short_description: "large change planning"
+  default_prompt: "$large-change-planning\n\nPlan changes with material trust, compatibility, migration or recovery impact. Do not trigger from file count."
+policy:
+  allow_implicit_invocation: true

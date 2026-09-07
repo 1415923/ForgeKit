@@ -1,6 +1,6 @@
 interface:
-  display_name: "Release Check"
-  short_description: "Assess explicit release readiness read-only"
-  default_prompt: |-
-    $release-check
-    Assess readiness for the named release, version, migration, or package and report ready, blocked, or not-verified without performing release actions.
+  display_name: "release-check"
+  short_description: "release check"
+  default_prompt: "$release-check\n\nAssess an explicit release candidate and its evidence. Does not publish or treat ordinary commits as releases."
+policy:
+  allow_implicit_invocation: true

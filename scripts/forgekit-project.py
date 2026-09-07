@@ -591,7 +591,65 @@ def print_upgrade_summary(toolkit_root, target, lang):
 
 def upgrade_project(args, toolkit_root, target, installed, toolkit, lang, topology, requested):
     upgrade_script = toolkit_root / "scripts/forgekit-upgrade.py"
-    base = [sys.executable, str(upgrade_script)]
+    # JSON pipes must use the same encoding on Windows regardless of console locale.
+    base = [sys.executable, '-X', 'utf8', str(upgrade_script)]
+    pipe_env = dict(os.environ, PYTHONUTF8='1', PYTHONIOENCODING='utf-8')
+    resolution_args = ['--entry-resolutions', str(Path(args.entry_resolutions).resolve())] if args.entry_resolutions else []
+    current_descriptor = toolkit_root / 'migrations' / version_text(toolkit) / 'migration.json'
+    if current_descriptor.is_file() and load_json(current_descriptor, 'migration').get('schema_version') == 2:
+        completed = subprocess.run(base + ['plan', '--repo-root', str(target), '--json'] + resolution_args, cwd=toolkit_root,
+                                   text=True, encoding='utf-8', errors='strict', capture_output=True, env=pipe_env)
+        try:
+            plan = json.loads(completed.stdout)
+        except ValueError:
+            print(completed.stdout + completed.stderr)
+            return 2
+        if completed.returncode not in (0, 2) or plan.get('to') != version_text(toolkit):
+            if plan.get('reason'):
+                print('[冲突] ' + plan['reason'] if lang == 'zh-CN' else '[conflict] ' + plan['reason'])
+            print('[stop] No complete migration plan reaches the toolkit version.')
+            return 2
+        chinese = lang == 'zh-CN'
+        if chinese:
+            print(f"升级预检：{plan.get('from')} → {plan.get('to')}。尚未写入任何文件。")
+            print('迁移链：' + ' → '.join(plan.get('version_chain', [plan['from'], plan['to']])))
+        else:
+            print(f"Upgrade preflight: {plan.get('from')} -> {plan.get('to')}. No files have been changed.")
+            print('Migration chain: ' + ' -> '.join(plan.get('version_chain', [plan['from'], plan['to']])))
+        if plan.get('conflicts') or completed.returncode:
+            for item in plan.get('conflicts', []):
+                print(f"{'[冲突]' if chinese else '[conflict]'} {item['target']}: {item['reason']}")
+            print('升级未执行：请先解决上述冲突，项目版本和文件保持原样。' if chinese else '[stop] Resolve the named conflicts and rerun. No files were changed.')
+            return 2
+        if chinese:
+            print(f"待执行 {len(plan['actions'])} 个动作；保留 {len(plan.get('preserved_documents', []))} 份项目事实文档，搬迁 {len(plan.get('preserved', []))} 个定制章节。")
+        else:
+            print(f"Planned: {len(plan['actions'])} actions; {len(plan.get('preserved_documents', []))} project documents preserved; {len(plan.get('preserved', []))} sections relocated.")
+        if plan.get('entry_resolution'):
+            for item in plan['entry_resolution']['entries']:
+                print(f"{'显式保留入口' if chinese else 'Explicit entry preservation'}: {item['target']} (sha256: {item['sha256']})")
+        for action in plan.get('actions', []):
+            label = ('计划移除' if action['operation'] == 'remove' else '计划写入') if chinese else 'planned ' + action['operation']
+            print(f"  {label}: {action['target']}")
+        if not confirmed(msg(lang, 'safe_apply_prompt'), args.yes, args.dry_run or args.no_apply):
+            print(msg(lang, 'safe_apply_skipped'))
+            return 0
+        result = subprocess.run(base + ['apply', '--safe', '--repo-root', str(target), '--json', '--plan-hash', plan['plan_hash']] + resolution_args,
+                                cwd=toolkit_root, text=True, encoding='utf-8', errors='strict', capture_output=True, env=pipe_env)
+        if result.returncode:
+            print(result.stdout + result.stderr)
+            return result.returncode
+        actual = json.loads(result.stdout)
+        if chinese:
+            print(f"[完成] 已执行 {len(actual['actions'])} 个校验过的动作；报告：{actual['report']}")
+            print('请新开 AI 会话。AGENTS/CLAUDE 已自动迁移，无需手工粘贴规则。')
+        else:
+            print(f"[ok] Applied {len(actual['actions'])} verified actions; report: {actual['report']}")
+            print('[next] Start a fresh AI session. AGENTS/CLAUDE entries were migrated automatically; no manual snippet is needed.')
+        return 0
+    if resolution_args:
+        print('[stop] Entry resolutions require a pending structured upgrade. No files changed.')
+        return 2
     check_output = run_capture(base + ["check", "--repo-root", str(target)], cwd=toolkit_root)
     plan_output = run_capture(base + ["plan", "--repo-root", str(target)], cwd=toolkit_root)
     safe_count, manual_count = migration_counts(plan_output)
@@ -649,6 +707,7 @@ def main():
     parser.add_argument("--no-apply", action="store_true", help="Run detection/check/plan only")
     parser.add_argument("--review-needed-policy", choices=["ask", "keep-local", "manual-merge", "replace-template", "abort"], help="How to resolve review-needed safe migration items during upgrade")
     parser.add_argument("--lang", help="Display language: zh-CN or en-US")
+    parser.add_argument("--entry-resolutions", help="Explicit reviewed full-entry preservation packet; requires a pending structured upgrade")
     args = parser.parse_args()
     if args.yes and (args.dry_run or args.no_apply):
         fail("--yes cannot be combined with --dry-run or --no-apply")
@@ -680,6 +739,8 @@ def main():
     status, installed, _ = detect_project(target)
     if args.force_init and status != "init":
         fail("--force-init is only valid when ForgeKit is not installed")
+    if args.entry_resolutions and (status != 'versioned' or installed is None or installed >= toolkit):
+        fail('Entry resolutions require a pending structured upgrade; no files changed')
     if status == "init":
         return init_project(args, toolkit_root, target, toolkit, lang)
     if status == "legacy-adoption":

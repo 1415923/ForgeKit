@@ -6,7 +6,9 @@ import unittest
 from pathlib import Path
 
 
-REPO = Path(__file__).resolve().parents[1]
+# Exact v0.46 release assertions; current contracts are exercised by test_v047_* .
+from version_fixture import v046_repo
+REPO = v046_repo()
 SPEC = importlib.util.spec_from_file_location("stage_e_release", REPO / "scripts/validate-stage-e-release.py")
 STAGE_E = importlib.util.module_from_spec(SPEC)
 assert SPEC.loader is not None

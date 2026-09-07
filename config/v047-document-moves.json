@@ -1,0 +1,8 @@
+{
+  "docs/context-continuity.md": ".forgekit/docs/work-session-checkpoint.md",
+  "docs/local-toolchain.md": "docs/testing.md",
+  "docs/workflow-router.md": ".forgekit/docs/usage-playbook.md",
+  ".codex/project.md": "docs/project-plan.md",
+  ".codex/scope.md": "docs/project-plan.md",
+  ".codex/rules.md": "AGENTS.md"
+}

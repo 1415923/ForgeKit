@@ -1,6 +1,6 @@
 ---
 name: security-review
-description: Review an explicit security concern or a change with real authentication, authorization, sensitive-data, command, path, file-access, dependency, supply-chain, network, or external-system impact. Use for a security-focused audit or targeted security finding recheck. Do not trigger merely because work involves code, backend logic, or configuration.
+description: Review concrete security boundaries, sensitive data or untrusted inputs. Not a generic quality review.
 ---
 
 # Security Review
@@ -9,7 +9,7 @@ description: Review an explicit security concern or a change with real authentic
 
 Use this Skill when the user requests a security review or the evidence shows an actual security boundary: identity, authentication, authorization, secrets, credentials, sensitive data, command execution, path or file access, untrusted input, network or external systems, dependencies, supply chain, release security, or permission changes.
 
-Do not make security review a required step for every project task. Code, backend, or configuration changes without a concrete security impact are not enough. Route ordinary correctness review to `code-review`, release consistency to `release-check`, and ForgeKit adoption fit to `project-suitability`. The Stage D Skills are alternatives or risk-based combinations, not a mandatory pipeline.
+Do not make security review a required step for every project task. Code, backend, or configuration changes without a concrete security impact are not enough. Route ordinary correctness review to `code-review`, release consistency to `release-check`, and ForgeKit adoption fit to `project-assessment`. These Skills are alternatives or risk-based combinations, not a mandatory pipeline.
 
 ## Default Mode: Read-Only
 
@@ -44,7 +44,7 @@ Label each conclusion:
 
 Apply `.forgekit/docs/maker-checker-protocol.md` and report `impact_severity: CRITICAL | MAJOR | MINOR | NOTE` independently from `blocking: YES | NO`. Base impact severity on exploitability, privilege, data exposure, persistence, reversibility, and blast radius. Severity never implies Blocking.
 
-For every Blocking finding, provide exactly one primary C1-C4 consequence, the evidence-backed failure path, and the affected blocked scope. Security findings commonly expose C1 or C2 consequences, but do not assign either code without evidence. Add validation relevance when missing or failed validation affects the current decision. Do not claim a security pass when required verification is unavailable.
+For every Blocking finding, provide exactly one primary C1-C4 consequence, the evidence-backed `failure_path`, and the affected `blocked_scope`. Security findings commonly expose C1 or C2 consequences, but do not assign either code without evidence. Add validation relevance when missing or failed validation affects the current decision. Do not claim a security pass when required verification is unavailable.
 
 Identity and authorization, cryptography or key handling, production data, compliance, credential rotation, production permission changes, and irreversible security migrations require explicit human review.
 

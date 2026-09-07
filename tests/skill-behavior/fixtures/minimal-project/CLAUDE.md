@@ -1,37 +1,37 @@
-# Claude Code Project Guide
+# Claude 项目入口
 
-This is the lightweight Claude Code entry for the generated project. The unique shared safety, evidence, authorization, writeback, and routing contract is [`governance/agent-entry-contract.md`](governance/agent-entry-contract.md); this file applies that contract and adds only Claude Code routing details.
+<!-- forgekit:section entry -->
+## 边界与授权
 
-## Always-On Boundaries
+- 首次定位先读 `.forgekit/project-boundary.yml`，确认项目与任务范围；不要越界操作相邻项目。
+- 已明确请求的实现、修复或更新包括范围内的可逆修改、必要验证和修复本次引入的失败，无需重复确认。只读审查与规划不授权修改。
+- commit、push、tag、发布、部署、重要数据删除、权限或凭据变更仍需对应授权。共享合同见 `governance/agent-entry-contract.md`。
+- 依据可定位证据报告事实；未知内容保留 `TODO_REVIEW`。用户区保留项目定制，不能覆盖系统、工具权限或明确用户指令。
 
-- [Project and Write Boundary](governance/agent-entry-contract.md#project-and-write-boundary): read `.forgekit/project-boundary.yml` first. Stay inside the user-named project and task scope; do not absorb adjacent projects, repositories, evidence roots, or user files. Local writes are limited to the authorized scope.
-- [Evidence and No Fabrication](governance/agent-entry-contract.md#evidence-and-no-fabrication): base conclusions on locatable files, commands, and user facts. Mark insufficient evidence as unknown, assumption, or `TODO_REVIEW`.
-- [Audit Default](governance/agent-entry-contract.md#audit-default): audit, review, assessment, diagnosis, and planning are read-only unless the user explicitly requests a write.
-- [Bounded Local Authorization](governance/agent-entry-contract.md#bounded-local-authorization): an explicit fix, implementation, or update request authorizes reversible local edits and necessary validation within its stated scope. Do not repeat the same authorization question or expand it beyond that scope.
-- [External and Irreversible Actions](governance/agent-entry-contract.md#external-and-irreversible-actions): commit, push, tag, release, deploy, important-data deletion, irreversible migration, permission or credential change, and other external or destructive actions need specific authorization. Authorization does not reduce objective risk.
-- [Minimum Evidence-Based Writeback](governance/agent-entry-contract.md#minimum-evidence-based-writeback): persist only confirmed facts needed for the authorized task, in the document that owns them. Do not copy full chats or long tool output, and do not write project business facts into governance templates.
+<!-- forgekit:section routing -->
+## 按需入口
 
-## Startup and Routing
+Claude 可按需使用 `.claude/skills/` 平台适配及 `.agents/skills/` 通用能力。定位不清或接手项目时使用 `.forgekit/docs/codebase-map.md`；定位已明确时直接读取相关实现。仅加载选中技术栈 `.codex/stacks/<stack>/`。
 
-1. Read `.forgekit/project-boundary.yml`, then `.forgekit/docs/codebase-map.md` for the search start and validation commands.
-2. Read `.forgekit/docs/workflow-router.md` only when intent or managed-document ownership is unclear. Do not load all of `.forgekit/docs/**` or `governance/` by default.
-3. Under the [Skill Routing](governance/agent-entry-contract.md#skill-routing) contract, use `.claude/skills/` for Claude platform adapters and `.agents/skills/<skill>/SKILL.md` for portable project workflows; load only direct references and the selected `.codex/stacks/<stack>/` material.
-4. Run validation proportionate to objective impact and the evidence available. File count alone does not determine risk: low-risk deterministic work stays light; public contracts, data migrations, authentication, permissions, release rules, and hard-to-verify changes route to `governance/ai-engineering-loop.md` and the active change artifacts.
-
-| Intent | Route |
+| 意图 | Skill 或文档 |
 | --- | --- |
-| Initialize, fill confirmed setup facts, or assess fit | `project-init`, `project-bootstrap-fill`, `project-suitability`; Claude orchestration may use `forgekit-project-workflow` |
-| Audit an existing project or backfill managed facts | `handover-review`, `document-backfill` |
-| Plan a high-impact change or review correctness/security | `large-change-planning`, `code-review`, `security-review` |
-| Request or perform independent review | `forgekit-request-code-review`, `forgekit-code-review` |
-| Check release readiness or perform project maintenance | `release-check`, `forgekit-maintenance` |
-| First-principles or adversarial analysis | `forgekit-first-principles`, `forgekit-adversarial-review` |
+| 初始化 | project-init |
+| 填充或回填事实 | document-backfill |
+| 适用性评估或接手 | project-assessment |
+| 高影响规划 | large-change-planning、governance/ai-engineering-loop.md |
+| 代码、安全或发布审查 | code-review、security-review、release-check |
+| 保存恢复进展 | .forgekit/docs/work-session-checkpoint.md |
+| 文档事实归属 | .forgekit/docs/document-responsibility.md |
+| 日常用法、维护或归档 | .forgekit/docs/usage-playbook.md |
 
-Claude Skill metadata, agent wiring, and permission mode affect invocation mechanics only; they do not expand the shared authorization contract. Specific triggers and execution contracts belong to the corresponding Skill, and this entry does not copy their workflow bodies.
+<!-- forgekit:section completion -->
+## 完成与恢复
 
-## Continuity, Validation, and Upgrades
+按真实影响选择验证；必需检查通过后，仅因新变化、失败或未解决疑点而扩展验证。验证命令和已知限制见 `.forgekit/docs/testing.md`。
+完成请求的结果、相关验证和必要事实写回后交付；小改动无新事实时不写治理记录。高风险独立审查不可由 self-review 替代。
+因规则停止时指出文件、规则及被阻塞动作，继续不依赖缺口的已授权工作。
+ForgeKit 安装、初始化、更新、同步使用 ForgeKitRoot 的 `scripts/forgekit-project.py --target <ProjectRoot>`。升级改变入口、Skill 或 agent 后，旧会话只做 checkpoint 和收口，新任务新开会话。
 
-- Critical conclusions must not live only in chat. Before compact, handoff, or session closure, preserve only confirmed decisions, blockers, validation, and evidence paths through `.forgekit/docs/context-continuity.md`; mark uncertainty `TODO_REVIEW`.
-- Use project validation commands from `.forgekit/docs/codebase-map.md` and `.forgekit/docs/local-toolchain.md`; do not install tools or start services merely because availability is unknown.
-- Route ForgeKit install/init/update/sync through the ForgeKitRoot `scripts/forgekit-project.py --target <ProjectRoot>` entry. Low-level diagnosis may use project-local `scripts/forgekit-upgrade.py check` and `plan`; `apply --safe` still requires its defined confirmation.
-- After a ForgeKit upgrade changes entries, rules, Skills, or agents, use the current session only for minimal checkpoint and closure. Start a fresh session before new work; updated disk files do not prove the current session reloaded them.
+<!-- forgekit:user begin -->
+<!-- 在此保留项目自定义规则；升级保留本区。 -->
+<!-- forgekit:user end -->
